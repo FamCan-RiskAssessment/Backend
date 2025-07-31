@@ -7,7 +7,13 @@ import (
 )
 
 type Env struct {
+	Server   Server
 	Database Database
+}
+
+type Server struct {
+	Port string
+	Mode string
 }
 
 type Database struct {
@@ -21,6 +27,10 @@ type Database struct {
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
+		Server: Server{
+			Port: os.Getenv("SERVER_PORT"),
+			Mode: os.Getenv("SERVER_MODE"),
+		},
 		Database: Database{
 			Host:     os.Getenv("DB_HOST"),
 			Port:     os.Getenv("DB_PORT"),

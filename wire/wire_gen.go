@@ -9,6 +9,7 @@ package wire
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
 )
 
@@ -20,7 +21,12 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	wireDatabase := &Database{
 		DB: postgresDatabase,
 	}
-	application := NewApplication(wireDatabase)
+	constants := ProvideConstants(config)
+	recoveryMiddleware := middleware.NewRecoveryMiddleware(constants)
+	middlewares := &Middlewares{
+		Recovery: recoveryMiddleware,
+	}
+	application := NewApplication(wireDatabase, middlewares)
 	return application, nil
 }
 
@@ -28,26 +34,41 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 
 var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Struct(new(Database), "*"))
 
+var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, wire.Struct(new(Middlewares), "*"))
+
 func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
 }
 
+func ProvideConstants(container *bootstrap.Config) *bootstrap.Constants {
+	return container.Constants
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
+	MiddlewareProviderSet,
 	ProvideDBConfig,
+	ProvideConstants,
 )
 
 type Database struct {
 	DB database.Database
 }
 
+type Middlewares struct {
+	Recovery *middleware.RecoveryMiddleware
+}
+
 type Application struct {
-	Database *Database
+	Database    *Database
+	Middlewares *Middlewares
 }
 
 func NewApplication(database2 *Database,
+	middlewares *Middlewares,
 ) *Application {
 	return &Application{
-		Database: database2,
+		Database:    database2,
+		Middlewares: middlewares,
 	}
 }

@@ -1,6 +1,10 @@
 package bootstrap
 
-import "os"
+import (
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 type Env struct {
 	Database Database
@@ -15,6 +19,7 @@ type Database struct {
 }
 
 func NewEnv() *Env {
+	godotenv.Load(".env")
 	return &Env{
 		Database: Database{
 			Host:     os.Getenv("DB_HOST"),

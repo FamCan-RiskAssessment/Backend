@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: RA-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 2G
+        reservations:
+          cpus: "0.2"
+          memory: 512M

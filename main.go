@@ -9,10 +9,13 @@ import (
 
 func main() {
 	ginEngine := gin.New()
+
 	config := bootstrap.Run()
+
 	app, err := wire.InitializeApplication(config)
 	if err != nil {
 		panic(err)
 	}
+
 	routes.Run(ginEngine, app)
 }

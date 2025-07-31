@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/routes"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
@@ -9,10 +11,15 @@ import (
 
 func main() {
 	ginEngine := gin.New()
+
 	config := bootstrap.Run()
+
 	app, err := wire.InitializeApplication(config)
 	if err != nil {
 		panic(err)
 	}
+
 	routes.Run(ginEngine, app)
+
+	ginEngine.Run(fmt.Sprintf(":%s", config.Env.Server.Port))
 }

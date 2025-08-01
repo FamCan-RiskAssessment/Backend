@@ -53,7 +53,7 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
 		handleForbiddenError(ctx, forbiddenError, recovery.constants.Context.Translator)
 	} else {
-		unhandledErrors(ctx, err, recovery.constants.Context.Translator)
+		unhandledErrors(ctx, recovery.constants.Context.Translator)
 	}
 }
 
@@ -148,7 +148,7 @@ func handleForbiddenError(ctx *gin.Context, forbiddenError exception.ForbiddenEr
 	controller.Response(ctx, 403, message, nil)
 }
 
-func unhandledErrors(ctx *gin.Context, err error, transKey string) {
+func unhandledErrors(ctx *gin.Context, transKey string) {
 	trans := controller.GetTranslator(ctx, transKey)
 	errorMessage, _ := trans.Translate(genericError)
 

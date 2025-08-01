@@ -1,6 +1,7 @@
 package localization
 
 var Persian = map[string]interface{}{
+	"OTP":                 "رمز یکبار مصرف",
 	"firstName":           "نام",
 	"lastName":            "نام خانوادگی",
 	"phone":               "شماره تماس",
@@ -60,7 +61,7 @@ var Persian = map[string]interface{}{
 		"e164":                   "شماره تلفن به درستی ثبت نشده است.",
 		"eqfield":                "رمز عبور و {0} مطابقت ندارند.",
 		"eq":                     "مقدار {0 باید درست باشد}",
-		"Expired":                "رمز یکبار مصرف شما منقضی شده است.",
+		"expired":                "رمز یکبار مصرف شما منقضی شده است.",
 		"invalid":                "رمز یکبار مصرف وارد شده اشتباه است.",
 		"notRegistered":          "ابتدا باید در سایت ثبت نام کنید.",
 		"invalidAuthCredentials": "نام کاربری و رمز عبور تطابق ندارند.",

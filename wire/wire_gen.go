@@ -16,6 +16,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
@@ -36,8 +37,11 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	}
 	constants := ProvideConstants(config)
 	recoveryMiddleware := middleware.NewRecoveryMiddleware(constants)
+	translator := localization.NewTranslationService()
+	localizationMiddleware := middleware.NewLocalizationMiddleware(constants, translator)
 	middlewares := &Middlewares{
-		Recovery: recoveryMiddleware,
+		Recovery:     recoveryMiddleware,
+		Localization: localizationMiddleware,
 	}
 	userRepository := repository.NewUserRepository()
 	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
@@ -73,9 +77,9 @@ var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wi
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager)
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService)
 
-var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, wire.Struct(new(Middlewares), "*"))
+var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, wire.Struct(new(Middlewares), "*"))
 
 func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
@@ -136,7 +140,8 @@ type Controllers struct {
 }
 
 type Middlewares struct {
-	Recovery *middleware.RecoveryMiddleware
+	Recovery     *middleware.RecoveryMiddleware
+	Localization *middleware.LocalizationMiddleware
 }
 
 type Application struct {

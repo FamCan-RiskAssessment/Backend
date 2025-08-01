@@ -13,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	infraJWT "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
+	infraLocalization "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
@@ -57,10 +58,12 @@ var ControllerProviderSet = wire.NewSet(
 
 var AdapterProviderSet = wire.NewSet(
 	infraJWT.NewJWTKeyManager,
+	infraLocalization.NewTranslationService,
 )
 
 var MiddlewareProviderSet = wire.NewSet(
 	middleware.NewRecoveryMiddleware,
+	middleware.NewLocalizationMiddleware,
 	wire.Struct(new(Middlewares), "*"),
 )
 
@@ -123,7 +126,8 @@ type Controllers struct {
 }
 
 type Middlewares struct {
-	Recovery *middleware.RecoveryMiddleware
+	Recovery     *middleware.RecoveryMiddleware
+	Localization *middleware.LocalizationMiddleware
 }
 
 type Application struct {

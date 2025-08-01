@@ -40,6 +40,9 @@ type JWTKeysPath struct {
 
 func NewConstants() *Constants {
 	return &Constants{
+		Context: Context{
+			Translator: "translator",
+		},
 		Field: Field{
 			User: "user",
 			OTP:  "otp",

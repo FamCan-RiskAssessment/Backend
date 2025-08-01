@@ -9,6 +9,7 @@ import (
 type Env struct {
 	Server   Server
 	Database Database
+	Cache    Redis
 }
 
 type Server struct {
@@ -24,6 +25,13 @@ type Database struct {
 	Name     string
 }
 
+type Redis struct {
+	Address   string
+	Port      string
+	Password  string
+	RDBNumber string
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -37,6 +45,12 @@ func NewEnv() *Env {
 			User:     os.Getenv("DB_USER"),
 			Password: os.Getenv("DB_PASSWORD"),
 			Name:     os.Getenv("DB_NAME"),
+		},
+		Cache: Redis{
+			Port:      os.Getenv("RDB_PORT"),
+			Address:   os.Getenv("RDB_ADDRESS"),
+			Password:  os.Getenv("RDB_PASSWORD"),
+			RDBNumber: os.Getenv("RDB_NUMBER"),
 		},
 	}
 }

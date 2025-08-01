@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/routes"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	ginEngine := gin.New()
+	ginEngine := gin.Default()
 
 	config := bootstrap.Run()
 
@@ -18,6 +19,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	app.Database.DB.GetDB().AutoMigrate(
+		&entity.User{},
+	)
 
 	routes.Run(ginEngine, app)
 

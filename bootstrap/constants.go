@@ -3,11 +3,16 @@ package bootstrap
 import "fmt"
 
 type Constants struct {
+	Context      Context
 	RedisKey     RedisKey
 	Field        Field
 	Tag          Tag
 	SMSTemplates SMSTemplates
 	JWTKeysPath  JWTKeysPath
+}
+
+type Context struct {
+	Translator string
 }
 
 type RedisKey struct {

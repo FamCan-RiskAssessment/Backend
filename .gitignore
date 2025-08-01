@@ -3,3 +3,4 @@
 db-data/
 .DS_Store
 tmp/
+*.pem

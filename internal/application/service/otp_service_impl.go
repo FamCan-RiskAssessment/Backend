@@ -30,7 +30,7 @@ func NewOTPService(
 
 var table = []byte("123456789")
 
-func (otpService *OTPService) GenerateOTP() (string, int, error) {
+func (otpService *OTPService) GenerateOTP(phone string) (string, int, error) {
 	otp := make([]byte, otpService.otpConfig.Length)
 	n, err := io.ReadAtLeast(rand.Reader, otp, otpService.otpConfig.Length)
 	if n != otpService.otpConfig.Length {

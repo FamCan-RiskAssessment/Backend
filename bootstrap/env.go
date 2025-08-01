@@ -2,14 +2,17 @@ package bootstrap
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
 
 type Env struct {
-	Server   Server
-	Database Database
-	Cache    Redis
+	Server     Server
+	Database   Database
+	Cache      Redis
+	SMSGateway SMSGateway
+	OTP        OTP
 }
 
 type Server struct {
@@ -32,6 +35,16 @@ type Redis struct {
 	RDBNumber string
 }
 
+type SMSGateway struct {
+	APIKey string
+}
+
+type OTP struct {
+	Length       int
+	ExpiryMinute int
+	MaxAttempts  int
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -52,5 +65,22 @@ func NewEnv() *Env {
 			Password:  os.Getenv("RDB_PASSWORD"),
 			RDBNumber: os.Getenv("RDB_NUMBER"),
 		},
+		SMSGateway: SMSGateway{
+			APIKey: os.Getenv("SMS_API_KEY"),
+		},
+		OTP: OTP{
+			Length:       getEnvInt("OTP_LENGTH", 6),
+			ExpiryMinute: getEnvInt("OTP_EXPIRY_MINUTES", 2),
+			MaxAttempts:  getEnvInt("OTP_MAX_ATTEMPTS", 3),
+		},
 	}
+}
+
+func getEnvInt(key string, defaultVal int) int {
+	if val := os.Getenv(key); val != "" {
+		if parsed, err := strconv.Atoi(val); err == nil {
+			return parsed
+		}
+	}
+	return defaultVal
 }

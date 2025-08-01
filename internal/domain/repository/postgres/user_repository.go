@@ -1,8 +1,11 @@
 package repository
 
-import "github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+import (
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+)
 
 type UserRepository interface {
-	GetUserByPhone(phone string) (*entity.User, error)
-	CreateUser(phone string) error
+	GetUserByPhone(db database.Database, phone string) (*entity.User, error)
+	CreateUser(db database.Database, user *entity.User) error
 }

@@ -7,4 +7,5 @@ import (
 
 func Run(ginEngine *gin.Engine, app *wire.Application) {
 	ginEngine.Use(app.Middlewares.Recovery.Recovery)
+	SetupGeneralRoutes(ginEngine.Group("/"), app)
 }

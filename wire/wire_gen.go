@@ -8,7 +8,17 @@ package wire
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
+	repository2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
 )
@@ -18,21 +28,52 @@ import (
 func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	bootstrapDatabase := ProvideDBConfig(config)
 	postgresDatabase := database.NewPostgresDatabase(bootstrapDatabase)
+	bootstrapRedis := ProvideRDBConfig(config)
+	redisDatabase := database.NewRedisDatabase(bootstrapRedis)
 	wireDatabase := &Database{
-		DB: postgresDatabase,
+		DB:  postgresDatabase,
+		RDB: redisDatabase,
 	}
 	constants := ProvideConstants(config)
 	recoveryMiddleware := middleware.NewRecoveryMiddleware(constants)
 	middlewares := &Middlewares{
 		Recovery: recoveryMiddleware,
 	}
-	application := NewApplication(wireDatabase, middlewares)
+	userRepository := repository.NewUserRepository()
+	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
+	keyManager := jwt.NewJWTKeyManager()
+	jwtKeysPath := ProvideJWTKeysPath(config)
+	jwtService := service.NewJWTService(keyManager, jwtKeysPath)
+	smsGateway := ProvideSMSGatewayConfig(config)
+	smsTemplates := ProvideSMSTemplates(config)
+	smsService := sms.NewSMSService(smsGateway, smsTemplates)
+	otp := ProvideOTPConfig(config)
+	otpService := service.NewOTPService(constants, otp, userCacheRepository)
+	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, postgresDatabase)
+	generalUserController := user.NewGeneralUserController(constants, userService)
+	generalControllers := &GeneralControllers{
+		UserController: generalUserController,
+	}
+	controllers := &Controllers{
+		General: generalControllers,
+	}
+	application := NewApplication(wireDatabase, middlewares, controllers)
 	return application, nil
 }
 
 // wire.go:
 
-var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Struct(new(Database), "*"))
+var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.NewRedisDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Bind(new(database.Cache), new(*database.RedisDatabase)), wire.Struct(new(Database), "*"))
+
+var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, redis.NewUserCacheRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
+
+var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
+
+var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
+
+var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
+
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager)
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, wire.Struct(new(Middlewares), "*"))
 
@@ -44,15 +85,54 @@ func ProvideConstants(container *bootstrap.Config) *bootstrap.Constants {
 	return container.Constants
 }
 
+func ProvideRDBConfig(container *bootstrap.Config) *bootstrap.Redis {
+	return &container.Env.Cache
+}
+
+func ProvideOTPConfig(container *bootstrap.Config) *bootstrap.OTP {
+	return &container.Env.OTP
+}
+
+func ProvideSMSGatewayConfig(container *bootstrap.Config) *bootstrap.SMSGateway {
+	return &container.Env.SMSGateway
+}
+
+func ProvideSMSTemplates(container *bootstrap.Config) *bootstrap.SMSTemplates {
+	return &container.Constants.SMSTemplates
+}
+
+func ProvideJWTKeysPath(container *bootstrap.Config) *bootstrap.JWTKeysPath {
+	return &container.Constants.JWTKeysPath
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
+	RepositoryProviderSet,
+	ServiceProviderSet,
 	MiddlewareProviderSet,
+	GeneralControllerProviderSet,
+	ControllerProviderSet,
+	AdapterProviderSet,
 	ProvideDBConfig,
 	ProvideConstants,
+	ProvideRDBConfig,
+	ProvideOTPConfig,
+	ProvideSMSGatewayConfig,
+	ProvideSMSTemplates,
+	ProvideJWTKeysPath,
 )
 
 type Database struct {
-	DB database.Database
+	DB  database.Database
+	RDB database.Cache
+}
+
+type GeneralControllers struct {
+	UserController *user.GeneralUserController
+}
+
+type Controllers struct {
+	General *GeneralControllers
 }
 
 type Middlewares struct {
@@ -62,13 +142,16 @@ type Middlewares struct {
 type Application struct {
 	Database    *Database
 	Middlewares *Middlewares
+	Controllers *Controllers
 }
 
 func NewApplication(database2 *Database,
 	middlewares *Middlewares,
+	controllers *Controllers,
 ) *Application {
 	return &Application{
 		Database:    database2,
 		Middlewares: middlewares,
+		Controllers: controllers,
 	}
 }

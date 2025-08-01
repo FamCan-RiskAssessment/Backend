@@ -20,6 +20,7 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
       - db
+
   db:
     image: postgres:latest
     container_name: db-RA

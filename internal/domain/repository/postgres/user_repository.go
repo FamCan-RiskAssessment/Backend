@@ -8,4 +8,6 @@ import (
 type UserRepository interface {
 	GetUserByPhone(db database.Database, phone string) (*entity.User, error)
 	CreateUser(db database.Database, user *entity.User) error
+	FindUserRoles(db database.Database, user *entity.User) error
+	FindRolePermissions(db database.Database, role *entity.Role) error
 }

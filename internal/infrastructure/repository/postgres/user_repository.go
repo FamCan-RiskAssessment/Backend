@@ -27,3 +27,11 @@ func (userRepository *UserRepository) GetUserByPhone(db database.Database, phone
 func (userRepository *UserRepository) CreateUser(db database.Database, user *entity.User) error {
 	return db.GetDB().Create(user).Error
 }
+
+func (userRepository *UserRepository) FindUserRoles(db database.Database, user *entity.User) error {
+	return db.GetDB().Preload("Roles").First(&user).Error
+}
+
+func (userRepository *UserRepository) FindRolePermissions(db database.Database, role *entity.Role) error {
+	return db.GetDB().Preload("Permissions").First(&role).Error
+}

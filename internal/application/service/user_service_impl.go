@@ -102,8 +102,47 @@ func (userService *UserService) VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest
 		return userdto.LoginResponse{}, err
 	}
 
+	permissions, err := userService.FindUserPermissions(user)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
 	return userdto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		Permissions:  permissions,
 	}, nil
+}
+
+func (userService *UserService) FindUserPermissions(user *entity.User) ([]userdto.PermissionResponse, error) {
+	var permissions []userdto.PermissionResponse
+
+	if err := userService.userRepository.FindUserRoles(userService.db, user); err != nil {
+		return nil, err
+	}
+
+	for _, role := range user.Roles {
+		rolePermissions, err := userService.getRolePermissions(&role)
+		if err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, rolePermissions...)
+	}
+
+	return permissions, nil
+}
+
+func (userService *UserService) getRolePermissions(role *entity.Role) ([]userdto.PermissionResponse, error) {
+	if err := userService.userRepository.FindRolePermissions(userService.db, role); err != nil {
+		return nil, err
+	}
+	permissions := make([]userdto.PermissionResponse, len(role.Permissions))
+	for i, permission := range role.Permissions {
+		permissions[i] = userdto.PermissionResponse{
+			ID:       permission.ID,
+			Name:     permission.Type.String(),
+			Category: permission.Category.String(),
+		}
+	}
+	return permissions, nil
 }

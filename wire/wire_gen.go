@@ -19,6 +19,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
@@ -61,7 +62,12 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	controllers := &Controllers{
 		General: generalControllers,
 	}
-	application := NewApplication(wireDatabase, middlewares, controllers)
+	superAdmin := ProvideSuperAdminCredentials(config)
+	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase)
+	seeds := &Seeds{
+		RoleSeeder: roleSeeder,
+	}
+	application := NewApplication(wireDatabase, middlewares, controllers, seeds)
 	return application, nil
 }
 
@@ -80,6 +86,8 @@ var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService)
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, wire.Struct(new(Middlewares), "*"))
+
+var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, wire.Struct(new(Seeds), "*"))
 
 func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
@@ -109,6 +117,10 @@ func ProvideJWTKeysPath(container *bootstrap.Config) *bootstrap.JWTKeysPath {
 	return &container.Constants.JWTKeysPath
 }
 
+func ProvideSuperAdminCredentials(container *bootstrap.Config) *bootstrap.SuperAdmin {
+	return &container.Env.SuperAdmin
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -124,6 +136,8 @@ var ProviderSet = wire.NewSet(
 	ProvideSMSGatewayConfig,
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,
+	ProvideSuperAdminCredentials,
+	SeedProviderSet,
 )
 
 type Database struct {
@@ -144,19 +158,26 @@ type Middlewares struct {
 	Localization *middleware.LocalizationMiddleware
 }
 
+type Seeds struct {
+	RoleSeeder *seed.RoleSeeder
+}
+
 type Application struct {
 	Database    *Database
 	Middlewares *Middlewares
 	Controllers *Controllers
+	Seeds       *Seeds
 }
 
 func NewApplication(database2 *Database,
 	middlewares *Middlewares,
 	controllers *Controllers,
+	seeds *Seeds,
 ) *Application {
 	return &Application{
 		Database:    database2,
 		Middlewares: middlewares,
 		Controllers: controllers,
+		Seeds:       seeds,
 	}
 }

@@ -16,6 +16,7 @@ import (
 	infraLocalization "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
+	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
@@ -67,6 +68,11 @@ var MiddlewareProviderSet = wire.NewSet(
 	wire.Struct(new(Middlewares), "*"),
 )
 
+var SeedProviderSet = wire.NewSet(
+	seed.NewRoleSeeder,
+	wire.Struct(new(Seeds), "*"),
+)
+
 func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
 }
@@ -95,6 +101,10 @@ func ProvideJWTKeysPath(container *bootstrap.Config) *bootstrap.JWTKeysPath {
 	return &container.Constants.JWTKeysPath
 }
 
+func ProvideSuperAdminCredentials(container *bootstrap.Config) *bootstrap.SuperAdmin {
+	return &container.Env.SuperAdmin
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -110,6 +120,8 @@ var ProviderSet = wire.NewSet(
 	ProvideSMSGatewayConfig,
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,
+	ProvideSuperAdminCredentials,
+	SeedProviderSet,
 )
 
 type Database struct {
@@ -130,21 +142,28 @@ type Middlewares struct {
 	Localization *middleware.LocalizationMiddleware
 }
 
+type Seeds struct {
+	RoleSeeder *seed.RoleSeeder
+}
+
 type Application struct {
 	Database    *Database
 	Middlewares *Middlewares
 	Controllers *Controllers
+	Seeds       *Seeds
 }
 
 func NewApplication(
 	database *Database,
 	middlewares *Middlewares,
 	controllers *Controllers,
+	seeds *Seeds,
 ) *Application {
 	return &Application{
 		Database:    database,
 		Middlewares: middlewares,
 		Controllers: controllers,
+		Seeds:       seeds,
 	}
 }
 

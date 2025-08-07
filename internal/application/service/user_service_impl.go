@@ -46,7 +46,7 @@ func NewUserService(
 }
 
 func (userService *UserService) Login(loginInfo userdto.LoginRequest) error {
-	user, err := userService.userRepository.GetUserByPhone(userService.db, loginInfo.Phone)
+	user, err := userService.userRepository.FindUserByPhone(userService.db, loginInfo.Phone)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (userService *UserService) VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest
 		return userdto.LoginResponse{}, err
 	}
 
-	user, err := userService.userRepository.GetUserByPhone(userService.db, verifyOTPInfo.Phone)
+	user, err := userService.userRepository.FindUserByPhone(userService.db, verifyOTPInfo.Phone)
 	if err != nil {
 		return userdto.LoginResponse{}, err
 	}

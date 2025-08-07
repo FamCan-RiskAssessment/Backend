@@ -19,14 +19,17 @@ type RedisKey struct {
 }
 
 type Field struct {
-	User string
-	OTP  string
+	User       string
+	OTP        string
+	Role       string
+	Permission string
 }
 
 type Tag struct {
-	Expired  string
-	Invalid  string
-	NotFound string
+	Expired      string
+	Invalid      string
+	NotFound     string
+	AlreadyExist string
 }
 
 type SMSTemplates struct {
@@ -44,13 +47,16 @@ func NewConstants() *Constants {
 			Translator: "translator",
 		},
 		Field: Field{
-			User: "user",
-			OTP:  "otp",
+			User:       "user",
+			OTP:        "otp",
+			Role:       "role",
+			Permission: "permission",
 		},
 		Tag: Tag{
-			Expired:  "expired",
-			Invalid:  "invalid",
-			NotFound: "not found",
+			Expired:      "expired",
+			Invalid:      "invalid",
+			NotFound:     "not found",
+			AlreadyExist: "already exist",
 		},
 		SMSTemplates: SMSTemplates{
 			OTP: "otp",

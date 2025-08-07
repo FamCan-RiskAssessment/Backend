@@ -22,7 +22,11 @@ func main() {
 
 	app.Database.DB.GetDB().AutoMigrate(
 		&entity.User{},
+		&entity.Role{},
+		&entity.Permission{},
 	)
+
+	app.Seeds.RoleSeeder.SeedRoles()
 
 	routes.Run(ginEngine, app)
 

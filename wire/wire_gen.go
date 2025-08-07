@@ -59,8 +59,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
 	}
+	adminUserController := user.NewAdminUserController(constants, userService)
+	adminControllers := &AdminControllers{
+		UserController: adminUserController,
+	}
 	controllers := &Controllers{
 		General: generalControllers,
+		Admin:   adminControllers,
 	}
 	superAdmin := ProvideSuperAdminCredentials(config)
 	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase)
@@ -80,6 +85,8 @@ var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, redis.NewU
 var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
 
 var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
+
+var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, wire.Struct(new(AdminControllers), "*"))
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
@@ -127,6 +134,7 @@ var ProviderSet = wire.NewSet(
 	ServiceProviderSet,
 	MiddlewareProviderSet,
 	GeneralControllerProviderSet,
+	AdminControllerProviderSet,
 	ControllerProviderSet,
 	AdapterProviderSet,
 	ProvideDBConfig,
@@ -149,8 +157,13 @@ type GeneralControllers struct {
 	UserController *user.GeneralUserController
 }
 
+type AdminControllers struct {
+	UserController *user.AdminUserController
+}
+
 type Controllers struct {
 	General *GeneralControllers
+	Admin   *AdminControllers
 }
 
 type Middlewares struct {

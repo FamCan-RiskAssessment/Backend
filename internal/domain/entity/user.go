@@ -5,4 +5,5 @@ import "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/databas
 type User struct {
 	database.Model
 	Phone string `gorm:"type:varchar(11);unique"`
+	Roles []Role `gorm:"many2many:user_roles;constraint:OnDelete:CASCADE"`
 }

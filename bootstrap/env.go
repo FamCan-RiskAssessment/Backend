@@ -13,6 +13,7 @@ type Env struct {
 	Cache      Redis
 	SMSGateway SMSGateway
 	OTP        OTP
+	SuperAdmin SuperAdmin
 }
 
 type Server struct {
@@ -45,6 +46,11 @@ type OTP struct {
 	MaxAttempts  int
 }
 
+type SuperAdmin struct {
+	Phone    string
+	Password string
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -72,6 +78,10 @@ func NewEnv() *Env {
 			Length:       getEnvInt("OTP_LENGTH", 6),
 			ExpiryMinute: getEnvInt("OTP_EXPIRY_MINUTES", 2),
 			MaxAttempts:  getEnvInt("OTP_MAX_ATTEMPTS", 3),
+		},
+		SuperAdmin: SuperAdmin{
+			Phone:    os.Getenv("SUPER_ADMIN_PHONE"),
+			Password: os.Getenv("SUPER_ADMIN_PASSWORD"),
 		},
 	}
 }

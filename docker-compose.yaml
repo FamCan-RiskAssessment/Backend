@@ -1,7 +1,29 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/famcan-riskassessment/backend
+    container_name: backend-RA
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    env_file:
+      - ./.env
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      - db
+
   db:
     image: postgres:latest
-    container_name: RA-db
+    container_name: db-RA
     restart: unless-stopped
     env_file:
       - .env
@@ -17,3 +39,20 @@ services:
         reservations:
           cpus: "0.2"
           memory: 512M
+
+  rdb:
+    image: redis:latest
+    container_name: rdb-RA
+    restart: unless-stopped
+    ports:
+      - ${RDB_PORT}:${RDB_PORT}
+    volumes:
+      - ./rdb-data:/var/lib/redis/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M

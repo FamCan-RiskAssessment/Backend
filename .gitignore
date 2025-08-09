@@ -1,5 +1,7 @@
 .env
 .vscode/
 db-data/
+rdb-data/
 .DS_Store
 tmp/
+*.pem

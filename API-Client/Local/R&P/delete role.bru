@@ -1,0 +1,15 @@
+meta {
+  name: delete role
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{Local}}/admin/roles/2
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

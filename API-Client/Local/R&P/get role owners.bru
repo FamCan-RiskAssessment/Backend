@@ -1,0 +1,15 @@
+meta {
+  name: get role owners
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{Local}}/admin/roles/10/owners
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -5,3 +5,5 @@ rdb-data/
 .DS_Store
 tmp/
 *.pem
+famcan
+famcan.pub

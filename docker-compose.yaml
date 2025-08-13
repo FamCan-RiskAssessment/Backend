@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/famcan-riskassessment/backend
+    image: ghcr.io/famcan-riskassessment/backend:latest
     container_name: backend-RA
     restart: unless-stopped
     deploy:

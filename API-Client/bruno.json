@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "FamCan",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

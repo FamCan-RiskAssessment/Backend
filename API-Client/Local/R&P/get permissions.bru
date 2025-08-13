@@ -1,0 +1,15 @@
+meta {
+  name: get permissions
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{Local}}/admin/permissions
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

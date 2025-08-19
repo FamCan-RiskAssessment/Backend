@@ -68,6 +68,7 @@ var AdapterProviderSet = wire.NewSet(
 )
 
 var MiddlewareProviderSet = wire.NewSet(
+	middleware.NewCorsMiddleware,
 	middleware.NewRecoveryMiddleware,
 	middleware.NewLocalizationMiddleware,
 	wire.Struct(new(Middlewares), "*"),
@@ -149,6 +150,7 @@ type Controllers struct {
 }
 
 type Middlewares struct {
+	Cors         *middleware.CORSMiddleware
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
 }

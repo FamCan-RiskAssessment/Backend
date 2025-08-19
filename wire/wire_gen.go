@@ -36,11 +36,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 		DB:  postgresDatabase,
 		RDB: redisDatabase,
 	}
+	corsMiddleware := middleware.NewCorsMiddleware()
 	constants := ProvideConstants(config)
 	recoveryMiddleware := middleware.NewRecoveryMiddleware(constants)
 	translator := localization.NewTranslationService()
 	localizationMiddleware := middleware.NewLocalizationMiddleware(constants, translator)
 	middlewares := &Middlewares{
+		Cors:         corsMiddleware,
 		Recovery:     recoveryMiddleware,
 		Localization: localizationMiddleware,
 	}
@@ -92,7 +94,7 @@ var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
 var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService)
 
-var MiddlewareProviderSet = wire.NewSet(middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, wire.Struct(new(Middlewares), "*"))
+var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, wire.Struct(new(Middlewares), "*"))
 
 var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, wire.Struct(new(Seeds), "*"))
 
@@ -167,6 +169,7 @@ type Controllers struct {
 }
 
 type Middlewares struct {
+	Cors         *middleware.CORSMiddleware
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
 }

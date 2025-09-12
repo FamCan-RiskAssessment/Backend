@@ -17,6 +17,7 @@ import (
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
@@ -32,17 +33,21 @@ var DatabaseProviderSet = wire.NewSet(
 
 var RepositoryProviderSet = wire.NewSet(
 	infraPostgre.NewUserRepository,
+	infraPostgre.NewFormRepository,
 	infraRedis.NewUserCacheRepository,
 	wire.Bind(new(domainPostgre.UserRepository), new(*infraPostgre.UserRepository)),
+	wire.Bind(new(domainPostgre.FormRepository), new(*infraPostgre.FormRepository)),
 	wire.Bind(new(domainRedis.UserCacheRepository), new(*infraRedis.UserCacheRepository)),
 )
 
 var ServiceProviderSet = wire.NewSet(
 	service.NewUserService,
+	service.NewFormService,
 	service.NewJWTService,
 	service.NewOTPService,
 	sms.NewSMSService,
 	wire.Bind(new(usecase.UserService), new(*service.UserService)),
+	wire.Bind(new(usecase.FormService), new(*service.FormService)),
 	wire.Bind(new(usecase.OtpService), new(*service.OTPService)),
 	wire.Bind(new(usecase.JwtService), new(*service.JWTService)),
 	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
@@ -55,7 +60,13 @@ var GeneralControllerProviderSet = wire.NewSet(
 
 var AdminControllerProviderSet = wire.NewSet(
 	user.NewAdminUserController,
+	form.NewAdminFormController,
 	wire.Struct(new(AdminControllers), "*"),
+)
+
+var CustomerControllerProviderSet = wire.NewSet(
+	form.NewCustomerFormController,
+	wire.Struct(new(CustomerControllers), "*"),
 )
 
 var ControllerProviderSet = wire.NewSet(
@@ -118,6 +129,7 @@ var ProviderSet = wire.NewSet(
 	MiddlewareProviderSet,
 	GeneralControllerProviderSet,
 	AdminControllerProviderSet,
+	CustomerControllerProviderSet,
 	ControllerProviderSet,
 	AdapterProviderSet,
 	ProvideDBConfig,
@@ -138,15 +150,22 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
+	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {
 	UserController *user.AdminUserController
+	FormController *form.AdminFormController
+}
+
+type CustomerControllers struct {
+	FormController *form.CustomerFormController
 }
 
 type Controllers struct {
-	General *GeneralControllers
-	Admin   *AdminControllers
+	General  *GeneralControllers
+	Admin    *AdminControllers
+	Customer *CustomerControllers
 }
 
 type Middlewares struct {

@@ -20,6 +20,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
@@ -58,12 +59,18 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
 	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
+	formRepository := repository.NewFormRepository()
+	formService := service.NewFormService(formRepository, userRepository, postgresDatabase)
+	generalFormController := form.NewGeneralFormController(constants, formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
+		FormController: generalFormController,
 	}
 	adminUserController := user.NewAdminUserController(constants, userService)
+	adminFormController := form.NewAdminFormController(constants, formService)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,
+		FormController: adminFormController,
 	}
 	controllers := &Controllers{
 		General: generalControllers,
@@ -82,13 +89,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 
 var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.NewRedisDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Bind(new(database.Cache), new(*database.RedisDatabase)), wire.Struct(new(Database), "*"))
 
-var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, redis.NewUserCacheRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
+var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, repository.NewFormRepository, redis.NewUserCacheRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepository)), wire.Bind(new(repository2.FormRepository), new(*repository.FormRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
 
-var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
+var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
 
-var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
+var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
 
-var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, wire.Struct(new(AdminControllers), "*"))
+var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, wire.Struct(new(AdminControllers), "*"))
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
@@ -157,10 +164,12 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
+	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {
 	UserController *user.AdminUserController
+	FormController *form.AdminFormController
 }
 
 type Controllers struct {

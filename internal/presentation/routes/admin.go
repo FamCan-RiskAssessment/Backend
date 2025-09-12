@@ -34,4 +34,11 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			userRoles.PUT("", app.Controllers.Admin.UserController.UpdateUserRoles)
 		}
 	}
+
+	forms := routerGroup.Group("/forms")
+	{
+		forms.GET("", app.Controllers.Admin.FormController.GetAllForms)
+		forms.GET("/:formID", app.Controllers.Admin.FormController.GetForm)
+		forms.DELETE("/:formID", app.Controllers.Admin.FormController.DeleteForm)
+	}
 }

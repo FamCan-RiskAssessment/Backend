@@ -25,7 +25,6 @@ func NewAdminFormController(
 }
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
-	// Get pagination parameters
 	offsetStr := ctx.DefaultQuery("offset", "0")
 	limitStr := ctx.DefaultQuery("limit", "10")
 

@@ -24,6 +24,7 @@ func main() {
 		&entity.User{},
 		&entity.Role{},
 		&entity.Permission{},
+		&entity.Form{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

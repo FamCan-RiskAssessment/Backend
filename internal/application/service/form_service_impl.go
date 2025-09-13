@@ -1,10 +1,11 @@
 package service
 
 import (
-	"strconv"
-	"time"
+	"fmt"
 
+	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
@@ -12,31 +13,33 @@ import (
 )
 
 type FormService struct {
+	constants      *bootstrap.Constants
 	formRepository postgres.FormRepository
-	userRepository postgres.UserRepository
+	userService    usecase.UserService
 	db             database.Database
 }
 
 func NewFormService(
+	constants *bootstrap.Constants,
 	formRepository postgres.FormRepository,
-	userRepository postgres.UserRepository,
+	userService usecase.UserService,
 	db database.Database,
 ) *FormService {
 	return &FormService{
+		constants:      constants,
 		formRepository: formRepository,
-		userRepository: userRepository,
+		userService:    userService,
 		db:             db,
 	}
 }
 
-func (s *FormService) CreateForm(userID uint, request formdto.CreateFormRequest) (formdto.CreateFormResponse, error) {
-	// Verify user exists
-	user, err := s.userRepository.FindUserByID(s.db, userID)
+func (formService *FormService) CreateForm(userID uint, request formdto.CreateFormRequest) (formdto.CreateFormResponse, error) {
+	user, err := formService.userService.GetUserByID(userID)
 	if err != nil {
 		return formdto.CreateFormResponse{}, err
 	}
 	if user == nil {
-		notFoundError := exception.NotFoundError{Item: strconv.Itoa(int(userID))}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
 		return formdto.CreateFormResponse{}, notFoundError
 	}
 
@@ -49,7 +52,7 @@ func (s *FormService) CreateForm(userID uint, request formdto.CreateFormRequest)
 		SocialSecurityNumber: request.SocialSecurityNumber,
 	}
 
-	err = s.formRepository.CreateForm(s.db, form)
+	err = formService.formRepository.CreateForm(formService.db, form)
 	if err != nil {
 		return formdto.CreateFormResponse{}, err
 	}
@@ -63,8 +66,8 @@ func (s *FormService) CreateForm(userID uint, request formdto.CreateFormRequest)
 			Address:              form.Address,
 			PostalCode:           form.PostalCode,
 			SocialSecurityNumber: form.SocialSecurityNumber,
-			CreatedAt:            form.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:            form.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:            form.CreatedAt,
+			UpdatedAt:            form.UpdatedAt,
 		},
 		Message: "Form created successfully",
 	}
@@ -72,13 +75,13 @@ func (s *FormService) CreateForm(userID uint, request formdto.CreateFormRequest)
 	return response, nil
 }
 
-func (s *FormService) GetForm(formID uint) (formdto.FormResponse, error) {
-	form, err := s.formRepository.FindFormByID(s.db, formID)
+func (formService *FormService) GetForm(formID uint) (formdto.FormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {
 		return formdto.FormResponse{}, err
 	}
 	if form == nil {
-		notFoundError := exception.NotFoundError{Item: strconv.Itoa(int(formID))}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
 		return formdto.FormResponse{}, notFoundError
 	}
 
@@ -90,37 +93,36 @@ func (s *FormService) GetForm(formID uint) (formdto.FormResponse, error) {
 		Address:              form.Address,
 		PostalCode:           form.PostalCode,
 		SocialSecurityNumber: form.SocialSecurityNumber,
-		CreatedAt:            form.CreatedAt.Format(time.RFC3339),
-		UpdatedAt:            form.UpdatedAt.Format(time.RFC3339),
+		CreatedAt:            form.CreatedAt,
+		UpdatedAt:            form.UpdatedAt,
 	}
 
 	return response, nil
 }
 
-func (s *FormService) GetUserForms(request formdto.GetUserFormsRequest) (formdto.GetUserFormsResponse, error) {
-	// Verify user exists
-	user, err := s.userRepository.FindUserByID(s.db, request.UserID)
+func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest) (formdto.GetUserFormsResponse, error) {
+	user, err := formService.userService.GetUserByID(request.UserID)
+	fmt.Println("user", user, err)
 	if err != nil {
 		return formdto.GetUserFormsResponse{}, err
 	}
 	if user == nil {
-		notFoundError := exception.NotFoundError{Item: strconv.Itoa(int(request.UserID))}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
 		return formdto.GetUserFormsResponse{}, notFoundError
 	}
 
-	// Set default pagination values
 	offset := request.Offset
 	limit := request.Limit
 	if limit <= 0 {
-		limit = 10 // default limit
+		limit = 10
 	}
 
-	forms, err := s.formRepository.FindFormsByUserID(s.db, request.UserID, offset, limit)
+	forms, err := formService.formRepository.FindFormsByUserID(formService.db, request.UserID, offset, limit)
 	if err != nil {
 		return formdto.GetUserFormsResponse{}, err
 	}
 
-	total, err := s.formRepository.CountFormsByUserID(s.db, request.UserID)
+	total, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
 	if err != nil {
 		return formdto.GetUserFormsResponse{}, err
 	}
@@ -135,8 +137,8 @@ func (s *FormService) GetUserForms(request formdto.GetUserFormsRequest) (formdto
 			Address:              form.Address,
 			PostalCode:           form.PostalCode,
 			SocialSecurityNumber: form.SocialSecurityNumber,
-			CreatedAt:            form.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:            form.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:            form.CreatedAt,
+			UpdatedAt:            form.UpdatedAt,
 		}
 	}
 
@@ -148,17 +150,16 @@ func (s *FormService) GetUserForms(request formdto.GetUserFormsRequest) (formdto
 	return response, nil
 }
 
-func (s *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.UpdateFormResponse, error) {
-	form, err := s.formRepository.FindFormByID(s.db, request.FormID)
+func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.UpdateFormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return formdto.UpdateFormResponse{}, err
 	}
 	if form == nil {
-		notFoundError := exception.NotFoundError{Item: strconv.Itoa(int(request.FormID))}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return formdto.UpdateFormResponse{}, notFoundError
 	}
 
-	// Update fields if provided
 	if request.Name != nil {
 		form.Name = *request.Name
 	}
@@ -175,7 +176,7 @@ func (s *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.Upd
 		form.SocialSecurityNumber = *request.SocialSecurityNumber
 	}
 
-	err = s.formRepository.UpdateForm(s.db, form)
+	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
 		return formdto.UpdateFormResponse{}, err
 	}
@@ -189,8 +190,8 @@ func (s *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.Upd
 			Address:              form.Address,
 			PostalCode:           form.PostalCode,
 			SocialSecurityNumber: form.SocialSecurityNumber,
-			CreatedAt:            form.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:            form.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:            form.CreatedAt,
+			UpdatedAt:            form.UpdatedAt,
 		},
 		Message: "Form updated successfully",
 	}
@@ -198,18 +199,17 @@ func (s *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.Upd
 	return response, nil
 }
 
-func (s *FormService) DeleteForm(formID uint) (formdto.DeleteFormResponse, error) {
-	// Check if form exists
-	form, err := s.formRepository.FindFormByID(s.db, formID)
+func (formService *FormService) DeleteForm(formID uint) (formdto.DeleteFormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {
 		return formdto.DeleteFormResponse{}, err
 	}
 	if form == nil {
-		notFoundError := exception.NotFoundError{Item: strconv.Itoa(int(formID))}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return formdto.DeleteFormResponse{}, notFoundError
 	}
 
-	err = s.formRepository.DeleteForm(s.db, formID)
+	err = formService.formRepository.DeleteForm(formService.db, formID)
 	if err != nil {
 		return formdto.DeleteFormResponse{}, err
 	}
@@ -221,18 +221,17 @@ func (s *FormService) DeleteForm(formID uint) (formdto.DeleteFormResponse, error
 	return response, nil
 }
 
-func (s *FormService) GetAllForms(offset, limit int) (formdto.GetUserFormsResponse, error) {
-	// Set default pagination values
+func (formService *FormService) GetAllForms(offset, limit int) (formdto.GetUserFormsResponse, error) {
 	if limit <= 0 {
-		limit = 10 // default limit
+		limit = 10
 	}
 
-	forms, err := s.formRepository.FindAllForms(s.db, offset, limit)
+	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit)
 	if err != nil {
 		return formdto.GetUserFormsResponse{}, err
 	}
 
-	total, err := s.formRepository.CountAllForms(s.db)
+	total, err := formService.formRepository.CountAllForms(formService.db)
 	if err != nil {
 		return formdto.GetUserFormsResponse{}, err
 	}
@@ -247,8 +246,8 @@ func (s *FormService) GetAllForms(offset, limit int) (formdto.GetUserFormsRespon
 			Address:              form.Address,
 			PostalCode:           form.PostalCode,
 			SocialSecurityNumber: form.SocialSecurityNumber,
-			CreatedAt:            form.CreatedAt.Format(time.RFC3339),
-			UpdatedAt:            form.UpdatedAt.Format(time.RFC3339),
+			CreatedAt:            form.CreatedAt,
+			UpdatedAt:            form.UpdatedAt,
 		}
 	}
 

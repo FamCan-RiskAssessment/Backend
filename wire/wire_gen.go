@@ -42,16 +42,18 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	recoveryMiddleware := middleware.NewRecoveryMiddleware(constants)
 	translator := localization.NewTranslationService()
 	localizationMiddleware := middleware.NewLocalizationMiddleware(constants, translator)
+	keyManager := jwt.NewJWTKeyManager()
+	jwtKeysPath := ProvideJWTKeysPath(config)
+	jwtService := service.NewJWTService(keyManager, jwtKeysPath)
+	userRepository := repository.NewUserRepository()
+	authMiddleware := middleware.NewAuthMiddleware(constants, jwtService, userRepository, postgresDatabase)
 	middlewares := &Middlewares{
 		Cors:         corsMiddleware,
 		Recovery:     recoveryMiddleware,
 		Localization: localizationMiddleware,
+		Auth:         authMiddleware,
 	}
-	userRepository := repository.NewUserRepository()
 	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
-	keyManager := jwt.NewJWTKeyManager()
-	jwtKeysPath := ProvideJWTKeysPath(config)
-	jwtService := service.NewJWTService(keyManager, jwtKeysPath)
 	smsGateway := ProvideSMSGatewayConfig(config)
 	smsTemplates := ProvideSMSTemplates(config)
 	smsService := sms.NewSMSService(smsGateway, smsTemplates)
@@ -59,22 +61,25 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
 	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
-	formRepository := repository.NewFormRepository()
-	formService := service.NewFormService(formRepository, userRepository, postgresDatabase)
-	generalFormController := form.NewGeneralFormController(constants, formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
-		FormController: generalFormController,
 	}
 	adminUserController := user.NewAdminUserController(constants, userService)
+	formRepository := repository.NewFormRepository()
+	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,
 		FormController: adminFormController,
 	}
+	customerFormController := form.NewCustomerFormController(constants, formService)
+	customerControllers := &CustomerControllers{
+		FormController: customerFormController,
+	}
 	controllers := &Controllers{
-		General: generalControllers,
-		Admin:   adminControllers,
+		General:  generalControllers,
+		Admin:    adminControllers,
+		Customer: customerControllers,
 	}
 	superAdmin := ProvideSuperAdminCredentials(config)
 	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase)
@@ -93,15 +98,17 @@ var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, repository
 
 var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
 
-var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
+var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
 
 var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, wire.Struct(new(AdminControllers), "*"))
+
+var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, wire.Struct(new(CustomerControllers), "*"))
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
 var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService)
 
-var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, wire.Struct(new(Middlewares), "*"))
+var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
 
 var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, wire.Struct(new(Seeds), "*"))
 
@@ -144,6 +151,7 @@ var ProviderSet = wire.NewSet(
 	MiddlewareProviderSet,
 	GeneralControllerProviderSet,
 	AdminControllerProviderSet,
+	CustomerControllerProviderSet,
 	ControllerProviderSet,
 	AdapterProviderSet,
 	ProvideDBConfig,
@@ -164,7 +172,6 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
-	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {
@@ -172,15 +179,21 @@ type AdminControllers struct {
 	FormController *form.AdminFormController
 }
 
+type CustomerControllers struct {
+	FormController *form.CustomerFormController
+}
+
 type Controllers struct {
-	General *GeneralControllers
-	Admin   *AdminControllers
+	General  *GeneralControllers
+	Admin    *AdminControllers
+	Customer *CustomerControllers
 }
 
 type Middlewares struct {
 	Cors         *middleware.CORSMiddleware
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
+	Auth         *middleware.AuthMiddleware
 }
 
 type Seeds struct {

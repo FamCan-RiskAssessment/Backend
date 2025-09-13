@@ -7,6 +7,7 @@ import (
 
 func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	form := routerGroup.Group("/form")
+	form.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		form.POST("", app.Controllers.Customer.FormController.CreateForm)
 		form.GET("", app.Controllers.Customer.FormController.GetUserForms)

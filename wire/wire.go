@@ -82,6 +82,7 @@ var MiddlewareProviderSet = wire.NewSet(
 	middleware.NewCorsMiddleware,
 	middleware.NewRecoveryMiddleware,
 	middleware.NewLocalizationMiddleware,
+	middleware.NewAuthMiddleware,
 	wire.Struct(new(Middlewares), "*"),
 )
 
@@ -150,7 +151,6 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
-	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {
@@ -172,6 +172,7 @@ type Middlewares struct {
 	Cors         *middleware.CORSMiddleware
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
+	Auth         *middleware.AuthMiddleware
 }
 
 type Seeds struct {

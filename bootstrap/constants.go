@@ -13,6 +13,7 @@ type Constants struct {
 
 type Context struct {
 	Translator string
+	ID         string
 }
 
 type RedisKey struct {
@@ -20,6 +21,7 @@ type RedisKey struct {
 
 type Field struct {
 	User       string
+	Form       string
 	OTP        string
 	Role       string
 	Permission string
@@ -45,9 +47,11 @@ func NewConstants() *Constants {
 	return &Constants{
 		Context: Context{
 			Translator: "translator",
+			ID:         "ID",
 		},
 		Field: Field{
 			User:       "user",
+			Form:       "form",
 			OTP:        "otp",
 			Role:       "role",
 			Permission: "permission",

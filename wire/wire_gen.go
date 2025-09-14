@@ -11,7 +11,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
-	repository2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	postgres2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
@@ -45,7 +45,7 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	keyManager := jwt.NewJWTKeyManager()
 	jwtKeysPath := ProvideJWTKeysPath(config)
 	jwtService := service.NewJWTService(keyManager, jwtKeysPath)
-	userRepository := repository.NewUserRepository()
+	userRepository := postgres.NewUserRepository()
 	authMiddleware := middleware.NewAuthMiddleware(constants, jwtService, userRepository, postgresDatabase)
 	middlewares := &Middlewares{
 		Cors:         corsMiddleware,
@@ -65,14 +65,15 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 		UserController: generalUserController,
 	}
 	adminUserController := user.NewAdminUserController(constants, userService)
-	formRepository := repository.NewFormRepository()
+	formRepository := postgres.NewFormRepository()
 	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
-	adminFormController := form.NewAdminFormController(constants, formService)
+	pagination := ProvidePagination(config)
+	adminFormController := form.NewAdminFormController(constants, formService, pagination)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,
 		FormController: adminFormController,
 	}
-	customerFormController := form.NewCustomerFormController(constants, formService)
+	customerFormController := form.NewCustomerFormController(constants, formService, pagination)
 	customerControllers := &CustomerControllers{
 		FormController: customerFormController,
 	}
@@ -94,7 +95,7 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 
 var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.NewRedisDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Bind(new(database.Cache), new(*database.RedisDatabase)), wire.Struct(new(Database), "*"))
 
-var RepositoryProviderSet = wire.NewSet(repository.NewUserRepository, repository.NewFormRepository, redis.NewUserCacheRepository, wire.Bind(new(repository2.UserRepository), new(*repository.UserRepository)), wire.Bind(new(repository2.FormRepository), new(*repository.FormRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
+var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.NewFormRepository, redis.NewUserCacheRepository, wire.Bind(new(postgres2.UserRepository), new(*postgres.UserRepository)), wire.Bind(new(postgres2.FormRepository), new(*postgres.FormRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
 
 var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
 
@@ -144,6 +145,10 @@ func ProvideSuperAdminCredentials(container *bootstrap.Config) *bootstrap.SuperA
 	return &container.Env.SuperAdmin
 }
 
+func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
+	return &container.Env.Pagination
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -162,6 +167,7 @@ var ProviderSet = wire.NewSet(
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
+	ProvidePagination,
 	SeedProviderSet,
 )
 

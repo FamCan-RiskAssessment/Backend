@@ -1,8 +1,6 @@
 package form
 
 import (
-	"strconv"
-
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
@@ -12,38 +10,38 @@ import (
 type AdminFormController struct {
 	constants   *bootstrap.Constants
 	formService usecase.FormService
+	pagination  *bootstrap.Pagination
 }
 
 func NewAdminFormController(
 	constants *bootstrap.Constants,
 	formService usecase.FormService,
+	pagination *bootstrap.Pagination,
 ) *AdminFormController {
 	return &AdminFormController{
 		constants:   constants,
 		formService: formService,
+		pagination:  pagination,
 	}
 }
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
-	offsetStr := ctx.DefaultQuery("offset", "0")
-	limitStr := ctx.DefaultQuery("limit", "10")
-
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil {
-		offset = 0
+	type GetAllFormsParams struct {
+		Page     int `form:"page"`
+		PageSize int `form:"pageSize"`
 	}
 
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 10
-	}
+	params := controller.Validate[GetAllFormsParams](ctx)
+	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
 
-	response, err := formController.formService.GetAllForms(offset, limit)
+	forms, count, err := formController.formService.GetAllForms(offset, limit)
 	if err != nil {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "", response)
+	data := controller.NewPaginatedResponse(forms, count, offset, limit)
+
+	controller.Response(ctx, 200, "", data)
 }
 
 func (formController *AdminFormController) GetForm(ctx *gin.Context) {
@@ -66,10 +64,12 @@ func (formController *AdminFormController) DeleteForm(ctx *gin.Context) {
 	}
 	params := controller.Validate[DeleteFormParams](ctx)
 
-	response, err := formController.formService.DeleteForm(params.FormID)
+	err := formController.formService.DeleteForm(params.FormID)
 	if err != nil {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "Form deleted successfully", response)
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.deleteForm")
+	controller.Response(ctx, 200, message, nil)
 }

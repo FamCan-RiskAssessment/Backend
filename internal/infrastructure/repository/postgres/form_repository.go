@@ -1,7 +1,8 @@
-package repository
+package postgres
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"gorm.io/gorm"
 )
@@ -28,17 +29,10 @@ func (r *FormRepository) FindFormByID(db database.Database, id uint) (*entity.Fo
 	return &form, nil
 }
 
-func (r *FormRepository) FindFormsByUserID(db database.Database, userID uint, offset, limit int) ([]*entity.Form, error) {
+func (r *FormRepository) FindFormsByUserID(db database.Database, userID uint, options *postgres.QueryOptions) ([]*entity.Form, error) {
 	var forms []*entity.Form
 	query := db.GetDB().Where("user_id = ?", userID).Preload("User")
-
-	if offset > 0 {
-		query = query.Offset(offset)
-	}
-	if limit > 0 {
-		query = query.Limit(limit)
-	}
-
+	query = applyQueryOptions(query, options)
 	err := query.Find(&forms).Error
 	return forms, err
 }

@@ -1,8 +1,6 @@
 package service
 
 import (
-	"fmt"
-
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -81,7 +79,7 @@ func (formService *FormService) GetForm(formID uint) (formdto.FormResponse, erro
 		return formdto.FormResponse{}, err
 	}
 	if form == nil {
-		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return formdto.FormResponse{}, notFoundError
 	}
 
@@ -100,31 +98,27 @@ func (formService *FormService) GetForm(formID uint) (formdto.FormResponse, erro
 	return response, nil
 }
 
-func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest) (formdto.GetUserFormsResponse, error) {
+func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.FormResponse, int64, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
-	fmt.Println("user", user, err)
 	if err != nil {
-		return formdto.GetUserFormsResponse{}, err
+		return nil, 0, err
 	}
 	if user == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
-		return formdto.GetUserFormsResponse{}, notFoundError
+		return nil, 0, notFoundError
 	}
 
-	offset := request.Offset
-	limit := request.Limit
-	if limit <= 0 {
-		limit = 10
-	}
+	options := postgres.NewQueryOptions().
+		WithPagination(request.Limit, request.Offset)
 
-	forms, err := formService.formRepository.FindFormsByUserID(formService.db, request.UserID, offset, limit)
+	forms, err := formService.formRepository.FindFormsByUserID(formService.db, request.UserID, options)
 	if err != nil {
-		return formdto.GetUserFormsResponse{}, err
+		return nil, 0, err
 	}
 
-	total, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
+	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
 	if err != nil {
-		return formdto.GetUserFormsResponse{}, err
+		return nil, 0, err
 	}
 
 	formResponses := make([]formdto.FormResponse, len(forms))
@@ -142,22 +136,17 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		}
 	}
 
-	response := formdto.GetUserFormsResponse{
-		Forms: formResponses,
-		Total: int(total),
-	}
-
-	return response, nil
+	return formResponses, count, nil
 }
 
-func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.UpdateFormResponse, error) {
+func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.FormResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.UpdateFormResponse{}, err
+		return formdto.FormResponse{}, err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.UpdateFormResponse{}, notFoundError
+		return formdto.FormResponse{}, notFoundError
 	}
 
 	if request.Name != nil {
@@ -178,62 +167,52 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
-		return formdto.UpdateFormResponse{}, err
+		return formdto.FormResponse{}, err
 	}
 
-	response := formdto.UpdateFormResponse{
-		Form: formdto.FormResponse{
-			ID:                   form.ID,
-			UserID:               form.UserID,
-			Name:                 form.Name,
-			DateOfBirth:          form.DateOfBirth,
-			Address:              form.Address,
-			PostalCode:           form.PostalCode,
-			SocialSecurityNumber: form.SocialSecurityNumber,
-			CreatedAt:            form.CreatedAt,
-			UpdatedAt:            form.UpdatedAt,
-		},
-		Message: "Form updated successfully",
+	response := formdto.FormResponse{
+		ID:                   form.ID,
+		UserID:               form.UserID,
+		Name:                 form.Name,
+		DateOfBirth:          form.DateOfBirth,
+		Address:              form.Address,
+		PostalCode:           form.PostalCode,
+		SocialSecurityNumber: form.SocialSecurityNumber,
+		CreatedAt:            form.CreatedAt,
+		UpdatedAt:            form.UpdatedAt,
 	}
 
 	return response, nil
 }
 
-func (formService *FormService) DeleteForm(formID uint) (formdto.DeleteFormResponse, error) {
+func (formService *FormService) DeleteForm(formID uint) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {
-		return formdto.DeleteFormResponse{}, err
+		return err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.DeleteFormResponse{}, notFoundError
+		return notFoundError
 	}
 
 	err = formService.formRepository.DeleteForm(formService.db, formID)
 	if err != nil {
-		return formdto.DeleteFormResponse{}, err
+		return err
 	}
 
-	response := formdto.DeleteFormResponse{
-		Message: "Form deleted successfully",
-	}
-
-	return response, nil
+	return nil
 }
 
-func (formService *FormService) GetAllForms(offset, limit int) (formdto.GetUserFormsResponse, error) {
-	if limit <= 0 {
-		limit = 10
-	}
+func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.FormResponse, int64, error) {
 
 	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit)
 	if err != nil {
-		return formdto.GetUserFormsResponse{}, err
+		return nil, 0, err
 	}
 
-	total, err := formService.formRepository.CountAllForms(formService.db)
+	count, err := formService.formRepository.CountAllForms(formService.db)
 	if err != nil {
-		return formdto.GetUserFormsResponse{}, err
+		return nil, 0, err
 	}
 
 	formResponses := make([]formdto.FormResponse, len(forms))
@@ -251,10 +230,5 @@ func (formService *FormService) GetAllForms(offset, limit int) (formdto.GetUserF
 		}
 	}
 
-	response := formdto.GetUserFormsResponse{
-		Forms: formResponses,
-		Total: int(total),
-	}
-
-	return response, nil
+	return formResponses, count, nil
 }

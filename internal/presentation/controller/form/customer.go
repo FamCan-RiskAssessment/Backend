@@ -75,12 +75,13 @@ func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
 		Limit:  limit,
 	}
 
-	response, err := formController.formService.GetUserForms(request)
+	forms, count, err := formController.formService.GetUserForms(request)
 	if err != nil {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "", response)
+	data := controller.NewPaginatedResponse(forms, count, offset, limit)
+	controller.Response(ctx, 200, "", data)
 }
 
 func (formController *CustomerFormController) GetForm(ctx *gin.Context) {
@@ -134,12 +135,12 @@ func (formController *CustomerFormController) DeleteForm(ctx *gin.Context) {
 	}
 	params := controller.Validate[DeleteFormParams](ctx)
 
-	response, err := formController.formService.DeleteForm(params.FormID)
+	err := formController.formService.DeleteForm(params.FormID)
 	if err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.deleteForm")
-	controller.Response(ctx, 200, message, response)
+	controller.Response(ctx, 200, message, nil)
 }

@@ -1,8 +1,6 @@
 package form
 
 import (
-	"strconv"
-
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -13,15 +11,18 @@ import (
 type CustomerFormController struct {
 	constants   *bootstrap.Constants
 	formService usecase.FormService
+	pagination  *bootstrap.Pagination
 }
 
 func NewCustomerFormController(
 	constants *bootstrap.Constants,
 	formService usecase.FormService,
+	pagination *bootstrap.Pagination,
 ) *CustomerFormController {
 	return &CustomerFormController{
 		constants:   constants,
 		formService: formService,
+		pagination:  pagination,
 	}
 }
 
@@ -36,16 +37,10 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 
 	params := controller.Validate[CreateFormParams](ctx)
 
-	userIDInterface, exists := ctx.Get(formController.constants.Context.ID)
-	if !exists {
-		panic("User ID not found in context")
-	}
-	userID, ok := userIDInterface.(uint)
-	if !ok {
-		panic("Invalid user ID type")
-	}
+	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	request := formdto.CreateFormRequest{
+		UserID:               userID.(uint),
 		Name:                 params.Name,
 		DateOfBirth:          params.DateOfBirth,
 		Address:              params.Address,
@@ -53,39 +48,29 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 		SocialSecurityNumber: params.SocialSecurityNumber,
 	}
 
-	response, err := formController.formService.CreateForm(userID, request)
+	response, err := formController.formService.CreateForm(request)
 	if err != nil {
 		panic(err)
 	}
 
-	controller.Response(ctx, 201, "Form created successfully", response)
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.createForm")
+	controller.Response(ctx, 201, message, response)
 }
 
 func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
-	userIDInterface, exists := ctx.Get(formController.constants.Context.ID)
-	if !exists {
-		panic("User ID not found in context")
-	}
-	userID, ok := userIDInterface.(uint)
-	if !ok {
-		panic("Invalid user ID type")
+	type GetUserFormsParams struct {
+		Page     int `form:"page"`
+		PageSize int `form:"pageSize"`
 	}
 
-	offsetStr := ctx.DefaultQuery("offset", "0")
-	limitStr := ctx.DefaultQuery("limit", "10")
+	params := controller.Validate[GetUserFormsParams](ctx)
+	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
 
-	offset, err := strconv.Atoi(offsetStr)
-	if err != nil {
-		offset = 0
-	}
-
-	limit, err := strconv.Atoi(limitStr)
-	if err != nil {
-		limit = 10
-	}
+	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	request := formdto.GetUserFormsRequest{
-		UserID: userID,
+		UserID: userID.(uint),
 		Offset: offset,
 		Limit:  limit,
 	}
@@ -138,7 +123,9 @@ func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "Form updated successfully", response)
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 200, message, response)
 }
 
 func (formController *CustomerFormController) DeleteForm(ctx *gin.Context) {
@@ -152,5 +139,7 @@ func (formController *CustomerFormController) DeleteForm(ctx *gin.Context) {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "Form deleted successfully", response)
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.deleteForm")
+	controller.Response(ctx, 200, message, response)
 }

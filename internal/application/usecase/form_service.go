@@ -3,7 +3,7 @@ package usecase
 import formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 
 type FormService interface {
-	CreateForm(userID uint, request formdto.CreateFormRequest) (formdto.CreateFormResponse, error)
+	CreateForm(request formdto.CreateFormRequest) (formdto.CreateFormResponse, error)
 	GetForm(formID uint) (formdto.FormResponse, error)
 	GetUserForms(request formdto.GetUserFormsRequest) (formdto.GetUserFormsResponse, error)
 	UpdateForm(request formdto.UpdateFormRequest) (formdto.UpdateFormResponse, error)

@@ -123,6 +123,10 @@ func ProvideSuperAdminCredentials(container *bootstrap.Config) *bootstrap.SuperA
 	return &container.Env.SuperAdmin
 }
 
+func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
+	return &container.Env.Pagination
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -141,6 +145,7 @@ var ProviderSet = wire.NewSet(
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
+	ProvidePagination,
 	SeedProviderSet,
 )
 

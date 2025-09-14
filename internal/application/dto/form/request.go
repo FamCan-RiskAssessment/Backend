@@ -1,6 +1,7 @@
 package formdto
 
 type CreateFormRequest struct {
+	UserID               uint
 	Name                 string `json:"name" binding:"required"`
 	DateOfBirth          string `json:"date_of_birth" binding:"required"`
 	Address              string `json:"address" binding:"required"`

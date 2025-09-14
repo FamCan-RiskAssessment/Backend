@@ -33,8 +33,8 @@ func NewFormService(
 	}
 }
 
-func (formService *FormService) CreateForm(userID uint, request formdto.CreateFormRequest) (formdto.CreateFormResponse, error) {
-	user, err := formService.userService.GetUserByID(userID)
+func (formService *FormService) CreateForm(request formdto.CreateFormRequest) (formdto.CreateFormResponse, error) {
+	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
 		return formdto.CreateFormResponse{}, err
 	}
@@ -44,7 +44,7 @@ func (formService *FormService) CreateForm(userID uint, request formdto.CreateFo
 	}
 
 	form := &entity.Form{
-		UserID:               userID,
+		UserID:               request.UserID,
 		Name:                 request.Name,
 		DateOfBirth:          request.DateOfBirth,
 		Address:              request.Address,

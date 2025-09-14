@@ -24,6 +24,7 @@ type Field struct {
 	Form       string
 	OTP        string
 	Role       string
+	Page       string
 	Permission string
 }
 
@@ -54,6 +55,7 @@ func NewConstants() *Constants {
 			Form:       "form",
 			OTP:        "otp",
 			Role:       "role",
+			Page:       "page",
 			Permission: "permission",
 		},
 		Tag: Tag{

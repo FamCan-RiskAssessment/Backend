@@ -7,7 +7,7 @@ import (
 
 func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	accessManagement := routerGroup.Group("")
-	accessManagement.Use(app.Middlewares.Auth.AuthRequired)
+	// accessManagement.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		permissions := accessManagement.Group("/permissions")
 		{
@@ -37,7 +37,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	}
 
 	forms := routerGroup.Group("/forms")
-	forms.Use(app.Middlewares.Auth.AuthRequired)
+	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		forms.GET("", app.Controllers.Admin.FormController.GetAllForms)
 		forms.GET("/:formID", app.Controllers.Admin.FormController.GetForm)

@@ -1,24 +1,24 @@
 package entity
 
 import (
-	"time"
-
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type Form struct {
 	database.Model
-	UserID               uint      `gorm:"not null;index"`
-	User                 User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	Name                 string    `gorm:"type:varchar(255);not null"`
-	DateOfBirth          time.Time `gorm:"type:date;not null"`
-	Address              string    `gorm:"type:text;not null"`
-	PostalCode           string    `gorm:"type:varchar(20);not null"`
-	SocialSecurityNumber string    `gorm:"type:varchar(20);not null"`
-	Gender               string    `gorm:"type:varchar(10);not null"`
-	IsAtba               bool      `gorm:"not null;default:false"`
-	Height               float64   `gorm:"type:decimal(5,2);not null"`
-	Weight               float64   `gorm:"type:decimal(5,2);not null"`
+	UserID               uint    `gorm:"not null;index"`
+	User                 User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Name                 string  `gorm:"type:varchar(255);not null"`
+	BirthDay             string  `gorm:"type:varchar(10);not null"`
+	BirthMonth           string  `gorm:"type:varchar(10);not null"`
+	BirthYear            string  `gorm:"type:varchar(10);not null"`
+	Address              string  `gorm:"type:text;not null"`
+	PostalCode           string  `gorm:"type:varchar(20);not null"`
+	SocialSecurityNumber string  `gorm:"type:varchar(20);not null"`
+	Gender               string  `gorm:"type:varchar(10);not null"`
+	IsAtba               bool    `gorm:"not null;default:false"`
+	Height               float64 `gorm:"type:decimal(5,2);not null"`
+	Weight               float64 `gorm:"type:decimal(5,2);not null"`
 
 	DrinksAlcohol             *bool   `gorm:"type:boolean"`
 	CupsPerWeek               *string `gorm:"type:varchar(50)"`

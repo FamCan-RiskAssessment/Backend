@@ -1,18 +1,18 @@
 package formdto
 
-import "time"
-
 type CreateFormRequest struct {
 	UserID               uint
-	Name                 string    `json:"name" binding:"required"`
-	DateOfBirth          time.Time `json:"date_of_birth" binding:"required"`
-	Address              string    `json:"address" binding:"required"`
-	PostalCode           string    `json:"postal_code" binding:"required"`
-	SocialSecurityNumber string    `json:"social_security_number" binding:"required"`
-	Gender               string    `json:"gender" binding:"required"`
-	IsAtba               bool      `json:"is_atba"`
-	Height               float64   `json:"height" binding:"required"`
-	Weight               float64   `json:"weight" binding:"required"`
+	Name                 string  `json:"name" binding:"required"`
+	BirthDay             string  `json:"birth_day" binding:"required"`
+	BirthMonth           string  `json:"birth_month" binding:"required"`
+	BirthYear            string  `json:"birth_year" binding:"required"`
+	Address              string  `json:"address" binding:"required"`
+	PostalCode           string  `json:"postal_code" binding:"required"`
+	SocialSecurityNumber string  `json:"social_security_number" binding:"required"`
+	Gender               string  `json:"gender" binding:"required"`
+	IsAtba               bool    `json:"is_atba"`
+	Height               float64 `json:"height" binding:"required"`
+	Weight               float64 `json:"weight" binding:"required"`
 
 	DrinksAlcohol             *bool   `json:"drinks_alcohol,omitempty"`
 	CupsPerWeek               *string `json:"cups_per_week,omitempty"`
@@ -159,16 +159,18 @@ type CreateFormRequest struct {
 }
 
 type UpdateFormRequest struct {
-	FormID               uint       `json:"form_id" binding:"required"`
-	Name                 *string    `json:"name,omitempty"`
-	DateOfBirth          *time.Time `json:"date_of_birth,omitempty"`
-	Address              *string    `json:"address,omitempty"`
-	PostalCode           *string    `json:"postal_code,omitempty"`
-	SocialSecurityNumber *string    `json:"social_security_number,omitempty"`
-	Gender               *string    `json:"gender,omitempty"`
-	IsAtba               *bool      `json:"is_atba,omitempty"`
-	Height               *float64   `json:"height,omitempty"`
-	Weight               *float64   `json:"weight,omitempty"`
+	FormID               uint     `json:"form_id" binding:"required"`
+	Name                 *string  `json:"name,omitempty"`
+	BirthDay             *string  `json:"birth_day,omitempty"`
+	BirthMonth           *string  `json:"birth_month,omitempty"`
+	BirthYear            *string  `json:"birth_year,omitempty"`
+	Address              *string  `json:"address,omitempty"`
+	PostalCode           *string  `json:"postal_code,omitempty"`
+	SocialSecurityNumber *string  `json:"social_security_number,omitempty"`
+	Gender               *string  `json:"gender,omitempty"`
+	IsAtba               *bool    `json:"is_atba,omitempty"`
+	Height               *float64 `json:"height,omitempty"`
+	Weight               *float64 `json:"weight,omitempty"`
 
 	DrinksAlcohol             *bool   `json:"drinks_alcohol,omitempty"`
 	CupsPerWeek               *string `json:"cups_per_week,omitempty"`

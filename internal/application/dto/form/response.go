@@ -3,17 +3,19 @@ package formdto
 import "time"
 
 type FormResponse struct {
-	ID                   uint      `json:"id"`
-	UserID               uint      `json:"user_id"`
-	Name                 string    `json:"name"`
-	DateOfBirth          time.Time `json:"date_of_birth"`
-	Address              string    `json:"address"`
-	PostalCode           string    `json:"postal_code"`
-	SocialSecurityNumber string    `json:"social_security_number"`
-	Gender               string    `json:"gender"`
-	IsAtba               bool      `json:"is_atba"`
-	Height               float64   `json:"height"`
-	Weight               float64   `json:"weight"`
+	ID                   uint    `json:"id"`
+	UserID               uint    `json:"user_id"`
+	Name                 string  `json:"name"`
+	BirthDay             string  `json:"birth_day"`
+	BirthMonth           string  `json:"birth_month"`
+	BirthYear            string  `json:"birth_year"`
+	Address              string  `json:"address"`
+	PostalCode           string  `json:"postal_code"`
+	SocialSecurityNumber string  `json:"social_security_number"`
+	Gender               string  `json:"gender"`
+	IsAtba               bool    `json:"is_atba"`
+	Height               float64 `json:"height"`
+	Weight               float64 `json:"weight"`
 
 	DrinksAlcohol             *bool   `json:"drinks_alcohol"`
 	CupsPerWeek               *string `json:"cups_per_week"`

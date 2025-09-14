@@ -1,8 +1,6 @@
 package form
 
 import (
-	"time"
-
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -30,15 +28,17 @@ func NewCustomerFormController(
 
 func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 	type CreateFormParams struct {
-		Name                 string    `json:"name" validate:"required"`
-		DateOfBirth          time.Time `json:"date_of_birth" validate:"required"`
-		Address              string    `json:"address" validate:"required"`
-		PostalCode           string    `json:"postal_code" validate:"required"`
-		SocialSecurityNumber string    `json:"social_security_number" validate:"required"`
-		Gender               string    `json:"gender" validate:"required"`
-		IsAtba               bool      `json:"is_atba"`
-		Height               float64   `json:"height" validate:"required"`
-		Weight               float64   `json:"weight" validate:"required"`
+		Name                 string  `json:"name" validate:"required"`
+		BirthDay             string  `json:"birth_day" validate:"required"`
+		BirthMonth           string  `json:"birth_month" validate:"required"`
+		BirthYear            string  `json:"birth_year" validate:"required"`
+		Address              string  `json:"address" validate:"required"`
+		PostalCode           string  `json:"postal_code" validate:"required"`
+		SocialSecurityNumber string  `json:"social_security_number" validate:"required"`
+		Gender               string  `json:"gender" validate:"required"`
+		IsAtba               bool    `json:"is_atba"`
+		Height               float64 `json:"height" validate:"required"`
+		Weight               float64 `json:"weight" validate:"required"`
 
 		DrinksAlcohol             *bool   `json:"drinks_alcohol,omitempty"`
 		CupsPerWeek               *string `json:"cups_per_week,omitempty"`
@@ -191,7 +191,9 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 	request := formdto.CreateFormRequest{
 		UserID:               userID.(uint),
 		Name:                 params.Name,
-		DateOfBirth:          params.DateOfBirth,
+		BirthDay:             params.BirthDay,
+		BirthMonth:           params.BirthMonth,
+		BirthYear:            params.BirthYear,
 		Address:              params.Address,
 		PostalCode:           params.PostalCode,
 		SocialSecurityNumber: params.SocialSecurityNumber,
@@ -396,16 +398,18 @@ func (formController *CustomerFormController) GetForm(ctx *gin.Context) {
 
 func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 	type UpdateFormParams struct {
-		FormID               uint       `json:"form_id" validate:"required"`
-		Name                 *string    `json:"name,omitempty"`
-		DateOfBirth          *time.Time `json:"date_of_birth,omitempty"`
-		Address              *string    `json:"address,omitempty"`
-		PostalCode           *string    `json:"postal_code,omitempty"`
-		SocialSecurityNumber *string    `json:"social_security_number,omitempty"`
-		Gender               *string    `json:"gender,omitempty"`
-		IsAtba               *bool      `json:"is_atba,omitempty"`
-		Height               *float64   `json:"height,omitempty"`
-		Weight               *float64   `json:"weight,omitempty"`
+		FormID               uint     `json:"form_id" validate:"required"`
+		Name                 *string  `json:"name,omitempty"`
+		BirthDay             *string  `json:"birth_day,omitempty"`
+		BirthMonth           *string  `json:"birth_month,omitempty"`
+		BirthYear            *string  `json:"birth_year,omitempty"`
+		Address              *string  `json:"address,omitempty"`
+		PostalCode           *string  `json:"postal_code,omitempty"`
+		SocialSecurityNumber *string  `json:"social_security_number,omitempty"`
+		Gender               *string  `json:"gender,omitempty"`
+		IsAtba               *bool    `json:"is_atba,omitempty"`
+		Height               *float64 `json:"height,omitempty"`
+		Weight               *float64 `json:"weight,omitempty"`
 
 		DrinksAlcohol             *bool   `json:"drinks_alcohol,omitempty"`
 		CupsPerWeek               *string `json:"cups_per_week,omitempty"`
@@ -556,7 +560,9 @@ func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 	request := formdto.UpdateFormRequest{
 		FormID:               params.FormID,
 		Name:                 params.Name,
-		DateOfBirth:          params.DateOfBirth,
+		BirthDay:             params.BirthDay,
+		BirthMonth:           params.BirthMonth,
+		BirthYear:            params.BirthYear,
 		Address:              params.Address,
 		PostalCode:           params.PostalCode,
 		SocialSecurityNumber: params.SocialSecurityNumber,

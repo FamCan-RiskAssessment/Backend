@@ -36,7 +36,9 @@ func (formService *FormService) entityToResponse(form *entity.Form) formdto.Form
 		ID:                   form.ID,
 		UserID:               form.UserID,
 		Name:                 form.Name,
-		DateOfBirth:          form.DateOfBirth,
+		BirthDay:             form.BirthDay,
+		BirthMonth:           form.BirthMonth,
+		BirthYear:            form.BirthYear,
 		Address:              form.Address,
 		PostalCode:           form.PostalCode,
 		SocialSecurityNumber: form.SocialSecurityNumber,
@@ -206,7 +208,9 @@ func (formService *FormService) CreateForm(request formdto.CreateFormRequest) (f
 	form := &entity.Form{
 		UserID:               request.UserID,
 		Name:                 request.Name,
-		DateOfBirth:          request.DateOfBirth,
+		BirthDay:             request.BirthDay,
+		BirthMonth:           request.BirthMonth,
+		BirthYear:            request.BirthYear,
 		Address:              request.Address,
 		PostalCode:           request.PostalCode,
 		SocialSecurityNumber: request.SocialSecurityNumber,
@@ -429,8 +433,14 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 	if request.Name != nil {
 		form.Name = *request.Name
 	}
-	if request.DateOfBirth != nil {
-		form.DateOfBirth = *request.DateOfBirth
+	if request.BirthDay != nil {
+		form.BirthDay = *request.BirthDay
+	}
+	if request.BirthMonth != nil {
+		form.BirthMonth = *request.BirthMonth
+	}
+	if request.BirthYear != nil {
+		form.BirthYear = *request.BirthYear
 	}
 	if request.Address != nil {
 		form.Address = *request.Address

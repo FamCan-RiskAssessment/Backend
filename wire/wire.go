@@ -10,6 +10,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
 	domainPostgre "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	domainRedis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
+	domainS3 "github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	infraJWT "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
@@ -17,6 +18,7 @@ import (
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
+	infraStorage "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -76,6 +78,8 @@ var ControllerProviderSet = wire.NewSet(
 var AdapterProviderSet = wire.NewSet(
 	infraJWT.NewJWTKeyManager,
 	infraLocalization.NewTranslationService,
+	infraStorage.NewS3Storage,
+	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.S3Storage)),
 )
 
 var MiddlewareProviderSet = wire.NewSet(
@@ -105,6 +109,10 @@ func ProvideRDBConfig(container *bootstrap.Config) *bootstrap.Redis {
 
 func ProvideOTPConfig(container *bootstrap.Config) *bootstrap.OTP {
 	return &container.Env.OTP
+}
+
+func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.S3 {
+	return &container.Env.S3
 }
 
 func ProvideSMSGatewayConfig(container *bootstrap.Config) *bootstrap.SMSGateway {
@@ -141,6 +149,7 @@ var ProviderSet = wire.NewSet(
 	ProvideConstants,
 	ProvideRDBConfig,
 	ProvideOTPConfig,
+	ProvideStorageConfig,
 	ProvideSMSGatewayConfig,
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,

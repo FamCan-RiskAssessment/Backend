@@ -490,9 +490,6 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 	if request.SmokeAtLeast100 != nil {
 		form.SmokeAtLeast100 = request.SmokeAtLeast100
 	}
-	if request.SmokingAge != nil {
-		form.SmokingAge = *request.SmokingAge
-	}
 	if request.SmokingNow != nil {
 		form.SmokingNow = *request.SmokingNow
 	}
@@ -525,9 +522,6 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 	}
 	if request.MenopausalStatus != nil {
 		form.MenopausalStatus = *request.MenopausalStatus
-	}
-	if request.MenopauseAge != nil {
-		form.MenopauseAge = *request.MenopauseAge
 	}
 	if request.HRT != nil {
 		form.HRT = request.HRT
@@ -729,9 +723,6 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 	}
 	if request.Country != nil {
 		form.Country = request.Country
-	}
-	if request.InsuranceStatus != nil {
-		form.InsuranceStatus = *request.InsuranceStatus
 	}
 	if request.SupplementaryInsurances != nil {
 		form.SupplementaryInsurances = request.SupplementaryInsurances

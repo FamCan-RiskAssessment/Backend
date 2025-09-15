@@ -9,12 +9,12 @@ type Form struct {
 	UserID               uint    `gorm:"not null;index"`
 	User                 User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Name                 string  `gorm:"type:varchar(255);not null"`
-	BirthDay             string  `gorm:"type:varchar(10);not null"`
+	BirthDay             uint    `gorm:"not null"`
 	BirthMonth           string  `gorm:"type:varchar(10);not null"`
-	BirthYear            string  `gorm:"type:varchar(10);not null"`
+	BirthYear            uint    `gorm:"not null"`
 	Address              string  `gorm:"type:text;not null"`
 	PostalCode           string  `gorm:"type:varchar(20);not null"`
-	SocialSecurityNumber string  `gorm:"type:varchar(20);not null"`
+	SocialSecurityNumber uint    `gorm:"not null"`
 	Gender               string  `gorm:"type:varchar(10);not null"`
 	IsAtba               bool    `gorm:"not null;default:false"`
 	Height               float64 `gorm:"type:decimal(5,2);not null"`
@@ -29,20 +29,20 @@ type Form struct {
 	HardActivityMonthInYear   uint    `gorm:"not null"`
 	HardActivityHourInWeek    string  `gorm:"type:varchar(50);not null"`
 	SmokeAtLeast100           *bool   `gorm:"type:boolean"`
-	SmokingAge                uint    `gorm:"not null"`
+	SmokingAge                *uint   `gorm:"type:int"`
 	SmokingNow                bool    `gorm:"not null;default:false"`
 	LeaveSmokingAge           *uint   `gorm:"type:int"`
-	CountSmokingDaily         *uint   `gorm:"type:int"`
-	CountGheliandaily         *uint   `gorm:"type:int"`
-	CountSmokingDailyPast     *uint   `gorm:"type:int"`
-	CountGheliandailyPast     *uint   `gorm:"type:int"`
+	CountSmokingDaily         *string `gorm:"type:varchar(50)"`
+	CountGheliandaily         *string `gorm:"type:varchar(50)"`
+	CountSmokingDailyPast     *string `gorm:"type:varchar(50)"`
+	CountGheliandailyPast     *string `gorm:"type:varchar(50)"`
 
 	GhaedeAge                    uint    `gorm:"not null"`
 	HasChildren                  bool    `gorm:"not null;default:false"`
 	NumberOfChildren             *uint   `gorm:"type:int"`
 	AgeOfFirstBirth              *uint   `gorm:"type:int"`
 	MenopausalStatus             string  `gorm:"type:varchar(50);not null"`
-	MenopauseAge                 string  `gorm:"type:varchar(50);not null"`
+	MenopauseAge                 *string `gorm:"type:varchar(50)"`
 	HRT                          *bool   `gorm:"type:boolean"`
 	HRTUseLength                 *uint   `gorm:"type:int"`
 	LastFiveYearsHRTUse          bool    `gorm:"not null;default:false"`
@@ -71,45 +71,45 @@ type Form struct {
 	ChildCancer     bool    `gorm:"not null;default:false"`
 	ChildName       *string `gorm:"type:varchar(50)"`
 	ChildCancerType *string `gorm:"type:varchar(50)"`
-	ChildCancerAge  *string `gorm:"type:varchar(50)"`
+	ChildCancerAge  *uint   `gorm:"type:int"`
 	ChildLifeStatus *string `gorm:"type:varchar(50)"`
 	// Pics
 	MotherCancer     bool    `gorm:"not null;default:false"`
 	MotherName       *string `gorm:"type:varchar(50)"`
 	MotherLifeStatus *string `gorm:"type:varchar(50)"`
 	MotherCancerType *string `gorm:"type:varchar(50)"`
-	MotherCancerAge  *string `gorm:"type:varchar(50)"`
+	MotherCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 	FatherCancer     bool    `gorm:"not null;default:false"`
 	FatherName       *string `gorm:"type:varchar(50)"`
 	FatherLifeStatus *string `gorm:"type:varchar(50)"`
 	FatherCancerType *string `gorm:"type:varchar(50)"`
-	FatherCancerAge  *string `gorm:"type:varchar(50)"`
+	FatherCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 	SiblingCancer     bool    `gorm:"not null;default:false"`
 	SiblingName       *string `gorm:"type:varchar(50)"`
 	SiblingLifeStatus *string `gorm:"type:varchar(50)"`
 	SiblingCancerType *string `gorm:"type:varchar(50)"`
-	SiblingCancerAge  *string `gorm:"type:varchar(50)"`
+	SiblingCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 	AmeAmoCancer     bool    `gorm:"not null;default:false"`
 	AmeAmoName       *string `gorm:"type:varchar(50)"`
 	AmeAmoLifeStatus *string `gorm:"type:varchar(50)"`
 	AmeAmoCancerType *string `gorm:"type:varchar(50)"`
-	AmeAmoCancerAge  *string `gorm:"type:varchar(50)"`
+	AmeAmoCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 	KhaleDaeiCancer     bool    `gorm:"not null;default:false"`
 	KhaleDaeiName       *string `gorm:"type:varchar(50)"`
 	KhaleDaeiLifeStatus *string `gorm:"type:varchar(50)"`
 	KhaleDaeiCancerType *string `gorm:"type:varchar(50)"`
-	KhaleDaeiCancerAge  *string `gorm:"type:varchar(50)"`
+	KhaleDaeiCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 	OtherRelativeCancer     *bool   `gorm:"type:boolean"`
 	OtherRelativeName       *string `gorm:"type:varchar(50)"`
 	OtherRelativeRelation   *string `gorm:"type:varchar(50)"`
 	OtherRelativeLifeStatus *string `gorm:"type:varchar(50)"`
 	OtherRelativeCancerType *string `gorm:"type:varchar(50)"`
-	OtherRelativeCancerAge  *string `gorm:"type:varchar(50)"`
+	OtherRelativeCancerAge  *uint   `gorm:"type:int"`
 	// Pics
 
 	TestGen *bool `gorm:"type:boolean"`
@@ -122,9 +122,9 @@ type Form struct {
 	City         *string `gorm:"type:varchar(50)"`
 	Country      *string `gorm:"type:varchar(50)"`
 
-	InsuranceStatus           string  `gorm:"type:varchar(50);not null"`
+	InsuranceStatus           *string `gorm:"type:varchar(50)"`
 	SupplementaryInsurances   *string `gorm:"type:varchar(50)"`
-	Hypertension              bool    `gorm:"not null;default:false"`
+	Hypertension              bool    `gorm:"noto null;default:false"`
 	HypertensionTreatment     *bool   `gorm:"type:boolean"`
 	HeartDisease              bool    `gorm:"not null;default:false"`
 	HeartDiseaseTreatment     *bool   `gorm:"type:boolean"`

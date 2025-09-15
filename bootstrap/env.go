@@ -15,6 +15,7 @@ type Env struct {
 	Pagination Pagination
 	OTP        OTP
 	SuperAdmin SuperAdmin
+	S3         S3
 }
 
 type Server struct {
@@ -52,9 +53,19 @@ type OTP struct {
 	MaxAttempts  int
 }
 
+type S3 struct {
+	Buckets   BucketName
+	Region    string
+	AccessKey string
+	SecretKey string
+	Endpoint  string
+}
+
+type BucketName struct {
+}
+
 type SuperAdmin struct {
-	Phone    string
-	Password string
+	Phone string
 }
 
 func NewEnv() *Env {
@@ -90,8 +101,13 @@ func NewEnv() *Env {
 			MaxAttempts:  getEnvInt("OTP_MAX_ATTEMPTS", 3),
 		},
 		SuperAdmin: SuperAdmin{
-			Phone:    os.Getenv("SUPER_ADMIN_PHONE"),
-			Password: os.Getenv("SUPER_ADMIN_PASSWORD"),
+			Phone: os.Getenv("SUPER_ADMIN_PHONE"),
+		},
+		S3: S3{
+			Region:    os.Getenv("S3_REGION"),
+			AccessKey: os.Getenv("S3_ACCESS_KEY"),
+			SecretKey: os.Getenv("S3_SECRET_KEY"),
+			Endpoint:  os.Getenv("S3_ENDPOINT"),
 		},
 	}
 }

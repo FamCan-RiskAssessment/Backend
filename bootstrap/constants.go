@@ -6,6 +6,7 @@ type Constants struct {
 	Context      Context
 	RedisKey     RedisKey
 	Field        Field
+	BucketPath   BucketPath
 	Tag          Tag
 	SMSTemplates SMSTemplates
 	JWTKeysPath  JWTKeysPath
@@ -19,11 +20,15 @@ type Context struct {
 type RedisKey struct {
 }
 
+type BucketPath struct {
+}
+
 type Field struct {
 	User       string
 	Form       string
 	OTP        string
 	Role       string
+	Page       string
 	Permission string
 }
 
@@ -54,6 +59,7 @@ func NewConstants() *Constants {
 			Form:       "form",
 			OTP:        "otp",
 			Role:       "role",
+			Page:       "page",
 			Permission: "permission",
 		},
 		Tag: Tag{

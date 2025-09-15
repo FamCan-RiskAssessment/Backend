@@ -12,6 +12,7 @@ type Env struct {
 	Database   Database
 	Cache      Redis
 	SMSGateway SMSGateway
+	Pagination Pagination
 	OTP        OTP
 	SuperAdmin SuperAdmin
 }
@@ -38,6 +39,11 @@ type Redis struct {
 
 type SMSGateway struct {
 	APIKey string
+}
+
+type Pagination struct {
+	DefaultPage     int
+	DefaultPageSize int
 }
 
 type OTP struct {
@@ -72,6 +78,10 @@ func NewEnv() *Env {
 		},
 		SMSGateway: SMSGateway{
 			APIKey: os.Getenv("SMS_API_KEY"),
+		},
+		Pagination: Pagination{
+			DefaultPage:     getEnvInt("PAGINATION_DEFAULT_PAGE", 1),
+			DefaultPageSize: getEnvInt("PAGINATION_DEFAULT_PAGE_SIZE", 10),
 		},
 		OTP: OTP{
 			Length:       getEnvInt("OTP_LENGTH", 6),

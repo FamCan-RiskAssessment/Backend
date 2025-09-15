@@ -1,8 +1,12 @@
 package usecase
 
-import userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
+import (
+	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+)
 
 type UserService interface {
+	GetUserByID(userID uint) (*entity.User, error)
 	Login(loginInfo userdto.LoginRequest) error
 	VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest) (userdto.LoginResponse, error)
 	GetAllPermissions() ([]userdto.PermissionResponse, error)

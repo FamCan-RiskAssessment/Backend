@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"

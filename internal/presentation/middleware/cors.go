@@ -21,6 +21,16 @@ func (cm *CORSMiddleware) CORS() gin.HandlerFunc {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
+		// Add this to handle preflight requests properly
+		AllowOriginFunc: func(origin string) bool {
+			allowedOrigins := []string{"http://185.231.115.28:5173", "http://localhost:5173"}
+			for _, allowed := range allowedOrigins {
+				if origin == allowed {
+					return true
+				}
+			}
+			return false
+		},
 	}
 
 	return cors.New(corsConfig)

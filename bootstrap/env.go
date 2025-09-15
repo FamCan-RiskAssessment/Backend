@@ -47,8 +47,7 @@ type OTP struct {
 }
 
 type SuperAdmin struct {
-	Phone    string
-	Password string
+	Phone string
 }
 
 func NewEnv() *Env {
@@ -80,8 +79,7 @@ func NewEnv() *Env {
 			MaxAttempts:  getEnvInt("OTP_MAX_ATTEMPTS", 3),
 		},
 		SuperAdmin: SuperAdmin{
-			Phone:    os.Getenv("SUPER_ADMIN_PHONE"),
-			Password: os.Getenv("SUPER_ADMIN_PASSWORD"),
+			Phone: os.Getenv("SUPER_ADMIN_PHONE"),
 		},
 	}
 }

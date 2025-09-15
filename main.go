@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	ginEngine := gin.Default()
+	ginEngine := gin.New()
 
 	config := bootstrap.Run()
 

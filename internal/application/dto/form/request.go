@@ -7,7 +7,7 @@ type CreateFormRequest struct {
 	BirthMonth           string  `json:"birthMonth" binding:"required"`
 	BirthYear            uint    `json:"birthYear" binding:"required"`
 	Address              string  `json:"address" binding:"required"`
-	PostalCode           string  `json:"postalCode" binding:"required"`
+	PostalCode           uint    `json:"postalCode" binding:"required"`
 	SocialSecurityNumber uint    `gorm:"not null" binding:"required"`
 	Gender               string  `json:"gender" binding:"required"`
 	IsAtba               bool    `json:"isAtba"`
@@ -165,7 +165,7 @@ type UpdateFormRequest struct {
 	BirthMonth           *string  `json:"birthMonth,omitempty"`
 	BirthYear            *uint    `json:"birthYear,omitempty"`
 	Address              *string  `json:"address,omitempty"`
-	PostalCode           *string  `json:"postalCode,omitempty"`
+	PostalCode           *uint    `json:"postalCode,omitempty"`
 	SocialSecurityNumber *uint    `json:"socialSecurityNumber,omitempty"`
 	Gender               *string  `json:"gender,omitempty"`
 	IsAtba               *bool    `json:"isAtba,omitempty"`

@@ -33,7 +33,7 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 		BirthMonth           string  `json:"birthMonth" validate:"required"`
 		BirthYear            uint    `json:"birthYear" validate:"required"`
 		Address              string  `json:"address" validate:"required"`
-		PostalCode           string  `json:"postalCode" validate:"required"`
+		PostalCode           uint    `json:"postalCode" validate:"required"`
 		SocialSecurityNumber uint    `json:"socialSecurityNumber" validate:"required"`
 		Gender               string  `json:"gender" validate:"required"`
 		IsAtba               bool    `json:"isAtba"`
@@ -404,7 +404,7 @@ func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 		BirthMonth           *string  `json:"birthMonth,omitempty"`
 		BirthYear            *uint    `json:"birthYear,omitempty"`
 		Address              *string  `json:"address,omitempty"`
-		PostalCode           *string  `json:"postalCode,omitempty"`
+		PostalCode           *uint    `json:"postalCode,omitempty"`
 		SocialSecurityNumber *uint    `json:"socialSecurityNumber,omitempty"`
 		Gender               *string  `json:"gender,omitempty"`
 		IsAtba               *bool    `json:"isAtba,omitempty"`

@@ -15,7 +15,10 @@ func NewCorsMiddleware() *CORSMiddleware {
 
 func (cm *CORSMiddleware) CORS() gin.HandlerFunc {
 	corsConfig := cors.Config{
-		AllowAllOrigins:  true,
+		AllowOrigins: []string{
+			"http://185.231.115.28:5173",
+			"http://localhost:5173",
+		},
 		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "ngrok-skip-browser-warning"},
 		ExposeHeaders:    []string{"Content-Length"},

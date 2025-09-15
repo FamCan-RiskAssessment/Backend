@@ -13,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
 	postgres2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
@@ -20,6 +21,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -107,7 +109,7 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService)
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)))
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
 
@@ -127,6 +129,10 @@ func ProvideRDBConfig(container *bootstrap.Config) *bootstrap.Redis {
 
 func ProvideOTPConfig(container *bootstrap.Config) *bootstrap.OTP {
 	return &container.Env.OTP
+}
+
+func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.S3 {
+	return &container.Env.S3
 }
 
 func ProvideSMSGatewayConfig(container *bootstrap.Config) *bootstrap.SMSGateway {
@@ -163,6 +169,7 @@ var ProviderSet = wire.NewSet(
 	ProvideConstants,
 	ProvideRDBConfig,
 	ProvideOTPConfig,
+	ProvideStorageConfig,
 	ProvideSMSGatewayConfig,
 	ProvideSMSTemplates,
 	ProvideJWTKeysPath,

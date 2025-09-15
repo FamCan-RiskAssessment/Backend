@@ -6,6 +6,7 @@ type Constants struct {
 	Context      Context
 	RedisKey     RedisKey
 	Field        Field
+	BucketPath   BucketPath
 	Tag          Tag
 	SMSTemplates SMSTemplates
 	JWTKeysPath  JWTKeysPath
@@ -17,6 +18,9 @@ type Context struct {
 }
 
 type RedisKey struct {
+}
+
+type BucketPath struct {
 }
 
 type Field struct {

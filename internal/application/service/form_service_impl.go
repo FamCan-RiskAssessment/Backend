@@ -195,14 +195,14 @@ func (formService *FormService) entityToResponse(form *entity.Form) formdto.Form
 	}
 }
 
-func (formService *FormService) CreateForm(request formdto.CreateFormRequest) (formdto.CreateFormResponse, error) {
+func (formService *FormService) CreateForm(request formdto.CreateFormRequest) error {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
-		return formdto.CreateFormResponse{}, err
+		return err
 	}
 	if user == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
-		return formdto.CreateFormResponse{}, notFoundError
+		return notFoundError
 	}
 
 	form := &entity.Form{
@@ -365,15 +365,10 @@ func (formService *FormService) CreateForm(request formdto.CreateFormRequest) (f
 
 	err = formService.formRepository.CreateForm(formService.db, form)
 	if err != nil {
-		return formdto.CreateFormResponse{}, err
+		return err
 	}
 
-	response := formdto.CreateFormResponse{
-		Form:    formService.entityToResponse(form),
-		Message: "Form created successfully",
-	}
-
-	return response, nil
+	return nil
 }
 
 func (formService *FormService) GetForm(formID uint) (formdto.FormResponse, error) {
@@ -420,14 +415,14 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	return formResponses, count, nil
 }
 
-func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (formdto.FormResponse, error) {
+func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.FormResponse{}, err
+		return err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.FormResponse{}, notFoundError
+		return notFoundError
 	}
 
 	if request.Name != nil {
@@ -853,10 +848,10 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) (f
 
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
-		return formdto.FormResponse{}, err
+		return err
 	}
 
-	return formService.entityToResponse(form), nil
+	return nil
 }
 
 func (formService *FormService) DeleteForm(formID uint) error {

@@ -346,14 +346,14 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
 	}
 
-	response, err := formController.formService.CreateForm(request)
+	err := formController.formService.CreateForm(request)
 	if err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.createForm")
-	controller.Response(ctx, 201, message, response)
+	controller.Response(ctx, 201, message, nil)
 }
 
 func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
@@ -715,14 +715,14 @@ func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
 	}
 
-	response, err := formController.formService.UpdateForm(request)
+	err := formController.formService.UpdateForm(request)
 	if err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 200, message, response)
+	controller.Response(ctx, 200, message, nil)
 }
 
 func (formController *CustomerFormController) DeleteForm(ctx *gin.Context) {

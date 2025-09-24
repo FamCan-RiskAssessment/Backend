@@ -174,6 +174,7 @@ var Persian = map[string]interface{}{
 		"createForm":                "فرم شما با موفقیت ثبت شد.",
 		"updateForm":                "فرم شما با موفقیت به روز رسانی شد.",
 		"deleteForm":                "فرم شما با موفقیت حذف شد.",
+		"setPassword":               "پسورد شما با موفقیت تنظیم شد.",
 	},
 	"emailSubject": map[string]interface{}{
 		"emailConfirmation": "تأیید آدرس ایمیل شما",

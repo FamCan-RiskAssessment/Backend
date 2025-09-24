@@ -126,6 +126,23 @@ func (userService *UserService) VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest
 	}, nil
 }
 
+func (userService *UserService) SetPassword(request userdto.SetPasswordRequest) error {
+	user, err := userService.GetUserByID(request.UserID)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return notFoundError
+	}
+
+	user.Password = request.Password
+	if err := userService.userRepository.UpdateUser(userService.db, user); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (userService *UserService) FindUserPermissions(user *entity.User) ([]userdto.PermissionResponse, error) {
 	var permissions []userdto.PermissionResponse
 

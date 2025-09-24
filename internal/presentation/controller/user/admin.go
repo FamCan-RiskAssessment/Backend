@@ -169,3 +169,23 @@ func (userController *AdminUserController) UpdateUserRoles(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateUserRoles")
 	controller.Response(ctx, 200, message, nil)
 }
+
+func (userController *AdminUserController) SetPassword(ctx *gin.Context) {
+	type setPasswordParams struct {
+		UserID   uint   `uri:"userID" validate:"required"`
+		Password string `json:"password"`
+	}
+	params := controller.Validate[setPasswordParams](ctx)
+
+	userPasswordRequest := userdto.SetPasswordRequest{
+		UserID:   params.UserID,
+		Password: params.Password,
+	}
+	if err := userController.userService.SetPassword(userPasswordRequest); err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.setPassword")
+	controller.Response(ctx, 200, message, nil)
+}

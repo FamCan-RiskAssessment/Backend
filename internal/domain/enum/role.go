@@ -12,18 +12,21 @@ const (
 var rolePermissions = map[RoleName][]PermissionType{
 	SuperAdmin: {
 		PermissionAll,
+		PermissionSetPassword,
 	},
 	Supervisor: {
 		PermissionViewPatients,
 		PermissionCreatePatients,
 		PermissionUpdatePatients,
 		PermissionDeletePatients,
+		PermissionSetPassword,
 	},
 	Operator: {
 		PermissionViewPatients,
 		PermissionCreatePatients,
 		PermissionUpdatePatients,
 		PermissionDeletePatients,
+		PermissionSetPassword,
 	},
 	Patient: {
 		PermissionEnterData,

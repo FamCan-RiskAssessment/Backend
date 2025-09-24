@@ -36,3 +36,8 @@ type GetPermissionRolesRequest struct {
 	Offset       int
 	Limit        int
 }
+
+type SetPasswordRequest struct {
+	UserID   uint
+	Password string
+}

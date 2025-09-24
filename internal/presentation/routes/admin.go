@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
 	"github.com/gin-gonic/gin"
 )
@@ -33,6 +34,12 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		{
 			userRoles.GET("", app.Controllers.Admin.UserController.GetUserRoles)
 			userRoles.PUT("", app.Controllers.Admin.UserController.UpdateUserRoles)
+		}
+
+		password := accessManagement.Group("/users/:userID/password")
+		{
+			password.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionSetPassword}))
+			password.PUT("", app.Controllers.Admin.UserController.SetPassword)
 		}
 	}
 

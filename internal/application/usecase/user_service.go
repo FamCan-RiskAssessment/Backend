@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	GetUserByID(userID uint) (*entity.User, error)
 	Login(loginInfo userdto.LoginRequest) error
+	SetPassword(request userdto.SetPasswordRequest) error
 	VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest) (userdto.LoginResponse, error)
 	GetAllPermissions() ([]userdto.PermissionResponse, error)
 	GetPermissionRoles(request userdto.GetPermissionRolesRequest) ([]userdto.RoleResponse, error)

@@ -10,6 +10,11 @@ const (
 	PermissionUpdateOwnData
 	PermissionDeleteOwnData
 
+	PermissionViewPatients
+	PermissionCreatePatients
+	PermissionUpdatePatients
+	PermissionDeletePatients
+
 	PermissionViewUsers
 	PermissionCreateUsers
 	PermissionUpdateUsers
@@ -24,6 +29,7 @@ const (
 const (
 	CategoryGeneral PermissionCategory = iota + 1
 	CategoryDataEntry
+	CategoryPatientManagement
 	CategoryUserManagement
 )
 
@@ -33,6 +39,11 @@ var permissionCategories = map[PermissionType]PermissionCategory{
 	PermissionEnterData:     CategoryDataEntry,
 	PermissionUpdateOwnData: CategoryDataEntry,
 	PermissionDeleteOwnData: CategoryDataEntry,
+
+	PermissionViewPatients:   CategoryPatientManagement,
+	PermissionCreatePatients: CategoryPatientManagement,
+	PermissionUpdatePatients: CategoryPatientManagement,
+	PermissionDeletePatients: CategoryPatientManagement,
 
 	PermissionViewUsers:   CategoryUserManagement,
 	PermissionCreateUsers: CategoryUserManagement,
@@ -47,6 +58,11 @@ var permissionNames = map[PermissionType]string{
 	PermissionUpdateOwnData: "ویرایش داده خود",
 	PermissionDeleteOwnData: "حذف داده خود",
 
+	PermissionViewPatients:   "مشاهده بیماران",
+	PermissionCreatePatients: "ایجاد بیمار",
+	PermissionUpdatePatients: "ویرایش بیمار",
+	PermissionDeletePatients: "حذف بیمار",
+
 	PermissionViewUsers:   "مشاهده کاربران",
 	PermissionCreateUsers: "ایجاد کاربر",
 	PermissionUpdateUsers: "ویرایش کاربر",
@@ -59,9 +75,10 @@ var permissionNames = map[PermissionType]string{
 }
 
 var CategoryNames = map[PermissionCategory]string{
-	CategoryGeneral:        "عمومی",
-	CategoryDataEntry:      "درج داده",
-	CategoryUserManagement: "مدیریت کاربران",
+	CategoryGeneral:           "عمومی",
+	CategoryDataEntry:         "درج داده",
+	CategoryUserManagement:    "مدیریت کاربران",
+	CategoryPatientManagement: "مدیریت بیماران",
 }
 
 func (p PermissionType) String() string {
@@ -93,6 +110,11 @@ func GetAllPermissionTypes() []PermissionType {
 		PermissionUpdateOwnData,
 		PermissionDeleteOwnData,
 
+		PermissionViewPatients,
+		PermissionCreatePatients,
+		PermissionUpdatePatients,
+		PermissionDeletePatients,
+
 		PermissionViewUsers,
 		PermissionCreateUsers,
 		PermissionUpdateUsers,
@@ -109,6 +131,7 @@ func GetAllPermissionCategories() []PermissionCategory {
 	return []PermissionCategory{
 		CategoryGeneral,
 		CategoryDataEntry,
+		CategoryPatientManagement,
 		CategoryUserManagement,
 	}
 }

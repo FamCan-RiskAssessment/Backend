@@ -20,14 +20,15 @@ var rolePermissions = map[RoleName][]PermissionType{
 		PermissionDeletePatients,
 	},
 	Operator: {
+		PermissionViewPatients,
 		PermissionCreatePatients,
 		PermissionUpdatePatients,
 		PermissionDeletePatients,
 	},
 	Patient: {
+		PermissionEnterData,
 		PermissionUpdateOwnData,
 		PermissionDeleteOwnData,
-		PermissionUpdateOwnData,
 	},
 }
 

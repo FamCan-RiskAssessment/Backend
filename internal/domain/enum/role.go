@@ -4,11 +4,31 @@ type RoleName uint
 
 const (
 	SuperAdmin RoleName = iota + 1
+	Supervisor
+	Operator
+	Patient
 )
 
 var rolePermissions = map[RoleName][]PermissionType{
 	SuperAdmin: {
 		PermissionAll,
+	},
+	Supervisor: {
+		PermissionViewPatients,
+		PermissionCreatePatients,
+		PermissionUpdatePatients,
+		PermissionDeletePatients,
+	},
+	Operator: {
+		PermissionViewPatients,
+		PermissionCreatePatients,
+		PermissionUpdatePatients,
+		PermissionDeletePatients,
+	},
+	Patient: {
+		PermissionEnterData,
+		PermissionUpdateOwnData,
+		PermissionDeleteOwnData,
 	},
 }
 
@@ -22,6 +42,12 @@ func (role RoleName) String() string {
 	switch role {
 	case SuperAdmin:
 		return "سوپر ادمین"
+	case Supervisor:
+		return "مدیر"
+	case Operator:
+		return "اپراتور"
+	case Patient:
+		return "بیمار"
 	}
 	return "unknown"
 }
@@ -29,5 +55,8 @@ func (role RoleName) String() string {
 func GetAllRoleNames() []RoleName {
 	return []RoleName{
 		SuperAdmin,
+		Supervisor,
+		Operator,
+		Patient,
 	}
 }

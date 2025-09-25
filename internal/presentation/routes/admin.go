@@ -43,6 +43,11 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		}
 	}
 
+	userManagement := routerGroup.Group("/users")
+	{
+		userManagement.GET("", app.Controllers.Admin.UserController.GetUsers)
+	}
+
 	forms := routerGroup.Group("/forms")
 	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	{

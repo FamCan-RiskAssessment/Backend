@@ -3,6 +3,7 @@ package postgres
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"gorm.io/gorm"
 )
@@ -214,4 +215,15 @@ func (repo *UserRepository) FindRolesByPermission(db database.Database, permissi
 		return nil, result.Error
 	}
 	return roles, nil
+}
+
+func (repo *UserRepository) FindUsers(db database.Database, options *postgres.QueryOptions) ([]*entity.User, int64, error) {
+	var users []*entity.User
+	query := db.GetDB()
+	query = applyQueryOptions(query, options)
+	result := query.Find(&users)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+	return users, result.RowsAffected, nil
 }

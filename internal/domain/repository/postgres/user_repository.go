@@ -32,4 +32,5 @@ type UserRepository interface {
 	ReplaceUserRoles(db database.Database, user *entity.User, roles []entity.Role) error
 	DeleteRole(db database.Database, id uint) error
 	FindRolesByPermission(db database.Database, permissionID uint) ([]*entity.Role, error)
+	FindUsers(db database.Database, options *QueryOptions) ([]*entity.User, int64, error)
 }

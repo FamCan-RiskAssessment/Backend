@@ -421,6 +421,25 @@ func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateU
 	return nil
 }
 
+func (userService *UserService) GetUsers(request userdto.GetUsersListRequest) ([]userdto.UserResponse, int64, error) {
+	options := postgres.NewQueryOptions().
+		WithPagination(request.Limit, request.Offset)
+
+	users, count, err := userService.userRepository.FindUsers(userService.db, options)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	userResponses := make([]userdto.UserResponse, len(users))
+	for i, user := range users {
+		userResponses[i] = userdto.UserResponse{
+			ID:    user.ID,
+			Phone: user.Phone,
+		}
+	}
+	return userResponses, count, nil
+}
+
 func (userService *UserService) GetPermissionRoles(request userdto.GetPermissionRolesRequest) ([]userdto.RoleResponse, error) {
 	permission, err := userService.userRepository.FindPermissionByID(userService.db, request.PermissionID)
 	if err != nil {

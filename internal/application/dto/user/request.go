@@ -26,9 +26,8 @@ type UpdateUserRolesRequest struct {
 }
 
 type GetUsersListRequest struct {
-	Statuses []uint
-	Offset   int
-	Limit    int
+	Offset int
+	Limit  int
 }
 
 type GetPermissionRolesRequest struct {

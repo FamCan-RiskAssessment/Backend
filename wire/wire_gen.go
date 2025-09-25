@@ -66,10 +66,10 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
 	}
-	adminUserController := user.NewAdminUserController(constants, userService)
+	pagination := ProvidePagination(config)
+	adminUserController := user.NewAdminUserController(constants, userService, pagination)
 	formRepository := postgres.NewFormRepository()
 	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
-	pagination := ProvidePagination(config)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,

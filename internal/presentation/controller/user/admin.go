@@ -11,16 +11,41 @@ import (
 type AdminUserController struct {
 	constants   *bootstrap.Constants
 	userService usecase.UserService
+	pagination  *bootstrap.Pagination
 }
 
 func NewAdminUserController(
 	constants *bootstrap.Constants,
 	userService usecase.UserService,
+	pagination *bootstrap.Pagination,
 ) *AdminUserController {
 	return &AdminUserController{
 		constants:   constants,
 		userService: userService,
+		pagination:  pagination,
 	}
+}
+
+func (userController *AdminUserController) GetUsers(ctx *gin.Context) {
+	type usersParams struct {
+		Page     int `form:"page"`
+		PageSize int `form:"pageSize"`
+	}
+	params := controller.Validate[usersParams](ctx)
+
+	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, userController.pagination.DefaultPage, userController.pagination.DefaultPageSize)
+
+	request := userdto.GetUsersListRequest{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	users, count, err := userController.userService.GetUsers(request)
+	if err != nil {
+		panic(err)
+	}
+	data := controller.NewPaginatedResponse(users, count, offset, limit)
+	controller.Response(ctx, 200, "", data)
 }
 
 func (userController *AdminUserController) GetPermissionsList(ctx *gin.Context) {

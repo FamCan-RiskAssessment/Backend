@@ -30,7 +30,7 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -49,7 +49,7 @@ services:
     ports:
       - ${RDB_PORT}:${RDB_PORT}
     volumes:
-      - ./rdb-data:/var/lib/redis/data
+      - rdb-data:/var/lib/redis/data
     deploy:
       resources:
         limits:
@@ -58,3 +58,7 @@ services:
         reservations:
           cpus: "0.1"
           memory: 64M
+
+volumes:
+  db-data:
+  rdb-data:

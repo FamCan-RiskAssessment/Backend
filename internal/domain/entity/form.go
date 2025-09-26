@@ -13,8 +13,8 @@ type Form struct {
 	BirthMonth           string  `gorm:"type:varchar(10);not null"`
 	BirthYear            uint    `gorm:"not null"`
 	Address              string  `gorm:"type:text;not null"`
-	PostalCode           uint    `gorm:"not null"`
-	SocialSecurityNumber uint    `gorm:"not null"`
+	PostalCode           string  `gorm:"not null"`
+	SocialSecurityNumber string  `gorm:"not null"`
 	Gender               string  `gorm:"type:varchar(10);not null"`
 	IsAtba               bool    `gorm:"not null;default:false"`
 	Height               float64 `gorm:"type:decimal(5,2);not null"`

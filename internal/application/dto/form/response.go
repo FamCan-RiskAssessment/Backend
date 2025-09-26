@@ -10,8 +10,8 @@ type FormResponse struct {
 	BirthMonth           string  `json:"birthMonth"`
 	BirthYear            uint    `json:"birthYear"`
 	Address              string  `json:"address"`
-	PostalCode           uint    `json:"postalCode"`
-	SocialSecurityNumber uint    `gorm:"not null"`
+	PostalCode           string  `json:"postalCode"`
+	SocialSecurityNumber string  `json:"socialSecurityNumber"`
 	Gender               string  `json:"gender"`
 	IsAtba               bool    `json:"isAtba"`
 	Height               float64 `json:"height"`

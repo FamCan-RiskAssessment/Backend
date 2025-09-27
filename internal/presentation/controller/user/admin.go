@@ -194,3 +194,46 @@ func (userController *AdminUserController) UpdateUserRoles(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateUserRoles")
 	controller.Response(ctx, 200, message, nil)
 }
+
+func (userController *AdminUserController) SetPassword(ctx *gin.Context) {
+	type setPasswordParams struct {
+		Password string `json:"password"`
+	}
+	params := controller.Validate[setPasswordParams](ctx)
+
+	userID, _ := ctx.Get(userController.constants.Context.ID)
+	userPasswordRequest := userdto.SetPasswordRequest{
+		UserID:   userID.(uint),
+		Password: params.Password,
+	}
+	if err := userController.userService.SetPassword(userPasswordRequest); err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.setPassword")
+	controller.Response(ctx, 200, message, nil)
+}
+
+func (userController *AdminUserController) LoginWithPassword(ctx *gin.Context) {
+	type loginWithPasswordParams struct {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+	}
+	params := controller.Validate[loginWithPasswordParams](ctx)
+
+	loginInfo := userdto.LoginRequest{
+		Phone:    params.Phone,
+		Password: params.Password,
+	}
+
+	response, err := userController.userService.LoginWithPassword(loginInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.login")
+	controller.Response(ctx, 200, message, response)
+
+}

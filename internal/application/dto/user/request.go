@@ -1,7 +1,8 @@
 package userdto
 
 type LoginRequest struct {
-	Phone string
+	Phone    string
+	Password string
 }
 
 type VerifyOTPRequest struct {
@@ -34,4 +35,9 @@ type GetPermissionRolesRequest struct {
 	PermissionID uint
 	Offset       int
 	Limit        int
+}
+
+type SetPasswordRequest struct {
+	UserID   uint
+	Password string
 }

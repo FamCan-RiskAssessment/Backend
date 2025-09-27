@@ -17,7 +17,7 @@ func Run(ginEngine *gin.Engine, app *wire.Application) {
 
 func registerAdminRoutes(ginEngine *gin.RouterGroup, app *wire.Application) {
 	ginEngine.Use(app.Middlewares.Auth.AuthRequired)
-	ginEngine.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionAll}))
+	ginEngine.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionSetPassword}))
 	SetupAdminRoutes(ginEngine, app)
 }
 

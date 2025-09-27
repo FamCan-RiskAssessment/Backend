@@ -6,6 +6,8 @@ type PermissionCategory uint
 const (
 	PermissionAll PermissionType = iota + 1
 
+	PermissionSetPassword
+
 	PermissionEnterData
 	PermissionUpdateOwnData
 	PermissionDeleteOwnData
@@ -31,6 +33,7 @@ const (
 	CategoryDataEntry
 	CategoryPatientManagement
 	CategoryUserManagement
+	CategoryAccessManagement
 )
 
 var permissionCategories = map[PermissionType]PermissionCategory{
@@ -49,6 +52,11 @@ var permissionCategories = map[PermissionType]PermissionCategory{
 	PermissionCreateUsers: CategoryUserManagement,
 	PermissionUpdateUsers: CategoryUserManagement,
 	PermissionDeleteUsers: CategoryUserManagement,
+
+	PermissionViewRoles:   CategoryAccessManagement,
+	PermissionCreateRoles: CategoryAccessManagement,
+	PermissionUpdateRoles: CategoryAccessManagement,
+	PermissionDeleteRoles: CategoryAccessManagement,
 }
 
 var permissionNames = map[PermissionType]string{
@@ -72,6 +80,8 @@ var permissionNames = map[PermissionType]string{
 	PermissionCreateRoles: "ایجاد نقش",
 	PermissionUpdateRoles: "ویرایش نقش",
 	PermissionDeleteRoles: "حذف نقش",
+
+	PermissionSetPassword: "تنظیم پسورد",
 }
 
 var CategoryNames = map[PermissionCategory]string{
@@ -79,6 +89,7 @@ var CategoryNames = map[PermissionCategory]string{
 	CategoryDataEntry:         "درج داده",
 	CategoryUserManagement:    "مدیریت کاربران",
 	CategoryPatientManagement: "مدیریت بیماران",
+	CategoryAccessManagement:  "مدیریت دسترسی",
 }
 
 func (p PermissionType) String() string {
@@ -124,6 +135,8 @@ func GetAllPermissionTypes() []PermissionType {
 		PermissionCreateRoles,
 		PermissionUpdateRoles,
 		PermissionDeleteRoles,
+
+		PermissionSetPassword,
 	}
 }
 
@@ -133,5 +146,6 @@ func GetAllPermissionCategories() []PermissionCategory {
 		CategoryDataEntry,
 		CategoryPatientManagement,
 		CategoryUserManagement,
+		CategoryAccessManagement,
 	}
 }

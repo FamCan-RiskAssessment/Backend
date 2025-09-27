@@ -42,6 +42,10 @@ func (userRepository *UserRepository) CreateUser(db database.Database, user *ent
 	return db.GetDB().Create(user).Error
 }
 
+func (userRepository *UserRepository) UpdateUser(db database.Database, user *entity.User) error {
+	return db.GetDB().Save(&user).Error
+}
+
 func (userRepository *UserRepository) FindUserRoles(db database.Database, user *entity.User) error {
 	return db.GetDB().Preload("Roles").First(&user).Error
 }

@@ -39,7 +39,9 @@ func (userController *GeneralUserController) Login(ctx *gin.Context) {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "کد پیامکی ارسال شد", nil)
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.sendOTP")
+	controller.Response(ctx, 200, message, nil)
 }
 
 func (userController *GeneralUserController) VerifyOTP(ctx *gin.Context) {
@@ -60,6 +62,7 @@ func (userController *GeneralUserController) VerifyOTP(ctx *gin.Context) {
 		panic(err)
 	}
 
-	controller.Response(ctx, 200, "شما با موفقیت وارد شدید", userInfo)
-
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.login")
+	controller.Response(ctx, 200, message, userInfo)
 }

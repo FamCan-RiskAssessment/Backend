@@ -10,5 +10,6 @@ func SetupGeneralRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	{
 		auth.POST("/login", app.Controllers.General.UserController.Login)
 		auth.POST("/verify-otp", app.Controllers.General.UserController.VerifyOTP)
+		auth.POST("/login-with-password", app.Controllers.Admin.UserController.LoginWithPassword)
 	}
 }

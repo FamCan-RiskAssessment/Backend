@@ -21,4 +21,5 @@ type UserService interface {
 	GetUserRoles(userID uint) ([]userdto.RoleResponse, error)
 	UpdateUserRoles(request userdto.UpdateUserRolesRequest) error
 	GetUsers(request userdto.GetUsersListRequest) ([]userdto.UserResponse, int64, error)
+	LoginWithPassword(loginInfo userdto.LoginRequest) (userdto.LoginResponse, error)
 }

@@ -143,6 +143,40 @@ func (userService *UserService) SetPassword(request userdto.SetPasswordRequest) 
 	return nil
 }
 
+func (userService *UserService) LoginWithPassword(loginInfo userdto.LoginRequest) (userdto.LoginResponse, error) {
+
+	user, err := userService.userRepository.FindUserByPhone(userService.db, loginInfo.Phone)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return userdto.LoginResponse{}, notFoundError
+	}
+
+	if user.Password != loginInfo.Password {
+		authError := exception.NewInvalidCredentialsError("phone and password not match", nil)
+		return userdto.LoginResponse{}, authError
+	}
+
+	accessToken, refreshToken, err := userService.jwtService.GenerateToken(user.ID)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
+	permissions, err := userService.FindUserPermissions(user)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
+	return userdto.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		Permissions:  permissions,
+	}, nil
+}
+
 func (userService *UserService) FindUserPermissions(user *entity.User) ([]userdto.PermissionResponse, error) {
 	var permissions []userdto.PermissionResponse
 

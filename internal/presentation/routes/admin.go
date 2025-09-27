@@ -36,7 +36,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			userRoles.PUT("", app.Controllers.Admin.UserController.UpdateUserRoles)
 		}
 
-		password := accessManagement.Group("/users/:userID/password")
+		password := accessManagement.Group("/users/password")
 		{
 			password.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionSetPassword}))
 			password.PUT("", app.Controllers.Admin.UserController.SetPassword)

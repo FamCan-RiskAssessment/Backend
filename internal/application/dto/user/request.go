@@ -1,7 +1,8 @@
 package userdto
 
 type LoginRequest struct {
-	Phone string
+	Phone    string
+	Password string
 }
 
 type VerifyOTPRequest struct {

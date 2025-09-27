@@ -47,6 +47,10 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	{
 		userManagement.GET("", app.Controllers.Admin.UserController.GetUsers)
 	}
+	auth := routerGroup.Group("/auth")
+	{
+		auth.POST("/login-with-password", app.Controllers.Admin.UserController.LoginWithPassword)
+	}
 
 	forms := routerGroup.Group("/forms")
 	// forms.Use(app.Middlewares.Auth.AuthRequired)

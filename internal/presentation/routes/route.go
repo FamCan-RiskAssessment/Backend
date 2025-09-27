@@ -7,6 +7,7 @@ import (
 )
 
 func Run(ginEngine *gin.Engine, app *wire.Application) {
+	ginEngine.Use(gin.Logger())
 	ginEngine.Use(app.Middlewares.Cors.CORS())
 	ginEngine.Use(app.Middlewares.Localization.Localization)
 	ginEngine.Use(app.Middlewares.Recovery.Recovery)

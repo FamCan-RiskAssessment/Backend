@@ -2,6 +2,7 @@ package localization
 
 var Persian = map[string]interface{}{
 	"OTP":                 "رمز یکبار مصرف",
+	"form":                "فرم",
 	"firstName":           "نام",
 	"lastName":            "نام خانوادگی",
 	"phone":               "شماره تماس",
@@ -105,6 +106,8 @@ var Persian = map[string]interface{}{
 		"deleteForm":                "فرم شما با موفقیت حذف شد.",
 		"setPassword":               "پسورد شما با موفقیت تنظیم شد.",
 		"sendOTP":                   "کد پیامکی ارسال شد.",
+		"acceptForm":                "فرم شما با موفقیت قبول شد.",
+		"rejectForm":                "فرم شما با موفقیت رد شد.",
 	},
 	"emailSubject": map[string]interface{}{
 		"emailConfirmation": "تأیید آدرس ایمیل شما",

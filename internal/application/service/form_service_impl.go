@@ -5,6 +5,7 @@ import (
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
@@ -34,6 +35,7 @@ func NewFormService(
 func (formService *FormService) entityToResponse(form *entity.Form) formdto.FormResponse {
 	return formdto.FormResponse{
 		ID:                   form.ID,
+		Status:               form.Status.String(),
 		UserID:               form.UserID,
 		Name:                 form.Name,
 		BirthDay:             form.BirthDay,
@@ -207,6 +209,7 @@ func (formService *FormService) CreateForm(request formdto.CreateFormRequest) er
 
 	form := &entity.Form{
 		UserID:               request.UserID,
+		Status:               enum.FormStatusPending,
 		Name:                 request.Name,
 		BirthDay:             request.BirthDay,
 		BirthMonth:           request.BirthMonth,
@@ -889,4 +892,44 @@ func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.FormRe
 	}
 
 	return formResponses, count, nil
+}
+
+func (formService *FormService) AcceptForm(formID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	form.Status = enum.FormStatusApproved
+	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) RejectForm(formID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	form.Status = enum.FormStatusRejected
+	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

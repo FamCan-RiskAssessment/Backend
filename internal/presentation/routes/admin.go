@@ -55,4 +55,11 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		forms.GET("/:formID", app.Controllers.Admin.FormController.GetForm)
 		forms.DELETE("/:formID", app.Controllers.Admin.FormController.DeleteForm)
 	}
+
+	formManagement := routerGroup.Group("/forms")
+	{
+		formManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryFormManagement)}))
+		formManagement.PUT("/:formID/accept", app.Controllers.Admin.FormController.AcceptForm)
+		formManagement.PUT("/:formID/reject", app.Controllers.Admin.FormController.RejectForm)
+	}
 }

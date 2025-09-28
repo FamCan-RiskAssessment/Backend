@@ -26,6 +26,12 @@ const (
 	PermissionCreateRoles
 	PermissionUpdateRoles
 	PermissionDeleteRoles
+
+	PermissionViewForms
+	PermissionCreateForms
+	PermissionUpdateForms
+	PermissionDeleteForms
+	PermissionHandleForms
 )
 
 const (
@@ -34,6 +40,7 @@ const (
 	CategoryPatientManagement
 	CategoryUserManagement
 	CategoryAccessManagement
+	CategoryFormManagement
 )
 
 var permissionCategories = map[PermissionType]PermissionCategory{
@@ -57,6 +64,12 @@ var permissionCategories = map[PermissionType]PermissionCategory{
 	PermissionCreateRoles: CategoryAccessManagement,
 	PermissionUpdateRoles: CategoryAccessManagement,
 	PermissionDeleteRoles: CategoryAccessManagement,
+
+	PermissionViewForms:   CategoryFormManagement,
+	PermissionCreateForms: CategoryFormManagement,
+	PermissionUpdateForms: CategoryFormManagement,
+	PermissionDeleteForms: CategoryFormManagement,
+	PermissionHandleForms: CategoryFormManagement,
 }
 
 var permissionNames = map[PermissionType]string{
@@ -82,6 +95,12 @@ var permissionNames = map[PermissionType]string{
 	PermissionDeleteRoles: "حذف نقش",
 
 	PermissionSetPassword: "تنظیم پسورد",
+
+	PermissionViewForms:   "مشاهده فرم ها",
+	PermissionCreateForms: "ایجاد فرم",
+	PermissionUpdateForms: "ویرایش فرم",
+	PermissionDeleteForms: "حذف فرم",
+	PermissionHandleForms: "مدیریت فرم ها",
 }
 
 var CategoryNames = map[PermissionCategory]string{
@@ -90,6 +109,7 @@ var CategoryNames = map[PermissionCategory]string{
 	CategoryUserManagement:    "مدیریت کاربران",
 	CategoryPatientManagement: "مدیریت بیماران",
 	CategoryAccessManagement:  "مدیریت دسترسی",
+	CategoryFormManagement:    "مدیریت فرم ها",
 }
 
 func (p PermissionType) String() string {
@@ -136,6 +156,12 @@ func GetAllPermissionTypes() []PermissionType {
 		PermissionUpdateRoles,
 		PermissionDeleteRoles,
 
+		PermissionViewForms,
+		PermissionCreateForms,
+		PermissionUpdateForms,
+		PermissionDeleteForms,
+		PermissionHandleForms,
+
 		PermissionSetPassword,
 	}
 }
@@ -147,5 +173,6 @@ func GetAllPermissionCategories() []PermissionCategory {
 		CategoryPatientManagement,
 		CategoryUserManagement,
 		CategoryAccessManagement,
+		CategoryFormManagement,
 	}
 }

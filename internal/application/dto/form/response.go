@@ -4,6 +4,7 @@ import "time"
 
 type FormResponse struct {
 	ID                   uint    `json:"id"`
+	Status               string  `json:"status"`
 	UserID               uint    `json:"user_id"`
 	Name                 string  `json:"name"`
 	BirthDay             uint    `json:"birthDay"`

@@ -9,6 +9,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
@@ -70,6 +71,16 @@ func (userService *UserService) Login(loginInfo userdto.LoginRequest) error {
 		err = userService.userRepository.CreateUser(userService.db, user)
 		if err != nil {
 			return err
+		}
+		patientRole, err := userService.userRepository.FindRoleByName(userService.db, enum.Patient.String())
+		if err != nil {
+			return err
+		}
+		if patientRole != nil {
+			err = userService.userRepository.AssignRoleToUser(userService.db, user, patientRole)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

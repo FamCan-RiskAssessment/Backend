@@ -9,4 +9,6 @@ type FormService interface {
 	UpdateForm(request formdto.UpdateFormRequest) error
 	DeleteForm(formID uint) error
 	GetAllForms(offset, limit int) ([]formdto.FormResponse, int64, error)
+	AcceptForm(formID uint) error
+	RejectForm(formID uint) error
 }

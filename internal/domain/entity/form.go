@@ -1,11 +1,13 @@
 package entity
 
 import (
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type Form struct {
 	database.Model
+	Status               enum.FormStatus
 	UserID               uint    `gorm:"not null;index"`
 	User                 User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	Name                 string  `gorm:"type:varchar(255);not null"`

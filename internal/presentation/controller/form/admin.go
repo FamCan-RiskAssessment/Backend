@@ -73,3 +73,35 @@ func (formController *AdminFormController) DeleteForm(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.deleteForm")
 	controller.Response(ctx, 200, message, nil)
 }
+
+func (formController *AdminFormController) AcceptForm(ctx *gin.Context) {
+	type AcceptFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[AcceptFormParams](ctx)
+
+	err := formController.formService.AcceptForm(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.acceptForm")
+	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *AdminFormController) RejectForm(ctx *gin.Context) {
+	type RejectFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[RejectFormParams](ctx)
+
+	err := formController.formService.RejectForm(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.rejectForm")
+	controller.Response(ctx, 200, message, nil)
+}

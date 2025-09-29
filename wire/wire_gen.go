@@ -86,8 +86,10 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	}
 	superAdmin := ProvideSuperAdminCredentials(config)
 	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase)
+	dummySeeder := seed.NewDummySeeder(postgresDatabase, userRepository, formRepository)
 	seeds := &Seeds{
-		RoleSeeder: roleSeeder,
+		RoleSeeder:  roleSeeder,
+		DummySeeder: dummySeeder,
 	}
 	application := NewApplication(wireDatabase, middlewares, controllers, seeds)
 	return application, nil
@@ -113,7 +115,7 @@ var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTrans
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
 
-var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, wire.Struct(new(Seeds), "*"))
+var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, seed.NewDummySeeder, wire.Struct(new(Seeds), "*"))
 
 func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
@@ -210,7 +212,8 @@ type Middlewares struct {
 }
 
 type Seeds struct {
-	RoleSeeder *seed.RoleSeeder
+	RoleSeeder  *seed.RoleSeeder
+	DummySeeder *seed.DummySeeder
 }
 
 type Application struct {

@@ -28,6 +28,7 @@ func main() {
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()
+	app.Seeds.DummySeeder.SeedDummy()
 
 	routes.Run(ginEngine, app)
 

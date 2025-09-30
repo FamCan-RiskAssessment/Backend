@@ -875,13 +875,13 @@ func (formService *FormService) DeleteForm(formID uint) error {
 	return nil
 }
 
-func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.FormResponse, int64, error) {
-	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit)
+func (formService *FormService) GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.FormResponse, int64, error) {
+	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllForms(formService.db)
+	count, err := formService.formRepository.CountAllForms(formService.db, filters)
 	if err != nil {
 		return nil, 0, err
 	}

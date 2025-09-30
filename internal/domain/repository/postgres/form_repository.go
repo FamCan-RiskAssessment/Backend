@@ -12,6 +12,15 @@ type FormRepository interface {
 	CountFormsByUserID(db database.Database, userID uint) (int64, error)
 	UpdateForm(db database.Database, form *entity.Form) error
 	DeleteForm(db database.Database, id uint) error
-	FindAllForms(db database.Database, offset, limit int) ([]*entity.Form, error)
-	CountAllForms(db database.Database) (int64, error)
+	FindAllForms(db database.Database, offset, limit int, filters *FormFilters) ([]*entity.Form, error)
+	CountAllForms(db database.Database, filters *FormFilters) (int64, error)
+}
+
+type FormFilters struct {
+	Status        *uint
+	Gender        *string
+	BirthYear     *uint
+	DrinksAlcohol *bool
+	SmokingNow    *bool
+	Cancer        *bool
 }

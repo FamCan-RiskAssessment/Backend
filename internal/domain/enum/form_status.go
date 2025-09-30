@@ -6,6 +6,7 @@ const (
 	FormStatusPending FormStatus = iota + 1
 	FormStatusApproved
 	FormStatusRejected
+	FormStatusInComplete
 )
 
 func (fs FormStatus) String() string {
@@ -16,6 +17,8 @@ func (fs FormStatus) String() string {
 		return "قبول شده"
 	case FormStatusRejected:
 		return "رد شده"
+	case FormStatusInComplete:
+		return "تکمیل نشده"
 	}
 	return "unknown"
 }
@@ -25,5 +28,6 @@ func GetAllFormStatuses() []FormStatus {
 		FormStatusPending,
 		FormStatusApproved,
 		FormStatusRejected,
+		FormStatusInComplete,
 	}
 }

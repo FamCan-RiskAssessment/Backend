@@ -7,6 +7,7 @@ const (
 	FormStatusApproved
 	FormStatusRejected
 	FormStatusInComplete
+	FormStatusReady
 )
 
 func (fs FormStatus) String() string {
@@ -19,6 +20,8 @@ func (fs FormStatus) String() string {
 		return "رد شده"
 	case FormStatusInComplete:
 		return "تکمیل نشده"
+	case FormStatusReady:
+		return "ارسال شده"
 	}
 	return "unknown"
 }
@@ -29,5 +32,6 @@ func GetAllFormStatuses() []FormStatus {
 		FormStatusApproved,
 		FormStatusRejected,
 		FormStatusInComplete,
+		FormStatusReady,
 	}
 }

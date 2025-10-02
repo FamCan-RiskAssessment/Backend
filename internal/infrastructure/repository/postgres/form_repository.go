@@ -21,6 +21,18 @@ func (r *FormRepository) CreateBasicInfo(db database.Database, basicInfo *entity
 	return db.GetDB().Create(basicInfo).Error
 }
 
+func (r *FormRepository) FindBasicInfoByFormID(db database.Database, formID uint) (*entity.BasicInfo, error) {
+	var info entity.BasicInfo
+	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &info, nil
+}
+
 func (r *FormRepository) FindFormByID(db database.Database, id uint) (*entity.Form, error) {
 	var form entity.Form
 	err := db.GetDB().Preload("User").First(&form, id).Error
@@ -52,7 +64,34 @@ func (r *FormRepository) UpdateForm(db database.Database, form *entity.Form) err
 }
 
 func (r *FormRepository) DeleteForm(db database.Database, id uint) error {
-	return db.GetDB().Delete(&entity.Form{}, id).Error
+	return db.GetDB().Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("form_id = ?", id).Delete(&entity.BasicInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.GeneralHealthInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.MamoGraphyInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.CancerInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.FamilyCancerInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.ContactInfo{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.LungCancerInfo{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Delete(&entity.Form{}, id).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func (r *FormRepository) FindAllForms(db database.Database, offset, limit int) ([]*entity.Form, error) {

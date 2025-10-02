@@ -92,20 +92,6 @@ func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", data)
 }
 
-func (formController *CustomerFormController) GetForm(ctx *gin.Context) {
-	type GetFormParams struct {
-		FormID uint `uri:"formID" validate:"required"`
-	}
-	params := controller.Validate[GetFormParams](ctx)
-
-	response, err := formController.formService.GetForm(params.FormID)
-	if err != nil {
-		panic(err)
-	}
-
-	controller.Response(ctx, 200, "", response)
-}
-
 func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 	type UpdateFormParams struct {
 		FormID               uint     `json:"form_id" validate:"required"`
@@ -549,4 +535,126 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{Message: message})
+}
+
+func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context) {
+	type ChangeFormStatusParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[ChangeFormStatusParams](ctx)
+
+	request := formdto.ChangeFormStatusRequest{
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.ChangeFormStatus(request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.changeFormStatus")
+	response.Message = message
+	controller.Response(ctx, 200, message, response)
+}
+
+func (formController *CustomerFormController) GetBasicForm(ctx *gin.Context) {
+	type GetBasicFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetBasicFormParams](ctx)
+
+	response, err := formController.formService.GetBasicForm(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+func (formController *CustomerFormController) GetGeneralHealth(ctx *gin.Context) {
+	type GetGeneralHealthParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetGeneralHealthParams](ctx)
+
+	response, err := formController.formService.GetGeneralHealth(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+func (formController *CustomerFormController) GetMamography(ctx *gin.Context) {
+	type GetMamographyParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetMamographyParams](ctx)
+
+	response, err := formController.formService.GetMamography(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+func (formController *CustomerFormController) GetCancer(ctx *gin.Context) {
+	type GetCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetCancerParams](ctx)
+
+	response, err := formController.formService.GetCancer(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+func (formController *CustomerFormController) GetFamilyCancer(ctx *gin.Context) {
+	type GetFamilyCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetFamilyCancerParams](ctx)
+
+	response, err := formController.formService.GetFamilyCancer(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+func (formController *CustomerFormController) GetContact(ctx *gin.Context) {
+	type GetContactParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetContactParams](ctx)
+
+	response, err := formController.formService.GetContact(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
+func (formController *CustomerFormController) GetLungCancer(ctx *gin.Context) {
+	type GetLungCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetLungCancerParams](ctx)
+
+	response, err := formController.formService.GetLungCancer(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
 }

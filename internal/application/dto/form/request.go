@@ -211,3 +211,7 @@ type UpsertLungCancerRequest struct {
 	SecondhandSmoke           bool    `json:"secondhandSmoke"`
 	SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation,omitempty"`
 }
+
+type ChangeFormStatusRequest struct {
+	FormID uint `json:"form_id" binding:"required"`
+}

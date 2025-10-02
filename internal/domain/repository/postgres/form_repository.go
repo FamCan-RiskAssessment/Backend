@@ -8,6 +8,7 @@ import (
 type FormRepository interface {
 	CreateForm(db database.Database, form *entity.Form) error
 	CreateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
+	FindBasicInfoByFormID(db database.Database, formID uint) (*entity.BasicInfo, error)
 	FindFormByID(db database.Database, id uint) (*entity.Form, error)
 	FindFormsByUserID(db database.Database, userID uint, options *QueryOptions) ([]*entity.Form, error)
 	CountFormsByUserID(db database.Database, userID uint) (int64, error)

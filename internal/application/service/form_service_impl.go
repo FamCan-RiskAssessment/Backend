@@ -32,170 +32,6 @@ func NewFormService(
 	}
 }
 
-func (formService *FormService) entityToResponse(form *entity.Form) formdto.FormResponse {
-	return formdto.FormResponse{
-		ID:                   form.ID,
-		Status:               form.Status.String(),
-		UserID:               form.UserID,
-		Name:                 form.Name,
-		BirthDay:             form.BirthDay,
-		BirthMonth:           form.BirthMonth,
-		BirthYear:            form.BirthYear,
-		Address:              form.Address,
-		PostalCode:           form.PostalCode,
-		SocialSecurityNumber: form.SocialSecurityNumber,
-		Gender:               form.Gender,
-		IsAtba:               form.IsAtba,
-		Height:               form.Height,
-		Weight:               form.Weight,
-
-		DrinksAlcohol:             form.DrinksAlcohol,
-		CupsPerWeek:               form.CupsPerWeek,
-		LastMonthSabzijatMeal:     form.LastMonthSabzijatMeal,
-		LastMonthSabzijatWeight:   form.LastMonthSabzijatWeight,
-		MediumActivityMonthInYear: form.MediumActivityMonthInYear,
-		MediumActivityHourInWeek:  form.MediumActivityHourInWeek,
-		HardActivityMonthInYear:   form.HardActivityMonthInYear,
-		HardActivityHourInWeek:    form.HardActivityHourInWeek,
-		SmokeAtLeast100:           form.SmokeAtLeast100,
-		SmokingAge:                form.SmokingAge,
-		SmokingNow:                form.SmokingNow,
-		LeaveSmokingAge:           form.LeaveSmokingAge,
-		CountSmokingDaily:         form.CountSmokingDaily,
-		CountGheliandaily:         form.CountGheliandaily,
-		CountSmokingDailyPast:     form.CountSmokingDailyPast,
-		CountGheliandailyPast:     form.CountGheliandailyPast,
-
-		GhaedeAge:                    form.GhaedeAge,
-		HasChildren:                  form.HasChildren,
-		NumberOfChildren:             form.NumberOfChildren,
-		AgeOfFirstBirth:              form.AgeOfFirstBirth,
-		MenopausalStatus:             form.MenopausalStatus,
-		MenopauseAge:                 form.MenopauseAge,
-		HRT:                          form.HRT,
-		HRTUseLength:                 form.HRTUseLength,
-		LastFiveYearsHRTUse:          form.LastFiveYearsHRTUse,
-		CurrentHRTUse:                form.CurrentHRTUse,
-		IntendedHRTUse:               form.IntendedHRTUse,
-		HRTType:                      form.HRTType,
-		Oral:                         form.Oral,
-		OralDuration:                 form.OralDuration,
-		OralTwoLastYears:             form.OralTwoLastYears,
-		MamoGraphy:                   form.MamoGraphy,
-		Falop:                        form.Falop,
-		Andometrioz:                  form.Andometrioz,
-		LeavePestan:                  form.LeavePestan,
-		LeaveTokhmdan:                form.LeaveTokhmdan,
-		LaDeColon:                    form.LaDeColon,
-		LaDePol:                      form.LaDePol,
-		AspLaMo:                      form.AspLaMo,
-		NsaiDLaMo:                    form.NsaiDLaMo,
-		LastFiveYearBloodTestInStool: form.LastFiveYearBloodTestInStool,
-
-		Cancer:     form.Cancer,
-		CancerType: form.CancerType,
-		CancerAge:  form.CancerAge,
-
-		ChildCancer:     form.ChildCancer,
-		ChildName:       form.ChildName,
-		ChildCancerType: form.ChildCancerType,
-		ChildCancerAge:  form.ChildCancerAge,
-		ChildLifeStatus: form.ChildLifeStatus,
-
-		MotherCancer:     form.MotherCancer,
-		MotherName:       form.MotherName,
-		MotherLifeStatus: form.MotherLifeStatus,
-		MotherCancerType: form.MotherCancerType,
-		MotherCancerAge:  form.MotherCancerAge,
-
-		FatherCancer:     form.FatherCancer,
-		FatherName:       form.FatherName,
-		FatherLifeStatus: form.FatherLifeStatus,
-		FatherCancerType: form.FatherCancerType,
-		FatherCancerAge:  form.FatherCancerAge,
-
-		SiblingCancer:     form.SiblingCancer,
-		SiblingName:       form.SiblingName,
-		SiblingLifeStatus: form.SiblingLifeStatus,
-		SiblingCancerType: form.SiblingCancerType,
-		SiblingCancerAge:  form.SiblingCancerAge,
-
-		AmeAmoCancer:     form.AmeAmoCancer,
-		AmeAmoName:       form.AmeAmoName,
-		AmeAmoLifeStatus: form.AmeAmoLifeStatus,
-		AmeAmoCancerType: form.AmeAmoCancerType,
-		AmeAmoCancerAge:  form.AmeAmoCancerAge,
-
-		KhaleDaeiCancer:     form.KhaleDaeiCancer,
-		KhaleDaeiName:       form.KhaleDaeiName,
-		KhaleDaeiLifeStatus: form.KhaleDaeiLifeStatus,
-		KhaleDaeiCancerType: form.KhaleDaeiCancerType,
-		KhaleDaeiCancerAge:  form.KhaleDaeiCancerAge,
-
-		OtherRelativeCancer:     form.OtherRelativeCancer,
-		OtherRelativeName:       form.OtherRelativeName,
-		OtherRelativeRelation:   form.OtherRelativeRelation,
-		OtherRelativeLifeStatus: form.OtherRelativeLifeStatus,
-		OtherRelativeCancerType: form.OtherRelativeCancerType,
-		OtherRelativeCancerAge:  form.OtherRelativeCancerAge,
-
-		TestGen:   form.TestGen,
-		FmTestGen: form.FmTestGen,
-
-		CallExpert:   form.CallExpert,
-		BirthCountry: form.BirthCountry,
-		Province:     form.Province,
-		City:         form.City,
-		Country:      form.Country,
-
-		InsuranceStatus:           form.InsuranceStatus,
-		SupplementaryInsurances:   form.SupplementaryInsurances,
-		Hypertension:              form.Hypertension,
-		HypertensionTreatment:     form.HypertensionTreatment,
-		HeartDisease:              form.HeartDisease,
-		HeartDiseaseTreatment:     form.HeartDiseaseTreatment,
-		Diabetes:                  form.Diabetes,
-		DiabetesTreatment:         form.DiabetesTreatment,
-		ChronicLungDisease:        form.ChronicLungDisease,
-		ChronicLungDiseaseType:    form.ChronicLungDiseaseType,
-		LungCancerHistory:         form.LungCancerHistory,
-		OtherCancerHistory:        form.OtherCancerHistory,
-		OtherCancerType:           form.OtherCancerType,
-		LungCancerFamily:          form.LungCancerFamily,
-		LungCancerFamilyRelation:  form.LungCancerFamilyRelation,
-		OtherCancerFamily:         form.OtherCancerFamily,
-		OtherCancerFamilyType:     form.OtherCancerFamilyType,
-		OtherCancerFamilyRelation: form.OtherCancerFamilyRelation,
-		OccupationalExposure:      form.OccupationalExposure,
-		CurrentSmoking:            form.CurrentSmoking,
-		SmokingStartAgeCurrent:    form.SmokingStartAgeCurrent,
-		SmokingTypesCurrent:       form.SmokingTypesCurrent,
-		CigarettesPerDayCurrent:   form.CigarettesPerDayCurrent,
-		CigarPerDayCurrent:        form.CigarPerDayCurrent,
-		ECigPerDayCurrent:         form.ECigPerDayCurrent,
-		PipePerDayCurrent:         form.PipePerDayCurrent,
-		ChapoghPerDayCurrent:      form.ChapoghPerDayCurrent,
-		SmokedOpiumPerDayCurrent:  form.SmokedOpiumPerDayCurrent,
-		ChewedOpiumPerDayCurrent:  form.ChewedOpiumPerDayCurrent,
-		HookahPerWeekCurrent:      form.HookahPerWeekCurrent,
-		PastSmoking:               form.PastSmoking,
-		SmokingStartAgePast:       form.SmokingStartAgePast,
-		SmokingTypesPast:          form.SmokingTypesPast,
-		CigarettesPerDayPast:      form.CigarettesPerDayPast,
-		CigarPerDayPast:           form.CigarPerDayPast,
-		ECigPerDayPast:            form.ECigPerDayPast,
-		PipePerDayPast:            form.PipePerDayPast,
-		ChapoghPerDayPast:         form.ChapoghPerDayPast,
-		SmokedOpiumPerDayPast:     form.SmokedOpiumPerDayPast,
-		ChewedOpiumPerDayPast:     form.ChewedOpiumPerDayPast,
-		HookahPerWeekPast:         form.HookahPerWeekPast,
-		SecondhandSmoke:           form.SecondhandSmoke,
-		SecondhandSmokeLocation:   form.SecondhandSmokeLocation,
-
-		CreatedAt: form.CreatedAt,
-		UpdatedAt: form.UpdatedAt,
-	}
-}
 
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
@@ -253,6 +89,10 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
+	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -294,6 +134,10 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -345,6 +189,10 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
+	}
 
 	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -372,6 +220,10 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
 	}
 
 	info, err := formService.formRepository.FindFamilyCancerByFormID(formService.db, request.FormID)
@@ -440,6 +292,10 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
+	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -473,6 +329,10 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
@@ -533,20 +393,347 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	return formService.formRepository.UpdateLungCancer(formService.db, info)
 }
 
-func (formService *FormService) GetForm(formID uint) (formdto.FormResponse, error) {
-	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.FormResponse{}, err
+		return formdto.ChangeFormStatusResponse{}, err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.FormResponse{}, notFoundError
+		return formdto.ChangeFormStatusResponse{}, notFoundError
 	}
 
-	return formService.entityToResponse(form), nil
+	// Change status to FormStatusReady
+	form.Status = enum.FormStatusReady
+	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return formdto.ChangeFormStatusResponse{}, err
+	}
+
+	response := formdto.ChangeFormStatusResponse{
+		Form: formdto.BasicFormResponse{
+			FormID:    form.ID,
+			Status:    form.Status.String(),
+			UserID:    form.UserID,
+			CreatedAt: form.CreatedAt,
+			UpdatedAt: form.UpdatedAt,
+		},
+		Message: "Form status changed successfully",
+	}
+
+	return response, nil
 }
 
-func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.FormResponse, int64, error) {
+func (formService *FormService) GetBasicForm(formID uint) (formdto.GetBasicFormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetBasicFormResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetBasicFormResponse{}, notFoundError
+	}
+
+	basic, err := formService.formRepository.FindBasicInfoByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetBasicFormResponse{}, err
+	}
+	if basic == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetBasicFormResponse{}, notFoundError
+	}
+
+	return formdto.GetBasicFormResponse{
+		ID:                   basic.ID,
+		Name:                 basic.Name,
+		Gender:               basic.Gender,
+		BirthYear:            basic.BirthYear,
+		BirthMonth:           basic.BirthMonth,
+		BirthDay:             basic.BirthDay,
+		IsAtba:               basic.IsAtba,
+		SocialSecurityNumber: basic.SocialSecurityNumber,
+		Height:               basic.Height,
+		Weight:               basic.Weight,
+	}, nil
+}
+
+func (formService *FormService) GetGeneralHealth(formID uint) (formdto.GetGeneralHealthResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetGeneralHealthResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetGeneralHealthResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetGeneralHealthResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetGeneralHealthResponse{}, notFoundError
+	}
+
+	return formdto.GetGeneralHealthResponse{
+		ID:                        info.ID,
+		DrinksAlcohol:             info.DrinksAlcohol,
+		CupsPerWeek:               info.CupsPerWeek,
+		LastMonthSabzijatMeal:     info.LastMonthSabzijatMeal,
+		LastMonthSabzijatWeight:   info.LastMonthSabzijatWeight,
+		MediumActivityMonthInYear: info.MediumActivityMonthInYear,
+		MediumActivityHourInWeek:  info.MediumActivityHourInWeek,
+		HardActivityMonthInYear:   info.HardActivityMonthInYear,
+		HardActivityHourInWeek:    info.HardActivityHourInWeek,
+		SmokeAtLeast100:           info.SmokeAtLeast100,
+		SmokingAge:                info.SmokingAge,
+		SmokingNow:                info.SmokingNow,
+		LeaveSmokingAge:           info.LeaveSmokingAge,
+		CountSmokingDaily:         info.CountSmokingDaily,
+		CountGheliandaily:         info.CountGheliandaily,
+		CountSmokingDailyPast:     info.CountSmokingDailyPast,
+		CountGheliandailyPast:     info.CountGheliandailyPast,
+	}, nil
+}
+
+func (formService *FormService) GetMamography(formID uint) (formdto.GetMamographyResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetMamographyResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetMamographyResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindMamographyByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetMamographyResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetMamographyResponse{}, notFoundError
+	}
+
+	return formdto.GetMamographyResponse{
+		ID:                           info.ID,
+		GhaedeAge:                    info.GhaedeAge,
+		HasChildren:                  info.HasChildren,
+		NumberOfChildren:             info.NumberOfChildren,
+		AgeOfFirstBirth:              info.AgeOfFirstBirth,
+		MenopausalStatus:             info.MenopausalStatus,
+		MenopauseAge:                 info.MenopauseAge,
+		HRT:                          info.HRT,
+		HRTUseLength:                 info.HRTUseLength,
+		LastFiveYearsHRTUse:          info.LastFiveYearsHRTUse,
+		CurrentHRTUse:                info.CurrentHRTUse,
+		IntendedHRTUse:               info.IntendedHRTUse,
+		HRTType:                      info.HRTType,
+		Oral:                         info.Oral,
+		OralDuration:                 info.OralDuration,
+		OralTwoLastYears:             info.OralTwoLastYears,
+		MamoGraphy:                   info.MamoGraphy,
+		Falop:                        info.Falop,
+		Andometrioz:                  info.Andometrioz,
+		LeavePestan:                  info.LeavePestan,
+		LeaveTokhmdan:                info.LeaveTokhmdan,
+		LaDeColon:                    info.LaDeColon,
+		LaDePol:                      info.LaDePol,
+		AspLaMo:                      info.AspLaMo,
+		NsaiDLaMo:                    info.NsaiDLaMo,
+		LastFiveYearBloodTestInStool: info.LastFiveYearBloodTestInStool,
+	}, nil
+}
+
+func (formService *FormService) GetCancer(formID uint) (formdto.GetCancerResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetCancerResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetCancerResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindCancerByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetCancerResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetCancerResponse{}, notFoundError
+	}
+
+	return formdto.GetCancerResponse{
+		ID:         info.ID,
+		Cancer:     info.Cancer,
+		CancerType: info.CancerType,
+		CancerAge:  info.CancerAge,
+	}, nil
+}
+
+func (formService *FormService) GetFamilyCancer(formID uint) (formdto.GetFamilyCancerResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetFamilyCancerResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindFamilyCancerByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetFamilyCancerResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerResponse{}, notFoundError
+	}
+
+	return formdto.GetFamilyCancerResponse{
+		ID:                      info.ID,
+		ChildCancer:             info.ChildCancer,
+		ChildName:               info.ChildName,
+		ChildCancerType:         info.ChildCancerType,
+		ChildCancerAge:          info.ChildCancerAge,
+		ChildLifeStatus:         info.ChildLifeStatus,
+		MotherCancer:            info.MotherCancer,
+		MotherName:              info.MotherName,
+		MotherLifeStatus:        info.MotherLifeStatus,
+		MotherCancerType:        info.MotherCancerType,
+		MotherCancerAge:         info.MotherCancerAge,
+		FatherCancer:            info.FatherCancer,
+		FatherName:              info.FatherName,
+		FatherLifeStatus:        info.FatherLifeStatus,
+		FatherCancerType:        info.FatherCancerType,
+		FatherCancerAge:         info.FatherCancerAge,
+		SiblingCancer:           info.SiblingCancer,
+		SiblingName:             info.SiblingName,
+		SiblingLifeStatus:       info.SiblingLifeStatus,
+		SiblingCancerType:       info.SiblingCancerType,
+		SiblingCancerAge:        info.SiblingCancerAge,
+		AmeAmoCancer:            info.AmeAmoCancer,
+		AmeAmoName:              info.AmeAmoName,
+		AmeAmoLifeStatus:        info.AmeAmoLifeStatus,
+		AmeAmoCancerType:        info.AmeAmoCancerType,
+		AmeAmoCancerAge:         info.AmeAmoCancerAge,
+		KhaleDaeiCancer:         info.KhaleDaeiCancer,
+		KhaleDaeiName:           info.KhaleDaeiName,
+		KhaleDaeiLifeStatus:     info.KhaleDaeiLifeStatus,
+		KhaleDaeiCancerType:     info.KhaleDaeiCancerType,
+		KhaleDaeiCancerAge:      info.KhaleDaeiCancerAge,
+		OtherRelativeCancer:     info.OtherRelativeCancer,
+		OtherRelativeName:       info.OtherRelativeName,
+		OtherRelativeRelation:   info.OtherRelativeRelation,
+		OtherRelativeLifeStatus: info.OtherRelativeLifeStatus,
+		OtherRelativeCancerType: info.OtherRelativeCancerType,
+		OtherRelativeCancerAge:  info.OtherRelativeCancerAge,
+	}, nil
+}
+
+func (formService *FormService) GetContact(formID uint) (formdto.GetContactResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetContactResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetContactResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindContactByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetContactResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetContactResponse{}, notFoundError
+	}
+
+	return formdto.GetContactResponse{
+		ID:           info.ID,
+		TestGen:      info.TestGen,
+		FmTestGen:    info.FmTestGen,
+		CallExpert:   info.CallExpert,
+		BirthCountry: info.BirthCountry,
+		Province:     info.Province,
+		City:         info.City,
+		Country:      info.Country,
+		Address:      info.Address,
+		PostalCode:   info.PostalCode,
+	}, nil
+}
+
+func (formService *FormService) GetLungCancer(formID uint) (formdto.GetLungCancerResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return formdto.GetLungCancerResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetLungCancerResponse{}, notFoundError
+	}
+
+	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, formID)
+	if err != nil {
+		return formdto.GetLungCancerResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetLungCancerResponse{}, notFoundError
+	}
+
+	return formdto.GetLungCancerResponse{
+		ID:                        info.ID,
+		InsuranceStatus:           info.InsuranceStatus,
+		SupplementaryInsurances:   info.SupplementaryInsurances,
+		Hypertension:              info.Hypertension,
+		HypertensionTreatment:     info.HypertensionTreatment,
+		HeartDisease:              info.HeartDisease,
+		HeartDiseaseTreatment:     info.HeartDiseaseTreatment,
+		Diabetes:                  info.Diabetes,
+		DiabetesTreatment:         info.DiabetesTreatment,
+		ChronicLungDisease:        info.ChronicLungDisease,
+		ChronicLungDiseaseType:    info.ChronicLungDiseaseType,
+		LungCancerHistory:         info.LungCancerHistory,
+		OtherCancerHistory:        info.OtherCancerHistory,
+		OtherCancerType:           info.OtherCancerType,
+		LungCancerFamily:          info.LungCancerFamily,
+		LungCancerFamilyRelation:  info.LungCancerFamilyRelation,
+		OtherCancerFamily:         info.OtherCancerFamily,
+		OtherCancerFamilyType:     info.OtherCancerFamilyType,
+		OtherCancerFamilyRelation: info.OtherCancerFamilyRelation,
+		OccupationalExposure:      info.OccupationalExposure,
+		CurrentSmoking:            info.CurrentSmoking,
+		SmokingStartAgeCurrent:    info.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:       info.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:   info.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:        info.CigarPerDayCurrent,
+		ECigPerDayCurrent:         info.ECigPerDayCurrent,
+		PipePerDayCurrent:         info.PipePerDayCurrent,
+		ChapoghPerDayCurrent:      info.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:  info.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:  info.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:      info.HookahPerWeekCurrent,
+		PastSmoking:               info.PastSmoking,
+		SmokingStartAgePast:       info.SmokingStartAgePast,
+		SmokingTypesPast:          info.SmokingTypesPast,
+		CigarettesPerDayPast:      info.CigarettesPerDayPast,
+		CigarPerDayPast:           info.CigarPerDayPast,
+		ECigPerDayPast:            info.ECigPerDayPast,
+		PipePerDayPast:            info.PipePerDayPast,
+		ChapoghPerDayPast:         info.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:     info.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:     info.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:         info.HookahPerWeekPast,
+		SecondhandSmoke:           info.SecondhandSmoke,
+		SecondhandSmokeLocation:   info.SecondhandSmokeLocation,
+	}, nil
+}
+
+func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.BasicFormResponse, int64, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
 		return nil, 0, err
@@ -569,15 +756,21 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		return nil, 0, err
 	}
 
-	formResponses := make([]formdto.FormResponse, len(forms))
+	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
-		formResponses[i] = formService.entityToResponse(form)
+		formResponses[i] = formdto.BasicFormResponse{
+			FormID: form.ID,
+			Status: form.Status.String(),
+			UserID: form.UserID,
+			CreatedAt: form.CreatedAt,
+			UpdatedAt: form.UpdatedAt,
+		}
 	}
 
 	return formResponses, count, nil
 }
 
-func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) error {
+func (formService *FormService) UpdateForm(request formdto.UpdateBasicFormRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -585,427 +778,6 @@ func (formService *FormService) UpdateForm(request formdto.UpdateFormRequest) er
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
-	}
-
-	if request.Name != nil {
-		form.Name = *request.Name
-	}
-	if request.BirthDay != nil {
-		form.BirthDay = *request.BirthDay
-	}
-	if request.BirthMonth != nil {
-		form.BirthMonth = *request.BirthMonth
-	}
-	if request.BirthYear != nil {
-		form.BirthYear = *request.BirthYear
-	}
-	if request.Address != nil {
-		form.Address = *request.Address
-	}
-	if request.PostalCode != nil {
-		form.PostalCode = *request.PostalCode
-	}
-	if request.SocialSecurityNumber != nil {
-		form.SocialSecurityNumber = *request.SocialSecurityNumber
-	}
-	if request.Gender != nil {
-		form.Gender = *request.Gender
-	}
-	if request.IsAtba != nil {
-		form.IsAtba = *request.IsAtba
-	}
-	if request.Height != nil {
-		form.Height = *request.Height
-	}
-	if request.Weight != nil {
-		form.Weight = *request.Weight
-	}
-	if request.DrinksAlcohol != nil {
-		form.DrinksAlcohol = request.DrinksAlcohol
-	}
-	if request.CupsPerWeek != nil {
-		form.CupsPerWeek = request.CupsPerWeek
-	}
-	if request.LastMonthSabzijatMeal != nil {
-		form.LastMonthSabzijatMeal = *request.LastMonthSabzijatMeal
-	}
-	if request.LastMonthSabzijatWeight != nil {
-		form.LastMonthSabzijatWeight = *request.LastMonthSabzijatWeight
-	}
-	if request.MediumActivityMonthInYear != nil {
-		form.MediumActivityMonthInYear = *request.MediumActivityMonthInYear
-	}
-	if request.MediumActivityHourInWeek != nil {
-		form.MediumActivityHourInWeek = *request.MediumActivityHourInWeek
-	}
-	if request.HardActivityMonthInYear != nil {
-		form.HardActivityMonthInYear = *request.HardActivityMonthInYear
-	}
-	if request.HardActivityHourInWeek != nil {
-		form.HardActivityHourInWeek = *request.HardActivityHourInWeek
-	}
-	if request.SmokeAtLeast100 != nil {
-		form.SmokeAtLeast100 = request.SmokeAtLeast100
-	}
-	if request.SmokingNow != nil {
-		form.SmokingNow = *request.SmokingNow
-	}
-	if request.LeaveSmokingAge != nil {
-		form.LeaveSmokingAge = request.LeaveSmokingAge
-	}
-	if request.CountSmokingDaily != nil {
-		form.CountSmokingDaily = request.CountSmokingDaily
-	}
-	if request.CountGheliandaily != nil {
-		form.CountGheliandaily = request.CountGheliandaily
-	}
-	if request.CountSmokingDailyPast != nil {
-		form.CountSmokingDailyPast = request.CountSmokingDailyPast
-	}
-	if request.CountGheliandailyPast != nil {
-		form.CountGheliandailyPast = request.CountGheliandailyPast
-	}
-	if request.GhaedeAge != nil {
-		form.GhaedeAge = *request.GhaedeAge
-	}
-	if request.HasChildren != nil {
-		form.HasChildren = *request.HasChildren
-	}
-	if request.NumberOfChildren != nil {
-		form.NumberOfChildren = request.NumberOfChildren
-	}
-	if request.AgeOfFirstBirth != nil {
-		form.AgeOfFirstBirth = request.AgeOfFirstBirth
-	}
-	if request.MenopausalStatus != nil {
-		form.MenopausalStatus = *request.MenopausalStatus
-	}
-	if request.HRT != nil {
-		form.HRT = request.HRT
-	}
-	if request.HRTUseLength != nil {
-		form.HRTUseLength = request.HRTUseLength
-	}
-	if request.LastFiveYearsHRTUse != nil {
-		form.LastFiveYearsHRTUse = *request.LastFiveYearsHRTUse
-	}
-	if request.CurrentHRTUse != nil {
-		form.CurrentHRTUse = request.CurrentHRTUse
-	}
-	if request.IntendedHRTUse != nil {
-		form.IntendedHRTUse = request.IntendedHRTUse
-	}
-	if request.HRTType != nil {
-		form.HRTType = request.HRTType
-	}
-	if request.Oral != nil {
-		form.Oral = request.Oral
-	}
-	if request.OralDuration != nil {
-		form.OralDuration = request.OralDuration
-	}
-	if request.OralTwoLastYears != nil {
-		form.OralTwoLastYears = request.OralTwoLastYears
-	}
-	if request.MamoGraphy != nil {
-		form.MamoGraphy = request.MamoGraphy
-	}
-	if request.Falop != nil {
-		form.Falop = request.Falop
-	}
-	if request.Andometrioz != nil {
-		form.Andometrioz = request.Andometrioz
-	}
-	if request.LeavePestan != nil {
-		form.LeavePestan = *request.LeavePestan
-	}
-	if request.LeaveTokhmdan != nil {
-		form.LeaveTokhmdan = *request.LeaveTokhmdan
-	}
-	if request.LaDeColon != nil {
-		form.LaDeColon = request.LaDeColon
-	}
-	if request.LaDePol != nil {
-		form.LaDePol = request.LaDePol
-	}
-	if request.AspLaMo != nil {
-		form.AspLaMo = request.AspLaMo
-	}
-	if request.NsaiDLaMo != nil {
-		form.NsaiDLaMo = request.NsaiDLaMo
-	}
-	if request.LastFiveYearBloodTestInStool != nil {
-		form.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
-	}
-	if request.Cancer != nil {
-		form.Cancer = *request.Cancer
-	}
-	if request.CancerType != nil {
-		form.CancerType = request.CancerType
-	}
-	if request.CancerAge != nil {
-		form.CancerAge = request.CancerAge
-	}
-	if request.ChildCancer != nil {
-		form.ChildCancer = *request.ChildCancer
-	}
-	if request.ChildName != nil {
-		form.ChildName = request.ChildName
-	}
-	if request.ChildCancerType != nil {
-		form.ChildCancerType = request.ChildCancerType
-	}
-	if request.ChildCancerAge != nil {
-		form.ChildCancerAge = request.ChildCancerAge
-	}
-	if request.ChildLifeStatus != nil {
-		form.ChildLifeStatus = request.ChildLifeStatus
-	}
-
-	if request.MotherCancer != nil {
-		form.MotherCancer = *request.MotherCancer
-	}
-	if request.MotherName != nil {
-		form.MotherName = request.MotherName
-	}
-	if request.MotherLifeStatus != nil {
-		form.MotherLifeStatus = request.MotherLifeStatus
-	}
-	if request.MotherCancerType != nil {
-		form.MotherCancerType = request.MotherCancerType
-	}
-	if request.MotherCancerAge != nil {
-		form.MotherCancerAge = request.MotherCancerAge
-	}
-
-	if request.FatherCancer != nil {
-		form.FatherCancer = *request.FatherCancer
-	}
-	if request.FatherName != nil {
-		form.FatherName = request.FatherName
-	}
-	if request.FatherLifeStatus != nil {
-		form.FatherLifeStatus = request.FatherLifeStatus
-	}
-	if request.FatherCancerType != nil {
-		form.FatherCancerType = request.FatherCancerType
-	}
-	if request.FatherCancerAge != nil {
-		form.FatherCancerAge = request.FatherCancerAge
-	}
-
-	if request.SiblingCancer != nil {
-		form.SiblingCancer = *request.SiblingCancer
-	}
-	if request.SiblingName != nil {
-		form.SiblingName = request.SiblingName
-	}
-	if request.SiblingLifeStatus != nil {
-		form.SiblingLifeStatus = request.SiblingLifeStatus
-	}
-	if request.SiblingCancerType != nil {
-		form.SiblingCancerType = request.SiblingCancerType
-	}
-	if request.SiblingCancerAge != nil {
-		form.SiblingCancerAge = request.SiblingCancerAge
-	}
-
-	if request.AmeAmoCancer != nil {
-		form.AmeAmoCancer = *request.AmeAmoCancer
-	}
-	if request.AmeAmoName != nil {
-		form.AmeAmoName = request.AmeAmoName
-	}
-	if request.AmeAmoLifeStatus != nil {
-		form.AmeAmoLifeStatus = request.AmeAmoLifeStatus
-	}
-	if request.AmeAmoCancerType != nil {
-		form.AmeAmoCancerType = request.AmeAmoCancerType
-	}
-	if request.AmeAmoCancerAge != nil {
-		form.AmeAmoCancerAge = request.AmeAmoCancerAge
-	}
-
-	if request.KhaleDaeiCancer != nil {
-		form.KhaleDaeiCancer = *request.KhaleDaeiCancer
-	}
-	if request.KhaleDaeiName != nil {
-		form.KhaleDaeiName = request.KhaleDaeiName
-	}
-	if request.KhaleDaeiLifeStatus != nil {
-		form.KhaleDaeiLifeStatus = request.KhaleDaeiLifeStatus
-	}
-	if request.KhaleDaeiCancerType != nil {
-		form.KhaleDaeiCancerType = request.KhaleDaeiCancerType
-	}
-	if request.KhaleDaeiCancerAge != nil {
-		form.KhaleDaeiCancerAge = request.KhaleDaeiCancerAge
-	}
-
-	if request.OtherRelativeCancer != nil {
-		form.OtherRelativeCancer = request.OtherRelativeCancer
-	}
-	if request.OtherRelativeName != nil {
-		form.OtherRelativeName = request.OtherRelativeName
-	}
-	if request.OtherRelativeRelation != nil {
-		form.OtherRelativeRelation = request.OtherRelativeRelation
-	}
-	if request.OtherRelativeLifeStatus != nil {
-		form.OtherRelativeLifeStatus = request.OtherRelativeLifeStatus
-	}
-	if request.OtherRelativeCancerType != nil {
-		form.OtherRelativeCancerType = request.OtherRelativeCancerType
-	}
-	if request.OtherRelativeCancerAge != nil {
-		form.OtherRelativeCancerAge = request.OtherRelativeCancerAge
-	}
-	if request.TestGen != nil {
-		form.TestGen = request.TestGen
-	}
-	if request.FmTestGen != nil {
-		form.FmTestGen = request.FmTestGen
-	}
-	if request.CallExpert != nil {
-		form.CallExpert = *request.CallExpert
-	}
-	if request.BirthCountry != nil {
-		form.BirthCountry = request.BirthCountry
-	}
-	if request.Province != nil {
-		form.Province = request.Province
-	}
-	if request.City != nil {
-		form.City = request.City
-	}
-	if request.Country != nil {
-		form.Country = request.Country
-	}
-	if request.SupplementaryInsurances != nil {
-		form.SupplementaryInsurances = request.SupplementaryInsurances
-	}
-	if request.Hypertension != nil {
-		form.Hypertension = *request.Hypertension
-	}
-	if request.HypertensionTreatment != nil {
-		form.HypertensionTreatment = request.HypertensionTreatment
-	}
-	if request.HeartDisease != nil {
-		form.HeartDisease = *request.HeartDisease
-	}
-	if request.HeartDiseaseTreatment != nil {
-		form.HeartDiseaseTreatment = request.HeartDiseaseTreatment
-	}
-	if request.Diabetes != nil {
-		form.Diabetes = *request.Diabetes
-	}
-	if request.DiabetesTreatment != nil {
-		form.DiabetesTreatment = request.DiabetesTreatment
-	}
-	if request.ChronicLungDisease != nil {
-		form.ChronicLungDisease = request.ChronicLungDisease
-	}
-	if request.ChronicLungDiseaseType != nil {
-		form.ChronicLungDiseaseType = request.ChronicLungDiseaseType
-	}
-	if request.LungCancerHistory != nil {
-		form.LungCancerHistory = *request.LungCancerHistory
-	}
-	if request.OtherCancerHistory != nil {
-		form.OtherCancerHistory = *request.OtherCancerHistory
-	}
-	if request.OtherCancerType != nil {
-		form.OtherCancerType = request.OtherCancerType
-	}
-	if request.LungCancerFamily != nil {
-		form.LungCancerFamily = request.LungCancerFamily
-	}
-	if request.LungCancerFamilyRelation != nil {
-		form.LungCancerFamilyRelation = request.LungCancerFamilyRelation
-	}
-	if request.OtherCancerFamily != nil {
-		form.OtherCancerFamily = request.OtherCancerFamily
-	}
-	if request.OtherCancerFamilyType != nil {
-		form.OtherCancerFamilyType = request.OtherCancerFamilyType
-	}
-	if request.OtherCancerFamilyRelation != nil {
-		form.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
-	}
-	if request.OccupationalExposure != nil {
-		form.OccupationalExposure = request.OccupationalExposure
-	}
-	if request.CurrentSmoking != nil {
-		form.CurrentSmoking = *request.CurrentSmoking
-	}
-	if request.SmokingStartAgeCurrent != nil {
-		form.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
-	}
-	if request.SmokingTypesCurrent != nil {
-		form.SmokingTypesCurrent = request.SmokingTypesCurrent
-	}
-	if request.CigarettesPerDayCurrent != nil {
-		form.CigarettesPerDayCurrent = request.CigarettesPerDayCurrent
-	}
-	if request.CigarPerDayCurrent != nil {
-		form.CigarPerDayCurrent = request.CigarPerDayCurrent
-	}
-	if request.ECigPerDayCurrent != nil {
-		form.ECigPerDayCurrent = request.ECigPerDayCurrent
-	}
-	if request.PipePerDayCurrent != nil {
-		form.PipePerDayCurrent = request.PipePerDayCurrent
-	}
-	if request.ChapoghPerDayCurrent != nil {
-		form.ChapoghPerDayCurrent = request.ChapoghPerDayCurrent
-	}
-	if request.SmokedOpiumPerDayCurrent != nil {
-		form.SmokedOpiumPerDayCurrent = request.SmokedOpiumPerDayCurrent
-	}
-	if request.ChewedOpiumPerDayCurrent != nil {
-		form.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
-	}
-	if request.HookahPerWeekCurrent != nil {
-		form.HookahPerWeekCurrent = request.HookahPerWeekCurrent
-	}
-	if request.PastSmoking != nil {
-		form.PastSmoking = request.PastSmoking
-	}
-	if request.SmokingStartAgePast != nil {
-		form.SmokingStartAgePast = request.SmokingStartAgePast
-	}
-	if request.SmokingTypesPast != nil {
-		form.SmokingTypesPast = request.SmokingTypesPast
-	}
-	if request.CigarettesPerDayPast != nil {
-		form.CigarettesPerDayPast = request.CigarettesPerDayPast
-	}
-	if request.CigarPerDayPast != nil {
-		form.CigarPerDayPast = request.CigarPerDayPast
-	}
-	if request.ECigPerDayPast != nil {
-		form.ECigPerDayPast = request.ECigPerDayPast
-	}
-	if request.PipePerDayPast != nil {
-		form.PipePerDayPast = request.PipePerDayPast
-	}
-	if request.ChapoghPerDayPast != nil {
-		form.ChapoghPerDayPast = request.ChapoghPerDayPast
-	}
-	if request.SmokedOpiumPerDayPast != nil {
-		form.SmokedOpiumPerDayPast = request.SmokedOpiumPerDayPast
-	}
-	if request.ChewedOpiumPerDayPast != nil {
-		form.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
-	}
-	if request.HookahPerWeekPast != nil {
-		form.HookahPerWeekPast = request.HookahPerWeekPast
-	}
-	if request.SecondhandSmoke != nil {
-		form.SecondhandSmoke = *request.SecondhandSmoke
-	}
-	if request.SecondhandSmokeLocation != nil {
-		form.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	}
 
 	err = formService.formRepository.UpdateForm(formService.db, form)
@@ -1034,7 +806,7 @@ func (formService *FormService) DeleteForm(formID uint) error {
 	return nil
 }
 
-func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.FormResponse, int64, error) {
+func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.BasicFormResponse, int64, error) {
 	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit)
 	if err != nil {
 		return nil, 0, err
@@ -1045,9 +817,15 @@ func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.FormRe
 		return nil, 0, err
 	}
 
-	formResponses := make([]formdto.FormResponse, len(forms))
+	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
-		formResponses[i] = formService.entityToResponse(form)
+		formResponses[i] = formdto.BasicFormResponse{
+			FormID: form.ID,
+			Status: form.Status.String(),
+			UserID: form.UserID,
+			CreatedAt: form.CreatedAt,
+			UpdatedAt: form.UpdatedAt,
+		}
 	}
 
 	return formResponses, count, nil

@@ -52,7 +52,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		forms.GET("", app.Controllers.Admin.FormController.GetAllForms)
-		forms.GET("/:formID", app.Controllers.Admin.FormController.GetForm)
+		forms.GET("/:formID", app.Controllers.Admin.FormController.GetBasicForm)
 		forms.DELETE("/:formID", app.Controllers.Admin.FormController.DeleteForm)
 	}
 

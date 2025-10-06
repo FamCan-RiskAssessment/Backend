@@ -31,6 +31,8 @@ services:
       - ${DB_PORT}:${DB_PORT}
     volumes:
       - db-data:/var/lib/postgresql/data
+    networks:
+      - famcan-dev-network
     deploy:
       resources:
         limits:
@@ -50,6 +52,8 @@ services:
       - ${RDB_PORT}:${RDB_PORT}
     volumes:
       - rdb-data:/var/lib/redis/data
+    networks:
+      - famcan-dev-network
     deploy:
       resources:
         limits:
@@ -62,3 +66,7 @@ services:
 volumes:
   db-data:
   rdb-data:
+
+networks:
+  famcan-dev-network:
+    driver: bridge

@@ -25,6 +25,13 @@ func main() {
 		&entity.Role{},
 		&entity.Permission{},
 		&entity.Form{},
+		&entity.BasicInfo{},
+		&entity.GeneralHealthInfo{},
+		&entity.MamoGraphyInfo{},
+		&entity.CancerInfo{},
+		&entity.FamilyCancerInfo{},
+		&entity.ContactInfo{},
+		&entity.LungCancerInfo{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

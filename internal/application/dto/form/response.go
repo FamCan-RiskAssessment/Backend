@@ -12,17 +12,15 @@ type BasicFormResponse struct {
 }
 
 type CreateFormResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpdateFormResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type GetUserFormsResponse struct {
-	Forms []BasicFormResponse `json:"forms"` // TODO: CHANGE TO FORMRESPONSE
+	Forms []BasicFormResponse `json:"forms"`
 	Total int                 `json:"total"`
 }
 
@@ -31,38 +29,31 @@ type DeleteFormResponse struct {
 }
 
 type UpsertGeneralHealthResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpsertMamographyResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpsertCancerResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpsertFamilyCancerResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpsertContactResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type UpsertLungCancerResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type GetBasicFormResponse struct {
 	ID                   uint    `json:"id"`
-	Name                 string  `json:"name"`
 	Gender               string  `json:"gender"`
 	BirthYear            uint    `json:"birthYear"`
 	BirthMonth           string  `json:"birthMonth"`
@@ -170,21 +161,21 @@ type GetMamographyResponse struct {
 }
 
 type ChangeFormStatusResponse struct {
-	Form    BasicFormResponse `json:"form"`
-	Message string            `json:"message"`
+	Form BasicFormResponse `json:"form"`
 }
 
 type GetContactResponse struct {
-	ID                   uint    `json:"id"`
-	TestGen              *bool   `json:"testGen,omitempty"`
-	FmTestGen            *bool   `json:"fmTestGen,omitempty"`
-	CallExpert           bool    `json:"callExpert"`
-	BirthCountry         *string `json:"birthCountry,omitempty"`
-	Province             *string `json:"province,omitempty"`
-	City                 *string `json:"city,omitempty"`
-	Country              *string `json:"country,omitempty"`
-	Address              string  `json:"address"`
-	PostalCode           string  `json:"postalCode"`
+	ID           uint    `json:"id"`
+	TestGen      *bool   `json:"testGen,omitempty"`
+	Name         string  `json:"name"`
+	FmTestGen    *bool   `json:"fmTestGen,omitempty"`
+	CallExpert   bool    `json:"callExpert"`
+	BirthCountry *string `json:"birthCountry,omitempty"`
+	Province     *string `json:"province,omitempty"`
+	City         *string `json:"city,omitempty"`
+	Country      *string `json:"country,omitempty"`
+	Address      string  `json:"address"`
+	PostalCode   string  `json:"postalCode"`
 }
 
 type GetLungCancerResponse struct {

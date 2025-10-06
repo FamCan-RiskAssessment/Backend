@@ -63,6 +63,10 @@ func (r *FormRepository) UpdateForm(db database.Database, form *entity.Form) err
 	return db.GetDB().Save(form).Error
 }
 
+func (r *FormRepository) UpdateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error {
+	return db.GetDB().Save(basicInfo).Error
+}
+
 func (r *FormRepository) DeleteForm(db database.Database, id uint) error {
 	return db.GetDB().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Where("form_id = ?", id).Delete(&entity.BasicInfo{}).Error; err != nil {

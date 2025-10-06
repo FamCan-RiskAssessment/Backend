@@ -13,6 +13,7 @@ type FormService interface {
 	GetLungCancer(formID uint) (formdto.GetLungCancerResponse, error)
 	GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.BasicFormResponse, int64, error)
 	UpdateForm(request formdto.UpdateBasicFormRequest) error
+	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
 	UpsertGeneralHealth(request formdto.UpsertGeneralHealthRequest) error
 	UpsertMamography(request formdto.UpsertMamographyRequest) error
 	UpsertCancer(request formdto.UpsertCancerRequest) error

@@ -28,7 +28,6 @@ func NewCustomerFormController(
 
 func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 	type CreateFormParams struct {
-		Name                 string  `json:"name" validate:"required"`
 		BirthDay             uint    `json:"birthDay" validate:"required"`
 		BirthMonth           string  `json:"birthMonth" validate:"required"`
 		BirthYear            uint    `json:"birthYear" validate:"required"`
@@ -45,7 +44,6 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 
 	request := formdto.CreateBasicFormRequest{
 		UserID:               userID.(uint),
-		Name:                 params.Name,
 		BirthDay:             params.BirthDay,
 		BirthMonth:           params.BirthMonth,
 		BirthYear:            params.BirthYear,
@@ -63,7 +61,7 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.createForm")
-	controller.Response(ctx, 201, message, formdto.CreateFormResponse{Form: form, Message: message})
+	controller.Response(ctx, 201, message, formdto.CreateFormResponse{Form: form})
 }
 
 func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
@@ -92,25 +90,23 @@ func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", data)
 }
 
-func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
-	type UpdateFormParams struct {
-		FormID               uint     `json:"form_id" validate:"required"`
-		Name                 *string  `json:"name,omitempty"`
-		BirthDay             *uint    `json:"birthDay,omitempty"`
-		BirthMonth           *string  `json:"birthMonth,omitempty"`
-		BirthYear            *uint    `json:"birthYear,omitempty"`
-		SocialSecurityNumber *string  `json:"socialSecurityNumber,omitempty"`
-		Gender               *string  `json:"gender,omitempty"`
-		IsAtba               *bool    `json:"isAtba,omitempty"`
-		Height               *float64 `json:"height,omitempty"`
-		Weight               *float64 `json:"weight,omitempty"`
+func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) {
+	type UpdateBasicInfoParams struct {
+		FormID               uint    `uri:"formID" validate:"required"`
+		BirthDay             uint    `json:"birthDay" validate:"required"`
+		BirthMonth           string  `json:"birthMonth" validate:"required"`
+		BirthYear            uint    `json:"birthYear" validate:"required"`
+		SocialSecurityNumber string  `json:"socialSecurityNumber" validate:"required"`
+		Gender               string  `json:"gender" validate:"required"`
+		IsAtba               bool    `json:"isAtba"`
+		Height               float64 `json:"height" validate:"required"`
+		Weight               float64 `json:"weight" validate:"required"`
 	}
 
-	params := controller.Validate[UpdateFormParams](ctx)
+	params := controller.Validate[UpdateBasicInfoParams](ctx)
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		Name:                 params.Name,
 		BirthDay:             params.BirthDay,
 		BirthMonth:           params.BirthMonth,
 		BirthYear:            params.BirthYear,
@@ -121,7 +117,7 @@ func (formController *CustomerFormController) UpdateForm(ctx *gin.Context) {
 		Weight:               params.Weight,
 	}
 
-	err := formController.formService.UpdateForm(request)
+	err := formController.formService.UpdateBasicInfo(request)
 	if err != nil {
 		panic(err)
 	}
@@ -197,7 +193,7 @@ func (formController *CustomerFormController) UpsertGeneralHealth(ctx *gin.Conte
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertGeneralHealthResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertGeneralHealthResponse{})
 }
 func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context) {
 	type UpsertMamographyParams struct {
@@ -267,7 +263,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
 func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
 	type UpsertCancerParams struct {
@@ -292,7 +288,7 @@ func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertCancerResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertCancerResponse{})
 }
 func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Context) {
 	type UpsertFamilyCancerParams struct {
@@ -390,12 +386,13 @@ func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Contex
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertFamilyCancerResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertFamilyCancerResponse{})
 }
 func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 	type UpsertContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
+		Name         string  `json:"name" validate:"required"`
 		TestGen      *bool   `json:"testGen,omitempty"`
 		FmTestGen    *bool   `json:"fmTestGen,omitempty"`
 		CallExpert   bool    `json:"callExpert"`
@@ -411,6 +408,7 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 
 	req := formdto.UpsertContactRequest{
 		FormID:       params.FormID,
+		Name:         params.Name,
 		TestGen:      params.TestGen,
 		FmTestGen:    params.FmTestGen,
 		CallExpert:   params.CallExpert,
@@ -428,7 +426,7 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertContactResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertContactResponse{})
 }
 func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context) {
 	type UpsertLungCancerParams struct {
@@ -534,7 +532,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{Message: message})
+	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
 }
 
 func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context) {
@@ -555,7 +553,6 @@ func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context)
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.changeFormStatus")
-	response.Message = message
 	controller.Response(ctx, 200, message, response)
 }
 

@@ -17,7 +17,6 @@ type BasicInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 1
-	Name                 string  `gorm:"type:varchar(255);not null"`
 	Gender               string  `gorm:"type:varchar(10);not null"`
 	BirthYear            uint    `gorm:"not null"`
 	BirthMonth           string  `gorm:"type:varchar(10);not null"`
@@ -149,7 +148,8 @@ type ContactInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 6
-	TestGen *bool `gorm:"type:boolean"`
+	Name    string `gorm:"type:varchar(255);not null"`
+	TestGen *bool  `gorm:"type:boolean"`
 	// Pics
 	FmTestGen *bool `gorm:"type:boolean"`
 	// Pics
@@ -167,9 +167,9 @@ type LungCancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 7
-	InsuranceStatus           *string `gorm:"type:varchar(50)"`
+	InsuranceStatus           *string `gorm:"type:varchar(127)"`
 	SupplementaryInsurances   *string `gorm:"type:varchar(50)"`
-	Hypertension              bool    `gorm:"noto null;default:false"`
+	Hypertension              bool    `gorm:"not null;default:false"`
 	HypertensionTreatment     *bool   `gorm:"type:boolean"`
 	HeartDisease              bool    `gorm:"not null;default:false"`
 	HeartDiseaseTreatment     *bool   `gorm:"type:boolean"`
@@ -197,7 +197,7 @@ type LungCancerInfo struct {
 	SmokedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
 	ChewedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent      *uint   `gorm:"type:int"`
-	PastSmoking               *string `gorm:"type:varchar(50)"`
+	PastSmoking               *string `gorm:"type:varchar(127)"`
 	SmokingStartAgePast       *uint   `gorm:"type:int"`
 	SmokingTypesPast          *string `gorm:"type:varchar(50)"`
 	CigarettesPerDayPast      *uint   `gorm:"type:int"`

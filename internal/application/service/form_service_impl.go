@@ -32,7 +32,6 @@ func NewFormService(
 	}
 }
 
-
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
@@ -54,7 +53,6 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
-		Name:                 request.Name,
 		Gender:               request.Gender,
 		BirthYear:            request.BirthYear,
 		BirthMonth:           request.BirthMonth,
@@ -305,6 +303,7 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		info = &entity.ContactInfo{FormID: request.FormID}
 	}
 
+	info.Name = request.Name
 	info.TestGen = request.TestGen
 	info.FmTestGen = request.FmTestGen
 	info.CallExpert = request.CallExpert
@@ -403,7 +402,6 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		return formdto.ChangeFormStatusResponse{}, notFoundError
 	}
 
-	// Change status to FormStatusReady
 	form.Status = enum.FormStatusReady
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
@@ -418,7 +416,6 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 			CreatedAt: form.CreatedAt,
 			UpdatedAt: form.UpdatedAt,
 		},
-		Message: "Form status changed successfully",
 	}
 
 	return response, nil
@@ -445,7 +442,6 @@ func (formService *FormService) GetBasicForm(formID uint) (formdto.GetBasicFormR
 
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
-		Name:                 basic.Name,
 		Gender:               basic.Gender,
 		BirthYear:            basic.BirthYear,
 		BirthMonth:           basic.BirthMonth,
@@ -759,9 +755,9 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID: form.ID,
-			Status: form.Status.String(),
-			UserID: form.UserID,
+			FormID:    form.ID,
+			Status:    form.Status.String(),
+			UserID:    form.UserID,
 			CreatedAt: form.CreatedAt,
 			UpdatedAt: form.UpdatedAt,
 		}
@@ -781,6 +777,46 @@ func (formService *FormService) UpdateForm(request formdto.UpdateBasicFormReques
 	}
 
 	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+	if form.Status != enum.FormStatusInComplete {
+		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
+		return ForbiddenError
+	}
+
+	info, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	info.BirthDay = request.BirthDay
+	info.BirthMonth = request.BirthMonth
+	info.BirthYear = request.BirthYear
+	info.SocialSecurityNumber = request.SocialSecurityNumber
+	info.Gender = request.Gender
+	info.IsAtba = request.IsAtba
+	info.Height = request.Height
+	info.Weight = request.Weight
+
+	err = formService.formRepository.UpdateBasicInfo(formService.db, info)
 	if err != nil {
 		return err
 	}
@@ -820,9 +856,9 @@ func (formService *FormService) GetAllForms(offset, limit int) ([]formdto.BasicF
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID: form.ID,
-			Status: form.Status.String(),
-			UserID: form.UserID,
+			FormID:    form.ID,
+			Status:    form.Status.String(),
+			UserID:    form.UserID,
 			CreatedAt: form.CreatedAt,
 			UpdatedAt: form.UpdatedAt,
 		}

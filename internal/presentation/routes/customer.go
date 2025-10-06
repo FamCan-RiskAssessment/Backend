@@ -12,7 +12,7 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		form.POST("/basic", app.Controllers.Customer.FormController.CreateForm)
 		formGroup := form.Group("/:formID")
 		{
-			formGroup.PUT("/basic", app.Controllers.Customer.FormController.UpdateForm)
+			formGroup.PUT("/basic", app.Controllers.Customer.FormController.UpdateBasicInfo)
 			formGroup.PUT("/generalhealth", app.Controllers.Customer.FormController.UpsertGeneralHealth)
 			formGroup.PUT("/mamography", app.Controllers.Customer.FormController.UpsertMamography)
 			formGroup.PUT("/cancer", app.Controllers.Customer.FormController.UpsertCancer)

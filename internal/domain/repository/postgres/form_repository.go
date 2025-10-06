@@ -13,6 +13,7 @@ type FormRepository interface {
 	FindFormsByUserID(db database.Database, userID uint, options *QueryOptions) ([]*entity.Form, error)
 	CountFormsByUserID(db database.Database, userID uint) (int64, error)
 	UpdateForm(db database.Database, form *entity.Form) error
+	UpdateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
 	DeleteForm(db database.Database, id uint) error
 	FindAllForms(db database.Database, offset, limit int) ([]*entity.Form, error)
 	CountAllForms(db database.Database) (int64, error)

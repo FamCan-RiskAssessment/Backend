@@ -4,7 +4,6 @@ type CreateBasicFormRequest struct {
 	UserID uint
 
 	// page 1
-	Name                 string  `json:"name" binding:"required"`
 	BirthDay             uint    `json:"birthDay" binding:"required"`
 	BirthMonth           string  `json:"birthMonth" binding:"required"`
 	BirthYear            uint    `json:"birthYear" binding:"required"`
@@ -19,15 +18,14 @@ type UpdateBasicFormRequest struct {
 	FormID uint `json:"form_id" binding:"required"`
 
 	// page 1
-	Name                 *string  `json:"name,omitempty"`
-	BirthDay             *uint    `json:"birthDay,omitempty"`
-	BirthMonth           *string  `json:"birthMonth,omitempty"`
-	BirthYear            *uint    `json:"birthYear,omitempty"`
-	SocialSecurityNumber *string  `json:"socialSecurityNumber,omitempty"`
-	Gender               *string  `json:"gender,omitempty"`
-	IsAtba               *bool    `json:"isAtba,omitempty"`
-	Height               *float64 `json:"height,omitempty"`
-	Weight               *float64 `json:"weight,omitempty"`
+	BirthDay             uint    `json:"birthDay,omitempty"`
+	BirthMonth           string  `json:"birthMonth,omitempty"`
+	BirthYear            uint    `json:"birthYear,omitempty"`
+	SocialSecurityNumber string  `json:"socialSecurityNumber,omitempty"`
+	Gender               string  `json:"gender,omitempty"`
+	IsAtba               bool    `json:"isAtba,omitempty"`
+	Height               float64 `json:"height,omitempty"`
+	Weight               float64 `json:"weight,omitempty"`
 }
 
 type GetUserFormsRequest struct {
@@ -153,6 +151,7 @@ type UpsertFamilyCancerRequest struct {
 type UpsertContactRequest struct {
 	FormID uint `json:"form_id" binding:"required"`
 
+	Name         string  `json:"name" binding:"required"`
 	TestGen      *bool   `json:"testGen,omitempty"`
 	FmTestGen    *bool   `json:"fmTestGen,omitempty"`
 	CallExpert   bool    `json:"callExpert"`

@@ -19,6 +19,7 @@ import (
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	infraStorage "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -48,11 +49,13 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewJWTService,
 	service.NewOTPService,
 	sms.NewSMSService,
+	service.NewCalcService,
 	wire.Bind(new(usecase.UserService), new(*service.UserService)),
 	wire.Bind(new(usecase.FormService), new(*service.FormService)),
 	wire.Bind(new(usecase.OtpService), new(*service.OTPService)),
 	wire.Bind(new(usecase.JwtService), new(*service.JWTService)),
 	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
+	wire.Bind(new(usecase.CalcService), new(*service.CalcService)),
 )
 
 var GeneralControllerProviderSet = wire.NewSet(
@@ -63,6 +66,7 @@ var GeneralControllerProviderSet = wire.NewSet(
 var AdminControllerProviderSet = wire.NewSet(
 	user.NewAdminUserController,
 	form.NewAdminFormController,
+	calc.NewAdminCalcController,
 	wire.Struct(new(AdminControllers), "*"),
 )
 

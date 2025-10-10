@@ -72,9 +72,12 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	formRepository := postgres.NewFormRepository()
 	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
+	calcService := service.NewCalcService(constants, formRepository, postgresDatabase)
+	adminCalcController := calc.NewAdminCalcController(constants, calcService)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,
 		FormController: adminFormController,
+		CalcController: adminCalcController,
 	}
 	customerFormController := form.NewCustomerFormController(constants, formService, pagination)
 	customerControllers := &CustomerControllers{
@@ -193,6 +196,7 @@ type GeneralControllers struct {
 type AdminControllers struct {
 	UserController *user.AdminUserController
 	FormController *form.AdminFormController
+	CalcController *calc.AdminCalcController
 }
 
 type CustomerControllers struct {

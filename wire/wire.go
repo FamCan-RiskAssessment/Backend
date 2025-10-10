@@ -175,6 +175,7 @@ type GeneralControllers struct {
 type AdminControllers struct {
 	UserController *user.AdminUserController
 	FormController *form.AdminFormController
+	CalcController *calc.AdminCalcController
 }
 
 type CustomerControllers struct {

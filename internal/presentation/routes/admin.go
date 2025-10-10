@@ -62,4 +62,9 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		formManagement.PUT("/:formID/accept", app.Controllers.Admin.FormController.AcceptForm)
 		formManagement.PUT("/:formID/reject", app.Controllers.Admin.FormController.RejectForm)
 	}
+
+	calc := routerGroup.Group("/calc")
+	{
+		calc.POST("/premm5", app.Controllers.Admin.CalcController.SendFormToCalc)
+	}
 }

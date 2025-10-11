@@ -140,6 +140,10 @@ func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
 	return &container.Env.Pagination
 }
 
+func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
+	return &container.Env.CalcURL
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -160,6 +164,7 @@ var ProviderSet = wire.NewSet(
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
+	ProvideCalcURL,
 	SeedProviderSet,
 )
 

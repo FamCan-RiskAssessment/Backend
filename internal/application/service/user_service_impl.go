@@ -131,6 +131,7 @@ func (userService *UserService) VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest
 	}
 
 	return userdto.LoginResponse{
+		UserID:       user.ID,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		Permissions:  permissions,

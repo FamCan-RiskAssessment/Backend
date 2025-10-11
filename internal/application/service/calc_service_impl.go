@@ -1,6 +1,11 @@
 package service
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
@@ -14,17 +19,20 @@ type CalcService struct {
 	constants      *bootstrap.Constants
 	formRepository postgres.FormRepository
 	db             database.Database
+	calcURL        *bootstrap.CalcURL
 }
 
 func NewCalcService(
 	constants *bootstrap.Constants,
 	formRepository postgres.FormRepository,
 	db database.Database,
+	calcURL *bootstrap.CalcURL,
 ) *CalcService {
 	return &CalcService{
 		constants:      constants,
 		formRepository: formRepository,
 		db:             db,
+		calcURL:        calcURL,
 	}
 }
 
@@ -59,6 +67,27 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 }
 
 func (calcService *CalcService) sendFormToPremm5(form *entity.Form) error {
+	request := calcdto.SendFormToPremm5Request{}
+
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
 	return nil
 }
 

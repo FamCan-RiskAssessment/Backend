@@ -72,7 +72,8 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	formRepository := postgres.NewFormRepository()
 	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
-	calcService := service.NewCalcService(constants, formRepository, postgresDatabase)
+	calcURL := ProvideCalcURL(config)
+	calcService := service.NewCalcService(constants, formRepository, postgresDatabase, calcURL)
 	adminCalcController := calc.NewAdminCalcController(constants, calcService)
 	adminControllers := &AdminControllers{
 		UserController: adminUserController,
@@ -161,6 +162,10 @@ func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
 	return &container.Env.Pagination
 }
 
+func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
+	return &container.Env.CalcURL
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -181,6 +186,7 @@ var ProviderSet = wire.NewSet(
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
+	ProvideCalcURL,
 	SeedProviderSet,
 )
 

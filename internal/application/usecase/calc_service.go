@@ -4,4 +4,5 @@ import calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dt
 
 type CalcService interface {
 	SendFormToCalc(request calcdto.SendFormToCalcRequest) error
+	GetAllModelTypes() []calcdto.CalcEnumResponse
 }

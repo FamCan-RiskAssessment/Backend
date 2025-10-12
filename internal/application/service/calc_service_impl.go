@@ -110,3 +110,16 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) error {
 	defer resp.Body.Close()
 	return nil
 }
+
+func (calcService *CalcService) GetAllModelTypes() []calcdto.CalcEnumResponse {
+	modelTypes := enum.GetAllCalcs()
+	response := make([]calcdto.CalcEnumResponse, len(modelTypes))
+
+	for i, modelType := range modelTypes {
+		response[i] = calcdto.CalcEnumResponse{
+			ID:   uint(modelType),
+			Name: modelType.String(),
+		}
+	}
+	return response
+}

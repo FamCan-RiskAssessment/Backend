@@ -1,4 +1,4 @@
-package calc
+package calcdto
 
 type SendFormToCalcRequest struct {
 	FormID uint

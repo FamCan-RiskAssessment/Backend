@@ -100,6 +100,37 @@ func (d *DummySeeder) seedUsers() {
 }
 
 func (d *DummySeeder) seedForms() {
+	statuses := []enum.FormStatus{enum.FormStatusPending, enum.FormStatusApproved, enum.FormStatusRejected, enum.FormStatusInComplete, enum.FormStatusReady}
+	menopausalStatuses := []string{"قبل از یائسگی", "یائسه", "نامشخص"}
+	lifeStatuses := []string{"زنده", "فوت شده", "نامشخص"}
+	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
+	insuranceStatuses := []string{"تأمین اجتماعی", "خدمات درمانی", "نیروهای مسلح", "خصوصی", "ندارد"}
+	occupationalExposures := []string{
+		"آزبست", "بنزن", "کروم", "نیکل", "آرسنیک", "رادون", "ذرات معلق", "دود سیگار",
+		"مواد شیمیایی", "اشعه", "هیچکدام", "نامشخص",
+	}
+	relations := []string{"پدر", "مادر", "برادر", "خواهر", "عمو", "عمه", "دایی", "خاله"}
+	lungDiseaseTypes := []string{"آسم", "برونشیت مزمن", "فیبروز ریوی", "COPD", "سایر"}
+	smokingTypes := []string{"سیگار", "سیگار برگ", "پیپ", "قلیان", "چپق", "سیگار الکترونیکی"}
+	cancerTypes := []string{"سرطان سینه", "سرطان ریه", "سرطان کولون", "سرطان پروستات", "سرطان تخمدان"}
+	pastSmokingStatuses := []string{"ترک کرده", "هرگز", "نامشخص"}
+	secondhandSmokeLocations := []string{"خانه", "محل کار", "مکان عمومی", "هیچکدام"}
+	names := []string{
+		"علی احمدی", "فاطمه محمدی", "حسن رضایی", "زهرا کریمی", "محمد حسینی",
+		"مریم صادقی", "احمد نوری", "نرگس احمدی", "رضا محمدی", "سارا رضایی",
+	}
+	addresses := []string{
+		"تهران، خیابان ولیعصر، پلاک 123", "اصفهان، خیابان چهارباغ، پلاک 456",
+		"شیراز، خیابان زند، پلاک 789", "مشهد، خیابان امام رضا، پلاک 321",
+		"تبریز، خیابان آزادی، پلاک 654", "کرج، خیابان فردوسی، پلاک 987",
+	}
+	provinces := []string{"تهران", "اصفهان", "فارس", "خراسان رضوی", "آذربایجان شرقی", "البرز"}
+	cities := []string{"تهران", "اصفهان", "شیراز", "مشهد", "تبریز", "کرج"}
+	countries := []string{"ایران", "ترکیه", "آلمان", "کانادا", "آمریکا"}
+	months := []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+		"مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
+	genders := []string{"مرد", "زن"}
+
 	roles, err := d.userRepository.FindAllRoles(d.db)
 	if err != nil {
 		panic(err)
@@ -129,119 +160,74 @@ func (d *DummySeeder) seedForms() {
 
 		numForms := (i % 3) + 1
 		for j := 0; j < numForms; j++ {
-			form := d.createDummyForm(user.ID, j)
+			form := d.createDummyForm(user.ID, j, statuses)
 			if err := d.formRepository.CreateForm(d.db, form); err != nil {
+				panic(err)
+			}
+			basicInfo := d.createDummyBasicInfo(form.ID, j, months, genders)
+			if err := d.formRepository.CreateBasicInfo(d.db, basicInfo); err != nil {
+				panic(err)
+			}
+			generalHealth := d.createDummyGeneralHealth(form.ID, j)
+			if err := d.formRepository.CreateGeneralHealth(d.db, generalHealth); err != nil {
+				panic(err)
+			}
+			mamography := d.createDummyMamography(form.ID, j, menopausalStatuses, hrtTypes)
+			if err := d.formRepository.CreateMamography(d.db, mamography); err != nil {
+				panic(err)
+			}
+			cancer := d.createDummyCancer(form.ID, j, cancerTypes)
+			if err := d.formRepository.CreateCancer(d.db, cancer); err != nil {
+				panic(err)
+			}
+			familyCancer := d.createDummyFamilyCancer(form.ID, j, cancerTypes, lifeStatuses, relations)
+			if err := d.formRepository.CreateFamilyCancer(d.db, familyCancer); err != nil {
+				panic(err)
+			}
+			contact := d.createDummyContact(form.ID, j, names, addresses, provinces, cities, countries)
+			if err := d.formRepository.CreateContact(d.db, contact); err != nil {
+				panic(err)
+			}
+			lungCancer := d.createDummyLungCancer(form.ID, j, insuranceStatuses, occupationalExposures, lungDiseaseTypes, smokingTypes, pastSmokingStatuses, secondhandSmokeLocations, cancerTypes, relations)
+			if err := d.formRepository.CreateLungCancer(d.db, lungCancer); err != nil {
 				panic(err)
 			}
 		}
 	}
 }
 
-func (d *DummySeeder) createDummyForm(userID uint, formIndex int) *entity.Form {
-	statuses := []enum.FormStatus{enum.FormStatusPending, enum.FormStatusApproved, enum.FormStatusRejected}
+func (d *DummySeeder) createDummyForm(userID uint, formIndex int, statuses []enum.FormStatus) *entity.Form {
 	status := statuses[formIndex%len(statuses)]
 
-	names := []string{
-		"علی احمدی", "فاطمه محمدی", "حسن رضایی", "زهرا کریمی", "محمد حسینی",
-		"مریم صادقی", "احمد نوری", "نرگس احمدی", "رضا محمدی", "سارا رضایی",
+	form := &entity.Form{
+		Status: status,
+		UserID: userID,
 	}
-
-	addresses := []string{
-		"تهران، خیابان ولیعصر، پلاک 123", "اصفهان، خیابان چهارباغ، پلاک 456",
-		"شیراز، خیابان زند، پلاک 789", "مشهد، خیابان امام رضا، پلاک 321",
-		"تبریز، خیابان آزادی، پلاک 654", "کرج، خیابان فردوسی، پلاک 987",
-	}
-
-	months := []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
-		"مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
-
-	genders := []string{"مرد", "زن"}
-
-	menopausalStatuses := []string{"قبل از یائسگی", "یائسه", "نامشخص"}
-
-	cancerTypes := []string{"سرطان سینه", "سرطان ریه", "سرطان کولون", "سرطان پروستات", "سرطان تخمدان"}
-
-	lifeStatuses := []string{"زنده", "فوت شده", "نامشخص"}
-
-	relations := []string{"پدر", "مادر", "برادر", "خواهر", "عمو", "عمه", "دایی", "خاله"}
-
-	provinces := []string{"تهران", "اصفهان", "فارس", "خراسان رضوی", "آذربایجان شرقی", "البرز"}
-
-	cities := []string{"تهران", "اصفهان", "شیراز", "مشهد", "تبریز", "کرج"}
-
-	countries := []string{"ایران", "ترکیه", "آلمان", "کانادا", "آمریکا"}
-
-	insuranceStatuses := []string{"تأمین اجتماعی", "خدمات درمانی", "نیروهای مسلح", "خصوصی", "ندارد"}
-
-	occupationalExposures := []string{
-		"آزبست", "بنزن", "کروم", "نیکل", "آرسنیک", "رادون", "ذرات معلق", "دود سیگار",
-		"مواد شیمیایی", "اشعه", "هیچکدام", "نامشخص",
-	}
-
-	lungDiseaseTypes := []string{"آسم", "برونشیت مزمن", "فیبروز ریوی", "COPD", "سایر"}
-
-	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
-
-	smokingTypes := []string{"سیگار", "سیگار برگ", "پیپ", "قلیان", "چپق", "سیگار الکترونیکی"}
-
-	pastSmokingStatuses := []string{"ترک کرده", "هرگز", "نامشخص"}
-
-	secondhandSmokeLocations := []string{"خانه", "محل کار", "مکان عمومی", "هیچکدام"}
-
-	name := names[formIndex%len(names)]
-	address := addresses[formIndex%len(addresses)]
+	return form
+}
+func (d *DummySeeder) createDummyBasicInfo(formID uint, formIndex int, months []string, genders []string) *entity.BasicInfo {
 	birthMonth := months[formIndex%len(months)]
 	gender := genders[formIndex%len(genders)]
-	menopausalStatus := menopausalStatuses[formIndex%len(menopausalStatuses)]
-	province := provinces[formIndex%len(provinces)]
-	city := cities[formIndex%len(cities)]
-	country := countries[formIndex%len(countries)]
-	insuranceStatus := insuranceStatuses[formIndex%len(insuranceStatuses)]
-	occupationalExposure := occupationalExposures[formIndex%len(occupationalExposures)]
-	lungDiseaseType := lungDiseaseTypes[formIndex%len(lungDiseaseTypes)]
-	hrtType := hrtTypes[formIndex%len(hrtTypes)]
-	smokingType := smokingTypes[formIndex%len(smokingTypes)]
-	pastSmokingStatus := pastSmokingStatuses[formIndex%len(pastSmokingStatuses)]
-	secondhandSmokeLocation := secondhandSmokeLocations[formIndex%len(secondhandSmokeLocations)]
 
-	hasCancer := formIndex%4 == 0
-	hasChildCancer := formIndex%6 == 0
-	hasMotherCancer := formIndex%5 == 0
-	hasFatherCancer := formIndex%7 == 0
-	hasSiblingCancer := formIndex%8 == 0
-	hasAmeAmoCancer := formIndex%9 == 0
-	hasKhaleDaeiCancer := formIndex%10 == 0
-	hasOtherRelativeCancer := formIndex%11 == 0
-	hasChildren := formIndex%3 == 0
-	smokingNow := formIndex%3 == 0
-	drinksAlcohol := formIndex%4 == 0
-	hasTestGen := formIndex%5 == 0
-	hasFmTestGen := formIndex%6 == 0
-	hasHypertension := formIndex%4 == 0
-	hasHeartDisease := formIndex%5 == 0
-	hasDiabetes := formIndex%6 == 0
-	hasLungCancerHistory := formIndex%7 == 0
-	hasOtherCancerHistory := formIndex%8 == 0
-	hasLungCancerFamily := formIndex%9 == 0
-	hasOtherCancerFamily := formIndex%10 == 0
-	currentSmoking := formIndex%4 == 0
-	secondhandSmoke := formIndex%3 == 0
-
-	form := &entity.Form{
-		Status:               status,
-		UserID:               userID,
-		Name:                 name,
-		BirthDay:             uint((formIndex % 28) + 1), // 1-28
-		BirthMonth:           birthMonth,
-		BirthYear:            uint(1970 + (formIndex % 40)), // 1970-2009
-		Address:              address,
-		PostalCode:           fmt.Sprintf("%05d", 10000+(formIndex%90000)),
-		SocialSecurityNumber: fmt.Sprintf("%03d-%06d-%03d", formIndex%1000, formIndex%1000000, formIndex%1000),
+	basicInfo := &entity.BasicInfo{
+		FormID:               formID,
 		Gender:               gender,
+		BirthYear:            uint(1970 + (formIndex % 40)), // 1970-2009
+		BirthMonth:           birthMonth,
+		BirthDay:             uint((formIndex % 28) + 1), // 1-28
 		IsAtba:               formIndex%2 == 0,
+		SocialSecurityNumber: fmt.Sprintf("%03d-%06d-%03d", formIndex%1000, formIndex%1000000, formIndex%1000),
 		Height:               float64(150 + (formIndex % 50)), // 150-199 cm
 		Weight:               float64(50 + (formIndex % 80)),  // 50-129 kg
+	}
+	return basicInfo
+}
+func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *entity.GeneralHealthInfo {
+	smokingNow := formIndex%3 == 0
+	drinksAlcohol := formIndex%4 == 0
 
+	generalHealth := &entity.GeneralHealthInfo{
+		FormID:                  formID,
 		DrinksAlcohol:           &drinksAlcohol,
 		CupsPerWeek:             stringPtr(fmt.Sprintf("%d", formIndex%20)),
 		LastMonthSabzijatMeal:   fmt.Sprintf("%d", (formIndex%30)+1),
@@ -260,7 +246,17 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int) *entity.Form {
 		CountGheliandaily:     stringPtr(fmt.Sprintf("%d", (formIndex%10)+1)),
 		CountSmokingDailyPast: stringPtr(fmt.Sprintf("%d", (formIndex%15)+1)),
 		CountGheliandailyPast: stringPtr(fmt.Sprintf("%d", (formIndex%8)+1)),
+	}
+	return generalHealth
+}
+func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopausalStatuses []string, hrtTypes []string) *entity.MamoGraphyInfo {
+	drinksAlcohol := formIndex%4 == 0
+	hasChildren := formIndex%3 == 0
+	hrtType := hrtTypes[formIndex%len(hrtTypes)]
+	menopausalStatus := menopausalStatuses[formIndex%len(menopausalStatuses)]
 
+	mamoGraphyInfo := &entity.MamoGraphyInfo{
+		FormID:                       formID,
 		GhaedeAge:                    uint(12 + (formIndex % 10)),
 		HasChildren:                  hasChildren,
 		NumberOfChildren:             uintPtr(uint((formIndex % 5) + 1)),
@@ -286,11 +282,32 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int) *entity.Form {
 		AspLaMo:                      &drinksAlcohol,
 		NsaiDLaMo:                    &drinksAlcohol,
 		LastFiveYearBloodTestInStool: &drinksAlcohol,
+	}
+	return mamoGraphyInfo
+}
+func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes []string) *entity.CancerInfo {
+	hasCancer := formIndex%4 == 0
 
+	cancerInfo := &entity.CancerInfo{
+		FormID:     formID,
 		Cancer:     hasCancer,
 		CancerType: stringPtr(cancerTypes[formIndex%len(cancerTypes)]),
 		CancerAge:  uintPtr(uint(30 + (formIndex % 40))),
+	}
+	return cancerInfo
+}
+func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []string, lifeStatuses []string, relations []string) *entity.FamilyCancerInfo {
 
+	hasChildCancer := formIndex%6 == 0
+	hasMotherCancer := formIndex%5 == 0
+	hasFatherCancer := formIndex%7 == 0
+	hasSiblingCancer := formIndex%8 == 0
+	hasAmeAmoCancer := formIndex%9 == 0
+	hasKhaleDaeiCancer := formIndex%10 == 0
+	hasOtherRelativeCancer := formIndex%11 == 0
+
+	familyCancerInfo := &entity.FamilyCancerInfo{
+		FormID:          formID,
 		ChildCancer:     hasChildCancer,
 		ChildName:       stringPtr(fmt.Sprintf("فرزند %d", formIndex+1)),
 		ChildCancerType: stringPtr(cancerTypes[formIndex%len(cancerTypes)]),
@@ -333,16 +350,53 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int) *entity.Form {
 		OtherRelativeLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
 		OtherRelativeCancerType: stringPtr(cancerTypes[formIndex%len(cancerTypes)]),
 		OtherRelativeCancerAge:  uintPtr(uint(25 + (formIndex % 35))),
+	}
+	return familyCancerInfo
+}
+func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string) *entity.ContactInfo {
+	name := names[formIndex%len(names)]
+	address := addresses[formIndex%len(addresses)]
+	hasTestGen := formIndex%5 == 0
+	hasFmTestGen := formIndex%6 == 0
+	province := provinces[formIndex%len(provinces)]
+	city := cities[formIndex%len(cities)]
+	country := countries[formIndex%len(countries)]
 
-		TestGen:   &hasTestGen,
-		FmTestGen: &hasFmTestGen,
-
+	contactInfo := &entity.ContactInfo{
+		FormID:       formID,
+		Name:         name,
+		TestGen:      &hasTestGen,
+		FmTestGen:    &hasFmTestGen,
 		CallExpert:   true,
 		BirthCountry: &country,
 		Province:     &province,
 		City:         &city,
 		Country:      &country,
+		Address:      address,
+		PostalCode:   fmt.Sprintf("%05d", 10000+(formIndex%90000)),
+	}
+	return contactInfo
+}
+func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []string, secondhandSmokeLocations []string, cancerTypes []string, relations []string) *entity.LungCancerInfo {
+	drinksAlcohol := formIndex%4 == 0
+	insuranceStatus := insuranceStatuses[formIndex%len(insuranceStatuses)]
+	hasHypertension := formIndex%4 == 0
+	hasHeartDisease := formIndex%5 == 0
+	hasDiabetes := formIndex%6 == 0
+	hasLungCancerHistory := formIndex%7 == 0
+	hasOtherCancerHistory := formIndex%8 == 0
+	hasLungCancerFamily := formIndex%9 == 0
+	hasOtherCancerFamily := formIndex%10 == 0
+	currentSmoking := formIndex%4 == 0
+	secondhandSmoke := formIndex%3 == 0
+	occupationalExposure := occupationalExposures[formIndex%len(occupationalExposures)]
+	lungDiseaseType := lungDiseaseTypes[formIndex%len(lungDiseaseTypes)]
+	smokingType := smokingTypes[formIndex%len(smokingTypes)]
+	pastSmokingStatus := pastSmokingStatuses[formIndex%len(pastSmokingStatuses)]
+	secondhandSmokeLocation := secondhandSmokeLocations[formIndex%len(secondhandSmokeLocations)]
 
+	lungCancerInfo := &entity.LungCancerInfo{
+		FormID:                    formID,
 		InsuranceStatus:           &insuranceStatus,
 		SupplementaryInsurances:   stringPtr(fmt.Sprintf("بیمه %d", formIndex+1)),
 		Hypertension:              hasHypertension,
@@ -362,36 +416,32 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int) *entity.Form {
 		OtherCancerFamilyType:     stringPtr(cancerTypes[formIndex%len(cancerTypes)]),
 		OtherCancerFamilyRelation: stringPtr(relations[formIndex%len(relations)]),
 		OccupationalExposure:      &occupationalExposure,
-
-		CurrentSmoking:           currentSmoking,
-		SmokingStartAgeCurrent:   uintPtr(uint(15 + (formIndex % 20))),
-		SmokingTypesCurrent:      &smokingType,
-		CigarettesPerDayCurrent:  uintPtr(uint((formIndex % 40) + 1)),
-		CigarPerDayCurrent:       uintPtr(uint((formIndex % 10) + 1)),
-		ECigPerDayCurrent:        uintPtr(uint((formIndex % 20) + 1)),
-		PipePerDayCurrent:        uintPtr(uint((formIndex % 15) + 1)),
-		ChapoghPerDayCurrent:     uintPtr(uint((formIndex % 8) + 1)),
-		SmokedOpiumPerDayCurrent: uintPtr(uint((formIndex % 5) + 1)),
-		ChewedOpiumPerDayCurrent: uintPtr(uint((formIndex % 3) + 1)),
-		HookahPerWeekCurrent:     uintPtr(uint((formIndex % 7) + 1)),
-
-		PastSmoking:           &pastSmokingStatus,
-		SmokingStartAgePast:   uintPtr(uint(15 + (formIndex % 20))),
-		SmokingTypesPast:      &smokingType,
-		CigarettesPerDayPast:  uintPtr(uint((formIndex % 30) + 1)),
-		CigarPerDayPast:       uintPtr(uint((formIndex % 8) + 1)),
-		ECigPerDayPast:        uintPtr(uint((formIndex % 15) + 1)),
-		PipePerDayPast:        uintPtr(uint((formIndex % 12) + 1)),
-		ChapoghPerDayPast:     uintPtr(uint((formIndex % 6) + 1)),
-		SmokedOpiumPerDayPast: uintPtr(uint((formIndex % 4) + 1)),
-		ChewedOpiumPerDayPast: uintPtr(uint((formIndex % 2) + 1)),
-		HookahPerWeekPast:     uintPtr(uint((formIndex % 5) + 1)),
-
-		SecondhandSmoke:         secondhandSmoke,
-		SecondhandSmokeLocation: &secondhandSmokeLocation,
+		CurrentSmoking:            currentSmoking,
+		SmokingStartAgeCurrent:    uintPtr(uint(15 + (formIndex % 20))),
+		SmokingTypesCurrent:       &smokingType,
+		CigarettesPerDayCurrent:   uintPtr(uint((formIndex % 40) + 1)),
+		CigarPerDayCurrent:        uintPtr(uint((formIndex % 10) + 1)),
+		ECigPerDayCurrent:         uintPtr(uint((formIndex % 20) + 1)),
+		PipePerDayCurrent:         uintPtr(uint((formIndex % 15) + 1)),
+		ChapoghPerDayCurrent:      uintPtr(uint((formIndex % 8) + 1)),
+		SmokedOpiumPerDayCurrent:  uintPtr(uint((formIndex % 5) + 1)),
+		ChewedOpiumPerDayCurrent:  uintPtr(uint((formIndex % 3) + 1)),
+		HookahPerWeekCurrent:      uintPtr(uint((formIndex % 7) + 1)),
+		PastSmoking:               &pastSmokingStatus,
+		SmokingStartAgePast:       uintPtr(uint(15 + (formIndex % 20))),
+		SmokingTypesPast:          &smokingType,
+		CigarettesPerDayPast:      uintPtr(uint((formIndex % 30) + 1)),
+		CigarPerDayPast:           uintPtr(uint((formIndex % 8) + 1)),
+		ECigPerDayPast:            uintPtr(uint((formIndex % 15) + 1)),
+		PipePerDayPast:            uintPtr(uint((formIndex % 12) + 1)),
+		ChapoghPerDayPast:         uintPtr(uint((formIndex % 6) + 1)),
+		SmokedOpiumPerDayPast:     uintPtr(uint((formIndex % 4) + 1)),
+		ChewedOpiumPerDayPast:     uintPtr(uint((formIndex % 2) + 1)),
+		HookahPerWeekPast:         uintPtr(uint((formIndex % 5) + 1)),
+		SecondhandSmoke:           secondhandSmoke,
+		SecondhandSmokeLocation:   &secondhandSmokeLocation,
 	}
-
-	return form
+	return lungCancerInfo
 }
 
 func stringPtr(s string) *string {

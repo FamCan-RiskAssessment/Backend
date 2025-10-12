@@ -60,20 +60,6 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", data)
 }
 
-func (formController *AdminFormController) GetForm(ctx *gin.Context) {
-	type GetFormParams struct {
-		FormID uint `uri:"formID" validate:"required"`
-	}
-	params := controller.Validate[GetFormParams](ctx)
-
-	response, err := formController.formService.GetForm(params.FormID)
-	if err != nil {
-		panic(err)
-	}
-
-	controller.Response(ctx, 200, "", response)
-}
-
 func (formController *AdminFormController) DeleteForm(ctx *gin.Context) {
 	type DeleteFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -120,4 +106,19 @@ func (formController *AdminFormController) RejectForm(ctx *gin.Context) {
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.rejectForm")
 	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *AdminFormController) GetBasicForm(ctx *gin.Context) {
+	type GetBasicFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetBasicFormParams](ctx)
+
+	response, err := formController.formService.GetBasicForm(params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
 }

@@ -26,7 +26,6 @@ type FormRepository interface {
 	DeleteForm(db database.Database, id uint) error
 	FindAllForms(db database.Database, offset, limit int, filters *FormFilters) ([]*entity.Form, error)
 	CountAllForms(db database.Database, filters *FormFilters) (int64, error)
-	CountAllForms(db database.Database) (int64, error)
 
 	FindGeneralHealthByFormID(db database.Database, formID uint) (*entity.GeneralHealthInfo, error)
 	CreateGeneralHealth(db database.Database, info *entity.GeneralHealthInfo) error

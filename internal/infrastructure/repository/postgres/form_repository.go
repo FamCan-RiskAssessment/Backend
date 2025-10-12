@@ -147,6 +147,7 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 	}
 
 	return query
+}
 func (r *FormRepository) FindGeneralHealthByFormID(db database.Database, formID uint) (*entity.GeneralHealthInfo, error) {
 	var info entity.GeneralHealthInfo
 	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error

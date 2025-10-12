@@ -25,7 +25,7 @@ type FormService interface {
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(formID uint) error
-	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.FormResponse, int64, error)
+	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error
 }

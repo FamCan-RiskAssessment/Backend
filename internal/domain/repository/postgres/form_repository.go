@@ -5,6 +5,15 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
+type FormFilters struct {
+	Status        *uint
+	Gender        *string
+	BirthYear     *uint
+	DrinksAlcohol *bool
+	SmokingNow    *bool
+	Cancer        *bool
+}
+
 type FormRepository interface {
 	CreateForm(db database.Database, form *entity.Form) error
 	CreateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
@@ -15,8 +24,8 @@ type FormRepository interface {
 	UpdateForm(db database.Database, form *entity.Form) error
 	UpdateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
 	DeleteForm(db database.Database, id uint) error
-	FindAllForms(db database.Database, offset, limit int) ([]*entity.Form, error)
-	CountAllForms(db database.Database) (int64, error)
+	FindAllForms(db database.Database, offset, limit int, filters *FormFilters) ([]*entity.Form, error)
+	CountAllForms(db database.Database, filters *FormFilters) (int64, error)
 
 	FindGeneralHealthByFormID(db database.Database, formID uint) (*entity.GeneralHealthInfo, error)
 	CreateGeneralHealth(db database.Database, info *entity.GeneralHealthInfo) error

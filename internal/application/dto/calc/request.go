@@ -18,3 +18,6 @@ type SendFormToPremm5Request struct {
 	CurrentAge             uint
 	FamilyLsOther          bool
 }
+
+type SendFormToBCRARequest struct {
+}

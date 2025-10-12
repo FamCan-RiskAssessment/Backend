@@ -57,11 +57,6 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		if err != nil {
 			return err
 		}
-	case enum.CalcGBR:
-		err = calcService.sendFormToGBR(form)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -92,9 +87,26 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form) error {
 }
 
 func (calcService *CalcService) sendFormToBCRA(form *entity.Form) error {
-	return nil
-}
+	request := calcdto.SendFormToBCRARequest{}
 
-func (calcService *CalcService) sendFormToGBR(form *entity.Form) error {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return err
+	}
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("content-tytpe", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
 	return nil
 }

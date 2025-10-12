@@ -72,6 +72,7 @@ type SuperAdmin struct {
 
 type CalcURL struct {
 	Premm5 string
+	BCRA   string
 }
 
 func NewEnv() *Env {
@@ -118,6 +119,7 @@ func NewEnv() *Env {
 		},
 		CalcURL: CalcURL{
 			Premm5: os.Getenv("PREMM5_API_URL"),
+			BCRA:   os.Getenv("BCRA_API_URL"),
 		},
 	}
 }

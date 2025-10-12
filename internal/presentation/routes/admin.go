@@ -45,6 +45,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 	userManagement := routerGroup.Group("/users")
 	{
+		userManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryPatientManagement)}))
 		userManagement.GET("", app.Controllers.Admin.UserController.GetUsers)
 	}
 

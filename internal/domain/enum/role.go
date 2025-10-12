@@ -17,11 +17,13 @@ var rolePermissions = map[RoleName][]PermissionType{
 	Supervisor: {
 		PermissionType(CategoryPatientManagement),
 		PermissionType(CategoryFormManagement),
+		PermissionType(CategoryDataEntry),
 		PermissionSetPassword,
 	},
 	Operator: {
 		PermissionType(CategoryPatientManagement),
 		PermissionType(CategoryFormManagement),
+		PermissionType(CategoryDataEntry),
 		PermissionSetPassword,
 	},
 	Patient: {

@@ -105,6 +105,8 @@ func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) 
 
 	params := controller.Validate[UpdateBasicInfoParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
 		BirthDay:             params.BirthDay,
@@ -115,6 +117,7 @@ func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) 
 		IsAtba:               params.IsAtba,
 		Height:               params.Height,
 		Weight:               params.Weight,
+		UserID:               userID.(uint),
 	}
 
 	err := formController.formService.UpdateBasicInfo(request)
@@ -133,7 +136,14 @@ func (formController *CustomerFormController) DeleteForm(ctx *gin.Context) {
 	}
 	params := controller.Validate[DeleteFormParams](ctx)
 
-	err := formController.formService.DeleteForm(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.DeleteFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	err := formController.formService.DeleteForm(request)
 	if err != nil {
 		panic(err)
 	}
@@ -167,7 +177,10 @@ func (formController *CustomerFormController) UpsertGeneralHealth(ctx *gin.Conte
 
 	params := controller.Validate[UpsertGeneralHealthParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertGeneralHealthRequest{
+		UserID:                    userID.(uint),
 		FormID:                    params.FormID,
 		DrinksAlcohol:             params.DrinksAlcohol,
 		CupsPerWeek:               params.CupsPerWeek,
@@ -228,7 +241,10 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 
 	params := controller.Validate[UpsertMamographyParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertMamographyRequest{
+		UserID:                       userID.(uint),
 		FormID:                       params.FormID,
 		GhaedeAge:                    params.GhaedeAge,
 		HasChildren:                  params.HasChildren,
@@ -275,7 +291,10 @@ func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
 
 	params := controller.Validate[UpsertCancerParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertCancerRequest{
+		UserID:     userID.(uint),
 		FormID:     params.FormID,
 		Cancer:     params.Cancer,
 		CancerType: params.CancerType,
@@ -340,7 +359,10 @@ func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Contex
 
 	params := controller.Validate[UpsertFamilyCancerParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertFamilyCancerRequest{
+		UserID:                  userID.(uint),
 		FormID:                  params.FormID,
 		ChildCancer:             params.ChildCancer,
 		ChildName:               params.ChildName,
@@ -406,7 +428,10 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 
 	params := controller.Validate[UpsertContactParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertContactRequest{
+		UserID:       userID.(uint),
 		FormID:       params.FormID,
 		Name:         params.Name,
 		TestGen:      params.TestGen,
@@ -479,7 +504,10 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 
 	params := controller.Validate[UpsertLungCancerParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	req := formdto.UpsertLungCancerRequest{
+		UserID:                    userID.(uint),
 		FormID:                    params.FormID,
 		InsuranceStatus:           params.InsuranceStatus,
 		SupplementaryInsurances:   params.SupplementaryInsurances,
@@ -542,7 +570,10 @@ func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context)
 
 	params := controller.Validate[ChangeFormStatusParams](ctx)
 
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
 	request := formdto.ChangeFormStatusRequest{
+		UserID: userID.(uint),
 		FormID: params.FormID,
 	}
 
@@ -563,7 +594,14 @@ func (formController *CustomerFormController) GetBasicForm(ctx *gin.Context) {
 
 	params := controller.Validate[GetBasicFormParams](ctx)
 
-	response, err := formController.formService.GetBasicForm(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetBasicForm(request)
 	if err != nil {
 		panic(err)
 	}
@@ -577,7 +615,14 @@ func (formController *CustomerFormController) GetGeneralHealth(ctx *gin.Context)
 
 	params := controller.Validate[GetGeneralHealthParams](ctx)
 
-	response, err := formController.formService.GetGeneralHealth(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetGeneralHealth(request)
 	if err != nil {
 		panic(err)
 	}
@@ -591,7 +636,14 @@ func (formController *CustomerFormController) GetMamography(ctx *gin.Context) {
 
 	params := controller.Validate[GetMamographyParams](ctx)
 
-	response, err := formController.formService.GetMamography(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetMamography(request)
 	if err != nil {
 		panic(err)
 	}
@@ -605,7 +657,14 @@ func (formController *CustomerFormController) GetCancer(ctx *gin.Context) {
 
 	params := controller.Validate[GetCancerParams](ctx)
 
-	response, err := formController.formService.GetCancer(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetCancer(request)
 	if err != nil {
 		panic(err)
 	}
@@ -619,7 +678,14 @@ func (formController *CustomerFormController) GetFamilyCancer(ctx *gin.Context) 
 
 	params := controller.Validate[GetFamilyCancerParams](ctx)
 
-	response, err := formController.formService.GetFamilyCancer(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetFamilyCancer(request)
 	if err != nil {
 		panic(err)
 	}
@@ -633,7 +699,14 @@ func (formController *CustomerFormController) GetContact(ctx *gin.Context) {
 
 	params := controller.Validate[GetContactParams](ctx)
 
-	response, err := formController.formService.GetContact(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetContact(request)
 	if err != nil {
 		panic(err)
 	}
@@ -648,7 +721,14 @@ func (formController *CustomerFormController) GetLungCancer(ctx *gin.Context) {
 
 	params := controller.Validate[GetLungCancerParams](ctx)
 
-	response, err := formController.formService.GetLungCancer(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetLungCancer(request)
 	if err != nil {
 		panic(err)
 	}

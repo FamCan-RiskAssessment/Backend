@@ -15,6 +15,7 @@ type CreateBasicFormRequest struct {
 }
 
 type UpdateBasicFormRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	// page 1
@@ -35,14 +36,22 @@ type GetUserFormsRequest struct {
 }
 
 type GetFormRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 }
 
+type GetPartialFormRequest struct {
+	UserID uint
+	FormID uint
+}
+
 type DeleteFormRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 }
 
 type UpsertGeneralHealthRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	DrinksAlcohol             *bool   `json:"drinksAlcohol,omitempty"`
@@ -64,6 +73,7 @@ type UpsertGeneralHealthRequest struct {
 }
 
 type UpsertMamographyRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	GhaedeAge                    uint    `json:"ghaedeAge" binding:"required"`
@@ -94,6 +104,7 @@ type UpsertMamographyRequest struct {
 }
 
 type UpsertCancerRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	Cancer     bool    `json:"cancer"`
@@ -102,6 +113,7 @@ type UpsertCancerRequest struct {
 }
 
 type UpsertFamilyCancerRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	ChildCancer     bool    `json:"childCancer"`
@@ -149,6 +161,7 @@ type UpsertFamilyCancerRequest struct {
 }
 
 type UpsertContactRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	Name         string  `json:"name" binding:"required"`
@@ -164,6 +177,7 @@ type UpsertContactRequest struct {
 }
 
 type UpsertLungCancerRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
 	InsuranceStatus           *string `json:"insuranceStatus,omitempty"`
@@ -212,5 +226,6 @@ type UpsertLungCancerRequest struct {
 }
 
 type ChangeFormStatusRequest struct {
+	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 }

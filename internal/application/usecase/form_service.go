@@ -4,13 +4,13 @@ import formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dt
 
 type FormService interface {
 	CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error)
-	GetBasicForm(formID uint) (formdto.GetBasicFormResponse, error)
-	GetGeneralHealth(formID uint) (formdto.GetGeneralHealthResponse, error)
-	GetMamography(formID uint) (formdto.GetMamographyResponse, error)
-	GetCancer(formID uint) (formdto.GetCancerResponse, error)
-	GetFamilyCancer(formID uint) (formdto.GetFamilyCancerResponse, error)
-	GetContact(formID uint) (formdto.GetContactResponse, error)
-	GetLungCancer(formID uint) (formdto.GetLungCancerResponse, error)
+	GetBasicForm(request formdto.GetPartialFormRequest) (formdto.GetBasicFormResponse, error)
+	GetGeneralHealth(request formdto.GetPartialFormRequest) (formdto.GetGeneralHealthResponse, error)
+	GetMamography(request formdto.GetPartialFormRequest) (formdto.GetMamographyResponse, error)
+	GetCancer(request formdto.GetPartialFormRequest) (formdto.GetCancerResponse, error)
+	GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error)
+	GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error)
+	GetLungCancer(request formdto.GetPartialFormRequest) (formdto.GetLungCancerResponse, error)
 	GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.BasicFormResponse, int64, error)
 	UpdateForm(request formdto.UpdateBasicFormRequest) error
 	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
@@ -21,7 +21,7 @@ type FormService interface {
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
-	DeleteForm(formID uint) error
+	DeleteForm(request formdto.DeleteFormRequest) error
 	GetAllForms(offset, limit int) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error

@@ -1,6 +1,9 @@
 package usecase
 
-import formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+import (
+	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+)
 
 type FormService interface {
 	CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error)
@@ -22,7 +25,7 @@ type FormService interface {
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(request formdto.DeleteFormRequest) error
-	GetAllForms(offset, limit int) ([]formdto.BasicFormResponse, int64, error)
+	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
 	"github.com/gin-gonic/gin"
 )
@@ -28,14 +29,29 @@ func NewAdminFormController(
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	type GetAllFormsParams struct {
-		Page     int `form:"page"`
-		PageSize int `form:"pageSize"`
+		Page          int     `form:"page"`
+		PageSize      int     `form:"pageSize"`
+		Status        *uint   `form:"status"`
+		Gender        *string `form:"gender"`
+		BirthYear     *uint   `form:"birthYear"`
+		DrinksAlcohol *bool   `form:"drinksAlcohol"`
+		SmokingNow    *bool   `form:"smokingNow"`
+		Cancer        *bool   `form:"cancer"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
 	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
 
-	forms, count, err := formController.formService.GetAllForms(offset, limit)
+	filters := &postgres.FormFilters{
+		Status:        params.Status,
+		Gender:        params.Gender,
+		BirthYear:     params.BirthYear,
+		DrinksAlcohol: params.DrinksAlcohol,
+		SmokingNow:    params.SmokingNow,
+		Cancer:        params.Cancer,
+	}
+
+	forms, count, err := formController.formService.GetAllForms(offset, limit, filters)
 	if err != nil {
 		panic(err)
 	}

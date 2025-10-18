@@ -23,9 +23,18 @@ type FormService interface {
 	UpsertFamilyCancer(request formdto.UpsertFamilyCancerRequest) error
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
+
+	UpdateGeneralHealth(request formdto.UpdateGeneralHealthRequest) error
+	UpdateMamography(request formdto.UpdateMamographyRequest) error
+	UpdateCancer(request formdto.UpdateCancerRequest) error
+	UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error
+	UpdateContact(request formdto.UpdateContactRequest) error
+	UpdateLungCancer(request formdto.UpdateLungCancerRequest) error
+
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(request formdto.DeleteFormRequest) error
 	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error
+	ChangeOperator(request formdto.ChangeOperatorRequest) error
 }

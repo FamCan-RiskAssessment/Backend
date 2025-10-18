@@ -92,15 +92,15 @@ func (formController *CustomerFormController) GetUserForms(ctx *gin.Context) {
 
 func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) {
 	type UpdateBasicInfoParams struct {
-		FormID               uint    `uri:"formID" validate:"required"`
-		BirthDay             uint    `json:"birthDay" validate:"required"`
-		BirthMonth           string  `json:"birthMonth" validate:"required"`
-		BirthYear            uint    `json:"birthYear" validate:"required"`
-		SocialSecurityNumber string  `json:"socialSecurityNumber" validate:"required"`
-		Gender               string  `json:"gender" validate:"required"`
-		IsAtba               bool    `json:"isAtba"`
-		Height               float64 `json:"height" validate:"required"`
-		Weight               float64 `json:"weight" validate:"required"`
+		FormID               uint     `uri:"formID" validate:"required"`
+		BirthDay             *uint    `json:"birthDay" validate:"required"`
+		BirthMonth           *string  `json:"birthMonth" validate:"required"`
+		BirthYear            *uint    `json:"birthYear" validate:"required"`
+		SocialSecurityNumber *string  `json:"socialSecurityNumber" validate:"required"`
+		Gender               *string  `json:"gender" validate:"required"`
+		IsAtba               *bool    `json:"isAtba"`
+		Height               *float64 `json:"height" validate:"required"`
+		Weight               *float64 `json:"weight" validate:"required"`
 	}
 
 	params := controller.Validate[UpdateBasicInfoParams](ctx)

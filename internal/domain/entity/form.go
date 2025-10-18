@@ -7,9 +7,11 @@ import (
 
 type Form struct {
 	database.Model
-	Status enum.FormStatus
-	UserID uint `gorm:"not null;index"`
-	User   User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Status     enum.FormStatus
+	UserID     uint  `gorm:"not null;index"`
+	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OperatorID *uint `gorm:""`
+	Operator   *User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 
 type BasicInfo struct {

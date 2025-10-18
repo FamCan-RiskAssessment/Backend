@@ -47,7 +47,6 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	{
 		userManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryPatientManagement)}))
 		userManagement.GET("", app.Controllers.Admin.UserController.GetUsers)
-		userManagement.GET("/forms", app.Controllers.Admin.FormController.GetUserForms)
 	}
 
 	forms := routerGroup.Group("/form")
@@ -59,6 +58,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 		formManagement := forms.Group("/:formID")
 		{
+			formManagement.PUT("/operator", app.Controllers.Admin.FormController.ChangeOperator)
 			formManagement.PUT("accept", app.Controllers.Admin.FormController.AcceptForm)
 			formManagement.PUT("reject", app.Controllers.Admin.FormController.RejectForm)
 			formManagement.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)

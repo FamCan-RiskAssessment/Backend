@@ -36,4 +36,5 @@ type FormService interface {
 	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error
+	ChangeOperator(request formdto.ChangeOperatorRequest) error
 }

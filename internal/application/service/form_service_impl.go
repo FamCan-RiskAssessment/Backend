@@ -445,11 +445,12 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 
 	response := formdto.ChangeFormStatusResponse{
 		Form: formdto.BasicFormResponse{
-			FormID:    form.ID,
-			Status:    form.Status.String(),
-			UserID:    form.UserID,
-			CreatedAt: form.CreatedAt,
-			UpdatedAt: form.UpdatedAt,
+			FormID:     form.ID,
+			Status:     form.Status.String(),
+			OperatorID: *form.OperatorID,
+			UserID:     form.UserID,
+			CreatedAt:  form.CreatedAt,
+			UpdatedAt:  form.UpdatedAt,
 		},
 	}
 
@@ -826,11 +827,12 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:    form.ID,
-			Status:    form.Status.String(),
-			UserID:    form.UserID,
-			CreatedAt: form.CreatedAt,
-			UpdatedAt: form.UpdatedAt,
+			FormID:     form.ID,
+			Status:     form.Status.String(),
+			UserID:     form.UserID,
+			OperatorID: *form.OperatorID,
+			CreatedAt:  form.CreatedAt,
+			UpdatedAt:  form.UpdatedAt,
 		}
 	}
 
@@ -945,11 +947,12 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:    form.ID,
-			Status:    form.Status.String(),
-			UserID:    form.UserID,
-			CreatedAt: form.CreatedAt,
-			UpdatedAt: form.UpdatedAt,
+			FormID:     form.ID,
+			Status:     form.Status.String(),
+			UserID:     form.UserID,
+			OperatorID: *form.OperatorID,
+			CreatedAt:  form.CreatedAt,
+			UpdatedAt:  form.UpdatedAt,
 		}
 	}
 
@@ -1404,4 +1407,24 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		return formService.formRepository.CreateLungCancer(formService.db, info)
 	}
 	return formService.formRepository.UpdateLungCancer(formService.db, info)
+}
+
+func (formService *FormService) ChangeOperator(request formdto.ChangeOperatorRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Update the operator ID
+	form.OperatorID = &request.OperatorID
+	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

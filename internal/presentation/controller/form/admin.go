@@ -734,3 +734,29 @@ func (formController *AdminFormController) GetUserForms(ctx *gin.Context) {
 	data := controller.NewPaginatedResponse(forms, count, offset, limit)
 	controller.Response(ctx, 200, "", data)
 }
+
+func (formController *AdminFormController) ChangeOperator(ctx *gin.Context) {
+	type ChangeOperatorParams struct {
+		FormID     uint `uri:"formID" validate:"required"`
+		OperatorID uint `json:"operatorId" validate:"required"`
+	}
+
+	params := controller.Validate[ChangeOperatorParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.ChangeOperatorRequest{
+		UserID:     userID.(uint),
+		FormID:     params.FormID,
+		OperatorID: params.OperatorID,
+	}
+
+	err := formController.formService.ChangeOperator(request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 200, message, nil)
+}

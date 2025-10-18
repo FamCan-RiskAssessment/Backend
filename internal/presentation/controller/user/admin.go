@@ -237,3 +237,7 @@ func (userController *AdminUserController) LoginWithPassword(ctx *gin.Context) {
 	controller.Response(ctx, 200, message, response)
 
 }
+
+func (userController *AdminUserController) GetOperators(ctx *gin.Context) {
+	
+}

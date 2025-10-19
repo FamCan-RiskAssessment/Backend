@@ -6,7 +6,7 @@ type BasicFormResponse struct {
 	FormID     uint   `json:"id"`
 	Status     string `json:"status"`
 	UserID     uint   `json:"user_id"`
-	OperatorID uint   `json:"operatorId,omitempty"`
+	OperatorID *uint  `json:"operatorId,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

@@ -447,7 +447,7 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		Form: formdto.BasicFormResponse{
 			FormID:     form.ID,
 			Status:     form.Status.String(),
-			OperatorID: *form.OperatorID,
+			OperatorID: form.OperatorID,
 			UserID:     form.UserID,
 			CreatedAt:  form.CreatedAt,
 			UpdatedAt:  form.UpdatedAt,
@@ -830,7 +830,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			FormID:     form.ID,
 			Status:     form.Status.String(),
 			UserID:     form.UserID,
-			OperatorID: *form.OperatorID,
+			OperatorID: form.OperatorID,
 			CreatedAt:  form.CreatedAt,
 			UpdatedAt:  form.UpdatedAt,
 		}
@@ -950,7 +950,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			FormID:     form.ID,
 			Status:     form.Status.String(),
 			UserID:     form.UserID,
-			OperatorID: *form.OperatorID,
+			OperatorID: form.OperatorID,
 			CreatedAt:  form.CreatedAt,
 			UpdatedAt:  form.UpdatedAt,
 		}

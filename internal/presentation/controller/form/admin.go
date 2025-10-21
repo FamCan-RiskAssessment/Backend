@@ -735,23 +735,46 @@ func (formController *AdminFormController) GetUserForms(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", data)
 }
 
-func (formController *AdminFormController) ChangeOperator(ctx *gin.Context) {
-	type ChangeOperatorParams struct {
+func (formController *AdminFormController) AssignOperator(ctx *gin.Context) {
+	type AssignOperatorParams struct {
 		FormID     uint `uri:"formID" validate:"required"`
 		OperatorID uint `json:"operatorId" validate:"required"`
 	}
 
-	params := controller.Validate[ChangeOperatorParams](ctx)
+	params := controller.Validate[AssignOperatorParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	request := formdto.ChangeOperatorRequest{
+	request := formdto.AssignOperatorRequest{
 		UserID:     userID.(uint),
 		FormID:     params.FormID,
 		OperatorID: params.OperatorID,
 	}
 
-	err := formController.formService.ChangeOperator(request)
+	err := formController.formService.AssignOperator(request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 200, message, nil)
+}
+func (formController *AdminFormController) UnassignOperator(ctx *gin.Context) {
+	type UnassignOperatorParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[UnassignOperatorParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.UnassignOperatorRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	err := formController.formService.UnassignOperator(request)
 	if err != nil {
 		panic(err)
 	}

@@ -230,10 +230,15 @@ type ChangeFormStatusRequest struct {
 	FormID uint `json:"form_id" binding:"required"`
 }
 
-type ChangeOperatorRequest struct {
+type AssignOperatorRequest struct {
 	UserID     uint
 	FormID     uint `json:"form_id" binding:"required"`
 	OperatorID uint `json:"operator_id" binding:"required"`
+}
+
+type UnassignOperatorRequest struct {
+	UserID uint
+	FormID uint `json:"form_id" binding:"required"`
 }
 
 type UpdateGeneralHealthRequest struct {

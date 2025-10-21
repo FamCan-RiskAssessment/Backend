@@ -10,7 +10,7 @@ type Form struct {
 	Status     enum.FormStatus
 	UserID     uint  `gorm:"not null;index"`
 	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OperatorID *uint `gorm:""`
+	OperatorID *uint `gorm:"type:int"`
 	Operator   *User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
 

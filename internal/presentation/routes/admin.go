@@ -58,7 +58,8 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 		formManagement := forms.Group("/:formID")
 		{
-			formManagement.PUT("/operator", app.Controllers.Admin.FormController.ChangeOperator)
+			formManagement.PUT("/operator", app.Controllers.Admin.FormController.AssignOperator)
+			formManagement.DELETE("/operator", app.Controllers.Admin.FormController.UnassignOperator)
 			formManagement.PUT("accept", app.Controllers.Admin.FormController.AcceptForm)
 			formManagement.PUT("reject", app.Controllers.Admin.FormController.RejectForm)
 			formManagement.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)

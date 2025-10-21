@@ -87,7 +87,6 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -135,7 +134,6 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -191,7 +189,6 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -225,7 +222,6 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -298,7 +294,6 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -339,7 +334,6 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -848,7 +842,6 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	info, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -987,7 +980,6 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1050,7 +1042,6 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1119,7 +1110,6 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1156,7 +1146,6 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1242,7 +1231,6 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1291,7 +1279,6 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
 	}
-	
 
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
@@ -1370,7 +1357,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	return formService.formRepository.UpdateLungCancer(formService.db, info)
 }
 
-func (formService *FormService) ChangeOperator(request formdto.ChangeOperatorRequest) error {
+func (formService *FormService) AssignOperator(request formdto.AssignOperatorRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -1382,6 +1369,25 @@ func (formService *FormService) ChangeOperator(request formdto.ChangeOperatorReq
 
 	// Update the operator ID
 	form.OperatorID = &request.OperatorID
+	err = formService.formRepository.UpdateForm(formService.db, form)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+func (formService *FormService) UnassignOperator(request formdto.UnassignOperatorRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Update the operator ID
+	form.OperatorID = nil
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
 		return err

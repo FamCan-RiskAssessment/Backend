@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
@@ -71,6 +72,7 @@ func (am *AuthMiddleware) RequiredWithPermission(allowedPermissions []enum.Permi
 			panic(unauthorizedError)
 		}
 		user, _ := am.userRepository.FindUserByID(am.db, id.(uint))
+		fmt.Println(user.ID, "user")
 
 		if err := am.userRepository.FindUserRoles(am.db, user); err != nil {
 			panic(err)

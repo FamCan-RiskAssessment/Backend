@@ -49,6 +49,12 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		userManagement.GET("", app.Controllers.Admin.UserController.GetUsers)
 	}
 
+	supervisorFormManagement := routerGroup.Group("/form")
+	supervisorFormManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.PermissionHandleOperators)}))
+	{
+
+	}
+
 	forms := routerGroup.Group("/form")
 	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	forms.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryFormManagement)}))
@@ -56,10 +62,15 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		forms.GET("", app.Controllers.Admin.FormController.GetAllForms)
 		forms.DELETE("/:formID", app.Controllers.Admin.FormController.DeleteForm)
 
+		supervisorFormManagement := forms.Group("/:formID")
+		supervisorFormManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.PermissionHandleOperators)}))
+		{
+			supervisorFormManagement.PUT("/operator", app.Controllers.Admin.FormController.AssignOperator)
+			supervisorFormManagement.DELETE("/operator", app.Controllers.Admin.FormController.UnassignOperator)
+		}
+
 		formManagement := forms.Group("/:formID")
 		{
-			formManagement.PUT("/operator", app.Controllers.Admin.FormController.AssignOperator)
-			formManagement.DELETE("/operator", app.Controllers.Admin.FormController.UnassignOperator)
 			formManagement.PUT("accept", app.Controllers.Admin.FormController.AcceptForm)
 			formManagement.PUT("reject", app.Controllers.Admin.FormController.RejectForm)
 			formManagement.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)

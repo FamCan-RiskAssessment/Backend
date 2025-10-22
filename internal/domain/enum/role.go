@@ -19,6 +19,7 @@ var rolePermissions = map[RoleName][]PermissionType{
 		PermissionType(CategoryFormManagement),
 		PermissionType(CategoryDataEntry),
 		PermissionSetPassword,
+		PermissionHandleOperators,
 	},
 	Operator: {
 		PermissionType(CategoryPatientManagement),

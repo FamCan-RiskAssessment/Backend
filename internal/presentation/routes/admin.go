@@ -80,4 +80,10 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 		}
 	}
+
+	operatorForms := routerGroup.Group("/operator-form")
+	operatorForms.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryFormManagement)}))
+	{
+		forms.GET("", app.Controllers.Admin.FormController.GetAllOperatorForms)
+	}
 }

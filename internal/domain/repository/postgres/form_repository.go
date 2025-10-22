@@ -14,6 +14,16 @@ type FormFilters struct {
 	Cancer        *bool
 }
 
+type OperatorFormFilters struct {
+	OperatorID    uint
+	Status        *uint
+	Gender        *string
+	BirthYear     *uint
+	DrinksAlcohol *bool
+	SmokingNow    *bool
+	Cancer        *bool
+}
+
 type FormRepository interface {
 	CreateForm(db database.Database, form *entity.Form) error
 	CreateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
@@ -26,6 +36,8 @@ type FormRepository interface {
 	DeleteForm(db database.Database, id uint) error
 	FindAllForms(db database.Database, offset, limit int, filters *FormFilters) ([]*entity.Form, error)
 	CountAllForms(db database.Database, filters *FormFilters) (int64, error)
+	FindAllOperatorForms(db database.Database, offset, limit int, filters *OperatorFormFilters) ([]*entity.Form, error)
+	CountAllOperatorForms(db database.Database, filters *OperatorFormFilters) (int64, error)
 
 	FindGeneralHealthByFormID(db database.Database, formID uint) (*entity.GeneralHealthInfo, error)
 	CreateGeneralHealth(db database.Database, info *entity.GeneralHealthInfo) error

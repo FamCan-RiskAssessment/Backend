@@ -931,6 +931,56 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	return formResponses, count, nil
 }
 
+func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error) {
+	operator, err := formService.userService.GetUserByID(filters.OperatorID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if operator == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+		return nil, 0, notFoundError
+	}
+	userRoles, err := formService.userService.GetUserRoles(filters.OperatorID)
+	if err != nil {
+		return nil, 0, err
+	}
+	hasOperatorRole := false
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			hasOperatorRole = true
+			break
+		}
+	}
+	if !hasOperatorRole {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Role}
+		return nil, 0, forbiddenError
+	}
+
+	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, offset, limit, filters)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	count, err := formService.formRepository.CountAllOperatorForms(formService.db, filters)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	formResponses := make([]formdto.BasicFormResponse, len(forms))
+	for i, form := range forms {
+		formResponses[i] = formdto.BasicFormResponse{
+			FormID:     form.ID,
+			Status:     form.Status.String(),
+			UserID:     form.UserID,
+			OperatorID: form.OperatorID,
+			CreatedAt:  form.CreatedAt,
+			UpdatedAt:  form.UpdatedAt,
+		}
+	}
+
+	return formResponses, count, nil
+}
+
 func (formService *FormService) AcceptForm(formID uint) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {

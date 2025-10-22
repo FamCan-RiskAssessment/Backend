@@ -124,11 +124,64 @@ func (r *FormRepository) CountAllForms(db database.Database, filters *postgres.F
 	return count, err
 }
 
+func (r *FormRepository) FindAllOperatorForms(db database.Database, offset, limit int, filters *postgres.OperatorFormFilters) ([]*entity.Form, error) {
+	var forms []*entity.Form
+	query := db.GetDB().Preload("User")
+	query = ApplyOperatorFormFilters(query, filters)
+
+	query = query.Order("id ASC")
+
+	if offset > 0 {
+		query = query.Offset(offset)
+	}
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	err := query.Find(&forms).Error
+	return forms, err
+}
+
+func (r *FormRepository) CountAllOperatorForms(db database.Database, filters *postgres.OperatorFormFilters) (int64, error) {
+	var count int64
+	query := db.GetDB().Model(&entity.Form{})
+	query = ApplyOperatorFormFilters(query, filters)
+	err := query.Count(&count).Error
+	return count, err
+}
+
 func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 	if filters == nil {
 		return query
 	}
 
+	if filters.Status != nil {
+		query = query.Where("status = ?", *filters.Status)
+	}
+	if filters.Gender != nil {
+		query = query.Where("gender = ?", *filters.Gender)
+	}
+	if filters.BirthYear != nil {
+		query = query.Where("birth_year = ?", *filters.BirthYear)
+	}
+	if filters.DrinksAlcohol != nil {
+		query = query.Where("drinks_alcohol = ?", *filters.DrinksAlcohol)
+	}
+	if filters.SmokingNow != nil {
+		query = query.Where("smoking_now = ?", *filters.SmokingNow)
+	}
+	if filters.Cancer != nil {
+		query = query.Where("cancer = ?", *filters.Cancer)
+	}
+
+	return query
+}
+func ApplyOperatorFormFilters(query *gorm.DB, filters *postgres.OperatorFormFilters) *gorm.DB {
+	if filters == nil {
+		return query
+	}
+
+	query = query.Where("operator_id = ?", filters.OperatorID)
 	if filters.Status != nil {
 		query = query.Where("status = ?", *filters.Status)
 	}

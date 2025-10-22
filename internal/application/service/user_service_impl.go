@@ -130,11 +130,17 @@ func (userService *UserService) VerifyOTP(verifyOTPInfo userdto.VerifyOTPRequest
 		return userdto.LoginResponse{}, err
 	}
 
+	roles, err := userService.GetUserRoles(user.ID)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
 	return userdto.LoginResponse{
 		UserID:       user.ID,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		Permissions:  permissions,
+		Roles:        roles,
 	}, nil
 }
 

@@ -5,6 +5,7 @@ type LoginResponse struct {
 	AccessToken  string               `json:"access_token"`
 	RefreshToken string               `json:"refresh_token"`
 	Permissions  []PermissionResponse `json:"permissions"`
+	Roles        []RoleResponse       `json:"roles"`
 }
 
 type UserResponse struct {

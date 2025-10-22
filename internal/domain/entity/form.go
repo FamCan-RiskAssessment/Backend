@@ -11,7 +11,7 @@ type Form struct {
 	UserID     uint  `gorm:"not null;index"`
 	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	OperatorID *uint `gorm:"type:int"`
-	Operator   *User `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	Operator   *User `gorm:"foreignKey:OperatorID;references:ID;constraint:OnDelete:SET NULL"`
 }
 
 type BasicInfo struct {

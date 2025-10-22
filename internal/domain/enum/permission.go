@@ -32,6 +32,8 @@ const (
 	PermissionUpdateForms
 	PermissionDeleteForms
 	PermissionHandleForms
+
+	PermissionHandleOperators
 )
 
 const (
@@ -101,6 +103,8 @@ var permissionNames = map[PermissionType]string{
 	PermissionUpdateForms: "ویرایش فرم",
 	PermissionDeleteForms: "حذف فرم",
 	PermissionHandleForms: "مدیریت فرم ها",
+
+	PermissionHandleOperators: "مدیریت اپراتور ها",
 }
 
 var CategoryNames = map[PermissionCategory]string{

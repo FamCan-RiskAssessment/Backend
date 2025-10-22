@@ -103,6 +103,8 @@ func (r *FormRepository) FindAllForms(db database.Database, offset, limit int, f
 	query := db.GetDB().Preload("User")
 	query = ApplyFormFilters(query, filters)
 
+	query = query.Order("id ASC")
+
 	if offset > 0 {
 		query = query.Offset(offset)
 	}

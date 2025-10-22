@@ -52,6 +52,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleNotFoundError(ctx, notFoundError, recovery.constants.Context.Translator)
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
 		handleForbiddenError(ctx, forbiddenError, recovery.constants.Context.Translator)
+	} else if fieldError, ok := err.(exception.FieldError); ok {
+		handleFieldError(ctx, fieldError, recovery.constants.Context.Translator)
 	} else {
 		unhandledErrors(ctx, recovery.constants.Context.Translator)
 	}
@@ -146,6 +148,13 @@ func handleForbiddenError(ctx *gin.Context, forbiddenError exception.ForbiddenEr
 	ResourceName, _ := trans.Translate(forbiddenError.Resource)
 	message, _ := trans.Translate("errors.forbiddenError", ResourceName)
 	controller.Response(ctx, 403, message, nil)
+}
+
+func handleFieldError(ctx *gin.Context, fieldError exception.FieldError, transKey string) {
+	trans := controller.GetTranslator(ctx, transKey)
+	fieldName, _ := trans.Translate(fieldError.Field)
+	message, _ := trans.Translate(fmt.Sprintf("errors.%s", fieldError.Tag), fieldName)
+	controller.Response(ctx, 400, message, nil)
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {

@@ -1367,7 +1367,30 @@ func (formService *FormService) AssignOperator(request formdto.AssignOperatorReq
 		return notFoundError
 	}
 
-	// Update the operator ID
+	operator, err := formService.userService.GetUserByID(request.OperatorID)
+	if err != nil {
+		return err
+	}
+	if operator == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+		return notFoundError
+	}
+	userRoles, err := formService.userService.GetUserRoles(request.OperatorID)
+	if err != nil {
+		return err
+	}
+	hasOperatorRole := false
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			hasOperatorRole = true
+			break
+		}
+	}
+	if !hasOperatorRole {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Role}
+		return forbiddenError
+	}
+
 	form.OperatorID = &request.OperatorID
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
@@ -1386,7 +1409,6 @@ func (formService *FormService) UnassignOperator(request formdto.UnassignOperato
 		return notFoundError
 	}
 
-	// Update the operator ID
 	form.OperatorID = nil
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {

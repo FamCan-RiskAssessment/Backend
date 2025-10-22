@@ -20,6 +20,8 @@ services:
       - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
       - db
+    networks:
+      - famcan-network
 
   db:
     image: postgres:latest
@@ -39,6 +41,8 @@ services:
         reservations:
           cpus: "0.2"
           memory: 512M
+    networks:
+      - famcan-network
 
   rdb:
     image: redis:latest
@@ -58,7 +62,13 @@ services:
         reservations:
           cpus: "0.1"
           memory: 64M
+    networks:
+      - famcan-network
 
 volumes:
   db-data:
   rdb-data:
+
+networks:
+  famcan-network:
+    external: true

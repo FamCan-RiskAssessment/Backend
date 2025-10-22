@@ -84,5 +84,6 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	calc := routerGroup.Group("/calc")
 	{
 		calc.POST("/premm5", app.Controllers.Admin.CalcController.SendFormToCalc)
+		calc.GET("/all-models", app.Controllers.Admin.CalcController.GetAllModelTypes)
 	}
 }

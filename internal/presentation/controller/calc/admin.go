@@ -35,12 +35,17 @@ func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {
 		CalcID: params.CalcID,
 	}
 
-	err := calcController.calcService.SendFormToCalc(sendFormToCalcRequest)
+	response, err := calcController.calcService.SendFormToCalc(sendFormToCalcRequest)
 	if err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, calcController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.sendFormToCalc")
-	controller.Response(ctx, 200, message, nil)
+	controller.Response(ctx, 200, message, response)
+}
+
+func (calcController *AdminCalcController) GetAllModelTypes(ctx *gin.Context) {
+	response := calcController.calcService.GetAllModelTypes()
+	controller.Response(ctx, 200, "", response)
 }

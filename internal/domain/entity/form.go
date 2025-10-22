@@ -7,21 +7,32 @@ import (
 
 type Form struct {
 	database.Model
-	Status               enum.FormStatus
-	UserID               uint    `gorm:"not null;index"`
-	User                 User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	Name                 string  `gorm:"type:varchar(255);not null"`
-	BirthDay             uint    `gorm:"not null"`
-	BirthMonth           string  `gorm:"type:varchar(10);not null"`
-	BirthYear            uint    `gorm:"not null"`
-	Address              string  `gorm:"type:text;not null"`
-	PostalCode           string  `gorm:"not null"`
-	SocialSecurityNumber string  `gorm:"not null"`
+	Status     enum.FormStatus
+	UserID     uint  `gorm:"not null;index"`
+	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OperatorID *uint `gorm:"type:int"`
+}
+
+type BasicInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 1
 	Gender               string  `gorm:"type:varchar(10);not null"`
+	BirthYear            uint    `gorm:"not null"`
+	BirthMonth           string  `gorm:"type:varchar(10);not null"`
+	BirthDay             uint    `gorm:"not null"`
 	IsAtba               bool    `gorm:"not null;default:false"`
+	SocialSecurityNumber string  `gorm:"not null"`
 	Height               float64 `gorm:"type:decimal(5,2);not null"`
 	Weight               float64 `gorm:"type:decimal(5,2);not null"`
+}
 
+type GeneralHealthInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	//page 2
 	DrinksAlcohol             *bool   `gorm:"type:boolean"`
 	CupsPerWeek               *string `gorm:"type:varchar(50)"`
 	LastMonthSabzijatMeal     string  `gorm:"type:varchar(50);not null"`
@@ -38,7 +49,13 @@ type Form struct {
 	CountGheliandaily         *string `gorm:"type:varchar(50)"`
 	CountSmokingDailyPast     *string `gorm:"type:varchar(50)"`
 	CountGheliandailyPast     *string `gorm:"type:varchar(50)"`
+}
 
+type MamoGraphyInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 3
 	GhaedeAge                    uint    `gorm:"not null"`
 	HasChildren                  bool    `gorm:"not null;default:false"`
 	NumberOfChildren             *uint   `gorm:"type:int"`
@@ -64,12 +81,24 @@ type Form struct {
 	AspLaMo                      *bool   `gorm:"type:boolean"`
 	NsaiDLaMo                    *bool   `gorm:"type:boolean"`
 	LastFiveYearBloodTestInStool *bool   `gorm:"type:boolean"`
+}
 
+type CancerInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 4
 	Cancer     bool    `gorm:"not null;default:false"`
 	CancerType *string `gorm:"type:varchar(50)"`
 	CancerAge  *uint   `gorm:"type:int"`
 	// Pics
+}
 
+type FamilyCancerInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 5
 	ChildCancer     bool    `gorm:"not null;default:false"`
 	ChildName       *string `gorm:"type:varchar(50)"`
 	ChildCancerType *string `gorm:"type:varchar(50)"`
@@ -113,8 +142,15 @@ type Form struct {
 	OtherRelativeCancerType *string `gorm:"type:varchar(50)"`
 	OtherRelativeCancerAge  *uint   `gorm:"type:int"`
 	// Pics
+}
 
-	TestGen *bool `gorm:"type:boolean"`
+type ContactInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 6
+	Name    string `gorm:"type:varchar(255);not null"`
+	TestGen *bool  `gorm:"type:boolean"`
 	// Pics
 	FmTestGen *bool `gorm:"type:boolean"`
 	// Pics
@@ -123,10 +159,18 @@ type Form struct {
 	Province     *string `gorm:"type:varchar(50)"`
 	City         *string `gorm:"type:varchar(50)"`
 	Country      *string `gorm:"type:varchar(50)"`
+	Address      string  `gorm:"type:text;not null"`
+	PostalCode   string  `gorm:"not null"`
+}
 
-	InsuranceStatus           *string `gorm:"type:varchar(50)"`
+type LungCancerInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 7
+	InsuranceStatus           *string `gorm:"type:varchar(127)"`
 	SupplementaryInsurances   *string `gorm:"type:varchar(50)"`
-	Hypertension              bool    `gorm:"noto null;default:false"`
+	Hypertension              bool    `gorm:"not null;default:false"`
 	HypertensionTreatment     *bool   `gorm:"type:boolean"`
 	HeartDisease              bool    `gorm:"not null;default:false"`
 	HeartDiseaseTreatment     *bool   `gorm:"type:boolean"`
@@ -154,7 +198,7 @@ type Form struct {
 	SmokedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
 	ChewedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent      *uint   `gorm:"type:int"`
-	PastSmoking               *string `gorm:"type:varchar(50)"`
+	PastSmoking               *string `gorm:"type:varchar(127)"`
 	SmokingStartAgePast       *uint   `gorm:"type:int"`
 	SmokingTypesPast          *string `gorm:"type:varchar(50)"`
 	CigarettesPerDayPast      *uint   `gorm:"type:int"`

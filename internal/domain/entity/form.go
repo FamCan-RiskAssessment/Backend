@@ -212,3 +212,12 @@ type LungCancerInfo struct {
 	SecondhandSmoke           bool    `gorm:"not null;default:false"`
 	SecondhandSmokeLocation   *string `gorm:"type:varchar(50)"`
 }
+
+type ModelResult struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
+
+	Premm5 float64
+	Gail   float64
+}

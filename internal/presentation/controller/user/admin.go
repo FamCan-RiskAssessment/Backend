@@ -182,7 +182,10 @@ func (userController *AdminUserController) UpdateUserRoles(ctx *gin.Context) {
 	}
 	params := controller.Validate[updateUserRolesParams](ctx)
 
+	actorID, _ := ctx.Get(userController.constants.Context.ID)
+
 	userRolesRequest := userdto.UpdateUserRolesRequest{
+		ActorID: actorID.(uint),
 		UserID:  params.UserID,
 		RoleIDs: params.RoleIDs,
 	}
@@ -239,5 +242,5 @@ func (userController *AdminUserController) LoginWithPassword(ctx *gin.Context) {
 }
 
 func (userController *AdminUserController) GetOperators(ctx *gin.Context) {
-	
+
 }

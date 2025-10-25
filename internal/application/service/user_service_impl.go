@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
@@ -23,6 +24,7 @@ type UserService struct {
 	jwtService          usecase.JwtService
 	smsService          communication.SmsService
 	otpService          usecase.OtpService
+	actionLogService    usecase.ActionLogService
 	db                  database.Database
 }
 
@@ -33,6 +35,7 @@ func NewUserService(
 	jwtService usecase.JwtService,
 	smsService communication.SmsService,
 	otpService usecase.OtpService,
+	actionLogService usecase.ActionLogService,
 	db database.Database,
 ) *UserService {
 	return &UserService{
@@ -42,6 +45,7 @@ func NewUserService(
 		jwtService:          jwtService,
 		smsService:          smsService,
 		otpService:          otpService,
+		actionLogService:    actionLogService,
 		db:                  db,
 	}
 }
@@ -469,6 +473,15 @@ func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateU
 	if err := userService.userRepository.ReplaceUserRoles(userService.db, user, roles); err != nil {
 		return err
 	}
+
+	log := actionlogdto.LogAction{
+		ActorID:  userRolesRequest.ActorID,
+		TargetID: &userRolesRequest.UserID,
+		Action:   enum.ActionTypeUserRoleUpdated,
+		Details:  "رول های یوزر بروزرسانی شد",
+	}
+
+	userService.actionLogService.LogAction(log)
 
 	return nil
 }

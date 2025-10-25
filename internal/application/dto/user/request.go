@@ -22,6 +22,7 @@ type UpdateRoleRequest struct {
 }
 
 type UpdateUserRolesRequest struct {
+	ActorID uint
 	UserID  uint
 	RoleIDs []uint
 }

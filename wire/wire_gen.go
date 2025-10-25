@@ -22,6 +22,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -61,7 +62,9 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	smsService := sms.NewSMSService(smsGateway, smsTemplates)
 	otp := ProvideOTPConfig(config)
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
-	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, postgresDatabase)
+	actionLogRepository := postgres.NewActionLogRepository()
+	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
+	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -69,11 +72,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	pagination := ProvidePagination(config)
 	adminUserController := user.NewAdminUserController(constants, userService, pagination)
 	formRepository := postgres.NewFormRepository()
-	formService := service.NewFormService(constants, formRepository, userService, postgresDatabase)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
+	actionLogController := actionlog.NewActionLogController(actionLogService, pagination)
 	adminControllers := &AdminControllers{
-		UserController: adminUserController,
-		FormController: adminFormController,
+		UserController:      adminUserController,
+		FormController:      adminFormController,
+		ActionLogController: actionLogController,
 	}
 	customerFormController := form.NewCustomerFormController(constants, formService, pagination)
 	customerControllers := &CustomerControllers{
@@ -99,13 +104,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 
 var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.NewRedisDatabase, wire.Bind(new(database.Database), new(*database.PostgresDatabase)), wire.Bind(new(database.Cache), new(*database.RedisDatabase)), wire.Struct(new(Database), "*"))
 
-var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.NewFormRepository, redis.NewUserCacheRepository, wire.Bind(new(postgres2.UserRepository), new(*postgres.UserRepository)), wire.Bind(new(postgres2.FormRepository), new(*postgres.FormRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
+var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.NewFormRepository, postgres.NewActionLogRepository, redis.NewUserCacheRepository, wire.Bind(new(postgres2.UserRepository), new(*postgres.UserRepository)), wire.Bind(new(postgres2.FormRepository), new(*postgres.FormRepository)), wire.Bind(new(postgres2.ActionLogRepository), new(*postgres.ActionLogRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
 
-var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)))
+var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)))
 
 var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
 
-var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, wire.Struct(new(AdminControllers), "*"))
+var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, actionlog.NewActionLogController, wire.Struct(new(AdminControllers), "*"))
 
 var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, wire.Struct(new(CustomerControllers), "*"))
 
@@ -190,8 +195,9 @@ type GeneralControllers struct {
 }
 
 type AdminControllers struct {
-	UserController *user.AdminUserController
-	FormController *form.AdminFormController
+	UserController      *user.AdminUserController
+	FormController      *form.AdminFormController
+	ActionLogController *actionlog.ActionLogController
 }
 
 type CustomerControllers struct {

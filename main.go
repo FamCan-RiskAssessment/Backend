@@ -32,6 +32,7 @@ func main() {
 		&entity.FamilyCancerInfo{},
 		&entity.ContactInfo{},
 		&entity.LungCancerInfo{},
+		&entity.ActionLog{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

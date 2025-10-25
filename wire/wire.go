@@ -19,6 +19,7 @@ import (
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	infraStorage "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
+	actionlog "github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -36,9 +37,11 @@ var DatabaseProviderSet = wire.NewSet(
 var RepositoryProviderSet = wire.NewSet(
 	infraPostgre.NewUserRepository,
 	infraPostgre.NewFormRepository,
+	infraPostgre.NewActionLogRepository,
 	infraRedis.NewUserCacheRepository,
 	wire.Bind(new(domainPostgre.UserRepository), new(*infraPostgre.UserRepository)),
 	wire.Bind(new(domainPostgre.FormRepository), new(*infraPostgre.FormRepository)),
+	wire.Bind(new(domainPostgre.ActionLogRepository), new(*infraPostgre.ActionLogRepository)),
 	wire.Bind(new(domainRedis.UserCacheRepository), new(*infraRedis.UserCacheRepository)),
 )
 
@@ -48,11 +51,13 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewJWTService,
 	service.NewOTPService,
 	sms.NewSMSService,
+	service.NewActionLogService,
 	wire.Bind(new(usecase.UserService), new(*service.UserService)),
 	wire.Bind(new(usecase.FormService), new(*service.FormService)),
 	wire.Bind(new(usecase.OtpService), new(*service.OTPService)),
 	wire.Bind(new(usecase.JwtService), new(*service.JWTService)),
 	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
+	wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)),
 )
 
 var GeneralControllerProviderSet = wire.NewSet(
@@ -63,6 +68,7 @@ var GeneralControllerProviderSet = wire.NewSet(
 var AdminControllerProviderSet = wire.NewSet(
 	user.NewAdminUserController,
 	form.NewAdminFormController,
+	actionlog.NewActionLogController,
 	wire.Struct(new(AdminControllers), "*"),
 )
 
@@ -169,8 +175,9 @@ type GeneralControllers struct {
 }
 
 type AdminControllers struct {
-	UserController *user.AdminUserController
-	FormController *form.AdminFormController
+	UserController      *user.AdminUserController
+	FormController      *form.AdminFormController
+	ActionLogController *actionlog.ActionLogController
 }
 
 type CustomerControllers struct {

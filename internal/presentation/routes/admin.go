@@ -97,4 +97,11 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	{
 		operatorForms.GET("", app.Controllers.Admin.FormController.GetAllOperatorForms)
 	}
+
+	actionLog := routerGroup.Group("/log")
+	actionLog.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryLogManagement)}))
+	{
+		actionLog.GET("", app.Controllers.Admin.ActionLogController.GetAllActionLogs)
+		actionLog.GET("/types", app.Controllers.Admin.ActionLogController.GetAllActionTypes)
+	}
 }

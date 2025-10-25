@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
@@ -12,23 +13,26 @@ import (
 )
 
 type FormService struct {
-	constants      *bootstrap.Constants
-	formRepository postgres.FormRepository
-	userService    usecase.UserService
-	db             database.Database
+	constants        *bootstrap.Constants
+	formRepository   postgres.FormRepository
+	userService      usecase.UserService
+	actionLogService usecase.ActionLogService
+	db               database.Database
 }
 
 func NewFormService(
 	constants *bootstrap.Constants,
 	formRepository postgres.FormRepository,
 	userService usecase.UserService,
+	actionLogService usecase.ActionLogService,
 	db database.Database,
 ) *FormService {
 	return &FormService{
-		constants:      constants,
-		formRepository: formRepository,
-		userService:    userService,
-		db:             db,
+		constants:        constants,
+		formRepository:   formRepository,
+		userService:      userService,
+		actionLogService: actionLogService,
+		db:               db,
 	}
 }
 
@@ -1447,6 +1451,15 @@ func (formService *FormService) AssignOperator(request formdto.AssignOperatorReq
 		return err
 	}
 
+	log := actionlogdto.LogAction{
+		ActorID:    request.UserID,
+		TargetID:   &request.OperatorID,
+		Action:     enum.ActionTypeFormAssigned,
+		ResourceID: &request.FormID,
+		Details:    "فرم به اپراتور اساین شد",
+	}
+	formService.actionLogService.LogAction(log)
+
 	return nil
 }
 func (formService *FormService) UnassignOperator(request formdto.UnassignOperatorRequest) error {
@@ -1464,6 +1477,14 @@ func (formService *FormService) UnassignOperator(request formdto.UnassignOperato
 	if err != nil {
 		return err
 	}
+
+	log := actionlogdto.LogAction{
+		ActorID:    request.UserID,
+		ResourceID: &request.FormID,
+		Action:     enum.ActionTypeFormUnAssigned,
+		Details:    "فرم از اپراتور گرفته شد",
+	}
+	formService.actionLogService.LogAction(log)
 
 	return nil
 }

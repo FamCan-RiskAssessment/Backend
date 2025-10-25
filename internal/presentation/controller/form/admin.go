@@ -180,7 +180,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 		BirthMonth           *string  `json:"birthMonth"`
 		BirthYear            *uint    `json:"birthYear"`
 		SocialSecurityNumber *string  `json:"socialSecurityNumber"`
-		Gender               *string  `json:"gender"`
+		Gender               *uint    `json:"gender"`
 		IsAtba               *bool    `json:"isAtba"`
 		Height               *float64 `json:"height"`
 		Weight               *float64 `json:"weight"`
@@ -275,7 +275,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		HasChildren                  *bool   `json:"hasChildren"`
 		NumberOfChildren             *uint   `json:"numberOfChildren"`
 		AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth"`
-		MenopausalStatus             *string `json:"menopausalStatus"`
+		MenopausalStatus             *uint   `json:"menopausalStatus"`
 		MenopauseAge                 *string `json:"menopauseAge"`
 		HRT                          *bool   `json:"hrt"`
 		HRTUseLength                 *uint   `json:"hrtUseLength"`
@@ -342,10 +342,10 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 }
 func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 	type UpdateCancerParams struct {
-		FormID     uint    `uri:"formID" validate:"required"`
-		Cancer     *bool   `json:"cancer"`
-		CancerType *string `json:"cancerType"`
-		CancerAge  *uint   `json:"cancerAge"`
+		FormID     uint  `uri:"formID" validate:"required"`
+		Cancer     *bool `json:"cancer"`
+		CancerType *uint `json:"cancerType"`
+		CancerAge  *uint `json:"cancerAge"`
 	}
 
 	params := controller.Validate[UpdateCancerParams](ctx)
@@ -374,45 +374,45 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 
 		ChildCancer     *bool   `json:"childCancer"`
 		ChildName       *string `json:"childName"`
-		ChildCancerType *string `json:"childCancerType"`
+		ChildCancerType *uint   `json:"childCancerType"`
 		ChildCancerAge  *uint   `json:"childCancerAge"`
 		ChildLifeStatus *string `json:"childLifeStatus"`
 
 		MotherCancer     *bool   `json:"motherCancer"`
 		MotherName       *string `json:"motherName"`
 		MotherLifeStatus *string `json:"motherLifeStatus"`
-		MotherCancerType *string `json:"motherCancerType"`
+		MotherCancerType *uint   `json:"motherCancerType"`
 		MotherCancerAge  *uint   `json:"motherCancerAge"`
 
 		FatherCancer     *bool   `json:"fatherCancer"`
 		FatherName       *string `json:"fatherName"`
 		FatherLifeStatus *string `json:"fatherLifeStatus"`
-		FatherCancerType *string `json:"fatherCancerType"`
+		FatherCancerType *uint   `json:"fatherCancerType"`
 		FatherCancerAge  *uint   `json:"fatherCancerAge"`
 
 		SiblingCancer     *bool   `json:"siblingCancer"`
 		SiblingName       *string `json:"siblingName"`
 		SiblingLifeStatus *string `json:"siblingLifeStatus"`
-		SiblingCancerType *string `json:"siblingCancerType"`
+		SiblingCancerType *uint   `json:"siblingCancerType"`
 		SiblingCancerAge  *uint   `json:"siblingCancerAge"`
 
 		AmeAmoCancer     *bool   `json:"ameAmoCancer"`
 		AmeAmoName       *string `json:"ameAmoName"`
 		AmeAmoLifeStatus *string `json:"ameAmoLifeStatus"`
-		AmeAmoCancerType *string `json:"ameAmoCancerType"`
+		AmeAmoCancerType *uint   `json:"ameAmoCancerType"`
 		AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge"`
 
 		KhaleDaeiCancer     *bool   `json:"khaleDaeiCancer"`
 		KhaleDaeiName       *string `json:"khaleDaeiName"`
 		KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus"`
-		KhaleDaeiCancerType *string `json:"khaleDaeiCancerType"`
+		KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType"`
 		KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge"`
 
 		OtherRelativeCancer     *bool   `json:"otherRelativeCancer"`
 		OtherRelativeName       *string `json:"otherRelativeName"`
 		OtherRelativeRelation   *string `json:"otherRelativeRelation"`
 		OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus"`
-		OtherRelativeCancerType *string `json:"otherRelativeCancerType"`
+		OtherRelativeCancerType *uint   `json:"otherRelativeCancerType"`
 		OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge"`
 	}
 
@@ -528,11 +528,11 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType"`
 		LungCancerHistory         *bool   `json:"lungCancerHistory"`
 		OtherCancerHistory        *bool   `json:"otherCancerHistory"`
-		OtherCancerType           *string `json:"otherCancerType"`
+		OtherCancerType           *uint   `json:"otherCancerType"`
 		LungCancerFamily          *bool   `json:"lungCancerFamily"`
 		LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation"`
 		OtherCancerFamily         *bool   `json:"otherCancerFamily"`
-		OtherCancerFamilyType     *string `json:"otherCancerFamilyType"`
+		OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType"`
 		OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation"`
 		OccupationalExposure      *string `json:"occupationalExposure"`
 		CurrentSmoking            *bool   `json:"currentSmoking"`

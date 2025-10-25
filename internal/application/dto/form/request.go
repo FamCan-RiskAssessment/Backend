@@ -8,7 +8,7 @@ type CreateBasicFormRequest struct {
 	BirthMonth           string  `json:"birthMonth" binding:"required"`
 	BirthYear            uint    `json:"birthYear" binding:"required"`
 	SocialSecurityNumber string  `json:"socialSecurityNumber" binding:"required"`
-	Gender               string  `json:"gender" binding:"required"`
+	Gender               uint    `json:"gender" binding:"required"`
 	IsAtba               bool    `json:"isAtba"`
 	Height               float64 `json:"height" binding:"required"`
 	Weight               float64 `json:"weight" binding:"required"`
@@ -23,7 +23,7 @@ type UpdateBasicFormRequest struct {
 	BirthMonth           *string  `json:"birthMonth"`
 	BirthYear            *uint    `json:"birthYear"`
 	SocialSecurityNumber *string  `json:"socialSecurityNumber"`
-	Gender               *string  `json:"gender"`
+	Gender               *uint    `json:"gender"`
 	IsAtba               *bool    `json:"isAtba"`
 	Height               *float64 `json:"height"`
 	Weight               *float64 `json:"weight"`
@@ -80,7 +80,7 @@ type UpsertMamographyRequest struct {
 	HasChildren                  bool    `json:"hasChildren"`
 	NumberOfChildren             *uint   `json:"numberOfChildren,omitempty"`
 	AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth,omitempty"`
-	MenopausalStatus             string  `json:"menopausalStatus" binding:"required"`
+	MenopausalStatus             uint    `json:"menopausalStatus" binding:"required"`
 	MenopauseAge                 *string `json:"menopauseAge,omitempty"`
 	HRT                          *bool   `json:"hrt,omitempty"`
 	HRTUseLength                 *uint   `json:"hrtUseLength,omitempty"`
@@ -107,9 +107,9 @@ type UpsertCancerRequest struct {
 	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
-	Cancer     bool    `json:"cancer"`
-	CancerType *string `json:"cancerType,omitempty"`
-	CancerAge  *uint   `json:"cancerAge,omitempty"`
+	Cancer     bool  `json:"cancer"`
+	CancerType *uint `json:"cancerType,omitempty"`
+	CancerAge  *uint `json:"cancerAge,omitempty"`
 }
 
 type UpsertFamilyCancerRequest struct {
@@ -118,45 +118,45 @@ type UpsertFamilyCancerRequest struct {
 
 	ChildCancer     bool    `json:"childCancer"`
 	ChildName       *string `json:"childName,omitempty"`
-	ChildCancerType *string `json:"childCancerType,omitempty"`
+	ChildCancerType *uint   `json:"childCancerType,omitempty"`
 	ChildCancerAge  *uint   `json:"childCancerAge,omitempty"`
 	ChildLifeStatus *string `json:"childLifeStatus,omitempty"`
 
 	MotherCancer     bool    `json:"motherCancer"`
 	MotherName       *string `json:"motherName,omitempty"`
 	MotherLifeStatus *string `json:"motherLifeStatus,omitempty"`
-	MotherCancerType *string `json:"motherCancerType,omitempty"`
+	MotherCancerType *uint   `json:"motherCancerType,omitempty"`
 	MotherCancerAge  *uint   `json:"motherCancerAge,omitempty"`
 
 	FatherCancer     bool    `json:"fatherCancer"`
 	FatherName       *string `json:"fatherName,omitempty"`
 	FatherLifeStatus *string `json:"fatherLifeStatus,omitempty"`
-	FatherCancerType *string `json:"fatherCancerType,omitempty"`
+	FatherCancerType *uint   `json:"fatherCancerType,omitempty"`
 	FatherCancerAge  *uint   `json:"fatherCancerAge,omitempty"`
 
 	SiblingCancer     bool    `json:"siblingCancer"`
 	SiblingName       *string `json:"siblingName,omitempty"`
 	SiblingLifeStatus *string `json:"siblingLifeStatus,omitempty"`
-	SiblingCancerType *string `json:"siblingCancerType,omitempty"`
+	SiblingCancerType *uint   `json:"siblingCancerType,omitempty"`
 	SiblingCancerAge  *uint   `json:"siblingCancerAge,omitempty"`
 
 	AmeAmoCancer     bool    `json:"ameAmoCancer"`
 	AmeAmoName       *string `json:"ameAmoName,omitempty"`
 	AmeAmoLifeStatus *string `json:"ameAmoLifeStatus,omitempty"`
-	AmeAmoCancerType *string `json:"ameAmoCancerType,omitempty"`
+	AmeAmoCancerType *uint   `json:"ameAmoCancerType,omitempty"`
 	AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge,omitempty"`
 
 	KhaleDaeiCancer     bool    `json:"khaleDaeiCancer"`
 	KhaleDaeiName       *string `json:"khaleDaeiName,omitempty"`
 	KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus,omitempty"`
-	KhaleDaeiCancerType *string `json:"khaleDaeiCancerType,omitempty"`
+	KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType,omitempty"`
 	KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge,omitempty"`
 
 	OtherRelativeCancer     *bool   `json:"otherRelativeCancer,omitempty"`
 	OtherRelativeName       *string `json:"otherRelativeName,omitempty"`
 	OtherRelativeRelation   *string `json:"otherRelativeRelation,omitempty"`
 	OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus,omitempty"`
-	OtherRelativeCancerType *string `json:"otherRelativeCancerType,omitempty"`
+	OtherRelativeCancerType *uint   `json:"otherRelativeCancerType,omitempty"`
 	OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge,omitempty"`
 }
 
@@ -192,11 +192,11 @@ type UpsertLungCancerRequest struct {
 	ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType,omitempty"`
 	LungCancerHistory         bool    `json:"lungCancerHistory"`
 	OtherCancerHistory        bool    `json:"otherCancerHistory"`
-	OtherCancerType           *string `json:"otherCancerType,omitempty"`
+	OtherCancerType           *uint   `json:"otherCancerType,omitempty"`
 	LungCancerFamily          *bool   `json:"lungCancerFamily,omitempty"`
 	LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation,omitempty"`
 	OtherCancerFamily         *bool   `json:"otherCancerFamily,omitempty"`
-	OtherCancerFamilyType     *string `json:"otherCancerFamilyType,omitempty"`
+	OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType,omitempty"`
 	OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation,omitempty"`
 	OccupationalExposure      *string `json:"occupationalExposure,omitempty"`
 	CurrentSmoking            bool    `json:"currentSmoking"`
@@ -270,7 +270,7 @@ type UpdateMamographyRequest struct {
 	HasChildren                  *bool   `json:"hasChildren"`
 	NumberOfChildren             *uint   `json:"numberOfChildren"`
 	AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth"`
-	MenopausalStatus             *string `json:"menopausalStatus"`
+	MenopausalStatus             *uint   `json:"menopausalStatus"`
 	MenopauseAge                 *string `json:"menopauseAge"`
 	HRT                          *bool   `json:"hrt"`
 	HRTUseLength                 *uint   `json:"hrtUseLength"`
@@ -296,9 +296,9 @@ type UpdateCancerRequest struct {
 	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
-	Cancer     *bool   `json:"cancer"`
-	CancerType *string `json:"cancerType"`
-	CancerAge  *uint   `json:"cancerAge"`
+	Cancer     *bool `json:"cancer"`
+	CancerType *uint `json:"cancerType"`
+	CancerAge  *uint `json:"cancerAge"`
 }
 type UpdateFamilyCancerRequest struct {
 	UserID uint
@@ -306,45 +306,45 @@ type UpdateFamilyCancerRequest struct {
 
 	ChildCancer     *bool   `json:"childCancer"`
 	ChildName       *string `json:"childName"`
-	ChildCancerType *string `json:"childCancerType"`
+	ChildCancerType *uint   `json:"childCancerType"`
 	ChildCancerAge  *uint   `json:"childCancerAge"`
 	ChildLifeStatus *string `json:"childLifeStatus"`
 
 	MotherCancer     *bool   `json:"motherCancer"`
 	MotherName       *string `json:"motherName"`
 	MotherLifeStatus *string `json:"motherLifeStatus"`
-	MotherCancerType *string `json:"motherCancerType"`
+	MotherCancerType *uint   `json:"motherCancerType"`
 	MotherCancerAge  *uint   `json:"motherCancerAge"`
 
 	FatherCancer     *bool   `json:"fatherCancer"`
 	FatherName       *string `json:"fatherName"`
 	FatherLifeStatus *string `json:"fatherLifeStatus"`
-	FatherCancerType *string `json:"fatherCancerType"`
+	FatherCancerType *uint   `json:"fatherCancerType"`
 	FatherCancerAge  *uint   `json:"fatherCancerAge"`
 
 	SiblingCancer     *bool   `json:"siblingCancer"`
 	SiblingName       *string `json:"siblingName"`
 	SiblingLifeStatus *string `json:"siblingLifeStatus"`
-	SiblingCancerType *string `json:"siblingCancerType"`
+	SiblingCancerType *uint   `json:"siblingCancerType"`
 	SiblingCancerAge  *uint   `json:"siblingCancerAge"`
 
 	AmeAmoCancer     *bool   `json:"ameAmoCancer"`
 	AmeAmoName       *string `json:"ameAmoName"`
 	AmeAmoLifeStatus *string `json:"ameAmoLifeStatus"`
-	AmeAmoCancerType *string `json:"ameAmoCancerType"`
+	AmeAmoCancerType *uint   `json:"ameAmoCancerType"`
 	AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge"`
 
 	KhaleDaeiCancer     *bool   `json:"khaleDaeiCancer"`
 	KhaleDaeiName       *string `json:"khaleDaeiName"`
 	KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus"`
-	KhaleDaeiCancerType *string `json:"khaleDaeiCancerType"`
+	KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType"`
 	KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge"`
 
 	OtherRelativeCancer     *bool   `json:"otherRelativeCancer"`
 	OtherRelativeName       *string `json:"otherRelativeName"`
 	OtherRelativeRelation   *string `json:"otherRelativeRelation"`
 	OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus"`
-	OtherRelativeCancerType *string `json:"otherRelativeCancerType"`
+	OtherRelativeCancerType *uint   `json:"otherRelativeCancerType"`
 	OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge"`
 }
 type UpdateContactRequest struct {
@@ -378,11 +378,11 @@ type UpdateLungCancerRequest struct {
 	ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType"`
 	LungCancerHistory         *bool   `json:"lungCancerHistory"`
 	OtherCancerHistory        *bool   `json:"otherCancerHistory"`
-	OtherCancerType           *string `json:"otherCancerType"`
+	OtherCancerType           *uint   `json:"otherCancerType"`
 	LungCancerFamily          *bool   `json:"lungCancerFamily"`
 	LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation"`
 	OtherCancerFamily         *bool   `json:"otherCancerFamily"`
-	OtherCancerFamilyType     *string `json:"otherCancerFamilyType"`
+	OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType"`
 	OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation"`
 	OccupationalExposure      *string `json:"occupationalExposure"`
 	CurrentSmoking            *bool   `json:"currentSmoking"`

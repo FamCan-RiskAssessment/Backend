@@ -123,7 +123,7 @@ var CategoryNames = map[PermissionCategory]string{
 	CategoryPatientManagement:  "مدیریت بیماران",
 	CategoryAccessManagement:   "مدیریت دسترسی",
 	CategoryFormManagement:     "مدیریت فرم ها",
-	CategoryOperatorManagement: "مدیریت اپراتور‌ ها",
+	CategoryOperatorManagement: "مدیریت اپراتور ها",
 	CategoryLogManagement:      "مدیریت لاگ ها",
 }
 

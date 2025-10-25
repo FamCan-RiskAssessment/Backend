@@ -32,7 +32,7 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 		BirthMonth           string  `json:"birthMonth" validate:"required"`
 		BirthYear            uint    `json:"birthYear" validate:"required"`
 		SocialSecurityNumber string  `json:"socialSecurityNumber" validate:"required"`
-		Gender               string  `json:"gender" validate:"required"`
+		Gender               uint    `json:"gender" validate:"required"`
 		IsAtba               bool    `json:"isAtba"`
 		Height               float64 `json:"height" validate:"required"`
 		Weight               float64 `json:"weight" validate:"required"`
@@ -97,7 +97,7 @@ func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) 
 		BirthMonth           *string  `json:"birthMonth" validate:"required"`
 		BirthYear            *uint    `json:"birthYear" validate:"required"`
 		SocialSecurityNumber *string  `json:"socialSecurityNumber" validate:"required"`
-		Gender               *string  `json:"gender" validate:"required"`
+		Gender               *uint    `json:"gender" validate:"required"`
 		IsAtba               *bool    `json:"isAtba"`
 		Height               *float64 `json:"height" validate:"required"`
 		Weight               *float64 `json:"weight" validate:"required"`
@@ -216,7 +216,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		HasChildren                  bool    `json:"hasChildren"`
 		NumberOfChildren             *uint   `json:"numberOfChildren,omitempty"`
 		AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth,omitempty"`
-		MenopausalStatus             string  `json:"menopausalStatus" validate:"required"`
+		MenopausalStatus             uint    `json:"menopausalStatus" validate:"required"`
 		MenopauseAge                 *string `json:"menopauseAge,omitempty"`
 		HRT                          *bool   `json:"hrt,omitempty"`
 		HRTUseLength                 *uint   `json:"hrtUseLength,omitempty"`
@@ -283,10 +283,10 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 }
 func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
 	type UpsertCancerParams struct {
-		FormID     uint    `uri:"formID" validate:"required"`
-		Cancer     bool    `json:"cancer"`
-		CancerType *string `json:"cancerType,omitempty"`
-		CancerAge  *uint   `json:"cancerAge,omitempty"`
+		FormID     uint  `uri:"formID" validate:"required"`
+		Cancer     bool  `json:"cancer"`
+		CancerType *uint `json:"cancerType,omitempty"`
+		CancerAge  *uint `json:"cancerAge,omitempty"`
 	}
 
 	params := controller.Validate[UpsertCancerParams](ctx)
@@ -315,45 +315,45 @@ func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Contex
 
 		ChildCancer     bool    `json:"childCancer"`
 		ChildName       *string `json:"childName,omitempty"`
-		ChildCancerType *string `json:"childCancerType,omitempty"`
+		ChildCancerType *uint   `json:"childCancerType,omitempty"`
 		ChildCancerAge  *uint   `json:"childCancerAge,omitempty"`
 		ChildLifeStatus *string `json:"childLifeStatus,omitempty"`
 
 		MotherCancer     bool    `json:"motherCancer"`
 		MotherName       *string `json:"motherName,omitempty"`
 		MotherLifeStatus *string `json:"motherLifeStatus,omitempty"`
-		MotherCancerType *string `json:"motherCancerType,omitempty"`
+		MotherCancerType *uint   `json:"motherCancerType,omitempty"`
 		MotherCancerAge  *uint   `json:"motherCancerAge,omitempty"`
 
 		FatherCancer     bool    `json:"fatherCancer"`
 		FatherName       *string `json:"fatherName,omitempty"`
 		FatherLifeStatus *string `json:"fatherLifeStatus,omitempty"`
-		FatherCancerType *string `json:"fatherCancerType,omitempty"`
+		FatherCancerType *uint   `json:"fatherCancerType,omitempty"`
 		FatherCancerAge  *uint   `json:"fatherCancerAge,omitempty"`
 
 		SiblingCancer     bool    `json:"siblingCancer"`
 		SiblingName       *string `json:"siblingName,omitempty"`
 		SiblingLifeStatus *string `json:"siblingLifeStatus,omitempty"`
-		SiblingCancerType *string `json:"siblingCancerType,omitempty"`
+		SiblingCancerType *uint   `json:"siblingCancerType,omitempty"`
 		SiblingCancerAge  *uint   `json:"siblingCancerAge,omitempty"`
 
 		AmeAmoCancer     bool    `json:"ameAmoCancer"`
 		AmeAmoName       *string `json:"ameAmoName,omitempty"`
 		AmeAmoLifeStatus *string `json:"ameAmoLifeStatus,omitempty"`
-		AmeAmoCancerType *string `json:"ameAmoCancerType,omitempty"`
+		AmeAmoCancerType *uint   `json:"ameAmoCancerType,omitempty"`
 		AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge,omitempty"`
 
 		KhaleDaeiCancer     bool    `json:"khaleDaeiCancer"`
 		KhaleDaeiName       *string `json:"khaleDaeiName,omitempty"`
 		KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus,omitempty"`
-		KhaleDaeiCancerType *string `json:"khaleDaeiCancerType,omitempty"`
+		KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType,omitempty"`
 		KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge,omitempty"`
 
 		OtherRelativeCancer     *bool   `json:"otherRelativeCancer,omitempty"`
 		OtherRelativeName       *string `json:"otherRelativeName,omitempty"`
 		OtherRelativeRelation   *string `json:"otherRelativeRelation,omitempty"`
 		OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus,omitempty"`
-		OtherRelativeCancerType *string `json:"otherRelativeCancerType,omitempty"`
+		OtherRelativeCancerType *uint   `json:"otherRelativeCancerType,omitempty"`
 		OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge,omitempty"`
 	}
 
@@ -469,11 +469,11 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType,omitempty"`
 		LungCancerHistory         bool    `json:"lungCancerHistory"`
 		OtherCancerHistory        bool    `json:"otherCancerHistory"`
-		OtherCancerType           *string `json:"otherCancerType,omitempty"`
+		OtherCancerType           *uint   `json:"otherCancerType,omitempty"`
 		LungCancerFamily          *bool   `json:"lungCancerFamily,omitempty"`
 		LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation,omitempty"`
 		OtherCancerFamily         *bool   `json:"otherCancerFamily,omitempty"`
-		OtherCancerFamilyType     *string `json:"otherCancerFamilyType,omitempty"`
+		OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType,omitempty"`
 		OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation,omitempty"`
 		OccupationalExposure      *string `json:"occupationalExposure,omitempty"`
 		CurrentSmoking            bool    `json:"currentSmoking"`

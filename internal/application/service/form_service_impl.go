@@ -57,7 +57,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
-		Gender:               request.Gender,
+		Gender:               enum.Gender(uint(request.Gender)),
 		BirthYear:            request.BirthYear,
 		BirthMonth:           request.BirthMonth,
 		BirthDay:             request.BirthDay,
@@ -156,7 +156,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.HasChildren = request.HasChildren
 	info.NumberOfChildren = request.NumberOfChildren
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
-	info.MenopausalStatus = request.MenopausalStatus
+	info.MenopausalStatus = enum.MenopausalStatus(uint(request.MenopausalStatus))
 	info.MenopauseAge = request.MenopauseAge
 	info.HRT = request.HRT
 	info.HRTUseLength = request.HRTUseLength
@@ -208,7 +208,9 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	}
 
 	info.Cancer = request.Cancer
-	info.CancerType = request.CancerType
+	if request.CancerType != nil {
+		info.CancerType = (*enum.CancerType)(request.CancerType)
+	}
 	info.CancerAge = request.CancerAge
 
 	if info.ID == 0 {
@@ -242,45 +244,59 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 
 	info.ChildCancer = request.ChildCancer
 	info.ChildName = request.ChildName
-	info.ChildCancerType = request.ChildCancerType
+	if request.ChildCancerType != nil {
+		info.ChildCancerType = (*enum.CancerType)(request.ChildCancerType)
+	}
 	info.ChildCancerAge = request.ChildCancerAge
 	info.ChildLifeStatus = request.ChildLifeStatus
 
 	info.MotherCancer = request.MotherCancer
 	info.MotherName = request.MotherName
 	info.MotherLifeStatus = request.MotherLifeStatus
-	info.MotherCancerType = request.MotherCancerType
+	if request.MotherCancerType != nil {
+		info.MotherCancerType = (*enum.CancerType)(request.MotherCancerType)
+	}
 	info.MotherCancerAge = request.MotherCancerAge
 
 	info.FatherCancer = request.FatherCancer
 	info.FatherName = request.FatherName
 	info.FatherLifeStatus = request.FatherLifeStatus
-	info.FatherCancerType = request.FatherCancerType
+	if request.FatherCancerType != nil {
+		info.FatherCancerType = (*enum.CancerType)(request.FatherCancerType)
+	}
 	info.FatherCancerAge = request.FatherCancerAge
 
 	info.SiblingCancer = request.SiblingCancer
 	info.SiblingName = request.SiblingName
 	info.SiblingLifeStatus = request.SiblingLifeStatus
-	info.SiblingCancerType = request.SiblingCancerType
+	if request.SiblingCancerType != nil {
+		info.SiblingCancerType = (*enum.CancerType)(request.SiblingCancerType)
+	}
 	info.SiblingCancerAge = request.SiblingCancerAge
 
 	info.AmeAmoCancer = request.AmeAmoCancer
 	info.AmeAmoName = request.AmeAmoName
 	info.AmeAmoLifeStatus = request.AmeAmoLifeStatus
-	info.AmeAmoCancerType = request.AmeAmoCancerType
+	if request.AmeAmoCancerType != nil {
+		info.AmeAmoCancerType = (*enum.CancerType)(request.AmeAmoCancerType)
+	}
 	info.AmeAmoCancerAge = request.AmeAmoCancerAge
 
 	info.KhaleDaeiCancer = request.KhaleDaeiCancer
 	info.KhaleDaeiName = request.KhaleDaeiName
 	info.KhaleDaeiLifeStatus = request.KhaleDaeiLifeStatus
-	info.KhaleDaeiCancerType = request.KhaleDaeiCancerType
+	if request.KhaleDaeiCancerType != nil {
+		info.KhaleDaeiCancerType = (*enum.CancerType)(request.KhaleDaeiCancerType)
+	}
 	info.KhaleDaeiCancerAge = request.KhaleDaeiCancerAge
 
 	info.OtherRelativeCancer = request.OtherRelativeCancer
 	info.OtherRelativeName = request.OtherRelativeName
 	info.OtherRelativeRelation = request.OtherRelativeRelation
 	info.OtherRelativeLifeStatus = request.OtherRelativeLifeStatus
-	info.OtherRelativeCancerType = request.OtherRelativeCancerType
+	if request.OtherRelativeCancerType != nil {
+		info.OtherRelativeCancerType = (*enum.CancerType)(request.OtherRelativeCancerType)
+	}
 	info.OtherRelativeCancerAge = request.OtherRelativeCancerAge
 
 	if info.ID == 0 {
@@ -364,11 +380,15 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	info.LungCancerHistory = request.LungCancerHistory
 	info.OtherCancerHistory = request.OtherCancerHistory
-	info.OtherCancerType = request.OtherCancerType
+	if request.OtherCancerType != nil {
+		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
+	}
 	info.LungCancerFamily = request.LungCancerFamily
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
 	info.OtherCancerFamily = request.OtherCancerFamily
-	info.OtherCancerFamilyType = request.OtherCancerFamilyType
+	if request.OtherCancerFamilyType != nil {
+		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
+	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	info.CurrentSmoking = request.CurrentSmoking
@@ -866,7 +886,7 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		info.SocialSecurityNumber = *request.SocialSecurityNumber
 	}
 	if request.Gender != nil {
-		info.Gender = *request.Gender
+		info.Gender = enum.Gender(uint(*request.Gender))
 	}
 	if request.IsAtba != nil {
 		info.IsAtba = *request.IsAtba
@@ -1120,7 +1140,7 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	info.NumberOfChildren = request.NumberOfChildren
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
 	if request.MenopausalStatus != nil {
-		info.MenopausalStatus = *request.MenopausalStatus
+		info.MenopausalStatus = enum.MenopausalStatus(uint(*request.MenopausalStatus))
 	}
 	info.MenopauseAge = request.MenopauseAge
 	info.HRT = request.HRT
@@ -1182,7 +1202,9 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	if request.Cancer != nil {
 		info.Cancer = *request.Cancer
 	}
-	info.CancerType = request.CancerType
+	if request.CancerType != nil {
+		info.CancerType = (*enum.CancerType)(request.CancerType)
+	}
 	info.CancerAge = request.CancerAge
 
 	if info.ID == 0 {
@@ -1219,7 +1241,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 		info.ChildCancer = *request.ChildCancer
 	}
 	info.ChildName = request.ChildName
-	info.ChildCancerType = request.ChildCancerType
+	if request.ChildCancerType != nil {
+		info.ChildCancerType = (*enum.CancerType)(request.ChildCancerType)
+	}
 	info.ChildCancerAge = request.ChildCancerAge
 	info.ChildLifeStatus = request.ChildLifeStatus
 
@@ -1228,7 +1252,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	}
 	info.MotherName = request.MotherName
 	info.MotherLifeStatus = request.MotherLifeStatus
-	info.MotherCancerType = request.MotherCancerType
+	if request.MotherCancerType != nil {
+		info.MotherCancerType = (*enum.CancerType)(request.MotherCancerType)
+	}
 	info.MotherCancerAge = request.MotherCancerAge
 
 	if request.FatherCancer != nil {
@@ -1236,7 +1262,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	}
 	info.FatherName = request.FatherName
 	info.FatherLifeStatus = request.FatherLifeStatus
-	info.FatherCancerType = request.FatherCancerType
+	if request.FatherCancerType != nil {
+		info.FatherCancerType = (*enum.CancerType)(request.FatherCancerType)
+	}
 	info.FatherCancerAge = request.FatherCancerAge
 
 	if request.SiblingCancer != nil {
@@ -1244,7 +1272,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	}
 	info.SiblingName = request.SiblingName
 	info.SiblingLifeStatus = request.SiblingLifeStatus
-	info.SiblingCancerType = request.SiblingCancerType
+	if request.SiblingCancerType != nil {
+		info.SiblingCancerType = (*enum.CancerType)(request.SiblingCancerType)
+	}
 	info.SiblingCancerAge = request.SiblingCancerAge
 
 	if request.AmeAmoCancer != nil {
@@ -1252,7 +1282,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	}
 	info.AmeAmoName = request.AmeAmoName
 	info.AmeAmoLifeStatus = request.AmeAmoLifeStatus
-	info.AmeAmoCancerType = request.AmeAmoCancerType
+	if request.AmeAmoCancerType != nil {
+		info.AmeAmoCancerType = (*enum.CancerType)(request.AmeAmoCancerType)
+	}
 	info.AmeAmoCancerAge = request.AmeAmoCancerAge
 
 	if request.KhaleDaeiCancer != nil {
@@ -1260,14 +1292,18 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	}
 	info.KhaleDaeiName = request.KhaleDaeiName
 	info.KhaleDaeiLifeStatus = request.KhaleDaeiLifeStatus
-	info.KhaleDaeiCancerType = request.KhaleDaeiCancerType
+	if request.KhaleDaeiCancerType != nil {
+		info.KhaleDaeiCancerType = (*enum.CancerType)(request.KhaleDaeiCancerType)
+	}
 	info.KhaleDaeiCancerAge = request.KhaleDaeiCancerAge
 
 	info.OtherRelativeCancer = request.OtherRelativeCancer
 	info.OtherRelativeName = request.OtherRelativeName
 	info.OtherRelativeRelation = request.OtherRelativeRelation
 	info.OtherRelativeLifeStatus = request.OtherRelativeLifeStatus
-	info.OtherRelativeCancerType = request.OtherRelativeCancerType
+	if request.OtherRelativeCancerType != nil {
+		info.OtherRelativeCancerType = (*enum.CancerType)(request.OtherRelativeCancerType)
+	}
 	info.OtherRelativeCancerAge = request.OtherRelativeCancerAge
 
 	if info.ID == 0 {
@@ -1369,11 +1405,15 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	if request.OtherCancerHistory != nil {
 		info.OtherCancerHistory = *request.OtherCancerHistory
 	}
-	info.OtherCancerType = request.OtherCancerType
+	if request.OtherCancerType != nil {
+		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
+	}
 	info.LungCancerFamily = request.LungCancerFamily
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
 	info.OtherCancerFamily = request.OtherCancerFamily
-	info.OtherCancerFamilyType = request.OtherCancerFamilyType
+	if request.OtherCancerFamilyType != nil {
+		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
+	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	if request.CurrentSmoking != nil {

@@ -24,12 +24,13 @@ type BucketPath struct {
 }
 
 type Field struct {
-	User       string
-	Form       string
-	OTP        string
-	Role       string
-	Page       string
-	Permission string
+	User         string
+	Form         string
+	OTP          string
+	Role         string
+	Page         string
+	Permission   string
+	Premm5Result string
 }
 
 type Tag struct {
@@ -55,12 +56,13 @@ func NewConstants() *Constants {
 			ID:         "ID",
 		},
 		Field: Field{
-			User:       "user",
-			Form:       "form",
-			OTP:        "otp",
-			Role:       "role",
-			Page:       "page",
-			Permission: "permission",
+			User:         "user",
+			Form:         "form",
+			OTP:          "otp",
+			Role:         "role",
+			Page:         "page",
+			Permission:   "permission",
+			Premm5Result: "premm5_result",
 		},
 		Tag: Tag{
 			Expired:      "expired",

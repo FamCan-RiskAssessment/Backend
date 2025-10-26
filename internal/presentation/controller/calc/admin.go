@@ -25,12 +25,14 @@ func NewAdminCalcController(
 
 func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {
 	type SendFormToCalcParams struct {
-		FormID uint `json:"formI" validate:"required"`
+		FormID uint `json:"formID" validate:"required"`
 		CalcID uint `json:"calcID" validate:"required"`
 	}
 	params := controller.Validate[SendFormToCalcParams](ctx)
 
+	userID, _ := ctx.Get(calcController.constants.Context.ID)
 	sendFormToCalcRequest := calcdto.SendFormToCalcRequest{
+		UserID: userID.(uint),
 		FormID: params.FormID,
 		CalcID: params.CalcID,
 	}
@@ -43,6 +45,26 @@ func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {
 	trans := controller.GetTranslator(ctx, calcController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.sendFormToCalc")
 	controller.Response(ctx, 200, message, response)
+}
+
+func (calcController *AdminCalcController) GetPremm5Results(ctx *gin.Context) {
+	type SendFormToCalcParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[SendFormToCalcParams](ctx)
+
+	userID, _ := ctx.Get(calcController.constants.Context.ID)
+	sendFormToCalcRequest := calcdto.SendFormToCalcRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := calcController.calcService.GetPremm5Results(sendFormToCalcRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
 }
 
 func (calcController *AdminCalcController) GetAllModelTypes(ctx *gin.Context) {

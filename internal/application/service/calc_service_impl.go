@@ -8,7 +8,9 @@ import (
 	"net/http"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/calc"
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
@@ -17,23 +19,26 @@ import (
 )
 
 type CalcService struct {
-	constants      *bootstrap.Constants
-	formRepository postgres.FormRepository
-	db             database.Database
-	calcURL        *bootstrap.CalcURL
+	constants        *bootstrap.Constants
+	formRepository   postgres.FormRepository
+	actionLogService usecase.ActionLogService
+	db               database.Database
+	calcURL          *bootstrap.CalcURL
 }
 
 func NewCalcService(
 	constants *bootstrap.Constants,
 	formRepository postgres.FormRepository,
+	actionLogService usecase.ActionLogService,
 	db database.Database,
 	calcURL *bootstrap.CalcURL,
 ) *CalcService {
 	return &CalcService{
-		constants:      constants,
-		formRepository: formRepository,
-		db:             db,
-		calcURL:        calcURL,
+		constants:        constants,
+		formRepository:   formRepository,
+		actionLogService: actionLogService,
+		db:               db,
+		calcURL:          calcURL,
 	}
 }
 
@@ -49,7 +54,7 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	var response calcdto.ModelResponse
 	switch enum.Calc(request.CalcID) {
 	case enum.CalcPremm5:
-		response, err = calcService.sendFormToPremm5(form)
+		response, err = calcService.sendFormToPremm5(form, request.UserID)
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
@@ -62,7 +67,47 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	return response, nil
 }
 
-func (calcService *CalcService) sendFormToPremm5(form *entity.Form) (calcdto.ModelResponse, error) {
+func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcRequest) (calcdto.Premm5Response, error) {
+	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
+		return calcdto.Premm5Response{}, notFoundError
+	}
+
+	result, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+
+	if result == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Premm5Result}
+		return calcdto.Premm5Response{}, notFoundError
+	}
+
+	result, err = calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+
+	response := calcdto.Premm5Response{
+		GeneProbs: map[string]float64{
+			"MLH1": result.MLH1Probability,
+			"MSH2": result.MSH2Probability,
+			"MSH6": result.MSH6Probability,
+			"PMS2": result.PMS2Probability,
+		},
+		PAny:  result.PAny,
+		PNone: result.PNone,
+	}
+
+	return response, nil
+
+}
+
+func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
@@ -161,10 +206,18 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form) (calcdto.Mod
 		return calcdto.ModelResponse{}, err
 	}
 
+	log := actionlogdto.LogAction{
+		ActorID:    userID,
+		Action:     enum.ActionTypeFormSentToPremm5,
+		ResourceID: &form.ID,
+	}
+	calcService.actionLogService.LogAction(log)
+
 	return calcdto.ModelResponse{
 		Name:        "PREMM5",
 		Probability: premm5Response.PAny,
 	}, nil
+
 }
 
 func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.ModelResponse, error) {

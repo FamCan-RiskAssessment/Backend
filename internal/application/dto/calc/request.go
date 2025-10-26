@@ -1,6 +1,7 @@
 package calcdto
 
 type SendFormToCalcRequest struct {
+	UserID uint
 	FormID uint
 	CalcID uint
 }

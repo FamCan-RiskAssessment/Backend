@@ -26,6 +26,7 @@ var Persian = map[string]interface{}{
 	"ticket":              "درخواست پشتیبانی",
 	"role":                "نقش",
 	"permission":          "دسترسی",
+	"premm5_result":       "رکورد پرم۵",
 	"ticketComment":       "نظر در مورد درخواست پشتیبانی",
 	"report":              "گزارش",
 	"contactInformation":  "پل ارتباطی",

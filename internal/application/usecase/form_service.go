@@ -34,6 +34,7 @@ type FormService interface {
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(request formdto.DeleteFormRequest) error
 	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
+	GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint) error
 	RejectForm(formID uint) error
 	AssignOperator(request formdto.AssignOperatorRequest) error

@@ -61,6 +61,43 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", data)
 }
 
+func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context) {
+	type GetAllOperatorFormsParams struct {
+		Page          int     `form:"page"`
+		PageSize      int     `form:"pageSize"`
+		Status        *uint   `form:"status"`
+		Gender        *string `form:"gender"`
+		BirthYear     *uint   `form:"birthYear"`
+		DrinksAlcohol *bool   `form:"drinksAlcohol"`
+		SmokingNow    *bool   `form:"smokingNow"`
+		Cancer        *bool   `form:"cancer"`
+	}
+
+	params := controller.Validate[GetAllOperatorFormsParams](ctx)
+	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	filters := &postgres.OperatorFormFilters{
+		OperatorID:    userID.(uint),
+		Status:        params.Status,
+		Gender:        params.Gender,
+		BirthYear:     params.BirthYear,
+		DrinksAlcohol: params.DrinksAlcohol,
+		SmokingNow:    params.SmokingNow,
+		Cancer:        params.Cancer,
+	}
+
+	forms, count, err := formController.formService.GetAllOperatorForms(offset, limit, filters)
+	if err != nil {
+		panic(err)
+	}
+
+	data := controller.NewPaginatedResponse(forms, count, offset, limit)
+
+	controller.Response(ctx, 200, "", data)
+}
+
 func (formController *AdminFormController) DeleteForm(ctx *gin.Context) {
 	type DeleteFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`

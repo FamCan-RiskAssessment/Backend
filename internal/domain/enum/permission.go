@@ -34,6 +34,8 @@ const (
 	PermissionHandleForms
 
 	PermissionHandleOperators
+
+	PermissionViewLogs
 )
 
 const (
@@ -44,6 +46,7 @@ const (
 	CategoryAccessManagement
 	CategoryFormManagement
 	CategoryOperatorManagement
+	CategoryLogManagement
 )
 
 var permissionCategories = map[PermissionType]PermissionCategory{
@@ -75,6 +78,7 @@ var permissionCategories = map[PermissionType]PermissionCategory{
 	PermissionHandleForms: CategoryFormManagement,
 
 	PermissionHandleOperators: CategoryOperatorManagement,
+	PermissionViewLogs:        CategoryLogManagement,
 }
 
 var permissionNames = map[PermissionType]string{
@@ -108,6 +112,8 @@ var permissionNames = map[PermissionType]string{
 	PermissionHandleForms: "مدیریت فرم ها",
 
 	PermissionHandleOperators: "مدیریت اپراتور ها",
+
+	PermissionViewLogs: "مشاهده لاگ ها",
 }
 
 var CategoryNames = map[PermissionCategory]string{
@@ -118,6 +124,7 @@ var CategoryNames = map[PermissionCategory]string{
 	CategoryAccessManagement:   "مدیریت دسترسی",
 	CategoryFormManagement:     "مدیریت فرم ها",
 	CategoryOperatorManagement: "مدیریت اپراتور‌ ها",
+	CategoryLogManagement:      "مدیریت لاگ ها",
 }
 
 func (p PermissionType) String() string {
@@ -172,6 +179,7 @@ func GetAllPermissionTypes() []PermissionType {
 
 		PermissionSetPassword,
 		PermissionHandleOperators,
+		PermissionViewLogs,
 	}
 }
 
@@ -183,5 +191,6 @@ func GetAllPermissionCategories() []PermissionCategory {
 		CategoryUserManagement,
 		CategoryAccessManagement,
 		CategoryFormManagement,
+		CategoryLogManagement,
 	}
 }

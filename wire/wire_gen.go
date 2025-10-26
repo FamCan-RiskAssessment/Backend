@@ -22,7 +22,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
-	actionlog "github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"

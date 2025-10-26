@@ -15,6 +15,7 @@ const (
 	CancerTypeBrain
 	CancerTypeLeukemia
 	CancerTypeLymphoma
+	CancerTypeEndometrial
 	CancerTypeOther
 )
 
@@ -44,6 +45,8 @@ func (ct CancerType) String() string {
 		return "لوسمی"
 	case CancerTypeLymphoma:
 		return "لنفوم"
+	case CancerTypeEndometrial:
+		return "آندومتر"
 	case CancerTypeOther:
 		return "سایر"
 	}

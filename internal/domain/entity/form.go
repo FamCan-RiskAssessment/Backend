@@ -99,48 +99,48 @@ type FamilyCancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 5
-	ChildCancer     bool             `gorm:"not null;default:false"`
-	ChildName       *string          `gorm:"type:varchar(50)"`
-	ChildCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	ChildCancerAge  *uint            `gorm:"type:int"`
-	ChildLifeStatus *string          `gorm:"type:varchar(50)"`
+	ChildCancer     bool    `gorm:"not null;default:false"`
+	ChildName       *string `gorm:"type:varchar(50)"`
+	ChildCancerType *enum.CancerType
+	ChildCancerAge  *uint   `gorm:"type:int"`
+	ChildLifeStatus *string `gorm:"type:varchar(50)"`
 	// Pics
-	MotherCancer     bool             `gorm:"not null;default:false"`
-	MotherName       *string          `gorm:"type:varchar(50)"`
-	MotherLifeStatus *string          `gorm:"type:varchar(50)"`
-	MotherCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	MotherCancerAge  *uint            `gorm:"type:int"`
+	MotherCancer     bool    `gorm:"not null;default:false"`
+	MotherName       *string `gorm:"type:varchar(50)"`
+	MotherLifeStatus *string `gorm:"type:varchar(50)"`
+	MotherCancerType *enum.CancerType
+	MotherCancerAge  *uint `gorm:"type:int"`
 	// Pics
-	FatherCancer     bool             `gorm:"not null;default:false"`
-	FatherName       *string          `gorm:"type:varchar(50)"`
-	FatherLifeStatus *string          `gorm:"type:varchar(50)"`
-	FatherCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	FatherCancerAge  *uint            `gorm:"type:int"`
+	FatherCancer     bool    `gorm:"not null;default:false"`
+	FatherName       *string `gorm:"type:varchar(50)"`
+	FatherLifeStatus *string `gorm:"type:varchar(50)"`
+	FatherCancerType *enum.CancerType
+	FatherCancerAge  *uint `gorm:"type:int"`
 	// Pics
-	SiblingCancer     bool             `gorm:"not null;default:false"`
-	SiblingName       *string          `gorm:"type:varchar(50)"`
-	SiblingLifeStatus *string          `gorm:"type:varchar(50)"`
-	SiblingCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	SiblingCancerAge  *uint            `gorm:"type:int"`
+	SiblingCancer     bool    `gorm:"not null;default:false"`
+	SiblingName       *string `gorm:"type:varchar(50)"`
+	SiblingLifeStatus *string `gorm:"type:varchar(50)"`
+	SiblingCancerType *enum.CancerType
+	SiblingCancerAge  *uint `gorm:"type:int"`
 	// Pics
-	AmeAmoCancer     bool             `gorm:"not null;default:false"`
-	AmeAmoName       *string          `gorm:"type:varchar(50)"`
-	AmeAmoLifeStatus *string          `gorm:"type:varchar(50)"`
-	AmeAmoCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	AmeAmoCancerAge  *uint            `gorm:"type:int"`
+	AmeAmoCancer     bool    `gorm:"not null;default:false"`
+	AmeAmoName       *string `gorm:"type:varchar(50)"`
+	AmeAmoLifeStatus *string `gorm:"type:varchar(50)"`
+	AmeAmoCancerType *enum.CancerType
+	AmeAmoCancerAge  *uint `gorm:"type:int"`
 	// Pics
-	KhaleDaeiCancer     bool             `gorm:"not null;default:false"`
-	KhaleDaeiName       *string          `gorm:"type:varchar(50)"`
-	KhaleDaeiLifeStatus *string          `gorm:"type:varchar(50)"`
-	KhaleDaeiCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	KhaleDaeiCancerAge  *uint            `gorm:"type:int"`
+	KhaleDaeiCancer     bool    `gorm:"not null;default:false"`
+	KhaleDaeiName       *string `gorm:"type:varchar(50)"`
+	KhaleDaeiLifeStatus *string `gorm:"type:varchar(50)"`
+	KhaleDaeiCancerType *enum.CancerType
+	KhaleDaeiCancerAge  *uint `gorm:"type:int"`
 	// Pics
-	OtherRelativeCancer     *bool            `gorm:"type:boolean"`
-	OtherRelativeName       *string          `gorm:"type:varchar(50)"`
-	OtherRelativeRelation   *string          `gorm:"type:varchar(50)"`
-	OtherRelativeLifeStatus *string          `gorm:"type:varchar(50)"`
-	OtherRelativeCancerType *enum.CancerType `gorm:"type:varchar(50)"`
-	OtherRelativeCancerAge  *uint            `gorm:"type:int"`
+	OtherRelativeCancer     *bool   `gorm:"type:boolean"`
+	OtherRelativeName       *string `gorm:"type:varchar(50)"`
+	OtherRelativeRelation   *string `gorm:"type:varchar(50)"`
+	OtherRelativeLifeStatus *string `gorm:"type:varchar(50)"`
+	OtherRelativeCancerType *enum.CancerType
+	OtherRelativeCancerAge  *uint `gorm:"type:int"`
 	// Pics
 }
 
@@ -168,49 +168,65 @@ type LungCancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 7
-	InsuranceStatus           *string          `gorm:"type:varchar(127)"`
-	SupplementaryInsurances   *string          `gorm:"type:varchar(50)"`
-	Hypertension              bool             `gorm:"not null;default:false"`
-	HypertensionTreatment     *bool            `gorm:"type:boolean"`
-	HeartDisease              bool             `gorm:"not null;default:false"`
-	HeartDiseaseTreatment     *bool            `gorm:"type:boolean"`
-	Diabetes                  bool             `gorm:"not null;default:false"`
-	DiabetesTreatment         *bool            `gorm:"type:boolean"`
-	ChronicLungDisease        *bool            `gorm:"type:boolean"`
-	ChronicLungDiseaseType    *string          `gorm:"type:varchar(50)"`
-	LungCancerHistory         bool             `gorm:"not null;default:false"`
-	OtherCancerHistory        bool             `gorm:"not null;default:false"`
-	OtherCancerType           *enum.CancerType `gorm:"type:varchar(50)"`
-	LungCancerFamily          *bool            `gorm:"type:boolean"`
-	LungCancerFamilyRelation  *string          `gorm:"type:varchar(50)"`
-	OtherCancerFamily         *bool            `gorm:"type:boolean"`
-	OtherCancerFamilyType     *enum.CancerType `gorm:"type:varchar(50)"`
-	OtherCancerFamilyRelation *string          `gorm:"type:varchar(50)"`
-	OccupationalExposure      *string          `gorm:"type:varchar(255)"`
-	CurrentSmoking            bool             `gorm:"not null;default:false"`
-	SmokingStartAgeCurrent    *uint            `gorm:"type:int"`
-	SmokingTypesCurrent       *string          `gorm:"type:varchar(50)"`
-	CigarettesPerDayCurrent   *uint            `gorm:"type:int"`
-	CigarPerDayCurrent        *uint            `gorm:"type:int"`
-	ECigPerDayCurrent         *uint            `gorm:"type:int"`
-	PipePerDayCurrent         *uint            `gorm:"type:int"`
-	ChapoghPerDayCurrent      *uint            `gorm:"type:int"`
-	SmokedOpiumPerDayCurrent  *uint            `gorm:"type:int"`
-	ChewedOpiumPerDayCurrent  *uint            `gorm:"type:int"`
-	HookahPerWeekCurrent      *uint            `gorm:"type:int"`
-	PastSmoking               *string          `gorm:"type:varchar(127)"`
-	SmokingStartAgePast       *uint            `gorm:"type:int"`
-	SmokingTypesPast          *string          `gorm:"type:varchar(50)"`
-	CigarettesPerDayPast      *uint            `gorm:"type:int"`
-	CigarPerDayPast           *uint            `gorm:"type:int"`
-	ECigPerDayPast            *uint            `gorm:"type:int"`
-	PipePerDayPast            *uint            `gorm:"type:int"`
-	ChapoghPerDayPast         *uint            `gorm:"type:int"`
-	SmokedOpiumPerDayPast     *uint            `gorm:"type:int"`
-	ChewedOpiumPerDayPast     *uint            `gorm:"type:int"`
-	HookahPerWeekPast         *uint            `gorm:"type:int"`
-	SecondhandSmoke           bool             `gorm:"not null;default:false"`
-	SecondhandSmokeLocation   *string          `gorm:"type:varchar(50)"`
+	InsuranceStatus           *string `gorm:"type:varchar(127)"`
+	SupplementaryInsurances   *string `gorm:"type:varchar(50)"`
+	Hypertension              bool    `gorm:"not null;default:false"`
+	HypertensionTreatment     *bool   `gorm:"type:boolean"`
+	HeartDisease              bool    `gorm:"not null;default:false"`
+	HeartDiseaseTreatment     *bool   `gorm:"type:boolean"`
+	Diabetes                  bool    `gorm:"not null;default:false"`
+	DiabetesTreatment         *bool   `gorm:"type:boolean"`
+	ChronicLungDisease        *bool   `gorm:"type:boolean"`
+	ChronicLungDiseaseType    *string `gorm:"type:varchar(50)"`
+	LungCancerHistory         bool    `gorm:"not null;default:false"`
+	OtherCancerHistory        bool    `gorm:"not null;default:false"`
+	OtherCancerType           *enum.CancerType
+	LungCancerFamily          *bool   `gorm:"type:boolean"`
+	LungCancerFamilyRelation  *string `gorm:"type:varchar(50)"`
+	OtherCancerFamily         *bool   `gorm:"type:boolean"`
+	OtherCancerFamilyType     *enum.CancerType
+	OtherCancerFamilyRelation *string `gorm:"type:varchar(50)"`
+	OccupationalExposure      *string `gorm:"type:varchar(255)"`
+	CurrentSmoking            bool    `gorm:"not null;default:false"`
+	SmokingStartAgeCurrent    *uint   `gorm:"type:int"`
+	SmokingTypesCurrent       *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayCurrent   *uint   `gorm:"type:int"`
+	CigarPerDayCurrent        *uint   `gorm:"type:int"`
+	ECigPerDayCurrent         *uint   `gorm:"type:int"`
+	PipePerDayCurrent         *uint   `gorm:"type:int"`
+	ChapoghPerDayCurrent      *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
+	HookahPerWeekCurrent      *uint   `gorm:"type:int"`
+	PastSmoking               *string `gorm:"type:varchar(127)"`
+	SmokingStartAgePast       *uint   `gorm:"type:int"`
+	SmokingTypesPast          *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayPast      *uint   `gorm:"type:int"`
+	CigarPerDayPast           *uint   `gorm:"type:int"`
+	ECigPerDayPast            *uint   `gorm:"type:int"`
+	PipePerDayPast            *uint   `gorm:"type:int"`
+	ChapoghPerDayPast         *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayPast     *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayPast     *uint   `gorm:"type:int"`
+	HookahPerWeekPast         *uint   `gorm:"type:int"`
+	SecondhandSmoke           bool    `gorm:"not null;default:false"`
+	SecondhandSmokeLocation   *string `gorm:"type:varchar(50)"`
+}
+
+type Premm5Result struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
+
+	// Gene-specific mutation probabilities
+	MLH1Probability float64 `gorm:"type:decimal(10,6);not null"`
+	MSH2Probability float64 `gorm:"type:decimal(10,6);not null"`
+	MSH6Probability float64 `gorm:"type:decimal(10,6);not null"`
+	PMS2Probability float64 `gorm:"type:decimal(10,6);not null"`
+
+	// Overall PREMM5 scores
+	PAny  float64 `gorm:"type:decimal(10,6);not null"` // Overall PREMM5 score (probability of any mutation)
+	PNone float64 `gorm:"type:decimal(10,6);not null"` // Probability of no mutation
 }
 
 type ModelResult struct {

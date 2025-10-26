@@ -62,4 +62,8 @@ type FormRepository interface {
 	FindLungCancerByFormID(db database.Database, formID uint) (*entity.LungCancerInfo, error)
 	CreateLungCancer(db database.Database, info *entity.LungCancerInfo) error
 	UpdateLungCancer(db database.Database, info *entity.LungCancerInfo) error
+
+	FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error)
+	CreatePremm5Result(db database.Database, result *entity.Premm5Result) error
+	UpdatePremm5Result(db database.Database, result *entity.Premm5Result) error
 }

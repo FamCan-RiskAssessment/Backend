@@ -9,16 +9,22 @@ import (
 
 type ActionLogController struct {
 	actionLogService usecase.ActionLogService
+	formService      usecase.FormService
+	userService      usecase.UserService
 	pagination       *bootstrap.Pagination
 }
 
 func NewActionLogController(
 	actionLogService usecase.ActionLogService,
+	formService usecase.FormService,
+	userService usecase.UserService,
 	pagination *bootstrap.Pagination,
 
 ) *ActionLogController {
 	return &ActionLogController{
 		actionLogService: actionLogService,
+		formService:      formService,
+		userService:      userService,
 		pagination:       pagination,
 	}
 }

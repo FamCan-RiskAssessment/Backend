@@ -22,7 +22,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
-	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
+	actionlog "github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
@@ -67,15 +67,17 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
 	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
+	formRepository := postgres.NewFormRepository()
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
+	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
+		FormController: generalFormController,
 	}
 	pagination := ProvidePagination(config)
 	adminUserController := user.NewAdminUserController(constants, userService, pagination)
-	formRepository := postgres.NewFormRepository()
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
-	actionLogController := actionlog.NewActionLogController(actionLogService, pagination)
+	actionLogController := actionlog.NewActionLogController(actionLogService, formService, userService, pagination)
 	calcURL := ProvideCalcURL(config)
 	calcService := service.NewCalcService(constants, formRepository, postgresDatabase, calcURL)
 	adminCalcController := calc.NewAdminCalcController(constants, calcService)
@@ -113,7 +115,7 @@ var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.New
 
 var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, service.NewCalcService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)), wire.Bind(new(usecase.CalcService), new(*service.CalcService)))
 
-var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
+var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
 
 var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, actionlog.NewActionLogController, calc.NewAdminCalcController, wire.Struct(new(AdminControllers), "*"))
 
@@ -202,6 +204,7 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
+	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {

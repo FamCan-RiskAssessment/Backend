@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
+	generaldto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/general"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
@@ -95,11 +96,11 @@ func (als *ActionLogService) GetAllActionLogs(offset, limit int) ([]actionlogdto
 	return response, count, nil
 }
 
-func (als *ActionLogService) GetAllActionTypes() ([]actionlogdto.ActionType, error) {
+func (als *ActionLogService) GetAllActionTypes() ([]generaldto.EnumResponse, error) {
 	actionTypes := enum.GetAllActionTypes()
-	response := make([]actionlogdto.ActionType, len(actionTypes))
+	response := make([]generaldto.EnumResponse, len(actionTypes))
 	for i, actionType := range actionTypes {
-		response[i] = actionlogdto.ActionType{
+		response[i] = generaldto.EnumResponse{
 			ID:   uint(actionType),
 			Name: actionType.String(),
 		}

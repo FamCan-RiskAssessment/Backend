@@ -17,8 +17,3 @@ type LogResponse struct {
 	CreatedAt  time.Time             `json:"createdAt"`
 	UpdatedAt  time.Time             `json:"updatedAt"`
 }
-
-type ActionType struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
-}

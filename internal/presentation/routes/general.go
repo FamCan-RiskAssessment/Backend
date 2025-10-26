@@ -15,4 +15,12 @@ func SetupGeneralRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			admin.POST("/login", app.Controllers.Admin.UserController.LoginWithPassword)
 		}
 	}
+
+	enums := routerGroup.Group("/enum")
+	{
+		enums.GET("/cancer-types", app.Controllers.General.FormController.GetAllCancerTypes)
+		enums.GET("/genders", app.Controllers.General.FormController.GetAllGenders)
+		enums.GET("/menopausal-statuses", app.Controllers.General.FormController.GetAllMenopausalStatuses)
+		enums.GET("/form-statuses", app.Controllers.General.FormController.GetAllFormStatuses)
+	}
 }

@@ -56,31 +56,33 @@ type MamoGraphyInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 3
-	GhaedeAge                    uint                  `gorm:"not null"`
-	HasChildren                  bool                  `gorm:"not null;default:false"`
-	NumberOfChildren             *uint                 `gorm:"type:int"`
-	AgeOfFirstBirth              *uint                 `gorm:"type:int"`
-	MenopausalStatus             enum.MenopausalStatus `gorm:"not null"`
-	MenopauseAge                 *string               `gorm:"type:varchar(50)"`
-	HRT                          *bool                 `gorm:"type:boolean"`
-	HRTUseLength                 *uint                 `gorm:"type:int"`
-	LastFiveYearsHRTUse          bool                  `gorm:"not null;default:false"`
-	CurrentHRTUse                *bool                 `gorm:"type:boolean"`
-	IntendedHRTUse               *uint                 `gorm:"type:int"`
-	HRTType                      *string               `gorm:"type:varchar(50)"`
-	Oral                         *bool                 `gorm:"type:boolean"`
-	OralDuration                 *string               `gorm:"type:varchar(50)"`
-	OralTwoLastYears             *bool                 `gorm:"type:boolean"`
-	MamoGraphy                   *bool                 `gorm:"type:boolean"`
-	Falop                        *bool                 `gorm:"type:boolean"`
-	Andometrioz                  *bool                 `gorm:"type:boolean"`
-	LeavePestan                  bool                  `gorm:"not null;default:false"`
-	LeaveTokhmdan                bool                  `gorm:"not null;default:false"`
-	LaDeColon                    *bool                 `gorm:"type:boolean"`
-	LaDePol                      *bool                 `gorm:"type:boolean"`
-	AspLaMo                      *bool                 `gorm:"type:boolean"`
-	NsaiDLaMo                    *bool                 `gorm:"type:boolean"`
-	LastFiveYearBloodTestInStool *bool                 `gorm:"type:boolean"`
+	GhaedeAge                    uint                            `gorm:"not null"`
+	HasChildren                  bool                            `gorm:"not null;default:false"`
+	NumberOfChildren             *uint                           `gorm:"type:int"`
+	AgeOfFirstBirth              *uint                           `gorm:"type:int"`
+	MenopausalStatus             enum.MenopausalStatus           `gorm:"not null"`
+	MenopauseAge                 *string                         `gorm:"type:varchar(50)"`
+	HRT                          *bool                           `gorm:"type:boolean"`
+	HRTUseLength                 *uint                           `gorm:"type:int"`
+	LastFiveYearsHRTUse          bool                            `gorm:"not null;default:false"`
+	CurrentHRTUse                *bool                           `gorm:"type:boolean"`
+	IntendedHRTUse               *uint                           `gorm:"type:int"`
+	HRTType                      *string                         `gorm:"type:varchar(50)"`
+	Oral                         *bool                           `gorm:"type:boolean"`
+	OralDuration                 *string                         `gorm:"type:varchar(50)"`
+	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
+	MamoGraphy                   *bool                           `gorm:"type:boolean"`
+	Falop                        *bool                           `gorm:"type:boolean"`
+	Andometrioz                  *bool                           `gorm:"type:boolean"`
+	LeavePestan                  bool                            `gorm:"not null;default:false"`
+	LeaveTokhmdan                bool                            `gorm:"not null;default:false"`
+	LaDeColon                    *bool                           `gorm:"type:boolean"`
+	LaDePol                      *bool                           `gorm:"type:boolean"`
+	AspLaMo                      *bool                           `gorm:"type:boolean"`
+	NsaiDLaMo                    *bool                           `gorm:"type:boolean"`
+	LastFiveYearBloodTestInStool *bool                           `gorm:"type:boolean"`
+	NumberOfBreastBiopsies       *uint                           `gorm:"type:int"`
+	HyperplasiaInBiopsy          *enum.HyperplasiaInBiopsyStatus `gorm:"type:int"`
 }
 
 type CancerInfo struct {

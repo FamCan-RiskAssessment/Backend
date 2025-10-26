@@ -45,4 +45,5 @@ type FormService interface {
 	GetAllGenders() ([]generaldto.EnumResponse, error)
 	GetAllMenopausalStatuses() ([]generaldto.EnumResponse, error)
 	GetAllFormStatuses() ([]generaldto.EnumResponse, error)
+	GetAllHyperplasiaInBiopsyStatuses() ([]generaldto.EnumResponse, error)
 }

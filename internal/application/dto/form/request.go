@@ -101,6 +101,8 @@ type UpsertMamographyRequest struct {
 	AspLaMo                      *bool   `json:"aspLaMo,omitempty"`
 	NsaiDLaMo                    *bool   `json:"nsaiDLaMo,omitempty"`
 	LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool,omitempty"`
+	NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
+	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
 }
 
 type UpsertCancerRequest struct {
@@ -291,6 +293,8 @@ type UpdateMamographyRequest struct {
 	AspLaMo                      *bool   `json:"aspLaMo"`
 	NsaiDLaMo                    *bool   `json:"nsaiDLaMo"`
 	LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool"`
+	NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
+	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
 }
 type UpdateCancerRequest struct {
 	UserID uint

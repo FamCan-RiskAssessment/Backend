@@ -66,15 +66,17 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
 	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
+	formRepository := postgres.NewFormRepository()
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
+	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
+		FormController: generalFormController,
 	}
 	pagination := ProvidePagination(config)
 	adminUserController := user.NewAdminUserController(constants, userService, pagination)
-	formRepository := postgres.NewFormRepository()
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
-	actionLogController := actionlog.NewActionLogController(actionLogService, pagination)
+	actionLogController := actionlog.NewActionLogController(actionLogService, formService, userService, pagination)
 	adminControllers := &AdminControllers{
 		UserController:      adminUserController,
 		FormController:      adminFormController,
@@ -108,7 +110,7 @@ var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.New
 
 var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)))
 
-var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, wire.Struct(new(GeneralControllers), "*"))
+var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
 
 var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, actionlog.NewActionLogController, wire.Struct(new(AdminControllers), "*"))
 
@@ -192,6 +194,7 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
+	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {

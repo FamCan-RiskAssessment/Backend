@@ -24,10 +24,6 @@ var (
 )
 
 func NewPostgresDatabase(dbConfig *bootstrap.Database) *PostgresDatabase {
-	fmt.Println(dbConfig.Host)
-	fmt.Println(dbConfig.Port)
-	fmt.Println(dbConfig.User)
-	fmt.Println(dbConfig.Password)
 	dbOnce.Do(func() {
 		dsn := fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=UTC",

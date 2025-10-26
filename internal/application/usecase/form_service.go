@@ -2,6 +2,7 @@ package usecase
 
 import (
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+	generaldto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/general"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 )
 
@@ -39,4 +40,9 @@ type FormService interface {
 	RejectForm(formID uint) error
 	AssignOperator(request formdto.AssignOperatorRequest) error
 	UnassignOperator(request formdto.UnassignOperatorRequest) error
+
+	GetAllCancerTypes() ([]generaldto.EnumResponse, error)
+	GetAllGenders() ([]generaldto.EnumResponse, error)
+	GetAllMenopausalStatuses() ([]generaldto.EnumResponse, error)
+	GetAllFormStatuses() ([]generaldto.EnumResponse, error)
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+	generaldto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/general"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
@@ -1527,4 +1528,52 @@ func (formService *FormService) UnassignOperator(request formdto.UnassignOperato
 	formService.actionLogService.LogAction(log)
 
 	return nil
+}
+
+func (formService *FormService) GetAllCancerTypes() ([]generaldto.EnumResponse, error) {
+	cancerTypes := enum.GetAllCancerTypes()
+	response := make([]generaldto.EnumResponse, len(cancerTypes))
+	for i, cancerType := range cancerTypes {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(cancerType),
+			Name: cancerType.String(),
+		}
+	}
+	return response, nil
+}
+
+func (formService *FormService) GetAllGenders() ([]generaldto.EnumResponse, error) {
+	genders := enum.GetAllGenders()
+	response := make([]generaldto.EnumResponse, len(genders))
+	for i, gender := range genders {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(gender),
+			Name: gender.String(),
+		}
+	}
+	return response, nil
+}
+
+func (formService *FormService) GetAllMenopausalStatuses() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllMenopausalStatuses()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}
+
+func (formService *FormService) GetAllFormStatuses() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllFormStatuses()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
 }

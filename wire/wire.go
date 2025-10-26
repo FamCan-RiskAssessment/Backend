@@ -62,6 +62,7 @@ var ServiceProviderSet = wire.NewSet(
 
 var GeneralControllerProviderSet = wire.NewSet(
 	user.NewGeneralUserController,
+	form.NewGeneralFormController,
 	wire.Struct(new(GeneralControllers), "*"),
 )
 
@@ -172,6 +173,7 @@ type Database struct {
 
 type GeneralControllers struct {
 	UserController *user.GeneralUserController
+	FormController *form.GeneralFormController
 }
 
 type AdminControllers struct {

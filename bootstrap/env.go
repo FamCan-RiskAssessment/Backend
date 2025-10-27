@@ -16,6 +16,7 @@ type Env struct {
 	OTP        OTP
 	SuperAdmin SuperAdmin
 	S3         S3
+	CalcURL    CalcURL
 }
 
 type Server struct {
@@ -69,6 +70,11 @@ type SuperAdmin struct {
 	Password string
 }
 
+type CalcURL struct {
+	Premm5 string
+	BCRA   string
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -110,6 +116,10 @@ func NewEnv() *Env {
 			AccessKey: os.Getenv("S3_ACCESS_KEY"),
 			SecretKey: os.Getenv("S3_SECRET_KEY"),
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
+		},
+		CalcURL: CalcURL{
+			Premm5: os.Getenv("PREMM5_API_URL"),
+			BCRA:   os.Getenv("BCRA_API_URL"),
 		},
 	}
 }

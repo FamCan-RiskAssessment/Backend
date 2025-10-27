@@ -178,6 +178,8 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.AspLaMo = request.AspLaMo
 	info.NsaiDLaMo = request.NsaiDLaMo
 	info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
+	info.HyperplasiaInBiopsy = (*enum.HyperplasiaInBiopsyStatus)(request.HyperplasiaInBiopsy)
 
 	if info.ID == 0 {
 		return formService.formRepository.CreateMamography(formService.db, info)
@@ -1169,6 +1171,12 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	info.AspLaMo = request.AspLaMo
 	info.NsaiDLaMo = request.NsaiDLaMo
 	info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	if request.NumberOfBreastBiopsies != nil {
+		info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
+	}
+	if request.HyperplasiaInBiopsy != nil {
+		info.HyperplasiaInBiopsy = (*enum.HyperplasiaInBiopsyStatus)(request.HyperplasiaInBiopsy)
+	}
 
 	if info.ID == 0 {
 		return formService.formRepository.CreateMamography(formService.db, info)
@@ -1568,6 +1576,18 @@ func (formService *FormService) GetAllMenopausalStatuses() ([]generaldto.EnumRes
 
 func (formService *FormService) GetAllFormStatuses() ([]generaldto.EnumResponse, error) {
 	statuses := enum.GetAllFormStatuses()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}
+
+func (formService *FormService) GetAllHyperplasiaInBiopsyStatuses() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllHyperplasiaInBiopsyStatuses()
 	response := make([]generaldto.EnumResponse, len(statuses))
 	for i, status := range statuses {
 		response[i] = generaldto.EnumResponse{

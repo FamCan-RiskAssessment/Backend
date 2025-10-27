@@ -61,10 +61,7 @@ jobs:
             echo "${{ secrets.ENV }}" > .env
             chmod 644 .env
 
-
-
-
-            docker compose down
+            docker compose down --remove-orphans
             sleep 10
             docker compose pull
             docker compose up -d

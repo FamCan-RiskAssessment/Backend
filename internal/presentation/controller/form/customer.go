@@ -237,6 +237,8 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		AspLaMo                      *bool   `json:"aspLaMo,omitempty"`
 		NsaiDLaMo                    *bool   `json:"nsaiDLaMo,omitempty"`
 		LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool,omitempty"`
+		NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
+		HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
 	}
 
 	params := controller.Validate[UpsertMamographyParams](ctx)
@@ -271,6 +273,8 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		AspLaMo:                      params.AspLaMo,
 		NsaiDLaMo:                    params.NsaiDLaMo,
 		LastFiveYearBloodTestInStool: params.LastFiveYearBloodTestInStool,
+		NumberOfBreastBiopsies:       params.NumberOfBreastBiopsies,
+		HyperplasiaInBiopsy:          params.HyperplasiaInBiopsy,
 	}
 
 	if err := formController.formService.UpsertMamography(req); err != nil {

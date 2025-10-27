@@ -20,6 +20,7 @@ import (
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	infraStorage "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
 	actionlog "github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -52,12 +53,14 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewOTPService,
 	sms.NewSMSService,
 	service.NewActionLogService,
+	service.NewCalcService,
 	wire.Bind(new(usecase.UserService), new(*service.UserService)),
 	wire.Bind(new(usecase.FormService), new(*service.FormService)),
 	wire.Bind(new(usecase.OtpService), new(*service.OTPService)),
 	wire.Bind(new(usecase.JwtService), new(*service.JWTService)),
 	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
 	wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)),
+	wire.Bind(new(usecase.CalcService), new(*service.CalcService)),
 )
 
 var GeneralControllerProviderSet = wire.NewSet(
@@ -70,6 +73,7 @@ var AdminControllerProviderSet = wire.NewSet(
 	user.NewAdminUserController,
 	form.NewAdminFormController,
 	actionlog.NewActionLogController,
+	calc.NewAdminCalcController,
 	wire.Struct(new(AdminControllers), "*"),
 )
 
@@ -143,6 +147,10 @@ func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
 	return &container.Env.Pagination
 }
 
+func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
+	return &container.Env.CalcURL
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -163,6 +171,7 @@ var ProviderSet = wire.NewSet(
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
+	ProvideCalcURL,
 	SeedProviderSet,
 )
 
@@ -180,6 +189,7 @@ type AdminControllers struct {
 	UserController      *user.AdminUserController
 	FormController      *form.AdminFormController
 	ActionLogController *actionlog.ActionLogController
+	CalcController      *calc.AdminCalcController
 }
 
 type CustomerControllers struct {

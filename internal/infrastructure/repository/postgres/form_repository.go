@@ -90,6 +90,9 @@ func (r *FormRepository) DeleteForm(db database.Database, id uint) error {
 		if err := tx.Where("form_id = ?", id).Delete(&entity.LungCancerInfo{}).Error; err != nil {
 			return err
 		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.Premm5Result{}).Error; err != nil {
+			return err
+		}
 
 		if err := tx.Delete(&entity.Form{}, id).Error; err != nil {
 			return err
@@ -321,4 +324,44 @@ func (r *FormRepository) CreateLungCancer(db database.Database, info *entity.Lun
 
 func (r *FormRepository) UpdateLungCancer(db database.Database, info *entity.LungCancerInfo) error {
 	return db.GetDB().Save(info).Error
+}
+
+func (r *FormRepository) FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error) {
+	var result entity.Premm5Result
+	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *FormRepository) CreatePremm5Result(db database.Database, result *entity.Premm5Result) error {
+	return db.GetDB().Create(result).Error
+}
+
+func (r *FormRepository) UpdatePremm5Result(db database.Database, result *entity.Premm5Result) error {
+	return db.GetDB().Save(result).Error
+}
+
+func (r *FormRepository) FindBCRAResultByFormID(db database.Database, formID uint) (*entity.BCRAResult, error) {
+	var result entity.BCRAResult
+	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *FormRepository) CreateBCRAResult(db database.Database, result *entity.BCRAResult) error {
+	return db.GetDB().Create(result).Error
+}
+
+func (r *FormRepository) UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error {
+	return db.GetDB().Save(result).Error
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/storage"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/action_log"
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
@@ -77,10 +78,14 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	adminUserController := user.NewAdminUserController(constants, userService, pagination)
 	adminFormController := form.NewAdminFormController(constants, formService, pagination)
 	actionLogController := actionlog.NewActionLogController(actionLogService, formService, userService, pagination)
+	calcURL := ProvideCalcURL(config)
+	calcService := service.NewCalcService(constants, formRepository, actionLogService, postgresDatabase, calcURL)
+	adminCalcController := calc.NewAdminCalcController(constants, calcService)
 	adminControllers := &AdminControllers{
 		UserController:      adminUserController,
 		FormController:      adminFormController,
 		ActionLogController: actionLogController,
+		CalcController:      adminCalcController,
 	}
 	customerFormController := form.NewCustomerFormController(constants, formService, pagination)
 	customerControllers := &CustomerControllers{
@@ -108,11 +113,11 @@ var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.New
 
 var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.NewFormRepository, postgres.NewActionLogRepository, redis.NewUserCacheRepository, wire.Bind(new(postgres2.UserRepository), new(*postgres.UserRepository)), wire.Bind(new(postgres2.FormRepository), new(*postgres.FormRepository)), wire.Bind(new(postgres2.ActionLogRepository), new(*postgres.ActionLogRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
 
-var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)))
+var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, service.NewCalcService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)), wire.Bind(new(usecase.CalcService), new(*service.CalcService)))
 
 var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
 
-var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, actionlog.NewActionLogController, wire.Struct(new(AdminControllers), "*"))
+var AdminControllerProviderSet = wire.NewSet(user.NewAdminUserController, form.NewAdminFormController, actionlog.NewActionLogController, calc.NewAdminCalcController, wire.Struct(new(AdminControllers), "*"))
 
 var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, wire.Struct(new(CustomerControllers), "*"))
 
@@ -164,6 +169,10 @@ func ProvidePagination(container *bootstrap.Config) *bootstrap.Pagination {
 	return &container.Env.Pagination
 }
 
+func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
+	return &container.Env.CalcURL
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -184,6 +193,7 @@ var ProviderSet = wire.NewSet(
 	ProvideJWTKeysPath,
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
+	ProvideCalcURL,
 	SeedProviderSet,
 )
 
@@ -201,6 +211,7 @@ type AdminControllers struct {
 	UserController      *user.AdminUserController
 	FormController      *form.AdminFormController
 	ActionLogController *actionlog.ActionLogController
+	CalcController      *calc.AdminCalcController
 }
 
 type CustomerControllers struct {

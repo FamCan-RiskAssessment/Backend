@@ -163,6 +163,8 @@ type GetMamographyResponse struct {
 	AspLaMo                      *bool                 `json:"aspLaMo,omitempty"`
 	NsaiDLaMo                    *bool                 `json:"nsaiDLaMo,omitempty"`
 	LastFiveYearBloodTestInStool *bool                 `json:"lastFiveYearBloodTestInStool,omitempty"`
+	NumberOfBreastBiopsies       *uint                 `json:"numberOfBreastBiopsies,omitempty"`
+	HyperplasiaInBiopsy          *uint                 `json:"hyperplasiaInBiopsy,omitempty"`
 }
 
 type ChangeFormStatusResponse struct {

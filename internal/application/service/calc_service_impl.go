@@ -280,177 +280,28 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 
 	// Calculate current age
 	currentAge := float64(2024 - basicInfo.BirthYear)
-
-	// Default values for hardcoded fields
-	t2 := currentAge + 5.0 // Project 5 years ahead
-	race := 1              // Default to White (1)
-
-	// Map hyperplasia status
-	hypPlas := 99 // Unknown by default
-	if mamographyInfo.HyperplasiaInBiopsy != nil {
-		switch *mamographyInfo.HyperplasiaInBiopsy {
-		case enum.NoHyperplasiaInBiopsy:
-			hypPlas = 0
-		case enum.HasHyperplasiaInBiopsy:
-			hypPlas = 1
-		case enum.UnkownHyperplasiaInBiopsy:
-			hypPlas = 99
-		}
-	}
-
-	// Map number of biopsies
-	nBiop := 99 // Unknown by default
-	if mamographyInfo.NumberOfBreastBiopsies != nil {
-		biopCount := *mamographyInfo.NumberOfBreastBiopsies
-		if biopCount >= 2 {
-			nBiop = 2
-		} else if biopCount == 1 {
-			nBiop = 1
-		} else {
-			nBiop = 0
-		}
-	}
-
-	// Age at menarche (GhaedeAge)
-	ageMen := 99 // Unknown by default
-	if mamographyInfo.GhaedeAge > 0 {
-		ageMen = int(mamographyInfo.GhaedeAge)
-	}
-
-	// Age at first birth
-	age1st := 98 // Nulliparous by default
-	if mamographyInfo.AgeOfFirstBirth != nil {
-		age := *mamographyInfo.AgeOfFirstBirth
-
-		// Convert age to category
-		if age < 20 {
-			age1st = 0
-		} else if age >= 20 && age < 25 {
-			age1st = 1
-		} else if age >= 25 && age < 30 {
-			age1st = 2
-		} else if age >= 30 {
-			age1st = 3
-		}
-
-		// Validate Age1st against AgeMen - if Age1st is less than AgeMen, it's invalid
-		// Set to 99 (unknown) to avoid validation error
-		if ageMen != 99 && float64(age) < float64(ageMen) {
-			age1st = 99
-		}
-	}
-
-	// Additionally, ensure Age1st doesn't exceed current age or other constraints
-	// If we have any potential issues, set to 99 (unknown)
-	if age1st != 98 && age1st != 99 {
-		// Check various conditions that might cause validation issues
-		if ageMen != 99 {
-			// Convert category back to approximate age to validate
-			var minAge int
-			switch age1st {
-			case 0:
-				minAge = 0
-			case 1:
-				minAge = 20
-			case 2:
-				minAge = 25
-			case 3:
-				minAge = 30
-			default:
-				minAge = 0
-			}
-
-			// If the minimum age of category is less than menarche age, or if it exceeds current age
-			if minAge < ageMen || float64(minAge) > currentAge {
-				age1st = 99
-			}
-		}
-	}
-
-	// Final safeguard: if we couldn't determine a valid Age1st, use 99
-	if age1st == 98 && ageMen != 99 {
-		// If we have menarche data but no valid first birth age, set to unknown
-		age1st = 99
-	}
-
-	// Count first-degree relatives with breast cancer
-	nRels := mapFirstDegreeBreastCancerRelatives(familyCancerInfo)
+	projectionAge := currentAge + 5.0
 
 	// Build BCRA request
 	request := calcdto.SendFormToBCRARequest{
 		T1:      currentAge,
-		T2:      t2,
-		N_Biop:  nBiop,
-		HypPlas: hypPlas,
-		AgeMen:  ageMen,
-		Age1st:  age1st,
-		N_Rels:  nRels,
-		Race:    race,
+		T2:      projectionAge,
+		N_Biop:  mapBiopsyCount(mamographyInfo),
+		HypPlas: mapHyperplasiaStatus(mamographyInfo),
+		AgeMen:  mapAgeAtMenarche(mamographyInfo),
+		Age1st:  mapAgeAtFirstBirth(mamographyInfo),
+		N_Rels:  mapFirstDegreeBreastCancerRelatives(familyCancerInfo),
+		Race:    1, // Default to White
 	}
 
-	jsonData, err := json.Marshal(request)
+	// Make API call
+	bcraResponse, err := calcService.callBCRAAPI(request)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
 
-	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return calcdto.ModelResponse{}, fmt.Errorf("failed to call BCRA API: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return calcdto.ModelResponse{}, fmt.Errorf("failed to read BCRA response: %w", err)
-	}
-
-	// Check if the BCRA API returned an error
-	if resp.StatusCode != http.StatusOK {
-		return calcdto.ModelResponse{}, fmt.Errorf("BCRA API returned error (status %d): %s", resp.StatusCode, string(body))
-	}
-
-	var bcraResponse calcdto.BCRAResponse
-	err = json.Unmarshal(body, &bcraResponse)
-	if err != nil {
-		return calcdto.ModelResponse{}, fmt.Errorf("failed to parse BCRA response: %w", err)
-	}
-
-	// Check if BCRA result already exists for this form
-	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, form.ID)
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	// Create or update BCRA result
-	if existingResult == nil {
-		// Create new result
-		bcraResult := &entity.BCRAResult{
-			FormID:     form.ID,
-			AbsRisk:    bcraResponse.AbsRisk,
-			AbsRiskAvg: bcraResponse.AbsRiskAvg,
-			RRStar1:    bcraResponse.RRStar1,
-			RRStar2:    bcraResponse.RRStar2,
-			ProjIntvl:  bcraResponse.ProjIntvl,
-		}
-		err = calcService.formRepository.CreateBCRAResult(calcService.db, bcraResult)
-	} else {
-		// Update existing result
-		existingResult.AbsRisk = bcraResponse.AbsRisk
-		existingResult.AbsRiskAvg = bcraResponse.AbsRiskAvg
-		existingResult.RRStar1 = bcraResponse.RRStar1
-		existingResult.RRStar2 = bcraResponse.RRStar2
-		existingResult.ProjIntvl = bcraResponse.ProjIntvl
-		err = calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
-	}
-
+	// Save result to database
+	err = calcService.saveBCRAResult(form.ID, bcraResponse)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
@@ -459,6 +310,207 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 		Name:        "BCRA",
 		Probability: bcraResponse.AbsRisk,
 	}, nil
+}
+
+// callBCRAAPI makes the HTTP request to the BCRA calculator API
+func (calcService *CalcService) callBCRAAPI(request calcdto.SendFormToBCRARequest) (calcdto.BCRAResponse, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+
+	// Log the request for debugging
+	fmt.Printf("BCRA Request: T1=%.1f, T2=%.1f, N_Biop=%d, HypPlas=%d, AgeMen=%d, Age1st=%d, N_Rels=%d, Race=%d\n",
+		request.T1, request.T2, request.N_Biop, request.HypPlas, request.AgeMen, request.Age1st, request.N_Rels, request.Race)
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to call BCRA API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to read BCRA response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.BCRAResponse{}, fmt.Errorf("BCRA API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var bcraResponse calcdto.BCRAResponse
+	err = json.Unmarshal(body, &bcraResponse)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to parse BCRA response: %w", err)
+	}
+
+	return bcraResponse, nil
+}
+
+// saveBCRAResult creates or updates the BCRA result in the database
+func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto.BCRAResponse) error {
+	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if existingResult == nil {
+		bcraResult := &entity.BCRAResult{
+			FormID:     formID,
+			AbsRisk:    bcraResponse.AbsRisk,
+			AbsRiskAvg: bcraResponse.AbsRiskAvg,
+			RRStar1:    bcraResponse.RRStar1,
+			RRStar2:    bcraResponse.RRStar2,
+			ProjIntvl:  bcraResponse.ProjIntvl,
+		}
+		return calcService.formRepository.CreateBCRAResult(calcService.db, bcraResult)
+	}
+
+	existingResult.AbsRisk = bcraResponse.AbsRisk
+	existingResult.AbsRiskAvg = bcraResponse.AbsRiskAvg
+	existingResult.RRStar1 = bcraResponse.RRStar1
+	existingResult.RRStar2 = bcraResponse.RRStar2
+	existingResult.ProjIntvl = bcraResponse.ProjIntvl
+
+	return calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
+}
+
+// mapHyperplasiaStatus maps hyperplasia status to BCRA code
+func mapHyperplasiaStatus(mamographyInfo *entity.MamoGraphyInfo) int {
+	if mamographyInfo.HyperplasiaInBiopsy == nil {
+		return 99 // Unknown
+	}
+
+	switch *mamographyInfo.HyperplasiaInBiopsy {
+	case enum.NoHyperplasiaInBiopsy:
+		return 0
+	case enum.HasHyperplasiaInBiopsy:
+		return 1
+	case enum.UnkownHyperplasiaInBiopsy:
+		return 99
+	default:
+		return 99
+	}
+}
+
+// mapBiopsyCount maps number of biopsies to BCRA code
+func mapBiopsyCount(mamographyInfo *entity.MamoGraphyInfo) int {
+	if mamographyInfo.NumberOfBreastBiopsies == nil {
+		return 99 // Unknown
+	}
+
+	count := *mamographyInfo.NumberOfBreastBiopsies
+	if count >= 2 {
+		return 2
+	} else if count == 1 {
+		return 1
+	}
+	return 0
+}
+
+// mapAgeAtMenarche maps GhaedeAge to BCRA AgeMen
+func mapAgeAtMenarche(mamographyInfo *entity.MamoGraphyInfo) int {
+	if mamographyInfo.GhaedeAge > 0 {
+		return int(mamographyInfo.GhaedeAge)
+	}
+	return 99 // Unknown
+}
+
+// mapAgeAtFirstBirth maps age at first birth to BCRA code with validation
+func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
+	// First check if patient has children
+	if !mamographyInfo.HasChildren {
+		return 98 // Nulliparous
+	}
+
+	// If has children but no age of first birth provided, return unknown
+	if mamographyInfo.AgeOfFirstBirth == nil {
+		return 99 // Unknown
+	}
+
+	age := int(*mamographyInfo.AgeOfFirstBirth)
+	ageMen := mapAgeAtMenarche(mamographyInfo)
+
+	// Validate: first birth age must be >= menarche age
+	if ageMen != 99 && age < ageMen {
+		return 99 // Unknown due to invalid data
+	}
+
+	// Map age to category
+	var category int
+	if age < 20 {
+		category = 0
+	} else if age < 25 {
+		category = 1
+	} else if age < 30 {
+		category = 2
+	} else {
+		category = 3
+	}
+
+	// Additional validation for Age1st=0 category
+	// BCRA has issues with Age1st=0 when combined with certain AgeMen values
+	// that can cause calculation to result in NaN
+	if category == 0 && ageMen != 99 {
+		// If menarche age is >= 12 with first birth before 20, it can cause issues
+		// Return 99 (unknown) as a conservative approach
+		if ageMen >= 12 {
+			return 99
+		}
+	}
+
+	// Validate the age is not absurdly high
+	if age > 60 {
+		return 99
+	}
+
+	return category
+}
+
+// mapFirstDegreeBreastCancerRelatives counts first-degree relatives with breast cancer
+func mapFirstDegreeBreastCancerRelatives(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 99 // Unknown
+	}
+
+	count := 0
+
+	// Check mother
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
+		*familyInfo.MotherCancerType == enum.CancerTypeBreast {
+		count++
+	}
+
+	// Check father
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
+		*familyInfo.FatherCancerType == enum.CancerTypeBreast {
+		count++
+	}
+
+	// Check siblings
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
+		*familyInfo.SiblingCancerType == enum.CancerTypeBreast {
+		count++
+	}
+
+	// Return categorized count
+	if count >= 2 {
+		return 2
+	} else if count == 1 {
+		return 1
+	} else if count == 0 {
+		return 0
+	}
+
+	return 99 // Unknown
 }
 
 func (calcService *CalcService) GetAllModelTypes() []calcdto.CalcEnumResponse {
@@ -634,50 +686,6 @@ func mapFamilyLsOther(familyInfo *entity.FamilyCancerInfo) uint {
 				return 1
 			}
 		}
-	}
-	return 0
-}
-
-// Map first-degree relatives with breast cancer
-func mapFirstDegreeBreastCancerRelatives(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
-		return 99 // Unknown
-	}
-
-	count := 0
-	hasBreastCancer := false
-
-	// Check mother
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeBreast {
-		count++
-		hasBreastCancer = true
-	}
-
-	// Check father
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeBreast {
-		count++
-		hasBreastCancer = true
-	}
-
-	// Check siblings
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeBreast {
-		count++
-		hasBreastCancer = true
-	}
-
-	// Return 99 if we have family cancer info but no breast cancer data
-	if !hasBreastCancer {
-		return 99
-	}
-
-	// Return categorized count
-	if count >= 2 {
-		return 2
-	} else if count == 1 {
-		return 1
 	}
 	return 0
 }

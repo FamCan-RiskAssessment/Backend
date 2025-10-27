@@ -27,6 +27,8 @@ var Persian = map[string]interface{}{
 	"role":                "نقش",
 	"permission":          "دسترسی",
 	"premm5_result":       "رکورد پرم۵",
+	"mamography_info":     "داده های ماموگرافی",
+	"family_cancer_info":  "داده های مرتبط با سرطان خانوادگی",
 	"ticketComment":       "نظر در مورد درخواست پشتیبانی",
 	"report":              "گزارش",
 	"contactInformation":  "پل ارتباطی",

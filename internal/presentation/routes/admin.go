@@ -109,6 +109,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	{
 		calc.POST("/model", app.Controllers.Admin.CalcController.SendFormToCalc)
 		calc.GET("/premm5/:formID", app.Controllers.Admin.CalcController.GetPremm5Results)
+		calc.GET("/bcra/:formID", app.Controllers.Admin.CalcController.GetBCRAResults)
 		calc.GET("/all-models", app.Controllers.Admin.CalcController.GetAllModelTypes)
 	}
 }

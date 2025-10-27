@@ -1,6 +1,8 @@
 package calc
 
 import (
+	"fmt"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -39,6 +41,7 @@ func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {
 
 	response, err := calcController.calcService.SendFormToCalc(sendFormToCalcRequest)
 	if err != nil {
+		fmt.Printf("ERROR in SendFormToCalc: %v\n", err)
 		panic(err)
 	}
 
@@ -60,6 +63,26 @@ func (calcController *AdminCalcController) GetPremm5Results(ctx *gin.Context) {
 	}
 
 	response, err := calcController.calcService.GetPremm5Results(sendFormToCalcRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
+func (calcController *AdminCalcController) GetBCRAResults(ctx *gin.Context) {
+	type SendFormToCalcParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[SendFormToCalcParams](ctx)
+
+	userID, _ := ctx.Get(calcController.constants.Context.ID)
+	sendFormToCalcRequest := calcdto.SendFormToCalcRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := calcController.calcService.GetBCRAResults(sendFormToCalcRequest)
 	if err != nil {
 		panic(err)
 	}

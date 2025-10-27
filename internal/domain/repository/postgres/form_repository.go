@@ -66,4 +66,8 @@ type FormRepository interface {
 	FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error)
 	CreatePremm5Result(db database.Database, result *entity.Premm5Result) error
 	UpdatePremm5Result(db database.Database, result *entity.Premm5Result) error
+
+	FindBCRAResultByFormID(db database.Database, formID uint) (*entity.BCRAResult, error)
+	CreateBCRAResult(db database.Database, result *entity.BCRAResult) error
+	UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error
 }

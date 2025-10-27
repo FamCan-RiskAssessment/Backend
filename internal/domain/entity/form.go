@@ -231,11 +231,14 @@ type Premm5Result struct {
 	PNone float64 `gorm:"type:decimal(10,6);not null"` // Probability of no mutation
 }
 
-type ModelResult struct {
+type BCRAResult struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
 
-	Premm5 float64
-	Gail   float64
+	AbsRisk    float64 `gorm:"type:decimal(10,6);not null"` // Absolute risk percentage
+	AbsRiskAvg float64 `gorm:"type:decimal(10,6);not null"` // Absolute risk average
+	RRStar1    float64 `gorm:"type:decimal(10,6);not null"` // Relative risk star 1
+	RRStar2    float64 `gorm:"type:decimal(10,6);not null"` // Relative risk star 2
+	ProjIntvl  float64 `gorm:"type:decimal(10,6);not null"` // Projection interval
 }

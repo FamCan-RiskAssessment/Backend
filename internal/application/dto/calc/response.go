@@ -15,3 +15,11 @@ type Premm5Response struct {
 	PAny      float64            `json:"p_any"`
 	PNone     float64            `json:"p_none"`
 }
+
+type BCRAResponse struct {
+	AbsRisk    float64 `json:"AbsRisk"`
+	AbsRiskAvg float64 `json:"AbsRisk_Avg"`
+	RRStar1    float64 `json:"RR_Star1"`
+	RRStar2    float64 `json:"RR_Star2"`
+	ProjIntvl  float64 `json:"Proj_Intvl"`
+}

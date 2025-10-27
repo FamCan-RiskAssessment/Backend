@@ -21,4 +21,12 @@ type SendFormToPremm5Request struct {
 }
 
 type SendFormToBCRARequest struct {
+	T1      float64 `json:"T1"`      // Current age
+	T2      float64 `json:"T2"`      // Projection age (hardcoded)
+	N_Biop  int     `json:"N_Biop"`  // Number of breast biopsies
+	HypPlas int     `json:"HypPlas"` // Hyperplasia in biopsy (0=no, 1=yes, 99=unknown)
+	AgeMen  int     `json:"AgeMen"`  // Age at menarche/first period
+	Age1st  int     `json:"Age1st"`  // Age at first live birth (98=nulliparous, 99=unknown)
+	N_Rels  int     `json:"N_Rels"`  // Number of first-degree relatives with breast cancer
+	Race    int     `json:"Race"`    // Race code (hardcoded)
 }

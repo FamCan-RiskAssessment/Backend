@@ -34,6 +34,7 @@ func main() {
 		&entity.LungCancerInfo{},
 		&entity.ActionLog{},
 		&entity.Premm5Result{},
+		&entity.BCRAResult{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

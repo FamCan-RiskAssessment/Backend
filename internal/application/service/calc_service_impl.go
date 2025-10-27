@@ -154,85 +154,40 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		return calcdto.ModelResponse{}, err
 	}
 
-	currentAge := uint(2024 - basicInfo.BirthYear) // Adjust year as needed
+	currentAge := uint(2024 - basicInfo.BirthYear)
 
 	request := calcdto.SendFormToPremm5Request{
-		Sex:                    mapGenderToPremm5(basicInfo.Gender),
-		PersonalCrcOne:         mapPersonalCrcOne(cancerInfo),
-		PersonalCrcMultiple:    mapPersonalCrcMultiple(cancerInfo),
-		AgeCrcDx:               mapAgeCrcDx(cancerInfo),
-		PersonalEndometrial:    mapPersonalEndometrial(cancerInfo),
-		AgeEcDx:                mapAgeEcDx(cancerInfo),
-		PersonalLsOther:        mapPersonalLsOther(cancerInfo),
-		FirstDegreeCrcOne:      mapFirstDegreeCrcOne(familyCancerInfo),
-		AgeYoungestRelativeCrc: mapAgeYoungestRelativeCrc(familyCancerInfo),
-		CurrentAge:             currentAge,
-		FamilyLsOther:          mapFamilyLsOther(familyCancerInfo),
+		Sex:        mapGenderToPremm5(basicInfo.Gender),
+		CurrentAge: int(currentAge),
+
+		PersonalCrcCount:       mapPersonalCrcCount(cancerInfo),
+		PersonalCrcYoungestAge: mapAgeCrcDx(cancerInfo),
+		PersonalEc:             mapPersonalEndometrial(cancerInfo),
+		PersonalEcAge:          mapAgeEcDx(cancerInfo),
+		PersonalOtherLs:        mapPersonalLsOther(cancerInfo),
+
+		NumFdrCrc:         mapNumFdrCrc(familyCancerInfo),
+		YoungestFdrCrcAge: mapYoungestFdrCrcAge(familyCancerInfo),
+		NumFdrEc:          mapNumFdrEc(familyCancerInfo),
+		YoungestFdrEcAge:  mapYoungestFdrEcAge(familyCancerInfo),
+
+		NumSdrCrc:         mapNumSdrCrc(familyCancerInfo),
+		YoungestSdrCrcAge: mapYoungestSdrCrcAge(familyCancerInfo),
+		NumSdrEc:          mapNumSdrEc(familyCancerInfo),
+		YoungestSdrEcAge:  mapYoungestSdrEcAge(familyCancerInfo),
+
+		HasFdrOtherLs: mapHasFdrOtherLs(familyCancerInfo),
+		HasSdrOtherLs: mapHasSdrOtherLs(familyCancerInfo),
 	}
 
-	jsonData, err := json.Marshal(request)
+	// Make API call
+	premm5Response, err := calcService.callPremm5API(request)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
 
-	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Println(err)
-		return calcdto.ModelResponse{}, err
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println(err)
-		return calcdto.ModelResponse{}, err
-	}
-
-	var premm5Response calcdto.Premm5Response
-	err = json.Unmarshal(body, &premm5Response)
-	if err != nil {
-		fmt.Println(err)
-		return calcdto.ModelResponse{}, err
-	}
-
-	defer resp.Body.Close()
-
-	// Check if PREMM5 result already exists for this form
-	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, form.ID)
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	// Create or update PREMM5 result
-	if existingResult == nil {
-		// Create new result
-		premm5Result := &entity.Premm5Result{
-			FormID:          form.ID,
-			MLH1Probability: premm5Response.GeneProbs["MLH1"],
-			MSH2Probability: premm5Response.GeneProbs["MSH2"],
-			MSH6Probability: premm5Response.GeneProbs["MSH6"],
-			PMS2Probability: premm5Response.GeneProbs["PMS2"],
-			PAny:            premm5Response.PAny,
-			PNone:           premm5Response.PNone,
-		}
-		err = calcService.formRepository.CreatePremm5Result(calcService.db, premm5Result)
-	} else {
-		// Update existing result
-		existingResult.MLH1Probability = premm5Response.GeneProbs["MLH1"]
-		existingResult.MSH2Probability = premm5Response.GeneProbs["MSH2"]
-		existingResult.MSH6Probability = premm5Response.GeneProbs["MSH6"]
-		existingResult.PMS2Probability = premm5Response.GeneProbs["PMS2"]
-		existingResult.PAny = premm5Response.PAny
-		existingResult.PNone = premm5Response.PNone
-		err = calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
-	}
-
+	// Save result to database
+	err = calcService.savePremm5Result(form.ID, premm5Response)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
@@ -248,7 +203,6 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		Name:        "PREMM5",
 		Probability: premm5Response.PAny,
 	}, nil
-
 }
 
 func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.ModelResponse, error) {
@@ -527,7 +481,7 @@ func (calcService *CalcService) GetAllModelTypes() []calcdto.CalcEnumResponse {
 }
 
 // Map gender: Male=1, Female=0
-func mapGenderToPremm5(gender enum.Gender) uint {
+func mapGenderToPremm5(gender enum.Gender) int {
 	switch gender {
 	case enum.GenderMale:
 		return 1
@@ -538,30 +492,358 @@ func mapGenderToPremm5(gender enum.Gender) uint {
 	}
 }
 
-// Map personal CRC history
-func mapPersonalCrcOne(cancerInfo *entity.CancerInfo) uint {
+// Map personal CRC count (0, 1, or 2+)
+func mapPersonalCrcCount(cancerInfo *entity.CancerInfo) int {
 	if cancerInfo != nil && cancerInfo.Cancer &&
 		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
+		// TODO: You may need additional field to track multiple CRCs
+		// For now, assume single CRC = 1, multiple = 2
 		return 1
 	}
 	return 0
 }
 
-func mapPersonalCrcMultiple(cancerInfo *entity.CancerInfo) uint {
-	// You'd need additional cancer history fields to determine multiple CRCs
-	// For now, return 0
+// Map count of first-degree relatives with CRC (0, 1, or 2+)
+func mapNumFdrCrc(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	count := 0
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
+		*familyInfo.MotherCancerType == enum.CancerTypeColon {
+		count++
+	}
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
+		*familyInfo.FatherCancerType == enum.CancerTypeColon {
+		count++
+	}
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
+		*familyInfo.SiblingCancerType == enum.CancerTypeColon {
+		count++
+	}
+	// Cap at 2 for >=2
+	if count >= 2 {
+		return 2
+	}
+	return count
+}
+
+// Map youngest age among FDR with CRC
+func mapYoungestFdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	youngestAge := 999
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
+		*familyInfo.MotherCancerType == enum.CancerTypeColon &&
+		familyInfo.MotherCancerAge != nil {
+		age := int(*familyInfo.MotherCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
+		*familyInfo.FatherCancerType == enum.CancerTypeColon &&
+		familyInfo.FatherCancerAge != nil {
+		age := int(*familyInfo.FatherCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
+		*familyInfo.SiblingCancerType == enum.CancerTypeColon &&
+		familyInfo.SiblingCancerAge != nil {
+		age := int(*familyInfo.SiblingCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if youngestAge == 999 {
+		return 0
+	}
+	return youngestAge
+}
+
+// Map count of FDR with endometrial cancer
+func mapNumFdrEc(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	count := 0
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
+		*familyInfo.MotherCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
+		*familyInfo.FatherCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
+		*familyInfo.SiblingCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if count >= 2 {
+		return 2
+	}
+	return count
+}
+
+// Map youngest age among FDR with endometrial cancer
+func mapYoungestFdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	youngestAge := 999
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
+		*familyInfo.MotherCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.MotherCancerAge != nil {
+		age := int(*familyInfo.MotherCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
+		*familyInfo.FatherCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.FatherCancerAge != nil {
+		age := int(*familyInfo.FatherCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
+		*familyInfo.SiblingCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.SiblingCancerAge != nil {
+		age := int(*familyInfo.SiblingCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if youngestAge == 999 {
+		return 0
+	}
+	return youngestAge
+}
+
+// Map count of second-degree relatives with CRC (0, 1, or 2+)
+func mapNumSdrCrc(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	count := 0
+	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
+		*familyInfo.AmeAmoCancerType == enum.CancerTypeColon {
+		count++
+	}
+	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
+		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeColon {
+		count++
+	}
+	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
+		familyInfo.OtherRelativeCancerType != nil &&
+		*familyInfo.OtherRelativeCancerType == enum.CancerTypeColon {
+		count++
+	}
+	if count >= 2 {
+		return 2
+	}
+	return count
+}
+
+// Map youngest age among SDR with CRC
+func mapYoungestSdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	youngestAge := 999
+	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
+		*familyInfo.AmeAmoCancerType == enum.CancerTypeColon &&
+		familyInfo.AmeAmoCancerAge != nil {
+		age := int(*familyInfo.AmeAmoCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
+		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeColon &&
+		familyInfo.KhaleDaeiCancerAge != nil {
+		age := int(*familyInfo.KhaleDaeiCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
+		familyInfo.OtherRelativeCancerType != nil &&
+		*familyInfo.OtherRelativeCancerType == enum.CancerTypeColon &&
+		familyInfo.OtherRelativeCancerAge != nil {
+		age := int(*familyInfo.OtherRelativeCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if youngestAge == 999 {
+		return 0
+	}
+	return youngestAge
+}
+
+// Map count of SDR with endometrial cancer
+func mapNumSdrEc(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	count := 0
+	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
+		*familyInfo.AmeAmoCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
+		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
+		familyInfo.OtherRelativeCancerType != nil &&
+		*familyInfo.OtherRelativeCancerType == enum.CancerTypeEndometrial {
+		count++
+	}
+	if count >= 2 {
+		return 2
+	}
+	return count
+}
+
+// Map youngest age among SDR with endometrial cancer
+func mapYoungestSdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	youngestAge := 999
+	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
+		*familyInfo.AmeAmoCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.AmeAmoCancerAge != nil {
+		age := int(*familyInfo.AmeAmoCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
+		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.KhaleDaeiCancerAge != nil {
+		age := int(*familyInfo.KhaleDaeiCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
+		familyInfo.OtherRelativeCancerType != nil &&
+		*familyInfo.OtherRelativeCancerType == enum.CancerTypeEndometrial &&
+		familyInfo.OtherRelativeCancerAge != nil {
+		age := int(*familyInfo.OtherRelativeCancerAge)
+		if age < youngestAge {
+			youngestAge = age
+		}
+	}
+	if youngestAge == 999 {
+		return 0
+	}
+	return youngestAge
+}
+
+// Map if FDR has other Lynch syndrome cancers
+func mapHasFdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	// Check mother, father, siblings for other LS cancers
+	lscancers := []enum.CancerType{
+		enum.CancerTypeOvarian, enum.CancerTypeStomach,
+		enum.CancerTypePancreatic, enum.CancerTypeBrain,
+		enum.CancerTypeLiver,
+	}
+
+	// Check mother
+	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.MotherCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
+	// Check father
+	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.FatherCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
+	// Check siblings
+	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.SiblingCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
 	return 0
 }
 
-func mapAgeCrcDx(cancerInfo *entity.CancerInfo) uint {
-	if cancerInfo != nil && cancerInfo.CancerAge != nil {
-		return *cancerInfo.CancerAge
+// Map if SDR has other Lynch syndrome cancers
+func mapHasSdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
+	if familyInfo == nil {
+		return 0
+	}
+	// Check aunt/uncle for other LS cancers
+	lscancers := []enum.CancerType{
+		enum.CancerTypeOvarian, enum.CancerTypeStomach,
+		enum.CancerTypePancreatic, enum.CancerTypeBrain,
+		enum.CancerTypeLiver,
+	}
+
+	// Check AmeAmo
+	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.AmeAmoCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
+	// Check KhaleDaei
+	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.KhaleDaeiCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
+	// Check other relatives
+	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
+		familyInfo.OtherRelativeCancerType != nil {
+		for _, lsc := range lscancers {
+			if *familyInfo.OtherRelativeCancerType == lsc {
+				return 1
+			}
+		}
+	}
+
+	return 0
+}
+
+// Map youngest age at CRC diagnosis
+func mapAgeCrcDx(cancerInfo *entity.CancerInfo) int {
+	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
+		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
+		return int(*cancerInfo.CancerAge)
 	}
 	return 0
 }
 
 // Map endometrial cancer
-func mapPersonalEndometrial(cancerInfo *entity.CancerInfo) uint {
+func mapPersonalEndometrial(cancerInfo *entity.CancerInfo) int {
 	if cancerInfo != nil && cancerInfo.Cancer &&
 		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
 		return 1
@@ -569,16 +851,17 @@ func mapPersonalEndometrial(cancerInfo *entity.CancerInfo) uint {
 	return 0
 }
 
-func mapAgeEcDx(cancerInfo *entity.CancerInfo) uint {
+// Map age at endometrial cancer diagnosis
+func mapAgeEcDx(cancerInfo *entity.CancerInfo) int {
 	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
 		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
-		return *cancerInfo.CancerAge
+		return int(*cancerInfo.CancerAge)
 	}
 	return 0
 }
 
 // Map other LS-associated cancers
-func mapPersonalLsOther(cancerInfo *entity.CancerInfo) uint {
+func mapPersonalLsOther(cancerInfo *entity.CancerInfo) int {
 	if cancerInfo != nil && cancerInfo.Cancer && cancerInfo.CancerType != nil {
 		switch *cancerInfo.CancerType {
 		case enum.CancerTypeOvarian, enum.CancerTypeStomach, enum.CancerTypePancreatic:
@@ -588,104 +871,71 @@ func mapPersonalLsOther(cancerInfo *entity.CancerInfo) uint {
 	return 0
 }
 
-// Map family history
-func mapFirstDegreeCrcOne(familyInfo *entity.FamilyCancerInfo) uint {
-	if familyInfo != nil {
-		// Check mother, father, siblings for colon cancer
-		if (familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-			*familyInfo.MotherCancerType == enum.CancerTypeColon) ||
-			(familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-				*familyInfo.FatherCancerType == enum.CancerTypeColon) ||
-			(familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-				*familyInfo.SiblingCancerType == enum.CancerTypeColon) {
-			return 1
-		}
+// callPremm5API makes the HTTP request to the PREMM5 calculator API
+func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to marshal PREMM5 request: %w", err)
 	}
-	return 0
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to create PREMM5 request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to call PREMM5 API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to read PREMM5 response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.Premm5Response{}, fmt.Errorf("PREMM5 API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var premm5Response calcdto.Premm5Response
+	err = json.Unmarshal(body, &premm5Response)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to parse PREMM5 response: %w", err)
+	}
+
+	return premm5Response, nil
 }
 
-func mapAgeYoungestRelativeCrc(familyInfo *entity.FamilyCancerInfo) uint {
-	if familyInfo != nil {
-		var youngestAge uint = 999
-		if familyInfo.MotherCancerAge != nil && *familyInfo.MotherCancerAge < youngestAge {
-			youngestAge = *familyInfo.MotherCancerAge
-		}
-		if familyInfo.FatherCancerAge != nil && *familyInfo.FatherCancerAge < youngestAge {
-			youngestAge = *familyInfo.FatherCancerAge
-		}
-		if familyInfo.SiblingCancerAge != nil && *familyInfo.SiblingCancerAge < youngestAge {
-			youngestAge = *familyInfo.SiblingCancerAge
-		}
-		if youngestAge != 999 {
-			return youngestAge
-		}
+// savePremm5Result creates or updates the PREMM5 result in the database
+func (calcService *CalcService) savePremm5Result(formID uint, premm5Response calcdto.Premm5Response) error {
+	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
 	}
-	return 0
-}
 
-func mapFamilyLsOther(familyInfo *entity.FamilyCancerInfo) uint {
-	if familyInfo != nil {
-		// Check for other LS-associated cancers in family members
-		// LS-associated cancers include: endometrial, ovarian, stomach, pancreatic, brain, small bowel, hepatobiliary, urinary tract
-
-		// Check mother
-		if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil {
-			switch *familyInfo.MotherCancerType {
-			case enum.CancerTypeCervical, enum.CancerTypeOvarian,
-				enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
+	if existingResult == nil {
+		premm5Result := &entity.Premm5Result{
+			FormID:          formID,
+			MLH1Probability: premm5Response.GeneProbs["MLH1"],
+			MSH2Probability: premm5Response.GeneProbs["MSH2"],
+			MSH6Probability: premm5Response.GeneProbs["MSH6"],
+			PMS2Probability: premm5Response.GeneProbs["PMS2"],
+			PAny:            premm5Response.PAny,
+			PNone:           premm5Response.PNone,
 		}
-
-		// Check father
-		if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil {
-			switch *familyInfo.FatherCancerType {
-			case enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
-		}
-
-		// Check siblings
-		if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil {
-			switch *familyInfo.SiblingCancerType {
-			case enum.CancerTypeCervical, enum.CancerTypeOvarian,
-				enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
-		}
-
-		// Check aunt/uncle (AmeAmo/KhaleDaei)
-		if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil {
-			switch *familyInfo.AmeAmoCancerType {
-			case enum.CancerTypeCervical, enum.CancerTypeOvarian,
-				enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
-		}
-
-		if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil {
-			switch *familyInfo.KhaleDaeiCancerType {
-			case enum.CancerTypeCervical, enum.CancerTypeOvarian,
-				enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
-		}
-
-		// Check other relatives
-		if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-			familyInfo.OtherRelativeCancerType != nil {
-			switch *familyInfo.OtherRelativeCancerType {
-			case enum.CancerTypeCervical, enum.CancerTypeOvarian,
-				enum.CancerTypeStomach, enum.CancerTypePancreatic,
-				enum.CancerTypeBrain, enum.CancerTypeLiver:
-				return 1
-			}
-		}
+		return calcService.formRepository.CreatePremm5Result(calcService.db, premm5Result)
 	}
-	return 0
+
+	existingResult.MLH1Probability = premm5Response.GeneProbs["MLH1"]
+	existingResult.MSH2Probability = premm5Response.GeneProbs["MSH2"]
+	existingResult.MSH6Probability = premm5Response.GeneProbs["MSH6"]
+	existingResult.PMS2Probability = premm5Response.GeneProbs["PMS2"]
+	existingResult.PAny = premm5Response.PAny
+	existingResult.PNone = premm5Response.PNone
+
+	return calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
 }

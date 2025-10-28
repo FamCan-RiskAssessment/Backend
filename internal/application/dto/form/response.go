@@ -89,11 +89,16 @@ type GetGeneralHealthResponse struct {
 	CountGheliandailyPast     *string `json:"countGheliandailyPast,omitempty"`
 }
 
-type GetCancerResponse struct {
-	ID         uint             `json:"id"`
-	Cancer     bool             `json:"cancer"`
-	CancerType *enum.CancerType `json:"cancerType,omitempty"`
-	CancerAge  *uint            `json:"cancerAge,omitempty"`
+type CancerResponse struct {
+	ID         uint            `json:"id"`
+	CancerType enum.CancerType `json:"cancerType"`
+	CancerAge  uint            `json:"cancerAge"`
+}
+
+type GetCancersResponse struct {
+	Cancer    bool              `json:"cancer"`
+	CancerWho *enum.Relative    `json:"relative,omitempty"`
+	Cancers   []*CancerResponse `json:"cancers"`
 }
 
 type GetFamilyCancerResponse struct {

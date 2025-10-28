@@ -304,11 +304,10 @@ type UpdateMamographyRequest struct {
 }
 type UpdateCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	Cancer     *bool `json:"cancer"`
-	CancerType *uint `json:"cancerType"`
-	CancerAge  *uint `json:"cancerAge"`
+	Cancer  bool
+	Cancers []CancerRequest
 }
 type UpdateFamilyCancerRequest struct {
 	UserID uint

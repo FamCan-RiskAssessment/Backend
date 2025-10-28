@@ -84,7 +84,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formManagement.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			formManagement.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			formManagement.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
-			formManagement.GET("/cancer", app.Controllers.Admin.FormController.GetCancer)
+			formManagement.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
 			formManagement.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
 			formManagement.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			formManagement.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)

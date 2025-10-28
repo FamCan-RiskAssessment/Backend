@@ -11,7 +11,7 @@ type FormService interface {
 	GetBasicForm(request formdto.GetPartialFormRequest) (formdto.GetBasicFormResponse, error)
 	GetGeneralHealth(request formdto.GetPartialFormRequest) (formdto.GetGeneralHealthResponse, error)
 	GetMamography(request formdto.GetPartialFormRequest) (formdto.GetMamographyResponse, error)
-	GetCancer(request formdto.GetPartialFormRequest) (formdto.GetCancerResponse, error)
+	GetCancers(request formdto.GetPartialFormRequest) (formdto.GetCancersResponse, error)
 	GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error)
 	GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error)
 	GetLungCancer(request formdto.GetPartialFormRequest) (formdto.GetLungCancerResponse, error)

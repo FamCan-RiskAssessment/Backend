@@ -24,7 +24,7 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.GET("/basic", app.Controllers.Customer.FormController.GetBasicForm)
 			formGroup.GET("/generalhealth", app.Controllers.Customer.FormController.GetGeneralHealth)
 			formGroup.GET("/mamography", app.Controllers.Customer.FormController.GetMamography)
-			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetCancer)
+			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
 			formGroup.GET("/familycancer", app.Controllers.Customer.FormController.GetFamilyCancer)
 			formGroup.GET("/contact", app.Controllers.Customer.FormController.GetContact)
 			formGroup.GET("/lungcancer", app.Controllers.Customer.FormController.GetLungCancer)

@@ -212,11 +212,7 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 			CancerAge:  v.CancerAge,
 			CancerType: enum.CancerType(v.CancerType),
 		}
-		if v.CancerWho != nil {
-			info.Cancer.CancerWho = enum.Relative(*v.CancerWho)
-		} else {
-			info.Cancer.CancerWho = enum.Relative(1)
-		}
+
 		if err := formService.formRepository.CreateNewCancer(formService.db, info); err != nil {
 			return err
 		}
@@ -598,14 +594,14 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 	}, nil
 }
 
-func (formService *FormService) GetCancer(request formdto.GetPartialFormRequest) (formdto.GetCancerResponse, error) {
+func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest) (formdto.GetCancersResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.GetCancerResponse{}, err
+		return formdto.GetCancersResponse{}, err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.GetCancerResponse{}, notFoundError
+		return formdto.GetCancersResponse{}, notFoundError
 	}
 
 	// if form.UserID != request.UserID {
@@ -613,21 +609,23 @@ func (formService *FormService) GetCancer(request formdto.GetPartialFormRequest)
 	// 	return formdto.GetCancerResponse{}, ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
+	info, err := formService.formRepository.FindAllCancersByFormID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.GetCancerResponse{}, err
-	}
-	if info == nil {
-		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.GetCancerResponse{}, notFoundError
+		return formdto.GetCancersResponse{}, err
 	}
 
-	return formdto.GetCancerResponse{
-		ID:         info.ID,
-		Cancer:     info.Cancer,
-		CancerType: info.CancerType,
-		CancerAge:  info.CancerAge,
-	}, nil
+	cancersResponse := formdto.GetCancersResponse{}
+	if len(info) == 0 {
+		cancersResponse.Cancer = false
+		cancersResponse.Cancers = make([]*formdto.CancerResponse, len(info))
+		return cancersResponse, nil
+	}
+
+	cancersResponse.Cancer = true
+	for _, v := range info {
+		cancersResponse.Cancers = append(cancersResponse.Cancers, &formdto.CancerResponse{ID: v.ID, CancerType: v.Cancer.CancerType, CancerAge: v.Cancer.CancerAge})
+	}
+	return cancersResponse, nil
 }
 
 func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error) {
@@ -1201,27 +1199,18 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
-	if err != nil {
-		return err
-	}
-	if info == nil {
-		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-		return ForbiddenError
-	}
+	for _, v := range request.Cancers {
+		info := &entity.NewCancerInfo{FormID: request.FormID}
+		info.Cancer = &entity.CancerSpec{
+			CancerAge:  v.CancerAge,
+			CancerType: enum.CancerType(v.CancerType),
+		}
 
-	if request.Cancer != nil {
-		info.Cancer = *request.Cancer
+		if err := formService.formRepository.CreateNewCancer(formService.db, info); err != nil {
+			return err
+		}
 	}
-	if request.CancerType != nil {
-		info.CancerType = (*enum.CancerType)(request.CancerType)
-	}
-	info.CancerAge = request.CancerAge
-
-	if info.ID == 0 {
-		return formService.formRepository.CreateCancer(formService.db, info)
-	}
-	return formService.formRepository.UpdateCancer(formService.db, info)
+	return nil
 }
 
 func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error {

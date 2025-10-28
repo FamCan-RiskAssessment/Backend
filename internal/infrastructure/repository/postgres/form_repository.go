@@ -260,11 +260,12 @@ func (r *FormRepository) FindCancerByFormID(db database.Database, formID uint) (
 
 func (r *FormRepository) FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.NewCancerInfo, error) {
 	var info []*entity.NewCancerInfo
-	err := db.GetDB().Where("form_id = ?", formID).Find(&info).Error
+	err := db.GetDB().
+		Preload("Cancer").
+		Where("form_id = ?", formID).
+		Find(&info).Error
+
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
 		return nil, err
 	}
 	return info, nil
@@ -299,7 +300,7 @@ func (r *FormRepository) FindFamilyCancerByFormID(db database.Database, formID u
 }
 
 func (r *FormRepository) DeleteAllCancersByFormID(db database.Database, formID uint) error {
-	return db.GetDB().Where("form_id = ?").Delete(&entity.CancerSpec{}).Error
+	return db.GetDB().Where("form_id = ?", formID).Delete(&entity.NewCancerInfo{}).Error
 }
 
 func (r *FormRepository) CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error {

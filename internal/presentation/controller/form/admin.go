@@ -341,23 +341,29 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
 func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
+	type CancerParams struct {
+		CancerType uint `json:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint `json:"cancerAge" validate:"required,gte=0"`
+	}
 	type UpdateCancerParams struct {
-		FormID     uint  `uri:"formID" validate:"required"`
-		Cancer     *bool `json:"cancer"`
-		CancerType *uint `json:"cancerType"`
-		CancerAge  *uint `json:"cancerAge"`
+		FormID  uint           `uri:"formID" validate:"required"`
+		Cancer  bool           `json:"cancer"`
+		Cancers []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
 	}
 
 	params := controller.Validate[UpdateCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
+	var cancers []formdto.CancerRequest
+	for _, v := range params.Cancers {
+		cancers = append(cancers, formdto.CancerRequest{CancerType: v.CancerType, CancerAge: v.CancerAge})
+	}
 	req := formdto.UpdateCancerRequest{
-		UserID:     userID.(uint),
-		FormID:     params.FormID,
-		Cancer:     params.Cancer,
-		CancerType: params.CancerType,
-		CancerAge:  params.CancerAge,
+		UserID:  userID.(uint),
+		FormID:  params.FormID,
+		Cancer:  params.Cancer,
+		Cancers: cancers,
 	}
 
 	if err := formController.formService.UpdateCancer(req); err != nil {
@@ -663,7 +669,7 @@ func (formController *AdminFormController) GetMamography(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
-func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
+func (formController *AdminFormController) GetAllCancers(ctx *gin.Context) {
 	type GetCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 	}
@@ -677,7 +683,7 @@ func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
 		FormID: params.FormID,
 	}
 
-	response, err := formController.formService.GetCancer(request)
+	response, err := formController.formService.GetCancers(request)
 	if err != nil {
 		panic(err)
 	}

@@ -51,6 +51,11 @@ type FormRepository interface {
 	CreateCancer(db database.Database, info *entity.CancerInfo) error
 	UpdateCancer(db database.Database, info *entity.CancerInfo) error
 
+	FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.NewCancerInfo, error)
+	DeleteAllCancersByFormID(db database.Database, formID uint) error
+	CreateNewCancer(db database.Database, info *entity.NewCancerInfo) error
+	UpdateNewCancer(db database.Database, info *entity.NewCancerInfo) error
+
 	FindFamilyCancerByFormID(db database.Database, formID uint) (*entity.FamilyCancerInfo, error)
 	CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error
 	UpdateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error

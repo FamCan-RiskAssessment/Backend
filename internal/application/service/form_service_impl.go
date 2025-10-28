@@ -202,24 +202,26 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
-	if err != nil {
+	if err := formService.formRepository.DeleteAllCancersByFormID(formService.db, request.FormID); err != nil {
 		return err
 	}
-	if info == nil {
-		info = &entity.CancerInfo{FormID: request.FormID}
-	}
 
-	info.Cancer = request.Cancer
-	if request.CancerType != nil {
-		info.CancerType = (*enum.CancerType)(request.CancerType)
+	for _, v := range request.Cancers {
+		info := &entity.NewCancerInfo{FormID: request.FormID}
+		info.Cancer = &entity.CancerSpec{
+			CancerAge:  v.CancerAge,
+			CancerType: enum.CancerType(v.CancerType),
+		}
+		if v.CancerWho != nil {
+			info.Cancer.CancerWho = enum.Relative(*v.CancerWho)
+		} else {
+			info.Cancer.CancerWho = enum.Relative(1)
+		}
+		if err := formService.formRepository.CreateNewCancer(formService.db, info); err != nil {
+			return err
+		}
 	}
-	info.CancerAge = request.CancerAge
-
-	if info.ID == 0 {
-		return formService.formRepository.CreateCancer(formService.db, info)
-	}
-	return formService.formRepository.UpdateCancer(formService.db, info)
+	return nil
 }
 
 func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyCancerRequest) error {

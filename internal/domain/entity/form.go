@@ -96,6 +96,21 @@ type CancerInfo struct {
 	// Pics
 }
 
+type NewCancerInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+
+	Cancer *CancerSpec
+}
+
+type CancerSpec struct {
+	CancerWho  enum.Relative
+	CancerAge  uint
+	CancerType enum.CancerType
+	// Pics
+}
+
 type FamilyCancerInfo struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`

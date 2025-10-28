@@ -105,13 +105,19 @@ type UpsertMamographyRequest struct {
 	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
 }
 
+type CancerRequest struct {
+	CancerWho  *uint
+	CancerType uint
+	CancerAge  uint
+	// PIC
+}
+
 type UpsertCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	Cancer     bool  `json:"cancer"`
-	CancerType *uint `json:"cancerType,omitempty"`
-	CancerAge  *uint `json:"cancerAge,omitempty"`
+	Cancer  bool
+	Cancers []CancerRequest
 }
 
 type UpsertFamilyCancerRequest struct {

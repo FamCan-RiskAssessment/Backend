@@ -286,23 +286,30 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
 func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
+	type CancerParams struct {
+		CancerWho  *uint `json:"cancerWho" validate:"omitempty,gt=0"`
+		CancerType uint  `json:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint  `json:"cancerAge" validate:"required,gte=0"`
+	}
 	type UpsertCancerParams struct {
-		FormID     uint  `uri:"formID" validate:"required"`
-		Cancer     bool  `json:"cancer"`
-		CancerType *uint `json:"cancerType,omitempty"`
-		CancerAge  *uint `json:"cancerAge,omitempty"`
+		FormID  uint           `uri:"formID" validate:"required"`
+		Cancer  bool           `json:"cancer"`
+		Cancers []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
 	}
 
 	params := controller.Validate[UpsertCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
+	var cancers []formdto.CancerRequest
+	for _, v := range params.Cancers {
+		cancers = append(cancers, formdto.CancerRequest{CancerWho: v.CancerWho, CancerType: v.CancerType, CancerAge: v.CancerAge})
+	}
 	req := formdto.UpsertCancerRequest{
-		UserID:     userID.(uint),
-		FormID:     params.FormID,
-		Cancer:     params.Cancer,
-		CancerType: params.CancerType,
-		CancerAge:  params.CancerAge,
+		UserID:  userID.(uint),
+		FormID:  params.FormID,
+		Cancer:  params.Cancer,
+		Cancers: cancers,
 	}
 
 	if err := formController.formService.UpsertCancer(req); err != nil {

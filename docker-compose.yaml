@@ -24,7 +24,7 @@ services:
       - famcan-network
 
   db:
-    image: postgres:latest
+    image: postgres:17
     container_name: db-RA
     restart: unless-stopped
     env_file:
@@ -45,7 +45,7 @@ services:
       - famcan-network
 
   rdb:
-    image: redis:latest
+    image: redis:8
     container_name: rdb-RA
     restart: unless-stopped
     env_file:

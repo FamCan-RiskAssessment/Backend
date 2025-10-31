@@ -29,6 +29,7 @@ func NewS3Storage(
 	storage *bootstrap.S3,
 ) *S3Storage {
 	buckets := make(map[enum.BucketType]string)
+	buckets[enum.BucketTypeMamography] = storage.Buckets.Mamography
 	return &S3Storage{
 		constants: constants,
 		storage:   storage,
@@ -45,9 +46,10 @@ func (s3StorageS3Storage *S3Storage) setS3Client(bucketType enum.BucketType) err
 		return nil
 	}
 	sess, err := session.NewSession(&aws.Config{
-		Credentials: credentials.NewStaticCredentials(s3StorageS3Storage.storage.AccessKey, s3StorageS3Storage.storage.SecretKey, ""),
-		Region:      aws.String(s3StorageS3Storage.storage.Region),
-		Endpoint:    aws.String(s3StorageS3Storage.storage.Endpoint),
+		Credentials:      credentials.NewStaticCredentials(s3StorageS3Storage.storage.AccessKey, s3StorageS3Storage.storage.SecretKey, ""),
+		Region:           aws.String(s3StorageS3Storage.storage.Region),
+		Endpoint:         aws.String(s3StorageS3Storage.storage.Endpoint),
+		S3ForcePathStyle: aws.Bool(true),
 	})
 
 	if err != nil {

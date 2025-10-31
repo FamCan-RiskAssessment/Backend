@@ -1,6 +1,8 @@
 package form
 
 import (
+	"mime/multipart"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -212,33 +214,34 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	type UpsertMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		GhaedeAge                    uint    `json:"ghaedeAge" validate:"required"`
-		HasChildren                  bool    `json:"hasChildren"`
-		NumberOfChildren             *uint   `json:"numberOfChildren,omitempty"`
-		AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth,omitempty"`
-		MenopausalStatus             uint    `json:"menopausalStatus" validate:"required"`
-		MenopauseAge                 *string `json:"menopauseAge,omitempty"`
-		HRT                          *bool   `json:"hrt,omitempty"`
-		HRTUseLength                 *uint   `json:"hrtUseLength,omitempty"`
-		LastFiveYearsHRTUse          bool    `json:"lastFiveYearsHrtUse"`
-		CurrentHRTUse                *bool   `json:"currentHrtUse,omitempty"`
-		IntendedHRTUse               *uint   `json:"intendedHrtUse,omitempty"`
-		HRTType                      *string `json:"hrtType,omitempty"`
-		Oral                         *bool   `json:"oral,omitempty"`
-		OralDuration                 *string `json:"oralDuration,omitempty"`
-		OralTwoLastYears             *bool   `json:"oralTwoLastYears,omitempty"`
-		MamoGraphy                   *bool   `json:"mamoGraphy,omitempty"`
-		Falop                        *bool   `json:"falop,omitempty"`
-		Andometrioz                  *bool   `json:"andometrioz,omitempty"`
-		LeavePestan                  bool    `json:"leavePestan"`
-		LeaveTokhmdan                bool    `json:"leaveTokhmdan"`
-		LaDeColon                    *bool   `json:"laDeColon,omitempty"`
-		LaDePol                      *bool   `json:"laDePol,omitempty"`
-		AspLaMo                      *bool   `json:"aspLaMo,omitempty"`
-		NsaiDLaMo                    *bool   `json:"nsaiDLaMo,omitempty"`
-		LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool,omitempty"`
-		NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
-		HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
+		GhaedeAge                    uint                  `form:"ghaedeAge" validate:"required"`
+		HasChildren                  bool                  `form:"hasChildren"`
+		NumberOfChildren             *uint                 `form:"numberOfChildren,omitempty"`
+		AgeOfFirstBirth              *uint                 `form:"ageOfFirstBirth,omitempty"`
+		MenopausalStatus             uint                  `form:"menopausalStatus" validate:"required"`
+		MenopauseAge                 *string               `form:"menopauseAge,omitempty"`
+		HRT                          *bool                 `form:"hrt,omitempty"`
+		HRTUseLength                 *uint                 `form:"hrtUseLength,omitempty"`
+		LastFiveYearsHRTUse          bool                  `form:"lastFiveYearsHrtUse"`
+		CurrentHRTUse                *bool                 `form:"currentHrtUse,omitempty"`
+		IntendedHRTUse               *uint                 `form:"intendedHrtUse,omitempty"`
+		HRTType                      *string               `form:"hrtType,omitempty"`
+		Oral                         *bool                 `form:"oral,omitempty"`
+		OralDuration                 *string               `form:"oralDuration,omitempty"`
+		OralTwoLastYears             *bool                 `form:"oralTwoLastYears,omitempty"`
+		MamoGraphy                   *bool                 `form:"mamoGraphy,omitempty"`
+		MamoGraphyPicture            *multipart.FileHeader `form:"mamographyPicture"`
+		Falop                        *bool                 `form:"falop,omitempty"`
+		Andometrioz                  *bool                 `form:"andometrioz,omitempty"`
+		LeavePestan                  bool                  `form:"leavePestan"`
+		LeaveTokhmdan                bool                  `form:"leaveTokhmdan"`
+		LaDeColon                    *bool                 `form:"laDeColon,omitempty"`
+		LaDePol                      *bool                 `form:"laDePol,omitempty"`
+		AspLaMo                      *bool                 `form:"aspLaMo,omitempty"`
+		NsaiDLaMo                    *bool                 `form:"nsaiDLaMo,omitempty"`
+		LastFiveYearBloodTestInStool *bool                 `form:"lastFiveYearBloodTestInStool,omitempty"`
+		NumberOfBreastBiopsies       *uint                 `form:"numberOfBreastBiopsies,omitempty"`
+		HyperplasiaInBiopsy          *uint                 `form:"hyperplasiaInBiopsy,omitempty"`
 	}
 
 	params := controller.Validate[UpsertMamographyParams](ctx)
@@ -264,6 +267,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		OralDuration:                 params.OralDuration,
 		OralTwoLastYears:             params.OralTwoLastYears,
 		MamoGraphy:                   params.MamoGraphy,
+		MamoGraphyPicture:            params.MamoGraphyPicture,
 		Falop:                        params.Falop,
 		Andometrioz:                  params.Andometrioz,
 		LeavePestan:                  params.LeavePestan,

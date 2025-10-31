@@ -7,10 +7,11 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID     uint   `json:"id"`
-	Status     string `json:"status"`
-	UserID     uint   `json:"user_id"`
-	OperatorID *uint  `json:"operatorId,omitempty"`
+	FormID             uint   `json:"id"`
+	Status             string `json:"status"`
+	UserID             uint   `json:"user_id"`
+	OperatorID         *uint  `json:"operatorId,omitempty"`
+	FilledByOperatorID *uint  `json:"filledByOperatorId,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -154,7 +155,7 @@ type GetMamographyResponse struct {
 	OralDuration                 *string               `json:"oralDuration,omitempty"`
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
-	MamoGraphyPicture            *string               `json:"mamoGraphyPicture`
+	MamoGraphyPicture            *string               `json:"mamoGraphyPicture"`
 	Falop                        *bool                 `json:"falop,omitempty"`
 	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
 	LeavePestan                  bool                  `json:"leavePestan"`

@@ -44,6 +44,33 @@ func NewFormService(
 	}
 }
 
+func (formService *FormService) canOperatorEditForm(form *entity.Form, operatorID uint) (bool, error) {
+	if form.FilledByOperatorID != nil && *form.FilledByOperatorID == operatorID {
+		return true, nil
+	}
+
+	if form.OperatorID != nil && *form.OperatorID == operatorID {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) isOperator(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
@@ -54,9 +81,25 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, notFoundError
 	}
 
+	if request.FilledByOperatorID != nil {
+		err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		operator, err := formService.userService.GetUserByID(*request.FilledByOperatorID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		if operator == nil {
+			notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+			return formdto.BasicFormResponse{}, notFoundError
+		}
+	}
+
 	form := &entity.Form{
-		UserID: request.UserID,
-		Status: enum.FormStatusInComplete,
+		UserID:             request.UserID,
+		Status:             enum.FormStatusInComplete,
+		FilledByOperatorID: request.FilledByOperatorID,
 	}
 
 	if err = formService.formRepository.CreateForm(formService.db, form); err != nil {
@@ -80,11 +123,12 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	}
 
 	response := formdto.BasicFormResponse{
-		FormID:    form.ID,
-		Status:    form.Status.String(),
-		UserID:    form.UserID,
-		CreatedAt: form.CreatedAt,
-		UpdatedAt: form.UpdatedAt,
+		FormID:             form.ID,
+		Status:             form.Status.String(),
+		UserID:             form.UserID,
+		FilledByOperatorID: form.FilledByOperatorID,
+		CreatedAt:          form.CreatedAt,
+		UpdatedAt:          form.UpdatedAt,
 	}
 
 	return response, nil
@@ -98,6 +142,21 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -145,6 +204,21 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -243,6 +317,21 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
 	// 	return ForbiddenError
@@ -276,6 +365,21 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -364,6 +468,21 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
 	// 	return ForbiddenError
@@ -402,6 +521,21 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {

@@ -15,6 +15,7 @@ import (
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/google/uuid"
 )
 
 type UserService struct {
@@ -527,4 +528,134 @@ func (userService *UserService) GetPermissionRoles(request userdto.GetPermission
 		}
 	}
 	return rolesResponse, nil
+}
+
+func (userService *UserService) RequestUserValidationOTP(operatorID uint, request userdto.RequestUserValidationOTPRequest) error {
+	// Verify operator has operator role
+	userRoles, err := userService.GetUserRoles(operatorID)
+	if err != nil {
+		return err
+	}
+	hasOperatorRole := false
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			hasOperatorRole = true
+			break
+		}
+	}
+	if !hasOperatorRole {
+		return exception.ForbiddenError{Resource: userService.constants.Field.Role}
+	}
+
+	// Find or create user by phone
+	user, err := userService.userRepository.FindUserByPhone(userService.db, request.Phone)
+	if err != nil {
+		return err
+	}
+	if user == nil {
+		// Create user if doesn't exist
+		user = &entity.User{
+			Phone: request.Phone,
+		}
+		err = userService.userRepository.CreateUser(userService.db, user)
+		if err != nil {
+			return err
+		}
+		patientRole, err := userService.userRepository.FindRoleByName(userService.db, enum.Patient.String())
+		if err != nil {
+			return err
+		}
+		if patientRole != nil {
+			err = userService.userRepository.AssignRoleToUser(userService.db, user, patientRole)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Generate OTP
+	otp, expireMinute, err := userService.otpService.GenerateOTP(request.Phone)
+	if err != nil {
+		return err
+	}
+
+	// Store OTP with operator-specific key
+	redisKey := userService.constants.RedisKey.GenerateOperatorValidationOTPKey(operatorID, request.Phone)
+	err = userService.userCacheRepository.Set(context.Background(), redisKey, otp, time.Duration(expireMinute)*time.Minute)
+	if err != nil {
+		return err
+	}
+
+	// Send OTP via SMS (uncomment when ready)
+	// err = userService.smsService.SendOTP(request.Phone, otp)
+	// if err != nil {
+	// 	return err
+	// }
+
+	return nil
+}
+
+func (userService *UserService) VerifyUserValidationOTP(operatorID uint, request userdto.VerifyUserValidationOTPRequest) (userdto.UserValidationResponse, error) {
+	// Verify operator has operator role
+	userRoles, err := userService.GetUserRoles(operatorID)
+	if err != nil {
+		return userdto.UserValidationResponse{}, err
+	}
+	hasOperatorRole := false
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			hasOperatorRole = true
+			break
+		}
+	}
+	if !hasOperatorRole {
+		return userdto.UserValidationResponse{}, exception.ForbiddenError{Resource: userService.constants.Field.Role}
+	}
+
+	// Verify OTP
+	redisKey := userService.constants.RedisKey.GenerateOperatorValidationOTPKey(operatorID, request.Phone)
+	err = userService.otpService.VerifyOTP(redisKey, request.OTP)
+	if err != nil {
+		return userdto.UserValidationResponse{}, err
+	}
+
+	// Find user by phone
+	user, err := userService.userRepository.FindUserByPhone(userService.db, request.Phone)
+	if err != nil {
+		return userdto.UserValidationResponse{}, err
+	}
+	if user == nil {
+		return userdto.UserValidationResponse{}, exception.NotFoundError{Item: userService.constants.Field.User}
+	}
+
+	// Generate validation token and store it
+	validationToken := uuid.New().String()
+	validationKey := userService.constants.RedisKey.GenerateOperatorValidationTokenKey(operatorID, user.ID)
+	// Store for 30 minutes (operator can create forms for this user)
+	expiration := 30 * time.Minute
+	err = userService.userCacheRepository.SetValidationToken(context.Background(), validationKey, expiration)
+	if err != nil {
+		return userdto.UserValidationResponse{}, err
+	}
+
+	// Delete OTP after successful verification
+	_ = userService.userCacheRepository.Delete(context.Background(), redisKey)
+
+	return userdto.UserValidationResponse{
+		ValidationToken: validationToken,
+		ExpiresIn:       int(expiration.Seconds()),
+		UserID:          user.ID,
+	}, nil
+}
+
+func (userService *UserService) ValidateUserForFormCreation(operatorID, userID uint) error {
+	validationKey := userService.constants.RedisKey.GenerateOperatorValidationTokenKey(operatorID, userID)
+	valid, err := userService.userCacheRepository.GetValidationToken(context.Background(), validationKey)
+	if err != nil {
+		return err
+	}
+	if !valid {
+		return exception.ForbiddenError{Resource: userService.constants.Field.User}
+	}
+	return nil
 }

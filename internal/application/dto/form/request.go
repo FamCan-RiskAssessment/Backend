@@ -3,7 +3,8 @@ package formdto
 import "mime/multipart"
 
 type CreateBasicFormRequest struct {
-	UserID uint
+	UserID             uint
+	FilledByOperatorID *uint
 
 	// page 1
 	BirthDay             uint    `json:"birthDay" binding:"required"`

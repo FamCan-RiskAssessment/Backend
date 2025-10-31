@@ -44,14 +44,11 @@ func NewFormService(
 	}
 }
 
-// Helper function to check if operator can edit form
 func (formService *FormService) canOperatorEditForm(form *entity.Form, operatorID uint) (bool, error) {
-	// Operators can edit forms they filled
 	if form.FilledByOperatorID != nil && *form.FilledByOperatorID == operatorID {
 		return true, nil
 	}
 
-	// Operators can edit forms assigned to them
 	if form.OperatorID != nil && *form.OperatorID == operatorID {
 		return true, nil
 	}
@@ -59,7 +56,6 @@ func (formService *FormService) canOperatorEditForm(form *entity.Form, operatorI
 	return false, nil
 }
 
-// Helper function to check if user is operator
 func (formService *FormService) isOperator(userID uint) (bool, error) {
 	userRoles, err := formService.userService.GetUserRoles(userID)
 	if err != nil {
@@ -86,6 +82,10 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	}
 
 	if request.FilledByOperatorID != nil {
+		err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
 		operator, err := formService.userService.GetUserByID(*request.FilledByOperatorID)
 		if err != nil {
 			return formdto.BasicFormResponse{}, err
@@ -93,24 +93,6 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		if operator == nil {
 			notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
 			return formdto.BasicFormResponse{}, notFoundError
-		}
-
-		userRoles, err := formService.userService.GetUserRoles(*request.FilledByOperatorID)
-		if err != nil {
-			return formdto.BasicFormResponse{}, err
-		}
-
-		hasOperatorRole := false
-		for _, role := range userRoles {
-			if role.Name == enum.Operator.String() {
-				hasOperatorRole = true
-				break
-			}
-		}
-
-		if !hasOperatorRole {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Role}
-			return formdto.BasicFormResponse{}, forbiddenError
 		}
 	}
 

@@ -58,6 +58,8 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	operators := routerGroup.Group("/operator")
 	operators.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionCreateFormForUser}))
 	{
+		operators.POST("/validate-user/request", app.Controllers.Admin.FormController.RequestUserValidationOTP)
+		operators.POST("/validate-user/verify", app.Controllers.Admin.FormController.VerifyUserValidationOTP)
 		operators.POST("/form", app.Controllers.Admin.FormController.CreateFormForUser)
 
 		operatorFormGroup := operators.Group("/form/:formID")

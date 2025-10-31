@@ -3,6 +3,7 @@ package form
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
@@ -12,17 +13,20 @@ import (
 type AdminFormController struct {
 	constants   *bootstrap.Constants
 	formService usecase.FormService
+	userService usecase.UserService
 	pagination  *bootstrap.Pagination
 }
 
 func NewAdminFormController(
 	constants *bootstrap.Constants,
 	formService usecase.FormService,
+	userService usecase.UserService,
 	pagination *bootstrap.Pagination,
 ) *AdminFormController {
 	return &AdminFormController{
 		constants:   constants,
 		formService: formService,
+		userService: userService,
 		pagination:  pagination,
 	}
 }
@@ -859,4 +863,50 @@ func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.createForm")
 	controller.Response(ctx, 201, message, formdto.CreateFormResponse{Form: form})
+}
+
+func (formController *AdminFormController) RequestUserValidationOTP(ctx *gin.Context) {
+	type RequestUserValidationOTPParams struct {
+		Phone string `json:"phone" validate:"required,min=11,max=11"`
+	}
+
+	params := controller.Validate[RequestUserValidationOTPParams](ctx)
+	operatorID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := userdto.RequestUserValidationOTPRequest{
+		Phone: params.Phone,
+	}
+
+	err := formController.userService.RequestUserValidationOTP(operatorID.(uint), request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.sendOTP")
+	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *AdminFormController) VerifyUserValidationOTP(ctx *gin.Context) {
+	type VerifyUserValidationOTPParams struct {
+		Phone string `json:"phone" validate:"required,min=11,max=11"`
+		OTP   string `json:"otp" validate:"required,min=6,max=6"`
+	}
+
+	params := controller.Validate[VerifyUserValidationOTPParams](ctx)
+	operatorID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := userdto.VerifyUserValidationOTPRequest{
+		Phone: params.Phone,
+		OTP:   params.OTP,
+	}
+
+	response, err := formController.userService.VerifyUserValidationOTP(operatorID.(uint), request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.userVerified")
+	controller.Response(ctx, 200, message, response)
 }

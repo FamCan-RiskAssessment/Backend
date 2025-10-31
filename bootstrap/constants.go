@@ -94,3 +94,11 @@ func (r *RedisKey) GenerateOTPKey(value string) string {
 func (path *BucketPath) GetMamoGraphyPath(formID uint, fileName string) string {
 	return fmt.Sprintf("Radiology/%d/MamoGraphy/%s", formID, fileName)
 }
+
+func (r *RedisKey) GenerateOperatorValidationOTPKey(operatorID uint, phone string) string {
+	return fmt.Sprintf("operator:validation:otp:%d:%s", operatorID, phone)
+}
+
+func (r *RedisKey) GenerateOperatorValidationTokenKey(operatorID uint, userID uint) string {
+	return fmt.Sprintf("operator:validation:token:%d:%d", operatorID, userID)
+}

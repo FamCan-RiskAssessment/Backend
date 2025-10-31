@@ -47,14 +47,10 @@ type FormRepository interface {
 	CreateMamography(db database.Database, info *entity.MamoGraphyInfo) error
 	UpdateMamography(db database.Database, info *entity.MamoGraphyInfo) error
 
-	FindCancerByFormID(db database.Database, formID uint) (*entity.CancerInfo, error)
+	FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error)
+	DeleteAllCancersByFormID(db database.Database, formID uint) error
 	CreateCancer(db database.Database, info *entity.CancerInfo) error
 	UpdateCancer(db database.Database, info *entity.CancerInfo) error
-
-	FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.NewCancerInfo, error)
-	DeleteAllCancersByFormID(db database.Database, formID uint) error
-	CreateNewCancer(db database.Database, info *entity.NewCancerInfo) error
-	UpdateNewCancer(db database.Database, info *entity.NewCancerInfo) error
 
 	FindFamilyCancerByFormID(db database.Database, formID uint) (*entity.FamilyCancerInfo, error)
 	CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error

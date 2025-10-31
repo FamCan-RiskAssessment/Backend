@@ -246,20 +246,8 @@ func (r *FormRepository) UpdateMamography(db database.Database, info *entity.Mam
 	return db.GetDB().Save(info).Error
 }
 
-func (r *FormRepository) FindCancerByFormID(db database.Database, formID uint) (*entity.CancerInfo, error) {
-	var info entity.CancerInfo
-	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &info, nil
-}
-
-func (r *FormRepository) FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.NewCancerInfo, error) {
-	var info []*entity.NewCancerInfo
+func (r *FormRepository) FindAllCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error) {
+	var info []*entity.CancerInfo
 	err := db.GetDB().
 		Preload("Cancer").
 		Where("form_id = ?", formID).
@@ -275,15 +263,7 @@ func (r *FormRepository) CreateCancer(db database.Database, info *entity.CancerI
 	return db.GetDB().Create(info).Error
 }
 
-func (r *FormRepository) CreateNewCancer(db database.Database, info *entity.NewCancerInfo) error {
-	return db.GetDB().Create(info).Error
-}
-
 func (r *FormRepository) UpdateCancer(db database.Database, info *entity.CancerInfo) error {
-	return db.GetDB().Save(info).Error
-}
-
-func (r *FormRepository) UpdateNewCancer(db database.Database, info *entity.NewCancerInfo) error {
 	return db.GetDB().Save(info).Error
 }
 
@@ -300,7 +280,7 @@ func (r *FormRepository) FindFamilyCancerByFormID(db database.Database, formID u
 }
 
 func (r *FormRepository) DeleteAllCancersByFormID(db database.Database, formID uint) error {
-	return db.GetDB().Where("form_id = ?", formID).Delete(&entity.NewCancerInfo{}).Error
+	return db.GetDB().Where("form_id = ?", formID).Delete(&entity.CancerInfo{}).Error
 }
 
 func (r *FormRepository) CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error {

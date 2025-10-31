@@ -144,7 +144,7 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		return calcdto.ModelResponse{}, err
 	}
 
-	cancerInfo, err := calcService.formRepository.FindCancerByFormID(calcService.db, form.ID)
+	cancerInfo, err := calcService.formRepository.FindAllCancersByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
@@ -493,14 +493,16 @@ func mapGenderToPremm5(gender enum.Gender) int {
 }
 
 // Map personal CRC count (0, 1, or 2+)
-func mapPersonalCrcCount(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer &&
-		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
-		// TODO: You may need additional field to track multiple CRCs
-		// For now, assume single CRC = 1, multiple = 2
-		return 1
+func mapPersonalCrcCount(cancerInfo []*entity.CancerInfo) int {
+	// TODO: You may need additional field to track multiple CRCs
+	// For now, assume single CRC = 1, multiple = 2
+	var crcCount int = 0
+	for _, v := range cancerInfo {
+		if v.Cancer != nil && v.Cancer.CancerType == enum.CancerTypeColon {
+			crcCount++
+		}
 	}
-	return 0
+	return crcCount
 }
 
 // Map count of first-degree relatives with CRC (0, 1, or 2+)
@@ -834,37 +836,40 @@ func mapHasSdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age at CRC diagnosis
-func mapAgeCrcDx(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
-		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
-		return int(*cancerInfo.CancerAge)
+func mapAgeCrcDx(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.Cancer != nil && v.Cancer.CancerType == enum.CancerTypeColon {
+			return int(v.Cancer.CancerAge)
+		}
 	}
 	return 0
 }
 
 // Map endometrial cancer
-func mapPersonalEndometrial(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer &&
-		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
-		return 1
+func mapPersonalEndometrial(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.Cancer != nil && v.Cancer.CancerType == enum.CancerTypeEndometrial {
+			return 1
+		}
 	}
 	return 0
 }
 
 // Map age at endometrial cancer diagnosis
-func mapAgeEcDx(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
-		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
-		return int(*cancerInfo.CancerAge)
+func mapAgeEcDx(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.Cancer != nil && v.Cancer.CancerType == enum.CancerTypeEndometrial {
+			return int(v.Cancer.CancerAge)
+		}
 	}
 	return 0
 }
 
 // Map other LS-associated cancers
-func mapPersonalLsOther(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer && cancerInfo.CancerType != nil {
-		switch *cancerInfo.CancerType {
-		case enum.CancerTypeOvarian, enum.CancerTypeStomach, enum.CancerTypePancreatic:
+func mapPersonalLsOther(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.Cancer != nil &&
+			(v.Cancer.CancerType == enum.CancerTypeOvarian || v.Cancer.CancerType == enum.CancerTypeStomach || v.Cancer.CancerType == enum.CancerTypePancreatic) {
 			return 1
 		}
 	}

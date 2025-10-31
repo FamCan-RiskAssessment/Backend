@@ -89,17 +89,6 @@ type CancerInfo struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
-	// page 4
-	Cancer     bool  `gorm:"not null;default:false"`
-	CancerAge  *uint `gorm:"type:int"`
-	CancerType *enum.CancerType
-	// Pics
-}
-
-type NewCancerInfo struct {
-	database.Model
-	FormID uint `gorm:"not null;index"`
-	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 
 	CancerID uint
 	Cancer   *CancerSpec `gorm:"foreignKey:CancerID;constraint:OnDelete:CASCADE"`

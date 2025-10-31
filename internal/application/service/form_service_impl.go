@@ -207,13 +207,13 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	}
 
 	for _, v := range request.Cancers {
-		info := &entity.NewCancerInfo{FormID: request.FormID}
+		info := &entity.CancerInfo{FormID: request.FormID}
 		info.Cancer = &entity.CancerSpec{
 			CancerAge:  v.CancerAge,
 			CancerType: enum.CancerType(v.CancerType),
 		}
 
-		if err := formService.formRepository.CreateNewCancer(formService.db, info); err != nil {
+		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
 			return err
 		}
 	}
@@ -1200,13 +1200,13 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	// }
 
 	for _, v := range request.Cancers {
-		info := &entity.NewCancerInfo{FormID: request.FormID}
+		info := &entity.CancerInfo{FormID: request.FormID}
 		info.Cancer = &entity.CancerSpec{
 			CancerAge:  v.CancerAge,
 			CancerType: enum.CancerType(v.CancerType),
 		}
 
-		if err := formService.formRepository.CreateNewCancer(formService.db, info); err != nil {
+		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
 			return err
 		}
 	}

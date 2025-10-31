@@ -177,7 +177,7 @@ func (d *DummySeeder) seedForms() {
 				panic(err)
 			}
 			cancer := d.createDummyCancer(form.ID, j, cancerTypes)
-			if err := d.formRepository.CreateNewCancer(d.db, cancer); err != nil {
+			if err := d.formRepository.CreateCancer(d.db, cancer); err != nil {
 				panic(err)
 			}
 			familyCancer := d.createDummyFamilyCancer(form.ID, j, cancerTypes, lifeStatuses, relations)
@@ -285,8 +285,8 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 	}
 	return mamoGraphyInfo
 }
-func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType) *entity.NewCancerInfo {
-	cancerInfo := &entity.NewCancerInfo{
+func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType) *entity.CancerInfo {
+	cancerInfo := &entity.CancerInfo{
 		FormID: formID,
 		Cancer: &entity.CancerSpec{CancerAge: uint(30 + (formIndex % 40)), CancerType: cancerTypes[formIndex%len(cancerTypes)]},
 	}

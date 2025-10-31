@@ -1,6 +1,9 @@
 package service
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -10,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
@@ -18,6 +22,7 @@ type FormService struct {
 	formRepository   postgres.FormRepository
 	userService      usecase.UserService
 	actionLogService usecase.ActionLogService
+	s3Storage        s3.S3Storage
 	db               database.Database
 }
 
@@ -26,6 +31,7 @@ func NewFormService(
 	formRepository postgres.FormRepository,
 	userService usecase.UserService,
 	actionLogService usecase.ActionLogService,
+	s3Storage s3.S3Storage,
 	db database.Database,
 ) *FormService {
 	return &FormService{
@@ -33,6 +39,7 @@ func NewFormService(
 		formRepository:   formRepository,
 		userService:      userService,
 		actionLogService: actionLogService,
+		s3Storage:        s3Storage,
 		db:               db,
 	}
 }
@@ -140,11 +147,6 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 		return notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
-
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -181,10 +183,54 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
 	info.HyperplasiaInBiopsy = (*enum.HyperplasiaInBiopsyStatus)(request.HyperplasiaInBiopsy)
 
-	if info.ID == 0 {
-		return formService.formRepository.CreateMamography(formService.db, info)
+	var pictureKey string
+	var oldPicturePath *string
+	if request.MamoGraphy != nil && *request.MamoGraphy && request.MamoGraphyPicture != nil && request.MamoGraphyPicture.Filename != "" {
+		// Save the old picture path BEFORE overwriting it
+		if info.MamoGraphyPicturePath != nil {
+			oldPicturePath = info.MamoGraphyPicturePath
+		}
+
+		pictureKey = formService.constants.BucketPath.GetMamoGraphyPath(request.FormID, request.MamoGraphyPicture.Filename)
+		info.MamoGraphyPicturePath = &pictureKey
 	}
-	return formService.formRepository.UpdateMamography(formService.db, info)
+
+	isCreate := info.ID == 0
+
+	if isCreate {
+		return formService.db.WithTransaction(func(tx database.Database) error {
+			if err := formService.formRepository.CreateMamography(tx, info); err != nil {
+				return err
+			}
+
+			if pictureKey != "" && request.MamoGraphyPicture != nil {
+				if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+	}
+
+	if pictureKey != "" && request.MamoGraphyPicture != nil {
+		if oldPicturePath != nil && *oldPicturePath != "" && *oldPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeMamography, *oldPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old mamography picture %s: %v\n", *oldPicturePath, err)
+
+			}
+		}
+
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+			return err
+		}
+	}
+
+	if err := formService.formRepository.UpdateMamography(formService.db, info); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest) error {
@@ -566,6 +612,15 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		return formdto.GetMamographyResponse{}, notFoundError
 	}
 
+	var mamoGraphyPicture *string
+	if info.MamoGraphyPicturePath != nil && *info.MamoGraphyPicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeMamography, *info.MamoGraphyPicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.GetMamographyResponse{}, err
+		}
+		mamoGraphyPicture = &presignedURL
+	}
+
 	return formdto.GetMamographyResponse{
 		ID:                           info.ID,
 		GhaedeAge:                    info.GhaedeAge,
@@ -584,6 +639,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		OralDuration:                 info.OralDuration,
 		OralTwoLastYears:             info.OralTwoLastYears,
 		MamoGraphy:                   info.MamoGraphy,
+		MamoGraphyPicture:            mamoGraphyPicture,
 		Falop:                        info.Falop,
 		Andometrioz:                  info.Andometrioz,
 		LeavePestan:                  info.LeavePestan,

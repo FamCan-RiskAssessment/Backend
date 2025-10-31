@@ -1,5 +1,7 @@
 package formdto
 
+import "mime/multipart"
+
 type CreateBasicFormRequest struct {
 	UserID uint
 
@@ -76,33 +78,34 @@ type UpsertMamographyRequest struct {
 	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
-	GhaedeAge                    uint    `json:"ghaedeAge" binding:"required"`
-	HasChildren                  bool    `json:"hasChildren"`
-	NumberOfChildren             *uint   `json:"numberOfChildren,omitempty"`
-	AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth,omitempty"`
-	MenopausalStatus             uint    `json:"menopausalStatus" binding:"required"`
-	MenopauseAge                 *string `json:"menopauseAge,omitempty"`
-	HRT                          *bool   `json:"hrt,omitempty"`
-	HRTUseLength                 *uint   `json:"hrtUseLength,omitempty"`
-	LastFiveYearsHRTUse          bool    `json:"lastFiveYearsHrtUse"`
-	CurrentHRTUse                *bool   `json:"currentHrtUse,omitempty"`
-	IntendedHRTUse               *uint   `json:"intendedHrtUse,omitempty"`
-	HRTType                      *string `json:"hrtType,omitempty"`
-	Oral                         *bool   `json:"oral,omitempty"`
-	OralDuration                 *string `json:"oralDuration,omitempty"`
-	OralTwoLastYears             *bool   `json:"oralTwoLastYears,omitempty"`
-	MamoGraphy                   *bool   `json:"mamoGraphy,omitempty"`
-	Falop                        *bool   `json:"falop,omitempty"`
-	Andometrioz                  *bool   `json:"andometrioz,omitempty"`
-	LeavePestan                  bool    `json:"leavePestan"`
-	LeaveTokhmdan                bool    `json:"leaveTokhmdan"`
-	LaDeColon                    *bool   `json:"laDeColon,omitempty"`
-	LaDePol                      *bool   `json:"laDePol,omitempty"`
-	AspLaMo                      *bool   `json:"aspLaMo,omitempty"`
-	NsaiDLaMo                    *bool   `json:"nsaiDLaMo,omitempty"`
-	LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool,omitempty"`
-	NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
-	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
+	GhaedeAge                    uint                  `json:"ghaedeAge" binding:"required"`
+	HasChildren                  bool                  `json:"hasChildren"`
+	NumberOfChildren             *uint                 `json:"numberOfChildren,omitempty"`
+	AgeOfFirstBirth              *uint                 `json:"ageOfFirstBirth,omitempty"`
+	MenopausalStatus             uint                  `json:"menopausalStatus" binding:"required"`
+	MenopauseAge                 *string               `json:"menopauseAge,omitempty"`
+	HRT                          *bool                 `json:"hrt,omitempty"`
+	HRTUseLength                 *uint                 `json:"hrtUseLength,omitempty"`
+	LastFiveYearsHRTUse          bool                  `json:"lastFiveYearsHrtUse"`
+	CurrentHRTUse                *bool                 `json:"currentHrtUse,omitempty"`
+	IntendedHRTUse               *uint                 `json:"intendedHrtUse,omitempty"`
+	HRTType                      *string               `json:"hrtType,omitempty"`
+	Oral                         *bool                 `json:"oral,omitempty"`
+	OralDuration                 *string               `json:"oralDuration,omitempty"`
+	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
+	MamoGraphy                   *bool                 `form:"mamoGraphy,omitempty"`
+	MamoGraphyPicture            *multipart.FileHeader `json:"mamoGraphyPicture,omitempty"`
+	Falop                        *bool                 `json:"falop,omitempty"`
+	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
+	LeavePestan                  bool                  `json:"leavePestan"`
+	LeaveTokhmdan                bool                  `json:"leaveTokhmdan"`
+	LaDeColon                    *bool                 `json:"laDeColon,omitempty"`
+	LaDePol                      *bool                 `json:"laDePol,omitempty"`
+	AspLaMo                      *bool                 `json:"aspLaMo,omitempty"`
+	NsaiDLaMo                    *bool                 `json:"nsaiDLaMo,omitempty"`
+	LastFiveYearBloodTestInStool *bool                 `json:"lastFiveYearBloodTestInStool,omitempty"`
+	NumberOfBreastBiopsies       *uint                 `json:"numberOfBreastBiopsies,omitempty"`
+	HyperplasiaInBiopsy          *uint                 `json:"hyperplasiaInBiopsy,omitempty"`
 }
 
 type UpsertCancerRequest struct {

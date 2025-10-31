@@ -5,6 +5,7 @@ import "fmt"
 type Constants struct {
 	Context      Context
 	RedisKey     RedisKey
+	S3BucketPath BucketPath
 	Field        Field
 	BucketPath   BucketPath
 	Tag          Tag
@@ -88,4 +89,8 @@ func NewConstants() *Constants {
 
 func (r *RedisKey) GenerateOTPKey(value string) string {
 	return fmt.Sprintf("otp:%s", value)
+}
+
+func (path *BucketPath) GetMamoGraphyPath(formID uint, fileName string) string {
+	return fmt.Sprintf("Radiology/%d/MamoGraphy/%s", formID, fileName)
 }

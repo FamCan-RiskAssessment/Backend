@@ -72,6 +72,7 @@ type MamoGraphyInfo struct {
 	OralDuration                 *string                         `gorm:"type:varchar(50)"`
 	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
 	MamoGraphy                   *bool                           `gorm:"type:boolean"`
+	MamoGraphyPicturePath        *string                         `gorm:"type:varchar(255)"`
 	Falop                        *bool                           `gorm:"type:boolean"`
 	Andometrioz                  *bool                           `gorm:"type:boolean"`
 	LeavePestan                  bool                            `gorm:"not null;default:false"`

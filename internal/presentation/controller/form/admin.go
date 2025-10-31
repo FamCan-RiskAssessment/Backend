@@ -33,26 +33,28 @@ func NewAdminFormController(
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	type GetAllFormsParams struct {
-		Page          int     `form:"page"`
-		PageSize      int     `form:"pageSize"`
-		Status        *uint   `form:"status"`
-		Gender        *string `form:"gender"`
-		BirthYear     *uint   `form:"birthYear"`
-		DrinksAlcohol *bool   `form:"drinksAlcohol"`
-		SmokingNow    *bool   `form:"smokingNow"`
-		Cancer        *bool   `form:"cancer"`
+		Page               int     `form:"page"`
+		PageSize           int     `form:"pageSize"`
+		Status             *uint   `form:"status"`
+		Gender             *string `form:"gender"`
+		BirthYear          *uint   `form:"birthYear"`
+		DrinksAlcohol      *bool   `form:"drinksAlcohol"`
+		SmokingNow         *bool   `form:"smokingNow"`
+		Cancer             *bool   `form:"cancer"`
+		FilledByOperatorID *uint   `form:"filledByOperatorID"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
 	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
 
 	filters := &postgres.FormFilters{
-		Status:        params.Status,
-		Gender:        params.Gender,
-		BirthYear:     params.BirthYear,
-		DrinksAlcohol: params.DrinksAlcohol,
-		SmokingNow:    params.SmokingNow,
-		Cancer:        params.Cancer,
+		Status:             params.Status,
+		Gender:             params.Gender,
+		BirthYear:          params.BirthYear,
+		DrinksAlcohol:      params.DrinksAlcohol,
+		SmokingNow:         params.SmokingNow,
+		Cancer:             params.Cancer,
+		FilledByOperatorID: params.FilledByOperatorID,
 	}
 
 	forms, count, err := formController.formService.GetAllForms(offset, limit, filters)
@@ -177,6 +179,7 @@ func (formController *AdminFormController) GetBasicForm(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 	type UpdateBasicInfoParams struct {
 		FormID               uint     `uri:"formID" validate:"required"`
@@ -216,6 +219,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 200, message, nil)
 }
+
 func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context) {
 	type UpdateGeneralHealthParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -271,6 +275,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertGeneralHealthResponse{})
 }
+
 func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 	type UpdateMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -344,6 +349,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
+
 func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 	type UpdateCancerParams struct {
 		FormID     uint  `uri:"formID" validate:"required"`
@@ -372,6 +378,7 @@ func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertCancerResponse{})
 }
+
 func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) {
 	type UpdateFamilyCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -473,6 +480,7 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertFamilyCancerResponse{})
 }
+
 func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	type UpdateContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -516,6 +524,7 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertContactResponse{})
 }
+
 func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 	type UpdateLungCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -625,6 +634,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
 }
+
 func (formController *AdminFormController) GetGeneralHealth(ctx *gin.Context) {
 	type GetGeneralHealthParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -646,6 +656,7 @@ func (formController *AdminFormController) GetGeneralHealth(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetMamography(ctx *gin.Context) {
 	type GetMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -667,6 +678,7 @@ func (formController *AdminFormController) GetMamography(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
 	type GetCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -688,6 +700,7 @@ func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetFamilyCancer(ctx *gin.Context) {
 	type GetFamilyCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -709,6 +722,7 @@ func (formController *AdminFormController) GetFamilyCancer(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetContact(ctx *gin.Context) {
 	type GetContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -730,6 +744,7 @@ func (formController *AdminFormController) GetContact(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetLungCancer(ctx *gin.Context) {
 	type GetLungCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -751,6 +766,7 @@ func (formController *AdminFormController) GetLungCancer(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
 func (formController *AdminFormController) GetUserForms(ctx *gin.Context) {
 	type GetUserFormsParams struct {
 		UserID   uint `form:"userId"`
@@ -909,4 +925,8 @@ func (formController *AdminFormController) VerifyUserValidationOTP(ctx *gin.Cont
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.userVerified")
 	controller.Response(ctx, 200, message, response)
+}
+
+func (formController *AdminFormController) GetOperatorFormsFilled(ctx *gin.Context) {
+
 }

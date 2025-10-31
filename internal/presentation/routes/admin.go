@@ -8,7 +8,6 @@ import (
 
 func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	accessManagement := routerGroup.Group("")
-	// accessManagement.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		permissions := accessManagement.Group("/permission")
 		{
@@ -82,8 +81,13 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		}
 	}
 
+	supervisor := routerGroup.Group("/supervisor/operator/")
+	supervisor.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.PermissionHandleOperators)}))
+	{
+		// supervisor.GET("", app.Controllers.Admin.FormController.GetAllForms)
+	}
+
 	forms := routerGroup.Group("/form")
-	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	forms.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryFormManagement)}))
 	{
 		forms.GET("", app.Controllers.Admin.FormController.GetAllForms)
@@ -94,6 +98,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		{
 			supervisorFormManagement.PUT("/operator", app.Controllers.Admin.FormController.AssignOperator)
 			supervisorFormManagement.DELETE("/operator", app.Controllers.Admin.FormController.UnassignOperator)
+
 		}
 
 		formManagement := forms.Group("/:formID")

@@ -7,10 +7,11 @@ import (
 
 type Form struct {
 	database.Model
-	Status     enum.FormStatus
-	UserID     uint  `gorm:"not null;index"`
-	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OperatorID *uint `gorm:"type:int"`
+	Status             enum.FormStatus
+	UserID             uint  `gorm:"not null;index"`
+	User               User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OperatorID         *uint `gorm:"type:int"`
+	FilledByOperatorID *uint `gorm:"type:int;index"`
 }
 
 type BasicInfo struct {

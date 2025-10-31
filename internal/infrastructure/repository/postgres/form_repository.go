@@ -176,6 +176,9 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 	if filters.Cancer != nil {
 		query = query.Where("cancer = ?", *filters.Cancer)
 	}
+	if filters.FilledByOperatorID != nil {
+		query = query.Where("filled_by_operator_id = ?", *filters.FilledByOperatorID)
+	}
 
 	return query
 }

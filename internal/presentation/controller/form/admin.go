@@ -820,3 +820,43 @@ func (formController *AdminFormController) UnassignOperator(ctx *gin.Context) {
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 200, message, nil)
 }
+
+func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
+	type CreateFormForUserParams struct {
+		UserID               uint    `json:"userId" validate:"required"`
+		BirthDay             uint    `json:"birthDay" validate:"required"`
+		BirthMonth           string  `json:"birthMonth" validate:"required"`
+		BirthYear            uint    `json:"birthYear" validate:"required"`
+		SocialSecurityNumber string  `json:"socialSecurityNumber" validate:"required"`
+		Gender               uint    `json:"gender" validate:"required"`
+		IsAtba               bool    `json:"isAtba"`
+		Height               float64 `json:"height" validate:"required"`
+		Weight               float64 `json:"weight" validate:"required"`
+	}
+
+	params := controller.Validate[CreateFormForUserParams](ctx)
+
+	operatorID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.CreateBasicFormRequest{
+		UserID:               params.UserID,
+		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
+		BirthDay:             params.BirthDay,
+		BirthMonth:           params.BirthMonth,
+		BirthYear:            params.BirthYear,
+		SocialSecurityNumber: params.SocialSecurityNumber,
+		Gender:               params.Gender,
+		IsAtba:               params.IsAtba,
+		Height:               params.Height,
+		Weight:               params.Weight,
+	}
+
+	form, err := formController.formService.CreateBasicInfoForm(request)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.createForm")
+	controller.Response(ctx, 201, message, formdto.CreateFormResponse{Form: form})
+}

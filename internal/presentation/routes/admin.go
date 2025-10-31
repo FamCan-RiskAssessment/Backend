@@ -55,6 +55,31 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 	}
 
+	operators := routerGroup.Group("/operator")
+	operators.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionCreateFormForUser}))
+	{
+		operators.POST("/form", app.Controllers.Admin.FormController.CreateFormForUser)
+
+		operatorFormGroup := operators.Group("/form/:formID")
+		{
+			operatorFormGroup.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)
+			operatorFormGroup.PATCH("/generalhealth", app.Controllers.Admin.FormController.UpdateGeneralHealth)
+			operatorFormGroup.PATCH("/mamography", app.Controllers.Admin.FormController.UpdateMamography)
+			operatorFormGroup.PATCH("/cancer", app.Controllers.Admin.FormController.UpdateCancer)
+			operatorFormGroup.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
+			operatorFormGroup.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
+			operatorFormGroup.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
+
+			operatorFormGroup.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
+			operatorFormGroup.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
+			operatorFormGroup.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
+			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetCancer)
+			operatorFormGroup.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
+			operatorFormGroup.GET("/contact", app.Controllers.Admin.FormController.GetContact)
+			operatorFormGroup.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
+		}
+	}
+
 	forms := routerGroup.Group("/form")
 	// forms.Use(app.Middlewares.Auth.AuthRequired)
 	forms.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryFormManagement)}))

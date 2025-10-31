@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
@@ -20,9 +22,7 @@ type BasicInfo struct {
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 1
 	Gender               enum.Gender `gorm:"not null"`
-	BirthYear            uint        `gorm:"not null"`
-	BirthMonth           string      `gorm:"type:varchar(10);not null"`
-	BirthDay             uint        `gorm:"not null"`
+	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
 	SocialSecurityNumber string      `gorm:"not null"`
 	Height               float64     `gorm:"type:decimal(5,2);not null"`

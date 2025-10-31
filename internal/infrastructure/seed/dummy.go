@@ -2,6 +2,7 @@ package seed
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
@@ -206,15 +207,15 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int, statuses []enu
 	return form
 }
 func (d *DummySeeder) createDummyBasicInfo(formID uint, formIndex int, months []string, genders []enum.Gender) *entity.BasicInfo {
-	birthMonth := months[formIndex%len(months)]
 	gender := genders[formIndex%len(genders)]
+
+	BirthDate := time.Date(1970+(formIndex%40), time.Month(formIndex%len(months)+1), formIndex%28+1, 0, 0, 0, 0, time.UTC)
+	// BirthDate.AddDate(1970 + (formIndex % 40), , (formIndex % 28) + 1)
 
 	basicInfo := &entity.BasicInfo{
 		FormID:               formID,
 		Gender:               gender,
-		BirthYear:            uint(1970 + (formIndex % 40)), // 1970-2009
-		BirthMonth:           birthMonth,
-		BirthDay:             uint((formIndex % 28) + 1), // 1-28
+		BirthDate:            BirthDate,
 		IsAtba:               formIndex%2 == 0,
 		SocialSecurityNumber: fmt.Sprintf("%03d-%06d-%03d", formIndex%1000, formIndex%1000000, formIndex%1000),
 		Height:               float64(150 + (formIndex % 50)), // 150-199 cm

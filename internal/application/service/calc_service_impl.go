@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
@@ -40,6 +41,16 @@ func NewCalcService(
 		db:               db,
 		calcURL:          calcURL,
 	}
+}
+
+func calculateAge(birthDate time.Time) int {
+	today := time.Now()
+
+	age := today.Year() - birthDate.Year()
+	if today.YearDay() < birthDate.YearDay() {
+		age = 0
+	}
+	return age
 }
 
 func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcRequest) (calcdto.ModelResponse, error) {
@@ -154,11 +165,11 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		return calcdto.ModelResponse{}, err
 	}
 
-	currentAge := uint(2024 - basicInfo.BirthYear)
+	currentAge := calculateAge(basicInfo.BirthDate)
 
 	request := calcdto.SendFormToPremm5Request{
 		Sex:        mapGenderToPremm5(basicInfo.Gender),
-		CurrentAge: int(currentAge),
+		CurrentAge: currentAge,
 
 		PersonalCrcCount:       mapPersonalCrcCount(cancerInfo),
 		PersonalCrcYoungestAge: mapAgeCrcDx(cancerInfo),
@@ -233,7 +244,7 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 	}
 
 	// Calculate current age
-	currentAge := float64(2024 - basicInfo.BirthYear)
+	currentAge := float64(calculateAge(basicInfo.BirthDate))
 	projectionAge := currentAge + 5.0
 
 	// Build BCRA request

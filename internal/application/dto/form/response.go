@@ -61,9 +61,7 @@ type UpsertLungCancerResponse struct {
 type GetBasicFormResponse struct {
 	ID                   uint        `json:"id"`
 	Gender               enum.Gender `json:"gender"`
-	BirthYear            uint        `json:"birthYear"`
-	BirthMonth           string      `json:"birthMonth"`
-	BirthDay             uint        `json:"birthDay"`
+	BirthDate            time.Time   `json:"birthDate"`
 	IsAtba               bool        `json:"isAtba"`
 	SocialSecurityNumber string      `json:"socialSecurityNumber"`
 	Height               float64     `json:"height"`

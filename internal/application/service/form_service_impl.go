@@ -109,9 +109,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthYear:            request.BirthYear,
-		BirthMonth:           request.BirthMonth,
-		BirthDay:             request.BirthDay,
+		BirthDate:            request.BirthDate,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: request.SocialSecurityNumber,
 		Height:               request.Height,
@@ -667,9 +665,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		Gender:               basic.Gender,
-		BirthYear:            basic.BirthYear,
-		BirthMonth:           basic.BirthMonth,
-		BirthDay:             basic.BirthDay,
+		BirthDate:            basic.BirthDate,
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: basic.SocialSecurityNumber,
 		Height:               basic.Height,
@@ -1069,11 +1065,8 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
-	if request.BirthDay != nil {
-		info.BirthDay = *request.BirthDay
-	}
-	if request.BirthMonth != nil {
-		info.BirthMonth = *request.BirthMonth
+	if request.BirthDate != nil {
+		info.BirthDate = *request.BirthDate
 	}
 	if request.SocialSecurityNumber != nil {
 		info.SocialSecurityNumber = *request.SocialSecurityNumber

@@ -1,15 +1,16 @@
 package formdto
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+	"time"
+)
 
 type CreateBasicFormRequest struct {
 	UserID             uint
 	FilledByOperatorID *uint
 
 	// page 1
-	BirthDay             uint    `json:"birthDay" binding:"required"`
-	BirthMonth           string  `json:"birthMonth" binding:"required"`
-	BirthYear            uint    `json:"birthYear" binding:"required"`
+	BirthDate            time.Time
 	SocialSecurityNumber string  `json:"socialSecurityNumber" binding:"required"`
 	Gender               uint    `json:"gender" binding:"required"`
 	IsAtba               bool    `json:"isAtba"`
@@ -22,9 +23,7 @@ type UpdateBasicFormRequest struct {
 	FormID uint `json:"form_id" binding:"required"`
 
 	// page 1
-	BirthDay             *uint    `json:"birthDay"`
-	BirthMonth           *string  `json:"birthMonth"`
-	BirthYear            *uint    `json:"birthYear"`
+	BirthDate            *time.Time
 	SocialSecurityNumber *string  `json:"socialSecurityNumber"`
 	Gender               *uint    `json:"gender"`
 	IsAtba               *bool    `json:"isAtba"`

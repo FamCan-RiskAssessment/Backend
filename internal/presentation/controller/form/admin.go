@@ -1,6 +1,8 @@
 package form
 
 import (
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
@@ -182,15 +184,13 @@ func (formController *AdminFormController) GetBasicForm(ctx *gin.Context) {
 
 func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 	type UpdateBasicInfoParams struct {
-		FormID               uint     `uri:"formID" validate:"required"`
-		BirthDay             *uint    `json:"birthDay"`
-		BirthMonth           *string  `json:"birthMonth"`
-		BirthYear            *uint    `json:"birthYear"`
-		SocialSecurityNumber *string  `json:"socialSecurityNumber"`
-		Gender               *uint    `json:"gender"`
-		IsAtba               *bool    `json:"isAtba"`
-		Height               *float64 `json:"height"`
-		Weight               *float64 `json:"weight"`
+		FormID               uint       `uri:"formID" validate:"required"`
+		BirthDate            *time.Time `json:"birthDate" validate:"required" time_format:"2006-01-02"`
+		SocialSecurityNumber *string    `json:"socialSecurityNumber"`
+		Gender               *uint      `json:"gender"`
+		IsAtba               *bool      `json:"isAtba"`
+		Height               *float64   `json:"height"`
+		Weight               *float64   `json:"weight"`
 	}
 
 	params := controller.Validate[UpdateBasicInfoParams](ctx)
@@ -199,9 +199,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		BirthDay:             params.BirthDay,
-		BirthMonth:           params.BirthMonth,
-		BirthYear:            params.BirthYear,
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
@@ -843,15 +841,13 @@ func (formController *AdminFormController) UnassignOperator(ctx *gin.Context) {
 
 func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	type CreateFormForUserParams struct {
-		UserID               uint    `json:"userId" validate:"required"`
-		BirthDay             uint    `json:"birthDay" validate:"required"`
-		BirthMonth           string  `json:"birthMonth" validate:"required"`
-		BirthYear            uint    `json:"birthYear" validate:"required"`
-		SocialSecurityNumber string  `json:"socialSecurityNumber" validate:"required"`
-		Gender               uint    `json:"gender" validate:"required"`
-		IsAtba               bool    `json:"isAtba"`
-		Height               float64 `json:"height" validate:"required"`
-		Weight               float64 `json:"weight" validate:"required"`
+		UserID               uint      `json:"userId" validate:"required"`
+		BirthDate            time.Time `json:"birthDate" validate:"required" time_format:"2006-01-02"`
+		SocialSecurityNumber string    `json:"socialSecurityNumber" validate:"required"`
+		Gender               uint      `json:"gender" validate:"required"`
+		IsAtba               bool      `json:"isAtba"`
+		Height               float64   `json:"height" validate:"required"`
+		Weight               float64   `json:"weight" validate:"required"`
 	}
 
 	params := controller.Validate[CreateFormForUserParams](ctx)
@@ -861,9 +857,7 @@ func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	request := formdto.CreateBasicFormRequest{
 		UserID:               params.UserID,
 		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
-		BirthDay:             params.BirthDay,
-		BirthMonth:           params.BirthMonth,
-		BirthYear:            params.BirthYear,
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,

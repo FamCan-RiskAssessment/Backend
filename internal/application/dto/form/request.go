@@ -2,8 +2,29 @@ package formdto
 
 import (
 	"mime/multipart"
+	"strings"
 	"time"
 )
+
+type BirthDate time.Time
+
+func (d *BirthDate) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), `"`)
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return err
+	}
+	*d = BirthDate(t)
+	return nil
+}
+
+func (d BirthDate) Time() time.Time {
+	return time.Time(d)
+}
+
+func (d BirthDate) String() string {
+	return time.Time(d).Format("2006-01-02")
+}
 
 type CreateBasicFormRequest struct {
 	UserID             uint

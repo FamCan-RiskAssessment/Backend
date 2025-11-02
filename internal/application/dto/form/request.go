@@ -1,5 +1,7 @@
 package formdto
 
+import "github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+
 type CreateBasicFormRequest struct {
 	UserID uint
 
@@ -106,7 +108,6 @@ type UpsertMamographyRequest struct {
 }
 
 type CancerRequest struct {
-	CancerWho  *uint
 	CancerType uint
 	CancerAge  uint
 	// PIC
@@ -120,52 +121,20 @@ type UpsertCancerRequest struct {
 	Cancers []CancerRequest
 }
 
+type FamilyCancerRequest struct {
+	Relative         enum.Relative
+	RelativeRelation *string
+	Name             *string
+	LifeStatus       *enum.LifeStatus
+	Cancer           bool
+	Cancers          []CancerRequest
+}
+
 type UpsertFamilyCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	ChildCancer     bool    `json:"childCancer"`
-	ChildName       *string `json:"childName,omitempty"`
-	ChildCancerType *uint   `json:"childCancerType,omitempty"`
-	ChildCancerAge  *uint   `json:"childCancerAge,omitempty"`
-	ChildLifeStatus *string `json:"childLifeStatus,omitempty"`
-
-	MotherCancer     bool    `json:"motherCancer"`
-	MotherName       *string `json:"motherName,omitempty"`
-	MotherLifeStatus *string `json:"motherLifeStatus,omitempty"`
-	MotherCancerType *uint   `json:"motherCancerType,omitempty"`
-	MotherCancerAge  *uint   `json:"motherCancerAge,omitempty"`
-
-	FatherCancer     bool    `json:"fatherCancer"`
-	FatherName       *string `json:"fatherName,omitempty"`
-	FatherLifeStatus *string `json:"fatherLifeStatus,omitempty"`
-	FatherCancerType *uint   `json:"fatherCancerType,omitempty"`
-	FatherCancerAge  *uint   `json:"fatherCancerAge,omitempty"`
-
-	SiblingCancer     bool    `json:"siblingCancer"`
-	SiblingName       *string `json:"siblingName,omitempty"`
-	SiblingLifeStatus *string `json:"siblingLifeStatus,omitempty"`
-	SiblingCancerType *uint   `json:"siblingCancerType,omitempty"`
-	SiblingCancerAge  *uint   `json:"siblingCancerAge,omitempty"`
-
-	AmeAmoCancer     bool    `json:"ameAmoCancer"`
-	AmeAmoName       *string `json:"ameAmoName,omitempty"`
-	AmeAmoLifeStatus *string `json:"ameAmoLifeStatus,omitempty"`
-	AmeAmoCancerType *uint   `json:"ameAmoCancerType,omitempty"`
-	AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge,omitempty"`
-
-	KhaleDaeiCancer     bool    `json:"khaleDaeiCancer"`
-	KhaleDaeiName       *string `json:"khaleDaeiName,omitempty"`
-	KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus,omitempty"`
-	KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType,omitempty"`
-	KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge,omitempty"`
-
-	OtherRelativeCancer     *bool   `json:"otherRelativeCancer,omitempty"`
-	OtherRelativeName       *string `json:"otherRelativeName,omitempty"`
-	OtherRelativeRelation   *string `json:"otherRelativeRelation,omitempty"`
-	OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus,omitempty"`
-	OtherRelativeCancerType *uint   `json:"otherRelativeCancerType,omitempty"`
-	OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge,omitempty"`
+	FamilyCancers []FamilyCancerRequest
 }
 
 type UpsertContactRequest struct {
@@ -311,50 +280,9 @@ type UpdateCancerRequest struct {
 }
 type UpdateFamilyCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	ChildCancer     *bool   `json:"childCancer"`
-	ChildName       *string `json:"childName"`
-	ChildCancerType *uint   `json:"childCancerType"`
-	ChildCancerAge  *uint   `json:"childCancerAge"`
-	ChildLifeStatus *string `json:"childLifeStatus"`
-
-	MotherCancer     *bool   `json:"motherCancer"`
-	MotherName       *string `json:"motherName"`
-	MotherLifeStatus *string `json:"motherLifeStatus"`
-	MotherCancerType *uint   `json:"motherCancerType"`
-	MotherCancerAge  *uint   `json:"motherCancerAge"`
-
-	FatherCancer     *bool   `json:"fatherCancer"`
-	FatherName       *string `json:"fatherName"`
-	FatherLifeStatus *string `json:"fatherLifeStatus"`
-	FatherCancerType *uint   `json:"fatherCancerType"`
-	FatherCancerAge  *uint   `json:"fatherCancerAge"`
-
-	SiblingCancer     *bool   `json:"siblingCancer"`
-	SiblingName       *string `json:"siblingName"`
-	SiblingLifeStatus *string `json:"siblingLifeStatus"`
-	SiblingCancerType *uint   `json:"siblingCancerType"`
-	SiblingCancerAge  *uint   `json:"siblingCancerAge"`
-
-	AmeAmoCancer     *bool   `json:"ameAmoCancer"`
-	AmeAmoName       *string `json:"ameAmoName"`
-	AmeAmoLifeStatus *string `json:"ameAmoLifeStatus"`
-	AmeAmoCancerType *uint   `json:"ameAmoCancerType"`
-	AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge"`
-
-	KhaleDaeiCancer     *bool   `json:"khaleDaeiCancer"`
-	KhaleDaeiName       *string `json:"khaleDaeiName"`
-	KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus"`
-	KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType"`
-	KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge"`
-
-	OtherRelativeCancer     *bool   `json:"otherRelativeCancer"`
-	OtherRelativeName       *string `json:"otherRelativeName"`
-	OtherRelativeRelation   *string `json:"otherRelativeRelation"`
-	OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus"`
-	OtherRelativeCancerType *uint   `json:"otherRelativeCancerType"`
-	OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge"`
+	FamilyCancers []FamilyCancerRequest
 }
 type UpdateContactRequest struct {
 	UserID uint

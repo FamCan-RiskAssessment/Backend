@@ -96,49 +96,20 @@ type CancerResponse struct {
 }
 
 type GetCancersResponse struct {
-	Cancer    bool              `json:"cancer"`
-	CancerWho *enum.Relative    `json:"relative,omitempty"`
-	Cancers   []*CancerResponse `json:"cancers"`
+	Cancer  bool             `json:"cancer"`
+	Cancers []CancerResponse `json:"cancers"`
+}
+
+type FamilyCancerResponse struct {
+	Relative         enum.Relative    `json:"relative"`
+	RelativeRelation *string          `json:"relation,omitempty"`
+	Name             *string          `json:"name,omitempty"`
+	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
+	Cancers          []CancerResponse `json:"cancers,omitempty"`
 }
 
 type GetFamilyCancerResponse struct {
-	ID                      uint             `json:"id"`
-	ChildCancer             bool             `json:"childCancer"`
-	ChildName               *string          `json:"childName,omitempty"`
-	ChildCancerType         *enum.CancerType `json:"childCancerType,omitempty"`
-	ChildCancerAge          *uint            `json:"childCancerAge,omitempty"`
-	ChildLifeStatus         *string          `json:"childLifeStatus,omitempty"`
-	MotherCancer            bool             `json:"motherCancer"`
-	MotherName              *string          `json:"motherName,omitempty"`
-	MotherLifeStatus        *string          `json:"motherLifeStatus,omitempty"`
-	MotherCancerType        *enum.CancerType `json:"motherCancerType,omitempty"`
-	MotherCancerAge         *uint            `json:"motherCancerAge,omitempty"`
-	FatherCancer            bool             `json:"fatherCancer"`
-	FatherName              *string          `json:"fatherName,omitempty"`
-	FatherLifeStatus        *string          `json:"fatherLifeStatus,omitempty"`
-	FatherCancerType        *enum.CancerType `json:"fatherCancerType,omitempty"`
-	FatherCancerAge         *uint            `json:"fatherCancerAge,omitempty"`
-	SiblingCancer           bool             `json:"siblingCancer"`
-	SiblingName             *string          `json:"siblingName,omitempty"`
-	SiblingLifeStatus       *string          `json:"siblingLifeStatus,omitempty"`
-	SiblingCancerType       *enum.CancerType `json:"siblingCancerType,omitempty"`
-	SiblingCancerAge        *uint            `json:"siblingCancerAge,omitempty"`
-	AmeAmoCancer            bool             `json:"ameAmoCancer"`
-	AmeAmoName              *string          `json:"ameAmoName,omitempty"`
-	AmeAmoLifeStatus        *string          `json:"ameAmoLifeStatus,omitempty"`
-	AmeAmoCancerType        *enum.CancerType `json:"ameAmoCancerType,omitempty"`
-	AmeAmoCancerAge         *uint            `json:"ameAmoCancerAge,omitempty"`
-	KhaleDaeiCancer         bool             `json:"khaleDaeiCancer"`
-	KhaleDaeiName           *string          `json:"khaleDaeiName,omitempty"`
-	KhaleDaeiLifeStatus     *string          `json:"khaleDaeiLifeStatus,omitempty"`
-	KhaleDaeiCancerType     *enum.CancerType `json:"khaleDaeiCancerType,omitempty"`
-	KhaleDaeiCancerAge      *uint            `json:"khaleDaeiCancerAge,omitempty"`
-	OtherRelativeCancer     *bool            `json:"otherRelativeCancer,omitempty"`
-	OtherRelativeName       *string          `json:"otherRelativeName,omitempty"`
-	OtherRelativeRelation   *string          `json:"otherRelativeRelation,omitempty"`
-	OtherRelativeLifeStatus *string          `json:"otherRelativeLifeStatus,omitempty"`
-	OtherRelativeCancerType *enum.CancerType `json:"otherRelativeCancerType,omitempty"`
-	OtherRelativeCancerAge  *uint            `json:"otherRelativeCancerAge,omitempty"`
+	FamilyCancers []FamilyCancerResponse `json:"familyCancers"`
 }
 
 type GetMamographyResponse struct {

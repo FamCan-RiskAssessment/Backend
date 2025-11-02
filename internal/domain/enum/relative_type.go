@@ -17,6 +17,7 @@ const (
 	MaternalUncle
 	MaternalAunt
 	Child
+	DistantRelative
 )
 
 func (g Relative) String() string {
@@ -49,6 +50,8 @@ func (g Relative) String() string {
 		return "خاله"
 	case Child:
 		return "فرزند"
+	case DistantRelative:
+		return "فامیل دور"
 	}
 	return "نامشخص"
 }
@@ -69,5 +72,6 @@ func GetAllRelatives() []Relative {
 		MaternalUncle,
 		MaternalAunt,
 		Child,
+		DistantRelative,
 	}
 }

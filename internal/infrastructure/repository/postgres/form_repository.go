@@ -249,7 +249,6 @@ func (r *FormRepository) UpdateMamography(db database.Database, info *entity.Mam
 func (r *FormRepository) FindCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error) {
 	var info []*entity.CancerInfo
 	err := db.GetDB().
-		Preload("Cancer").
 		Where("form_id = ?", formID).
 		Find(&info).Error
 
@@ -272,7 +271,6 @@ func (r *FormRepository) UpdateCancer(db database.Database, info *entity.CancerI
 func (r *FormRepository) FindFamilyCancersByFormID(db database.Database, formID uint) ([]*entity.NewFamilyCancerInfo, error) {
 	var info []*entity.NewFamilyCancerInfo
 	err := db.GetDB().
-		Preload("Cancer").
 		Where("form_id = ?", formID).
 		Order("relative ASC").
 		Find(&info).Error
@@ -285,15 +283,13 @@ func (r *FormRepository) FindFamilyCancersByFormID(db database.Database, formID 
 
 func (r *FormRepository) DeleteCancersByFormID(db database.Database, formID uint) error {
 	return db.GetDB().
-		Select("Cancer").
 		Where("form_id = ?", formID).
 		Delete(&entity.CancerInfo{}).Error
 }
 
-func (r *FormRepository) DeleteFamilyCancersByFormID(db database.Database, formID uint) error {
+func (r *FormRepository) DeleteFamilyCancerByFormIDAndNameAndRelation(db database.Database, formID uint, name string, relation uint) error {
 	return db.GetDB().
-		Select("Cancer").
-		Where("form_id = ?", formID).
+		Where("form_id = ? AND name = ? AND relative = ?", formID, name, relation).
 		Delete(&entity.NewFamilyCancerInfo{}).Error
 }
 

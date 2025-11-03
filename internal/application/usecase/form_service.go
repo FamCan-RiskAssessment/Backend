@@ -21,7 +21,7 @@ type FormService interface {
 	UpsertGeneralHealth(request formdto.UpsertGeneralHealthRequest) error
 	UpsertMamography(request formdto.UpsertMamographyRequest) error
 	UpsertCancer(request formdto.UpsertCancerRequest) error
-	UpsertFamilyCancer(request formdto.UpsertFamilyCancerRequest) error
+	UpsertFamilyCancer(request formdto.FamilyCancerRequest) error
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
 

@@ -207,11 +207,7 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	}
 
 	for _, v := range request.Cancers {
-		info := &entity.CancerInfo{FormID: request.FormID}
-		info.Cancer = &entity.CancerSpec{
-			CancerAge:  v.CancerAge,
-			CancerType: enum.CancerType(v.CancerType),
-		}
+		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
 
 		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
 			return err
@@ -220,7 +216,7 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	return nil
 }
 
-func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyCancerRequest) error {
+func (formService *FormService) UpsertFamilyCancer(request formdto.FamilyCancerRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -235,22 +231,19 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 	// 	return ForbiddenError
 	// }
 
-	if err := formService.formRepository.DeleteFamilyCancersByFormID(formService.db, request.FormID); err != nil {
-		return err
+	if request.Cancer == false {
+		if err := formService.formRepository.DeleteFamilyCancerByFormIDAndNameAndRelation(formService.db, request.FormID, *request.Name, uint(request.Relative)); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	for _, v := range request.FamilyCancers {
-		for _, u := range v.Cancers {
-			info := &entity.NewFamilyCancerInfo{FormID: request.FormID,
-				Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus,
-			}
-			info.Cancer = &entity.CancerSpec{
-				CancerAge:  u.CancerAge,
-				CancerType: enum.CancerType(u.CancerType),
-			}
-			if err := formService.formRepository.CreateFamilyCancer(formService.db, info); err != nil {
-				return err
-			}
+	for _, u := range request.Cancers {
+		info := &entity.NewFamilyCancerInfo{FormID: request.FormID,
+			Relative: request.Relative, RelativeRelation: request.RelativeRelation, Name: request.Name, LifeStatus: request.LifeStatus, CancerAge: u.CancerAge, CancerType: enum.CancerType(u.CancerType),
+		}
+		if err := formService.formRepository.CreateFamilyCancer(formService.db, info); err != nil {
+			return err
 		}
 	}
 
@@ -574,7 +567,7 @@ func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest
 
 	cancersResponse.Cancer = true
 	for _, v := range info {
-		cancersResponse.Cancers = append(cancersResponse.Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.Cancer.CancerType, CancerAge: v.Cancer.CancerAge})
+		cancersResponse.Cancers = append(cancersResponse.Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.CancerType, CancerAge: v.CancerAge})
 	}
 	return cancersResponse, nil
 }
@@ -614,7 +607,7 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus}
 			FamilyCancersResponse.FamilyCancers = append(FamilyCancersResponse.FamilyCancers, familyInfo)
 		}
-		FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers = append(FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.Cancer.CancerType, CancerAge: v.Cancer.CancerAge})
+		FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers = append(FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.CancerType, CancerAge: v.CancerAge})
 	}
 
 	return FamilyCancersResponse, nil
@@ -1127,11 +1120,7 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	// }
 
 	for _, v := range request.Cancers {
-		info := &entity.CancerInfo{FormID: request.FormID}
-		info.Cancer = &entity.CancerSpec{
-			CancerAge:  v.CancerAge,
-			CancerType: enum.CancerType(v.CancerType),
-		}
+		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
 
 		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
 			return err
@@ -1159,11 +1148,7 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	for _, v := range request.FamilyCancers {
 		for _, u := range v.Cancers {
 			info := &entity.NewFamilyCancerInfo{FormID: request.FormID,
-				Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus,
-			}
-			info.Cancer = &entity.CancerSpec{
-				CancerAge:  u.CancerAge,
-				CancerType: enum.CancerType(u.CancerType),
+				Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus, CancerAge: u.CancerAge, CancerType: enum.CancerType(u.CancerType),
 			}
 			if err := formService.formRepository.CreateFamilyCancer(formService.db, info); err != nil {
 				return err

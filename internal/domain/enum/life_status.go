@@ -4,14 +4,14 @@ type LifeStatus uint
 
 const (
 	Alive LifeStatus = iota + 1
-	Dead
+	Deceased
 )
 
 func (g LifeStatus) String() string {
 	switch g {
 	case Alive:
 		return "در قید حیات"
-	case Dead:
+	case Deceased:
 		return "فوت شده"
 	}
 	return "نامشخص"
@@ -20,6 +20,6 @@ func (g LifeStatus) String() string {
 func GetAllLifeStatuss() []LifeStatus {
 	return []LifeStatus{
 		Alive,
-		Dead,
+		Deceased,
 	}
 }

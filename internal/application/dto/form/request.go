@@ -122,6 +122,9 @@ type UpsertCancerRequest struct {
 }
 
 type FamilyCancerRequest struct {
+	UserID uint
+	FormID uint
+
 	Relative         enum.Relative
 	RelativeRelation *string
 	Name             *string

@@ -326,6 +326,7 @@ func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Contex
 		CancerAge  uint `json:"cancerAge" validate:"required,gte=0"`
 	}
 	type FamilyCancerParams struct {
+		FormID           uint           `uri:"formID" validate:"required"`
 		Relative         uint           `json:"relative" validate:"required,gt=0"`
 		RelativeRelation *string        `json:"relativeRelation,omitempty"`
 		Name             *string        `json:"name,omitempty"`
@@ -333,34 +334,26 @@ func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Contex
 		Cancer           bool           `json:"cancer" validate:"required"`
 		Cancers          []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
 	}
-	type UpsertFamilyCancerParams struct {
-		FormID        uint                 `uri:"formID" validate:"required"`
-		FamilyCancers []FamilyCancerParams `json:"familyCancers" validate:"dive"`
-	}
 
-	params := controller.Validate[UpsertFamilyCancerParams](ctx)
+	params := controller.Validate[FamilyCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	FamilyCancers := []formdto.FamilyCancerRequest{}
-	for _, v := range params.FamilyCancers {
-		FamilyCancer := formdto.FamilyCancerRequest{}
-		FamilyCancer.Relative = enum.Relative(v.Relative)
-		FamilyCancer.RelativeRelation = v.RelativeRelation
-		FamilyCancer.Name = v.Name
-		FamilyCancer.LifeStatus = (*enum.LifeStatus)(v.LifeStatus)
-		FamilyCancer.Cancer = v.Cancer
-		for _, c := range v.Cancers {
-			Cancer := formdto.CancerRequest{CancerType: c.CancerType, CancerAge: c.CancerAge}
-			FamilyCancer.Cancers = append(FamilyCancer.Cancers, Cancer)
-		}
-		FamilyCancers = append(FamilyCancers, FamilyCancer)
+	cancers := []formdto.CancerRequest{}
+	for _, c := range params.Cancers {
+		Cancer := formdto.CancerRequest{CancerType: c.CancerType, CancerAge: c.CancerAge}
+		cancers = append(cancers, Cancer)
 	}
 
-	req := formdto.UpsertFamilyCancerRequest{
-		UserID:        userID.(uint),
-		FormID:        params.FormID,
-		FamilyCancers: FamilyCancers,
+	req := formdto.FamilyCancerRequest{
+		UserID:           userID.(uint),
+		FormID:           params.FormID,
+		Relative:         enum.Relative(params.Relative),
+		RelativeRelation: params.RelativeRelation,
+		Name:             params.Name,
+		LifeStatus:       (*enum.LifeStatus)(params.LifeStatus),
+		Cancer:           params.Cancer,
+		Cancers:          cancers,
 	}
 
 	if err := formController.formService.UpsertFamilyCancer(req); err != nil {

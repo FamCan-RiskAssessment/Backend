@@ -3,8 +3,7 @@ package enum
 type Relative uint
 
 const (
-	Self Relative = iota + 1
-	Father
+	Father Relative = iota + 1
 	Mother
 	Brother
 	Sister
@@ -22,8 +21,6 @@ const (
 
 func (g Relative) String() string {
 	switch g {
-	case Self:
-		return "خود"
 	case Father:
 		return "پدر"
 	case Mother:
@@ -58,7 +55,6 @@ func (g Relative) String() string {
 
 func GetAllRelatives() []Relative {
 	return []Relative{
-		Self,
 		Father,
 		Mother,
 		Brother,

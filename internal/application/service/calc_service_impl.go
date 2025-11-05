@@ -292,11 +292,6 @@ func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcR
 		return calcdto.Premm5Response{}, notFoundError
 	}
 
-	result, err = calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.Premm5Response{}, err
-	}
-
 	response := calcdto.Premm5Response{
 		GeneProbs: map[string]float64{
 			"MLH1": result.MLH1Probability,

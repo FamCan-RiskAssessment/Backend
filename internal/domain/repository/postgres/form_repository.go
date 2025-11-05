@@ -70,4 +70,8 @@ type FormRepository interface {
 	FindBCRAResultByFormID(db database.Database, formID uint) (*entity.BCRAResult, error)
 	CreateBCRAResult(db database.Database, result *entity.BCRAResult) error
 	UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error
+
+	FindGailResultByFormID(db database.Database, formID uint) (*entity.GailResult, error)
+	CreateGailResult(db database.Database, result *entity.GailResult) error
+	UpdateGailResult(db database.Database, result *entity.GailResult) error
 }

@@ -242,3 +242,12 @@ type BCRAResult struct {
 	RRStar2    float64 `gorm:"type:decimal(10,6);not null"` // Relative risk star 2
 	ProjIntvl  float64 `gorm:"type:decimal(10,6);not null"` // Projection interval
 }
+
+type GailResult struct {
+	database.Model
+	FormID uint `gorm:"not null"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
+
+	AbsoluteRisk float64 `gorm:"not null"`
+	RelativeRisk *float64
+}

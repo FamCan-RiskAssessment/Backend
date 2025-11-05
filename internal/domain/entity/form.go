@@ -1,16 +1,19 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type Form struct {
 	database.Model
-	Status     enum.FormStatus
-	UserID     uint  `gorm:"not null;index"`
-	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OperatorID *uint `gorm:"type:int"`
+	Status             enum.FormStatus
+	UserID             uint  `gorm:"not null;index"`
+	User               User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OperatorID         *uint `gorm:"type:int"`
+	FilledByOperatorID *uint `gorm:"type:int;index"`
 }
 
 type BasicInfo struct {
@@ -19,9 +22,7 @@ type BasicInfo struct {
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 1
 	Gender               enum.Gender `gorm:"not null"`
-	BirthYear            uint        `gorm:"not null"`
-	BirthMonth           string      `gorm:"type:varchar(10);not null"`
-	BirthDay             uint        `gorm:"not null"`
+	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
 	SocialSecurityNumber string      `gorm:"not null"`
 	Height               float64     `gorm:"type:decimal(5,2);not null"`
@@ -72,6 +73,7 @@ type MamoGraphyInfo struct {
 	OralDuration                 *string                         `gorm:"type:varchar(50)"`
 	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
 	MamoGraphy                   *bool                           `gorm:"type:boolean"`
+	MamoGraphyPicturePath        *string                         `gorm:"type:varchar(255)"`
 	Falop                        *bool                           `gorm:"type:boolean"`
 	Andometrioz                  *bool                           `gorm:"type:boolean"`
 	LeavePestan                  bool                            `gorm:"not null;default:false"`

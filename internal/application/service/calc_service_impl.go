@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
@@ -40,6 +41,16 @@ func NewCalcService(
 		db:               db,
 		calcURL:          calcURL,
 	}
+}
+
+func calculateAge(birthDate time.Time) int {
+	today := time.Now()
+
+	age := today.Year() - birthDate.Year()
+	if today.YearDay() < birthDate.YearDay() {
+		age--
+	}
+	return age
 }
 
 func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcRequest) (calcdto.ModelResponse, error) {
@@ -159,11 +170,11 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		return calcdto.ModelResponse{}, err
 	}
 
-	currentAge := uint(2024 - basicInfo.BirthYear)
+	currentAge := calculateAge(basicInfo.BirthDate)
 
 	request := calcdto.SendFormToPremm5Request{
 		Sex:        mapGenderToPremm5(basicInfo.Gender),
-		CurrentAge: int(currentAge),
+		CurrentAge: currentAge,
 
 		PersonalCrcCount:       mapPersonalCrcCount(cancerInfo),
 		PersonalCrcYoungestAge: mapAgeCrcDx(cancerInfo),
@@ -238,7 +249,7 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 	}
 
 	// Calculate current age
-	currentAge := float64(2024 - basicInfo.BirthYear)
+	currentAge := float64(calculateAge(basicInfo.BirthDate))
 	projectionAge := currentAge + 5.0
 
 	// Build BCRA request
@@ -269,99 +280,6 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 		Name:        "BCRA",
 		Probability: bcraResponse.AbsRisk,
 	}, nil
-}
-
-func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelResponse, error) {
-	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	mamographyInfo, err := calcService.formRepository.FindMamographyByFormID(calcService.db, form.ID)
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	if mamographyInfo == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
-		return calcdto.ModelResponse{}, notFoundError
-	}
-
-	familyCancerInfo, err := calcService.formRepository.FindFamilyCancerByFormID(calcService.db, form.ID)
-	if err != nil {
-		return calcdto.ModelResponse{}, err
-	}
-
-	if familyCancerInfo == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
-		return calcdto.ModelResponse{}, notFoundError
-	}
-
-	request := calcdto.SendFormToGBRRequest{}
-}
-
-func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGBRRequest) (calcdto.GailResponse, error) {
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		return calcdto.GailResponse{}, err
-	}
-
-	fmt.Printf("Gail Request: Age=%d, LaterAge=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%d, ShowRR=%v\n",
-		request.Age, request.LaterAge, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race, request.ShowRR)
-
-	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Gail)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return calcdto.GailResponse{}, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to call Gail API: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to read Gail response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return calcdto.GailResponse{}, fmt.Errorf("Gail API returned error (status %d): %s", resp.StatusCode, string(body))
-	}
-
-	var gailResponse calcdto.GailResponse
-	err = json.Unmarshal(body, &gailResponse)
-	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to parse Gail response: %w", err)
-	}
-
-	return gailResponse, nil
-}
-
-func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto.GailResponse) error {
-	existingResult, err := calcService.formRepository.FindGailResultByFormID(calcService.db, formID)
-	if err != nil {
-		return err
-	}
-
-	if existingResult == nil {
-		gailResult := &entity.GailResult{
-			FormID:       formID,
-			AbsoluteRisk: gailResponse.AbsoluteRisk,
-			RelativeRisk: gailResponse.RelativeRisk,
-		}
-		return calcService.formRepository.CreateGailResult(calcService.db, gailResult)
-	}
-
-	existingResult.AbsoluteRisk = gailResponse.AbsoluteRisk
-	if gailResponse.RelativeRisk != nil {
-		existingResult.RelativeRisk = gailResponse.RelativeRisk
-	}
-
-	return calcService.formRepository.UpdateGailResult(calcService.db, existingResult)
 }
 
 // callBCRAAPI makes the HTTP request to the BCRA calculator API
@@ -433,6 +351,131 @@ func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto
 	existingResult.ProjIntvl = bcraResponse.ProjIntvl
 
 	return calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
+}
+
+func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelResponse, error) {
+	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	mamographyInfo, err := calcService.formRepository.FindMamographyByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	if mamographyInfo == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
+		return calcdto.ModelResponse{}, notFoundError
+	}
+
+	familyCancerInfo, err := calcService.formRepository.FindFamilyCancerByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	if familyCancerInfo == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
+		return calcdto.ModelResponse{}, notFoundError
+	}
+
+	// Calculate current age
+	currentAge := calculateAge(basicInfo.BirthDate)
+	projectionAge := currentAge + 5
+
+	// Build GBR request
+	request := calcdto.SendFormToGBRRequest{
+		Age:          currentAge,
+		LaterAge:     projectionAge,
+		HorizonYears: 5,
+		MenarcheAge:  mapAgeAtMenarche(mamographyInfo),
+		NumBiopsies:  mapBiopsyCount(mamographyInfo),
+		FLBAge:       mapAgeAtFirstBirth(mamographyInfo),
+		NumRelatives: mapFirstDegreeBreastCancerRelatives(familyCancerInfo),
+		Race:         1, // Default to White
+		ShowRR:       false,
+	}
+
+	// Make API call
+	gailResponse, err := calcService.callGailAPI(request)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	// Save result to database
+	err = calcService.saveGailResult(form.ID, gailResponse)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	return calcdto.ModelResponse{
+		Name:        "GBR",
+		Probability: gailResponse.AbsoluteRisk,
+	}, nil
+}
+
+func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGBRRequest) (calcdto.GailResponse, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.GailResponse{}, err
+	}
+
+	fmt.Printf("Gail Request: Age=%d, LaterAge=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%d, ShowRR=%v\n",
+		request.Age, request.LaterAge, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race, request.ShowRR)
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Gail)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.GailResponse{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.GailResponse{}, fmt.Errorf("failed to call Gail API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.GailResponse{}, fmt.Errorf("failed to read Gail response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.GailResponse{}, fmt.Errorf("gail API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var gailResponse calcdto.GailResponse
+	err = json.Unmarshal(body, &gailResponse)
+	if err != nil {
+		return calcdto.GailResponse{}, fmt.Errorf("failed to parse Gail response: %w", err)
+	}
+
+	return gailResponse, nil
+}
+
+func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto.GailResponse) error {
+	existingResult, err := calcService.formRepository.FindGailResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if existingResult == nil {
+		gailResult := &entity.GailResult{
+			FormID:       formID,
+			AbsoluteRisk: gailResponse.AbsoluteRisk,
+			RelativeRisk: gailResponse.RelativeRisk,
+		}
+		return calcService.formRepository.CreateGailResult(calcService.db, gailResult)
+	}
+
+	existingResult.AbsoluteRisk = gailResponse.AbsoluteRisk
+	if gailResponse.RelativeRisk != nil {
+		existingResult.RelativeRisk = gailResponse.RelativeRisk
+	}
+
+	return calcService.formRepository.UpdateGailResult(calcService.db, existingResult)
 }
 
 // mapHyperplasiaStatus maps hyperplasia status to BCRA code

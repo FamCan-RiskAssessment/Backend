@@ -63,6 +63,7 @@ type S3 struct {
 }
 
 type BucketName struct {
+	Mamography string
 }
 
 type SuperAdmin struct {
@@ -73,7 +74,10 @@ type SuperAdmin struct {
 type CalcURL struct {
 	Premm5 string
 	BCRA   string
+<<<<<<< HEAD
 	Gail   string
+=======
+>>>>>>> develop
 }
 
 func NewEnv() *Env {
@@ -117,6 +121,9 @@ func NewEnv() *Env {
 			AccessKey: os.Getenv("S3_ACCESS_KEY"),
 			SecretKey: os.Getenv("S3_SECRET_KEY"),
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
+			Buckets: BucketName{
+				Mamography: os.Getenv("MAMOGRAPHY_BUCKETNAME"),
+			},
 		},
 		CalcURL: CalcURL{
 			Premm5: os.Getenv("PREMM5_API_URL"),

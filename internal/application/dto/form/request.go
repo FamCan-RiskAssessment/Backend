@@ -1,14 +1,39 @@
 package formdto
 
-import "github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+import (
+	"mime/multipart"
+	"strings"
+	"time"
+
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+)
+
+type BirthDate time.Time
+
+func (d *BirthDate) UnmarshalJSON(b []byte) error {
+	s := strings.Trim(string(b), `"`)
+	t, err := time.Parse("2006-01-02", s)
+	if err != nil {
+		return err
+	}
+	*d = BirthDate(t)
+	return nil
+}
+
+func (d BirthDate) Time() time.Time {
+	return time.Time(d)
+}
+
+func (d BirthDate) String() string {
+	return time.Time(d).Format("2006-01-02")
+}
 
 type CreateBasicFormRequest struct {
-	UserID uint
+	UserID             uint
+	FilledByOperatorID *uint
 
 	// page 1
-	BirthDay             uint    `json:"birthDay" binding:"required"`
-	BirthMonth           string  `json:"birthMonth" binding:"required"`
-	BirthYear            uint    `json:"birthYear" binding:"required"`
+	BirthDate            time.Time
 	SocialSecurityNumber string  `json:"socialSecurityNumber" binding:"required"`
 	Gender               uint    `json:"gender" binding:"required"`
 	IsAtba               bool    `json:"isAtba"`
@@ -21,9 +46,7 @@ type UpdateBasicFormRequest struct {
 	FormID uint `json:"form_id" binding:"required"`
 
 	// page 1
-	BirthDay             *uint    `json:"birthDay"`
-	BirthMonth           *string  `json:"birthMonth"`
-	BirthYear            *uint    `json:"birthYear"`
+	BirthDate            *time.Time
 	SocialSecurityNumber *string  `json:"socialSecurityNumber"`
 	Gender               *uint    `json:"gender"`
 	IsAtba               *bool    `json:"isAtba"`
@@ -78,33 +101,34 @@ type UpsertMamographyRequest struct {
 	UserID uint
 	FormID uint `json:"form_id" binding:"required"`
 
-	GhaedeAge                    uint    `json:"ghaedeAge" binding:"required"`
-	HasChildren                  bool    `json:"hasChildren"`
-	NumberOfChildren             *uint   `json:"numberOfChildren,omitempty"`
-	AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth,omitempty"`
-	MenopausalStatus             uint    `json:"menopausalStatus" binding:"required"`
-	MenopauseAge                 *string `json:"menopauseAge,omitempty"`
-	HRT                          *bool   `json:"hrt,omitempty"`
-	HRTUseLength                 *uint   `json:"hrtUseLength,omitempty"`
-	LastFiveYearsHRTUse          bool    `json:"lastFiveYearsHrtUse"`
-	CurrentHRTUse                *bool   `json:"currentHrtUse,omitempty"`
-	IntendedHRTUse               *uint   `json:"intendedHrtUse,omitempty"`
-	HRTType                      *string `json:"hrtType,omitempty"`
-	Oral                         *bool   `json:"oral,omitempty"`
-	OralDuration                 *string `json:"oralDuration,omitempty"`
-	OralTwoLastYears             *bool   `json:"oralTwoLastYears,omitempty"`
-	MamoGraphy                   *bool   `json:"mamoGraphy,omitempty"`
-	Falop                        *bool   `json:"falop,omitempty"`
-	Andometrioz                  *bool   `json:"andometrioz,omitempty"`
-	LeavePestan                  bool    `json:"leavePestan"`
-	LeaveTokhmdan                bool    `json:"leaveTokhmdan"`
-	LaDeColon                    *bool   `json:"laDeColon,omitempty"`
-	LaDePol                      *bool   `json:"laDePol,omitempty"`
-	AspLaMo                      *bool   `json:"aspLaMo,omitempty"`
-	NsaiDLaMo                    *bool   `json:"nsaiDLaMo,omitempty"`
-	LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool,omitempty"`
-	NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
-	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
+	GhaedeAge                    uint                  `json:"ghaedeAge" binding:"required"`
+	HasChildren                  bool                  `json:"hasChildren"`
+	NumberOfChildren             *uint                 `json:"numberOfChildren,omitempty"`
+	AgeOfFirstBirth              *uint                 `json:"ageOfFirstBirth,omitempty"`
+	MenopausalStatus             uint                  `json:"menopausalStatus" binding:"required"`
+	MenopauseAge                 *string               `json:"menopauseAge,omitempty"`
+	HRT                          *bool                 `json:"hrt,omitempty"`
+	HRTUseLength                 *uint                 `json:"hrtUseLength,omitempty"`
+	LastFiveYearsHRTUse          bool                  `json:"lastFiveYearsHrtUse"`
+	CurrentHRTUse                *bool                 `json:"currentHrtUse,omitempty"`
+	IntendedHRTUse               *uint                 `json:"intendedHrtUse,omitempty"`
+	HRTType                      *string               `json:"hrtType,omitempty"`
+	Oral                         *bool                 `json:"oral,omitempty"`
+	OralDuration                 *string               `json:"oralDuration,omitempty"`
+	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
+	MamoGraphy                   *bool                 `form:"mamoGraphy,omitempty"`
+	MamoGraphyPicture            *multipart.FileHeader `form:"mamoGraphyPicture,omitempty"`
+	Falop                        *bool                 `json:"falop,omitempty"`
+	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
+	LeavePestan                  bool                  `json:"leavePestan"`
+	LeaveTokhmdan                bool                  `json:"leaveTokhmdan"`
+	LaDeColon                    *bool                 `json:"laDeColon,omitempty"`
+	LaDePol                      *bool                 `json:"laDePol,omitempty"`
+	AspLaMo                      *bool                 `json:"aspLaMo,omitempty"`
+	NsaiDLaMo                    *bool                 `json:"nsaiDLaMo,omitempty"`
+	LastFiveYearBloodTestInStool *bool                 `json:"lastFiveYearBloodTestInStool,omitempty"`
+	NumberOfBreastBiopsies       *uint                 `json:"numberOfBreastBiopsies,omitempty"`
+	HyperplasiaInBiopsy          *uint                 `json:"hyperplasiaInBiopsy,omitempty"`
 }
 
 type CancerRequest struct {

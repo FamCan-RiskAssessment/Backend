@@ -32,6 +32,7 @@ const (
 	PermissionUpdateForms
 	PermissionDeleteForms
 	PermissionHandleForms
+	PermissionCreateFormForUser
 
 	PermissionHandleOperators
 
@@ -105,11 +106,12 @@ var permissionNames = map[PermissionType]string{
 
 	PermissionSetPassword: "تنظیم پسورد",
 
-	PermissionViewForms:   "مشاهده فرم ها",
-	PermissionCreateForms: "ایجاد فرم",
-	PermissionUpdateForms: "ویرایش فرم",
-	PermissionDeleteForms: "حذف فرم",
-	PermissionHandleForms: "مدیریت فرم ها",
+	PermissionViewForms:         "مشاهده فرم ها",
+	PermissionCreateForms:       "ایجاد فرم",
+	PermissionUpdateForms:       "ویرایش فرم",
+	PermissionDeleteForms:       "حذف فرم",
+	PermissionHandleForms:       "مدیریت فرم ها",
+	PermissionCreateFormForUser: "ایجاد فرم برای کاربر",
 
 	PermissionHandleOperators: "مدیریت اپراتور ها",
 
@@ -176,6 +178,7 @@ func GetAllPermissionTypes() []PermissionType {
 		PermissionUpdateForms,
 		PermissionDeleteForms,
 		PermissionHandleForms,
+		PermissionCreateFormForUser,
 
 		PermissionSetPassword,
 		PermissionHandleOperators,

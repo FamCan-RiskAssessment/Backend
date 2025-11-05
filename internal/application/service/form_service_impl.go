@@ -1,6 +1,9 @@
 package service
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -10,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
@@ -18,6 +22,7 @@ type FormService struct {
 	formRepository   postgres.FormRepository
 	userService      usecase.UserService
 	actionLogService usecase.ActionLogService
+	s3Storage        s3.S3Storage
 	db               database.Database
 }
 
@@ -26,6 +31,7 @@ func NewFormService(
 	formRepository postgres.FormRepository,
 	userService usecase.UserService,
 	actionLogService usecase.ActionLogService,
+	s3Storage s3.S3Storage,
 	db database.Database,
 ) *FormService {
 	return &FormService{
@@ -33,8 +39,36 @@ func NewFormService(
 		formRepository:   formRepository,
 		userService:      userService,
 		actionLogService: actionLogService,
+		s3Storage:        s3Storage,
 		db:               db,
 	}
+}
+
+func (formService *FormService) canOperatorEditForm(form *entity.Form, operatorID uint) (bool, error) {
+	if form.FilledByOperatorID != nil && *form.FilledByOperatorID == operatorID {
+		return true, nil
+	}
+
+	if form.OperatorID != nil && *form.OperatorID == operatorID {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) isOperator(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
@@ -47,9 +81,25 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, notFoundError
 	}
 
+	if request.FilledByOperatorID != nil {
+		err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		operator, err := formService.userService.GetUserByID(*request.FilledByOperatorID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		if operator == nil {
+			notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+			return formdto.BasicFormResponse{}, notFoundError
+		}
+	}
+
 	form := &entity.Form{
-		UserID: request.UserID,
-		Status: enum.FormStatusInComplete,
+		UserID:             request.UserID,
+		Status:             enum.FormStatusInComplete,
+		FilledByOperatorID: request.FilledByOperatorID,
 	}
 
 	if err = formService.formRepository.CreateForm(formService.db, form); err != nil {
@@ -59,9 +109,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthYear:            request.BirthYear,
-		BirthMonth:           request.BirthMonth,
-		BirthDay:             request.BirthDay,
+		BirthDate:            request.BirthDate,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: request.SocialSecurityNumber,
 		Height:               request.Height,
@@ -73,11 +121,12 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	}
 
 	response := formdto.BasicFormResponse{
-		FormID:    form.ID,
-		Status:    form.Status.String(),
-		UserID:    form.UserID,
-		CreatedAt: form.CreatedAt,
-		UpdatedAt: form.UpdatedAt,
+		FormID:             form.ID,
+		Status:             form.Status.String(),
+		UserID:             form.UserID,
+		FilledByOperatorID: form.FilledByOperatorID,
+		CreatedAt:          form.CreatedAt,
+		UpdatedAt:          form.UpdatedAt,
 	}
 
 	return response, nil
@@ -91,6 +140,21 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -140,10 +204,20 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 		return notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -181,10 +255,54 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
 	info.HyperplasiaInBiopsy = (*enum.HyperplasiaInBiopsyStatus)(request.HyperplasiaInBiopsy)
 
-	if info.ID == 0 {
-		return formService.formRepository.CreateMamography(formService.db, info)
+	var pictureKey string
+	var oldPicturePath *string
+	if request.MamoGraphy != nil && *request.MamoGraphy && request.MamoGraphyPicture != nil && request.MamoGraphyPicture.Filename != "" {
+		// Save the old picture path BEFORE overwriting it
+		if info.MamoGraphyPicturePath != nil {
+			oldPicturePath = info.MamoGraphyPicturePath
+		}
+
+		pictureKey = formService.constants.BucketPath.GetMamoGraphyPath(request.FormID, request.MamoGraphyPicture.Filename)
+		info.MamoGraphyPicturePath = &pictureKey
 	}
-	return formService.formRepository.UpdateMamography(formService.db, info)
+
+	isCreate := info.ID == 0
+
+	if isCreate {
+		return formService.db.WithTransaction(func(tx database.Database) error {
+			if err := formService.formRepository.CreateMamography(tx, info); err != nil {
+				return err
+			}
+
+			if pictureKey != "" && request.MamoGraphyPicture != nil {
+				if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+	}
+
+	if pictureKey != "" && request.MamoGraphyPicture != nil {
+		if oldPicturePath != nil && *oldPicturePath != "" && *oldPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeMamography, *oldPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old mamography picture %s: %v\n", *oldPicturePath, err)
+
+			}
+		}
+
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+			return err
+		}
+	}
+
+	if err := formService.formRepository.UpdateMamography(formService.db, info); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest) error {
@@ -195,6 +313,21 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -224,6 +357,21 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.FamilyCancerR
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -258,6 +406,21 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -298,6 +461,21 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -429,9 +607,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		Gender:               basic.Gender,
-		BirthYear:            basic.BirthYear,
-		BirthMonth:           basic.BirthMonth,
-		BirthDay:             basic.BirthDay,
+		BirthDate:            basic.BirthDate,
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: basic.SocialSecurityNumber,
 		Height:               basic.Height,
@@ -508,6 +684,15 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		return formdto.GetMamographyResponse{}, notFoundError
 	}
 
+	var mamoGraphyPicture *string
+	if info.MamoGraphyPicturePath != nil && *info.MamoGraphyPicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeMamography, *info.MamoGraphyPicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.GetMamographyResponse{}, err
+		}
+		mamoGraphyPicture = &presignedURL
+	}
+
 	return formdto.GetMamographyResponse{
 		ID:                           info.ID,
 		GhaedeAge:                    info.GhaedeAge,
@@ -526,6 +711,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		OralDuration:                 info.OralDuration,
 		OralTwoLastYears:             info.OralTwoLastYears,
 		MamoGraphy:                   info.MamoGraphy,
+		MamoGraphyPicture:            mamoGraphyPicture,
 		Falop:                        info.Falop,
 		Andometrioz:                  info.Andometrioz,
 		LeavePestan:                  info.LeavePestan,
@@ -799,11 +985,8 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
-	if request.BirthDay != nil {
-		info.BirthDay = *request.BirthDay
-	}
-	if request.BirthMonth != nil {
-		info.BirthMonth = *request.BirthMonth
+	if request.BirthDate != nil {
+		info.BirthDate = *request.BirthDate
 	}
 	if request.SocialSecurityNumber != nil {
 		info.SocialSecurityNumber = *request.SocialSecurityNumber

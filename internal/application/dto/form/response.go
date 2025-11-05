@@ -7,10 +7,11 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID     uint   `json:"id"`
-	Status     string `json:"status"`
-	UserID     uint   `json:"user_id"`
-	OperatorID *uint  `json:"operatorId,omitempty"`
+	FormID             uint   `json:"id"`
+	Status             string `json:"status"`
+	UserID             uint   `json:"user_id"`
+	OperatorID         *uint  `json:"operatorId,omitempty"`
+	FilledByOperatorID *uint  `json:"filledByOperatorId,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -60,9 +61,7 @@ type UpsertLungCancerResponse struct {
 type GetBasicFormResponse struct {
 	ID                   uint        `json:"id"`
 	Gender               enum.Gender `json:"gender"`
-	BirthYear            uint        `json:"birthYear"`
-	BirthMonth           string      `json:"birthMonth"`
-	BirthDay             uint        `json:"birthDay"`
+	BirthDate            time.Time   `json:"birthDate"`
 	IsAtba               bool        `json:"isAtba"`
 	SocialSecurityNumber string      `json:"socialSecurityNumber"`
 	Height               float64     `json:"height"`
@@ -130,6 +129,7 @@ type GetMamographyResponse struct {
 	OralDuration                 *string               `json:"oralDuration,omitempty"`
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
+	MamoGraphyPicture            *string               `json:"mamoGraphyPicture"`
 	Falop                        *bool                 `json:"falop,omitempty"`
 	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
 	LeavePestan                  bool                  `json:"leavePestan"`

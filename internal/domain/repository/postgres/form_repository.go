@@ -6,12 +6,13 @@ import (
 )
 
 type FormFilters struct {
-	Status        *uint
-	Gender        *string
-	BirthYear     *uint
-	DrinksAlcohol *bool
-	SmokingNow    *bool
-	Cancer        *bool
+	Status             *uint
+	Gender             *string
+	BirthYear          *uint
+	DrinksAlcohol      *bool
+	SmokingNow         *bool
+	Cancer             *bool
+	FilledByOperatorID *uint
 }
 
 type OperatorFormFilters struct {

@@ -22,4 +22,7 @@ type UserService interface {
 	UpdateUserRoles(request userdto.UpdateUserRolesRequest) error
 	GetUsers(request userdto.GetUsersListRequest) ([]userdto.UserResponse, int64, error)
 	LoginWithPassword(loginInfo userdto.LoginRequest) (userdto.LoginResponse, error)
+	RequestUserValidationOTP(operatorID uint, request userdto.RequestUserValidationOTPRequest) error
+	VerifyUserValidationOTP(operatorID uint, request userdto.VerifyUserValidationOTPRequest) (userdto.UserValidationResponse, error)
+	ValidateUserForFormCreation(operatorID, userID uint) error
 }

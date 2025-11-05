@@ -68,7 +68,9 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	formRepository := postgres.NewFormRepository()
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, postgresDatabase)
+	s3 := ProvideStorageConfig(config)
+	s3Storage := storage.NewS3Storage(constants, s3)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -76,7 +78,7 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	}
 	pagination := ProvidePagination(config)
 	adminUserController := user.NewAdminUserController(constants, userService, pagination)
-	adminFormController := form.NewAdminFormController(constants, formService, pagination)
+	adminFormController := form.NewAdminFormController(constants, formService, userService, pagination)
 	actionLogController := actionlog.NewActionLogController(actionLogService, formService, userService, pagination)
 	calcURL := ProvideCalcURL(config)
 	calcService := service.NewCalcService(constants, formRepository, actionLogService, postgresDatabase, calcURL)

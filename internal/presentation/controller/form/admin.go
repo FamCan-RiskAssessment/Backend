@@ -7,6 +7,7 @@ import (
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
 	"github.com/gin-gonic/gin"
@@ -349,23 +350,29 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 }
 
 func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
+	type CancerParams struct {
+		CancerType uint `json:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint `json:"cancerAge" validate:"required,gte=0"`
+	}
 	type UpdateCancerParams struct {
-		FormID     uint  `uri:"formID" validate:"required"`
-		Cancer     *bool `json:"cancer"`
-		CancerType *uint `json:"cancerType"`
-		CancerAge  *uint `json:"cancerAge"`
+		FormID  uint           `uri:"formID" validate:"required"`
+		Cancer  bool           `json:"cancer"`
+		Cancers []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
 	}
 
 	params := controller.Validate[UpdateCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
+	var cancers []formdto.CancerRequest
+	for _, v := range params.Cancers {
+		cancers = append(cancers, formdto.CancerRequest{CancerType: v.CancerType, CancerAge: v.CancerAge})
+	}
 	req := formdto.UpdateCancerRequest{
-		UserID:     userID.(uint),
-		FormID:     params.FormID,
-		Cancer:     params.Cancer,
-		CancerType: params.CancerType,
-		CancerAge:  params.CancerAge,
+		UserID:  userID.(uint),
+		FormID:  params.FormID,
+		Cancer:  params.Cancer,
+		Cancers: cancers,
 	}
 
 	if err := formController.formService.UpdateCancer(req); err != nil {
@@ -378,96 +385,46 @@ func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 }
 
 func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) {
+	type CancerParams struct {
+		CancerType uint `json:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint `json:"cancerAge" validate:"required,gte=0"`
+	}
+	type FamilyCancerParams struct {
+		Relative         uint           `json:"relative" validate:"required,gt=0"`
+		RelativeRelation *string        `json:"relativeRelation,omitempty"`
+		Name             *string        `json:"name,omitempty"`
+		LifeStatus       *uint          `json:"lifeStatus,omitempty"`
+		Cancer           bool           `json:"cancer" validate:"required"`
+		Cancers          []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
+	}
 	type UpdateFamilyCancerParams struct {
-		FormID uint `uri:"formID" validate:"required"`
-
-		ChildCancer     *bool   `json:"childCancer"`
-		ChildName       *string `json:"childName"`
-		ChildCancerType *uint   `json:"childCancerType"`
-		ChildCancerAge  *uint   `json:"childCancerAge"`
-		ChildLifeStatus *string `json:"childLifeStatus"`
-
-		MotherCancer     *bool   `json:"motherCancer"`
-		MotherName       *string `json:"motherName"`
-		MotherLifeStatus *string `json:"motherLifeStatus"`
-		MotherCancerType *uint   `json:"motherCancerType"`
-		MotherCancerAge  *uint   `json:"motherCancerAge"`
-
-		FatherCancer     *bool   `json:"fatherCancer"`
-		FatherName       *string `json:"fatherName"`
-		FatherLifeStatus *string `json:"fatherLifeStatus"`
-		FatherCancerType *uint   `json:"fatherCancerType"`
-		FatherCancerAge  *uint   `json:"fatherCancerAge"`
-
-		SiblingCancer     *bool   `json:"siblingCancer"`
-		SiblingName       *string `json:"siblingName"`
-		SiblingLifeStatus *string `json:"siblingLifeStatus"`
-		SiblingCancerType *uint   `json:"siblingCancerType"`
-		SiblingCancerAge  *uint   `json:"siblingCancerAge"`
-
-		AmeAmoCancer     *bool   `json:"ameAmoCancer"`
-		AmeAmoName       *string `json:"ameAmoName"`
-		AmeAmoLifeStatus *string `json:"ameAmoLifeStatus"`
-		AmeAmoCancerType *uint   `json:"ameAmoCancerType"`
-		AmeAmoCancerAge  *uint   `json:"ameAmoCancerAge"`
-
-		KhaleDaeiCancer     *bool   `json:"khaleDaeiCancer"`
-		KhaleDaeiName       *string `json:"khaleDaeiName"`
-		KhaleDaeiLifeStatus *string `json:"khaleDaeiLifeStatus"`
-		KhaleDaeiCancerType *uint   `json:"khaleDaeiCancerType"`
-		KhaleDaeiCancerAge  *uint   `json:"khaleDaeiCancerAge"`
-
-		OtherRelativeCancer     *bool   `json:"otherRelativeCancer"`
-		OtherRelativeName       *string `json:"otherRelativeName"`
-		OtherRelativeRelation   *string `json:"otherRelativeRelation"`
-		OtherRelativeLifeStatus *string `json:"otherRelativeLifeStatus"`
-		OtherRelativeCancerType *uint   `json:"otherRelativeCancerType"`
-		OtherRelativeCancerAge  *uint   `json:"otherRelativeCancerAge"`
+		FormID        uint                 `uri:"formID" validate:"required"`
+		FamilyCancers []FamilyCancerParams `json:"familyCancers" validate:"dive"`
 	}
 
 	params := controller.Validate[UpdateFamilyCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
+	FamilyCancers := []formdto.FamilyCancerRequest{}
+	for _, v := range params.FamilyCancers {
+		FamilyCancer := formdto.FamilyCancerRequest{}
+		FamilyCancer.Relative = enum.Relative(v.Relative)
+		FamilyCancer.RelativeRelation = v.RelativeRelation
+		FamilyCancer.Name = v.Name
+		FamilyCancer.LifeStatus = (*enum.LifeStatus)(v.LifeStatus)
+		FamilyCancer.Cancer = v.Cancer
+		for _, c := range v.Cancers {
+			Cancer := formdto.CancerRequest{CancerType: c.CancerType, CancerAge: c.CancerAge}
+			FamilyCancer.Cancers = append(FamilyCancer.Cancers, Cancer)
+		}
+		FamilyCancers = append(FamilyCancers, FamilyCancer)
+	}
+
 	req := formdto.UpdateFamilyCancerRequest{
-		UserID:                  userID.(uint),
-		FormID:                  params.FormID,
-		ChildCancer:             params.ChildCancer,
-		ChildName:               params.ChildName,
-		ChildCancerType:         params.ChildCancerType,
-		ChildCancerAge:          params.ChildCancerAge,
-		ChildLifeStatus:         params.ChildLifeStatus,
-		MotherCancer:            params.MotherCancer,
-		MotherName:              params.MotherName,
-		MotherLifeStatus:        params.MotherLifeStatus,
-		MotherCancerType:        params.MotherCancerType,
-		MotherCancerAge:         params.MotherCancerAge,
-		FatherCancer:            params.FatherCancer,
-		FatherName:              params.FatherName,
-		FatherLifeStatus:        params.FatherLifeStatus,
-		FatherCancerType:        params.FatherCancerType,
-		FatherCancerAge:         params.FatherCancerAge,
-		SiblingCancer:           params.SiblingCancer,
-		SiblingName:             params.SiblingName,
-		SiblingLifeStatus:       params.SiblingLifeStatus,
-		SiblingCancerType:       params.SiblingCancerType,
-		SiblingCancerAge:        params.SiblingCancerAge,
-		AmeAmoCancer:            params.AmeAmoCancer,
-		AmeAmoName:              params.AmeAmoName,
-		AmeAmoLifeStatus:        params.AmeAmoLifeStatus,
-		AmeAmoCancerType:        params.AmeAmoCancerType,
-		AmeAmoCancerAge:         params.AmeAmoCancerAge,
-		KhaleDaeiCancer:         params.KhaleDaeiCancer,
-		KhaleDaeiName:           params.KhaleDaeiName,
-		KhaleDaeiLifeStatus:     params.KhaleDaeiLifeStatus,
-		KhaleDaeiCancerType:     params.KhaleDaeiCancerType,
-		KhaleDaeiCancerAge:      params.KhaleDaeiCancerAge,
-		OtherRelativeCancer:     params.OtherRelativeCancer,
-		OtherRelativeName:       params.OtherRelativeName,
-		OtherRelativeRelation:   params.OtherRelativeRelation,
-		OtherRelativeLifeStatus: params.OtherRelativeLifeStatus,
-		OtherRelativeCancerType: params.OtherRelativeCancerType,
-		OtherRelativeCancerAge:  params.OtherRelativeCancerAge,
+		UserID:        userID.(uint),
+		FormID:        params.FormID,
+		FamilyCancers: FamilyCancers,
 	}
 
 	if err := formController.formService.UpdateFamilyCancer(req); err != nil {
@@ -676,8 +633,7 @@ func (formController *AdminFormController) GetMamography(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
-
-func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
+func (formController *AdminFormController) GetAllCancers(ctx *gin.Context) {
 	type GetCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 	}
@@ -691,7 +647,7 @@ func (formController *AdminFormController) GetCancer(ctx *gin.Context) {
 		FormID: params.FormID,
 	}
 
-	response, err := formController.formService.GetCancer(request)
+	response, err := formController.formService.GetCancers(request)
 	if err != nil {
 		panic(err)
 	}

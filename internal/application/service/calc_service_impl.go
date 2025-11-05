@@ -83,77 +83,6 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	return response, nil
 }
 
-func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcRequest) (calcdto.Premm5Response, error) {
-	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.Premm5Response{}, err
-	}
-	if form == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
-		return calcdto.Premm5Response{}, notFoundError
-	}
-
-	result, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.Premm5Response{}, err
-	}
-
-	if result == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Premm5Result}
-		return calcdto.Premm5Response{}, notFoundError
-	}
-
-	result, err = calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.Premm5Response{}, err
-	}
-
-	response := calcdto.Premm5Response{
-		GeneProbs: map[string]float64{
-			"MLH1": result.MLH1Probability,
-			"MSH2": result.MSH2Probability,
-			"MSH6": result.MSH6Probability,
-			"PMS2": result.PMS2Probability,
-		},
-		PAny:  result.PAny,
-		PNone: result.PNone,
-	}
-
-	return response, nil
-
-}
-
-func (calcService *CalcService) GetBCRAResults(request calcdto.SendFormToCalcRequest) (calcdto.BCRAResponse, error) {
-	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.BCRAResponse{}, err
-	}
-	if form == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
-		return calcdto.BCRAResponse{}, notFoundError
-	}
-
-	result, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, request.FormID)
-	if err != nil {
-		return calcdto.BCRAResponse{}, err
-	}
-
-	if result == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.BCRAResult}
-		return calcdto.BCRAResponse{}, notFoundError
-	}
-
-	response := calcdto.BCRAResponse{
-		AbsRisk:    result.AbsRisk,
-		AbsRiskAvg: result.AbsRiskAvg,
-		RRStar1:    result.RRStar1,
-		RRStar2:    result.RRStar2,
-		ProjIntvl:  result.ProjIntvl,
-	}
-
-	return response, nil
-}
-
 func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
@@ -282,77 +211,6 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 	}, nil
 }
 
-// callBCRAAPI makes the HTTP request to the BCRA calculator API
-func (calcService *CalcService) callBCRAAPI(request calcdto.SendFormToBCRARequest) (calcdto.BCRAResponse, error) {
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		return calcdto.BCRAResponse{}, err
-	}
-
-	// Log the request for debugging
-	fmt.Printf("BCRA Request: T1=%.1f, T2=%.1f, N_Biop=%d, HypPlas=%d, AgeMen=%d, Age1st=%d, N_Rels=%d, Race=%d\n",
-		request.T1, request.T2, request.N_Biop, request.HypPlas, request.AgeMen, request.Age1st, request.N_Rels, request.Race)
-
-	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return calcdto.BCRAResponse{}, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to call BCRA API: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to read BCRA response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return calcdto.BCRAResponse{}, fmt.Errorf("BCRA API returned error (status %d): %s", resp.StatusCode, string(body))
-	}
-
-	var bcraResponse calcdto.BCRAResponse
-	err = json.Unmarshal(body, &bcraResponse)
-	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to parse BCRA response: %w", err)
-	}
-
-	return bcraResponse, nil
-}
-
-// saveBCRAResult creates or updates the BCRA result in the database
-func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto.BCRAResponse) error {
-	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, formID)
-	if err != nil {
-		return err
-	}
-
-	if existingResult == nil {
-		bcraResult := &entity.BCRAResult{
-			FormID:     formID,
-			AbsRisk:    bcraResponse.AbsRisk,
-			AbsRiskAvg: bcraResponse.AbsRiskAvg,
-			RRStar1:    bcraResponse.RRStar1,
-			RRStar2:    bcraResponse.RRStar2,
-			ProjIntvl:  bcraResponse.ProjIntvl,
-		}
-		return calcService.formRepository.CreateBCRAResult(calcService.db, bcraResult)
-	}
-
-	existingResult.AbsRisk = bcraResponse.AbsRisk
-	existingResult.AbsRiskAvg = bcraResponse.AbsRiskAvg
-	existingResult.RRStar1 = bcraResponse.RRStar1
-	existingResult.RRStar2 = bcraResponse.RRStar2
-	existingResult.ProjIntvl = bcraResponse.ProjIntvl
-
-	return calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
-}
-
 func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
@@ -414,6 +272,185 @@ func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelR
 	}, nil
 }
 
+func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcRequest) (calcdto.Premm5Response, error) {
+	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
+		return calcdto.Premm5Response{}, notFoundError
+	}
+
+	result, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+
+	if result == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Premm5Result}
+		return calcdto.Premm5Response{}, notFoundError
+	}
+
+	result, err = calcService.formRepository.FindPremm5ResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.Premm5Response{}, err
+	}
+
+	response := calcdto.Premm5Response{
+		GeneProbs: map[string]float64{
+			"MLH1": result.MLH1Probability,
+			"MSH2": result.MSH2Probability,
+			"MSH6": result.MSH6Probability,
+			"PMS2": result.PMS2Probability,
+		},
+		PAny:  result.PAny,
+		PNone: result.PNone,
+	}
+
+	return response, nil
+
+}
+
+func (calcService *CalcService) GetBCRAResults(request calcdto.SendFormToCalcRequest) (calcdto.BCRAResponse, error) {
+	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
+		return calcdto.BCRAResponse{}, notFoundError
+	}
+
+	result, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+
+	if result == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.BCRAResult}
+		return calcdto.BCRAResponse{}, notFoundError
+	}
+
+	response := calcdto.BCRAResponse{
+		AbsRisk:    result.AbsRisk,
+		AbsRiskAvg: result.AbsRiskAvg,
+		RRStar1:    result.RRStar1,
+		RRStar2:    result.RRStar2,
+		ProjIntvl:  result.ProjIntvl,
+	}
+
+	return response, nil
+}
+
+func (calcService *CalcService) GetGailResults(request calcdto.SendFormToCalcRequest) (calcdto.GailResponse, error) {
+	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.GailResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
+		return calcdto.GailResponse{}, notFoundError
+	}
+
+	result, err := calcService.formRepository.FindGailResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.GailResponse{}, err
+	}
+
+	if result == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.GailResult}
+		return calcdto.GailResponse{}, notFoundError
+	}
+
+	response := calcdto.GailResponse{
+		AbsoluteRisk: result.AbsoluteRisk,
+		RelativeRisk: result.RelativeRisk,
+	}
+
+	return response, nil
+}
+
+func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to marshal PREMM5 request: %w", err)
+	}
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to create PREMM5 request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to call PREMM5 API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to read PREMM5 response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.Premm5Response{}, fmt.Errorf("PREMM5 API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var premm5Response calcdto.Premm5Response
+	err = json.Unmarshal(body, &premm5Response)
+	if err != nil {
+		return calcdto.Premm5Response{}, fmt.Errorf("failed to parse PREMM5 response: %w", err)
+	}
+
+	return premm5Response, nil
+}
+
+func (calcService *CalcService) callBCRAAPI(request calcdto.SendFormToBCRARequest) (calcdto.BCRAResponse, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+
+	// Log the request for debugging
+	fmt.Printf("BCRA Request: T1=%.1f, T2=%.1f, N_Biop=%d, HypPlas=%d, AgeMen=%d, Age1st=%d, N_Rels=%d, Race=%d\n",
+		request.T1, request.T2, request.N_Biop, request.HypPlas, request.AgeMen, request.Age1st, request.N_Rels, request.Race)
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.BCRAResponse{}, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to call BCRA API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to read BCRA response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.BCRAResponse{}, fmt.Errorf("BCRA API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var bcraResponse calcdto.BCRAResponse
+	err = json.Unmarshal(body, &bcraResponse)
+	if err != nil {
+		return calcdto.BCRAResponse{}, fmt.Errorf("failed to parse BCRA response: %w", err)
+	}
+
+	return bcraResponse, nil
+}
+
 func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGBRRequest) (calcdto.GailResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
@@ -453,6 +490,63 @@ func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGBRRequest
 	}
 
 	return gailResponse, nil
+}
+
+func (calcService *CalcService) savePremm5Result(formID uint, premm5Response calcdto.Premm5Response) error {
+	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if existingResult == nil {
+		premm5Result := &entity.Premm5Result{
+			FormID:          formID,
+			MLH1Probability: premm5Response.GeneProbs["MLH1"],
+			MSH2Probability: premm5Response.GeneProbs["MSH2"],
+			MSH6Probability: premm5Response.GeneProbs["MSH6"],
+			PMS2Probability: premm5Response.GeneProbs["PMS2"],
+			PAny:            premm5Response.PAny,
+			PNone:           premm5Response.PNone,
+		}
+		return calcService.formRepository.CreatePremm5Result(calcService.db, premm5Result)
+	}
+
+	existingResult.MLH1Probability = premm5Response.GeneProbs["MLH1"]
+	existingResult.MSH2Probability = premm5Response.GeneProbs["MSH2"]
+	existingResult.MSH6Probability = premm5Response.GeneProbs["MSH6"]
+	existingResult.PMS2Probability = premm5Response.GeneProbs["PMS2"]
+	existingResult.PAny = premm5Response.PAny
+	existingResult.PNone = premm5Response.PNone
+
+	return calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
+}
+
+// saveBCRAResult creates or updates the BCRA result in the database
+func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto.BCRAResponse) error {
+	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if existingResult == nil {
+		bcraResult := &entity.BCRAResult{
+			FormID:     formID,
+			AbsRisk:    bcraResponse.AbsRisk,
+			AbsRiskAvg: bcraResponse.AbsRiskAvg,
+			RRStar1:    bcraResponse.RRStar1,
+			RRStar2:    bcraResponse.RRStar2,
+			ProjIntvl:  bcraResponse.ProjIntvl,
+		}
+		return calcService.formRepository.CreateBCRAResult(calcService.db, bcraResult)
+	}
+
+	existingResult.AbsRisk = bcraResponse.AbsRisk
+	existingResult.AbsRiskAvg = bcraResponse.AbsRiskAvg
+	existingResult.RRStar1 = bcraResponse.RRStar1
+	existingResult.RRStar2 = bcraResponse.RRStar2
+	existingResult.ProjIntvl = bcraResponse.ProjIntvl
+
+	return calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
 }
 
 func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto.GailResponse) error {
@@ -1010,73 +1104,4 @@ func mapPersonalLsOther(cancerInfo *entity.CancerInfo) int {
 		}
 	}
 	return 0
-}
-
-// callPremm5API makes the HTTP request to the PREMM5 calculator API
-func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to marshal PREMM5 request: %w", err)
-	}
-
-	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to create PREMM5 request: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to call PREMM5 API: %w", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to read PREMM5 response: %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return calcdto.Premm5Response{}, fmt.Errorf("PREMM5 API returned error (status %d): %s", resp.StatusCode, string(body))
-	}
-
-	var premm5Response calcdto.Premm5Response
-	err = json.Unmarshal(body, &premm5Response)
-	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to parse PREMM5 response: %w", err)
-	}
-
-	return premm5Response, nil
-}
-
-// savePremm5Result creates or updates the PREMM5 result in the database
-func (calcService *CalcService) savePremm5Result(formID uint, premm5Response calcdto.Premm5Response) error {
-	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, formID)
-	if err != nil {
-		return err
-	}
-
-	if existingResult == nil {
-		premm5Result := &entity.Premm5Result{
-			FormID:          formID,
-			MLH1Probability: premm5Response.GeneProbs["MLH1"],
-			MSH2Probability: premm5Response.GeneProbs["MSH2"],
-			MSH6Probability: premm5Response.GeneProbs["MSH6"],
-			PMS2Probability: premm5Response.GeneProbs["PMS2"],
-			PAny:            premm5Response.PAny,
-			PNone:           premm5Response.PNone,
-		}
-		return calcService.formRepository.CreatePremm5Result(calcService.db, premm5Result)
-	}
-
-	existingResult.MLH1Probability = premm5Response.GeneProbs["MLH1"]
-	existingResult.MSH2Probability = premm5Response.GeneProbs["MSH2"]
-	existingResult.MSH6Probability = premm5Response.GeneProbs["MSH6"]
-	existingResult.PMS2Probability = premm5Response.GeneProbs["PMS2"]
-	existingResult.PAny = premm5Response.PAny
-	existingResult.PNone = premm5Response.PNone
-
-	return calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
 }

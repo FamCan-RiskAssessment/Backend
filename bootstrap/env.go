@@ -74,10 +74,7 @@ type SuperAdmin struct {
 type CalcURL struct {
 	Premm5 string
 	BCRA   string
-<<<<<<< HEAD
 	Gail   string
-=======
->>>>>>> develop
 }
 
 func NewEnv() *Env {

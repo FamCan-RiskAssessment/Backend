@@ -33,6 +33,7 @@ type Field struct {
 	Permission       string
 	Premm5Result     string
 	BCRAResult       string
+	GailResult       string
 	MamoGraphyInfo   string
 	FamilyCancerInfo string
 }
@@ -68,6 +69,7 @@ func NewConstants() *Constants {
 			Permission:       "permission",
 			Premm5Result:     "premm5_result",
 			BCRAResult:       "bcra_result",
+			GailResult:       "gail_result",
 			MamoGraphyInfo:   "mamography_info",
 			FamilyCancerInfo: "family_cancer_info",
 		},

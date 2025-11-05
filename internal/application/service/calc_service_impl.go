@@ -89,12 +89,12 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 		return calcdto.ModelResponse{}, err
 	}
 
-	cancerInfo, err := calcService.formRepository.FindCancerByFormID(calcService.db, form.ID)
+	cancerInfo, err := calcService.formRepository.FindCancersByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
 
-	familyCancerInfo, err := calcService.formRepository.FindFamilyCancerByFormID(calcService.db, form.ID)
+	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
@@ -167,12 +167,12 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 		return calcdto.ModelResponse{}, notFoundError
 	}
 
-	familyCancerInfo, err := calcService.formRepository.FindFamilyCancerByFormID(calcService.db, form.ID)
+	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
 
-	if familyCancerInfo == nil {
+	if len(familyCancerInfo) == 0 {
 		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
 		return calcdto.ModelResponse{}, notFoundError
 	}
@@ -227,12 +227,12 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form) (calcdto.Model
 		return calcdto.ModelResponse{}, notFoundError
 	}
 
-	familyCancerInfo, err := calcService.formRepository.FindFamilyCancerByFormID(calcService.db, form.ID)
+	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
 
-	if familyCancerInfo == nil {
+	if len(familyCancerInfo) == 0 {
 		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
 		return calcdto.ModelResponse{}, notFoundError
 	}
@@ -660,29 +660,20 @@ func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
 	return category
 }
 
-func mapFirstDegreeBreastCancerRelatives(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapFirstDegreeBreastCancerRelatives(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 99 // Unknown
 	}
 
 	count := 0
 
-	// Check mother
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeBreast {
-		count++
-	}
-
-	// Check father
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeBreast {
-		count++
-	}
-
-	// Check siblings
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeBreast {
-		count++
+	for _, info := range familyInfo {
+		// Check mother, father, siblings for breast cancer
+		if (info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister) &&
+			info.CancerType == enum.CancerTypeBreast {
+			count++
+		}
 	}
 
 	// Return categorized count
@@ -723,33 +714,31 @@ func mapGenderToPremm5(gender enum.Gender) int {
 }
 
 // Map personal CRC count (0, 1, or 2+)
-func mapPersonalCrcCount(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer &&
-		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
-		// TODO: You may need additional field to track multiple CRCs
-		// For now, assume single CRC = 1, multiple = 2
-		return 1
+func mapPersonalCrcCount(cancerInfo []*entity.CancerInfo) int {
+	// TODO: You may need additional field to track multiple CRCs
+	// For now, assume single CRC = 1, multiple = 2
+	var crcCount int = 0
+	for _, v := range cancerInfo {
+		if v.CancerType == enum.CancerTypeColon {
+			crcCount++
+		}
 	}
-	return 0
+	return crcCount
 }
 
 // Map count of first-degree relatives with CRC (0, 1, or 2+)
-func mapNumFdrCrc(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapNumFdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	count := 0
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeColon {
-		count++
-	}
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeColon {
-		count++
-	}
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeColon {
-		count++
+	for _, info := range familyInfo {
+		// First-degree relatives: Mother, Father, Brother, Sister
+		if (info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister) &&
+			info.CancerType == enum.CancerTypeColon {
+			count++
+		}
 	}
 	// Cap at 2 for >=2
 	if count >= 2 {
@@ -759,33 +748,20 @@ func mapNumFdrCrc(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age among FDR with CRC
-func mapYoungestFdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapYoungestFdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	youngestAge := 999
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeColon &&
-		familyInfo.MotherCancerAge != nil {
-		age := int(*familyInfo.MotherCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeColon &&
-		familyInfo.FatherCancerAge != nil {
-		age := int(*familyInfo.FatherCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeColon &&
-		familyInfo.SiblingCancerAge != nil {
-		age := int(*familyInfo.SiblingCancerAge)
-		if age < youngestAge {
-			youngestAge = age
+	for _, info := range familyInfo {
+		// First-degree relatives: Mother, Father, Brother, Sister
+		if (info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister) &&
+			info.CancerType == enum.CancerTypeColon {
+			age := int(info.CancerAge)
+			if age < youngestAge {
+				youngestAge = age
+			}
 		}
 	}
 	if youngestAge == 999 {
@@ -795,22 +771,18 @@ func mapYoungestFdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map count of FDR with endometrial cancer
-func mapNumFdrEc(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapNumFdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	count := 0
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeEndometrial {
-		count++
-	}
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeEndometrial {
-		count++
-	}
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeEndometrial {
-		count++
+	for _, info := range familyInfo {
+		// First-degree relatives: Mother, Father, Brother, Sister
+		if (info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister) &&
+			info.CancerType == enum.CancerTypeEndometrial {
+			count++
+		}
 	}
 	if count >= 2 {
 		return 2
@@ -819,33 +791,20 @@ func mapNumFdrEc(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age among FDR with endometrial cancer
-func mapYoungestFdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapYoungestFdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	youngestAge := 999
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil &&
-		*familyInfo.MotherCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.MotherCancerAge != nil {
-		age := int(*familyInfo.MotherCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil &&
-		*familyInfo.FatherCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.FatherCancerAge != nil {
-		age := int(*familyInfo.FatherCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil &&
-		*familyInfo.SiblingCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.SiblingCancerAge != nil {
-		age := int(*familyInfo.SiblingCancerAge)
-		if age < youngestAge {
-			youngestAge = age
+	for _, info := range familyInfo {
+		// First-degree relatives: Mother, Father, Brother, Sister
+		if (info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister) &&
+			info.CancerType == enum.CancerTypeEndometrial {
+			age := int(info.CancerAge)
+			if age < youngestAge {
+				youngestAge = age
+			}
 		}
 	}
 	if youngestAge == 999 {
@@ -855,23 +814,21 @@ func mapYoungestFdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map count of second-degree relatives with CRC (0, 1, or 2+)
-func mapNumSdrCrc(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapNumSdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	count := 0
-	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
-		*familyInfo.AmeAmoCancerType == enum.CancerTypeColon {
-		count++
-	}
-	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
-		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeColon {
-		count++
-	}
-	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-		familyInfo.OtherRelativeCancerType != nil &&
-		*familyInfo.OtherRelativeCancerType == enum.CancerTypeColon {
-		count++
+	for _, info := range familyInfo {
+		// Second-degree relatives: Uncles, Aunts, Grandparents
+		if (info.Relative == enum.PaternalUncle || info.Relative == enum.PaternalAunt ||
+			info.Relative == enum.MaternalUncle || info.Relative == enum.MaternalAunt ||
+			info.Relative == enum.PaternalGrandFather || info.Relative == enum.PaternalGrandMother ||
+			info.Relative == enum.MaternalGrandFather || info.Relative == enum.MaternalGrandMother ||
+			info.Relative == enum.DistantRelative) &&
+			info.CancerType == enum.CancerTypeColon {
+			count++
+		}
 	}
 	if count >= 2 {
 		return 2
@@ -880,34 +837,23 @@ func mapNumSdrCrc(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age among SDR with CRC
-func mapYoungestSdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapYoungestSdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	youngestAge := 999
-	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
-		*familyInfo.AmeAmoCancerType == enum.CancerTypeColon &&
-		familyInfo.AmeAmoCancerAge != nil {
-		age := int(*familyInfo.AmeAmoCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
-		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeColon &&
-		familyInfo.KhaleDaeiCancerAge != nil {
-		age := int(*familyInfo.KhaleDaeiCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-		familyInfo.OtherRelativeCancerType != nil &&
-		*familyInfo.OtherRelativeCancerType == enum.CancerTypeColon &&
-		familyInfo.OtherRelativeCancerAge != nil {
-		age := int(*familyInfo.OtherRelativeCancerAge)
-		if age < youngestAge {
-			youngestAge = age
+	for _, info := range familyInfo {
+		// Second-degree relatives: Uncles, Aunts, Grandparents
+		if (info.Relative == enum.PaternalUncle || info.Relative == enum.PaternalAunt ||
+			info.Relative == enum.MaternalUncle || info.Relative == enum.MaternalAunt ||
+			info.Relative == enum.PaternalGrandFather || info.Relative == enum.PaternalGrandMother ||
+			info.Relative == enum.MaternalGrandFather || info.Relative == enum.MaternalGrandMother ||
+			info.Relative == enum.DistantRelative) &&
+			info.CancerType == enum.CancerTypeColon {
+			age := int(info.CancerAge)
+			if age < youngestAge {
+				youngestAge = age
+			}
 		}
 	}
 	if youngestAge == 999 {
@@ -917,23 +863,21 @@ func mapYoungestSdrCrcAge(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map count of SDR with endometrial cancer
-func mapNumSdrEc(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapNumSdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	count := 0
-	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
-		*familyInfo.AmeAmoCancerType == enum.CancerTypeEndometrial {
-		count++
-	}
-	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
-		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeEndometrial {
-		count++
-	}
-	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-		familyInfo.OtherRelativeCancerType != nil &&
-		*familyInfo.OtherRelativeCancerType == enum.CancerTypeEndometrial {
-		count++
+	for _, info := range familyInfo {
+		// Second-degree relatives: Uncles, Aunts, Grandparents
+		if (info.Relative == enum.PaternalUncle || info.Relative == enum.PaternalAunt ||
+			info.Relative == enum.MaternalUncle || info.Relative == enum.MaternalAunt ||
+			info.Relative == enum.PaternalGrandFather || info.Relative == enum.PaternalGrandMother ||
+			info.Relative == enum.MaternalGrandFather || info.Relative == enum.MaternalGrandMother ||
+			info.Relative == enum.DistantRelative) &&
+			info.CancerType == enum.CancerTypeEndometrial {
+			count++
+		}
 	}
 	if count >= 2 {
 		return 2
@@ -942,34 +886,23 @@ func mapNumSdrEc(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age among SDR with endometrial cancer
-func mapYoungestSdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapYoungestSdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	youngestAge := 999
-	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil &&
-		*familyInfo.AmeAmoCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.AmeAmoCancerAge != nil {
-		age := int(*familyInfo.AmeAmoCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil &&
-		*familyInfo.KhaleDaeiCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.KhaleDaeiCancerAge != nil {
-		age := int(*familyInfo.KhaleDaeiCancerAge)
-		if age < youngestAge {
-			youngestAge = age
-		}
-	}
-	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-		familyInfo.OtherRelativeCancerType != nil &&
-		*familyInfo.OtherRelativeCancerType == enum.CancerTypeEndometrial &&
-		familyInfo.OtherRelativeCancerAge != nil {
-		age := int(*familyInfo.OtherRelativeCancerAge)
-		if age < youngestAge {
-			youngestAge = age
+	for _, info := range familyInfo {
+		// Second-degree relatives: Uncles, Aunts, Grandparents
+		if (info.Relative == enum.PaternalUncle || info.Relative == enum.PaternalAunt ||
+			info.Relative == enum.MaternalUncle || info.Relative == enum.MaternalAunt ||
+			info.Relative == enum.PaternalGrandFather || info.Relative == enum.PaternalGrandMother ||
+			info.Relative == enum.MaternalGrandFather || info.Relative == enum.MaternalGrandMother ||
+			info.Relative == enum.DistantRelative) &&
+			info.CancerType == enum.CancerTypeEndometrial {
+			age := int(info.CancerAge)
+			if age < youngestAge {
+				youngestAge = age
+			}
 		}
 	}
 	if youngestAge == 999 {
@@ -979,8 +912,8 @@ func mapYoungestSdrEcAge(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map if FDR has other Lynch syndrome cancers
-func mapHasFdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapHasFdrOtherLs(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	// Check mother, father, siblings for other LS cancers
@@ -990,29 +923,14 @@ func mapHasFdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
 		enum.CancerTypeLiver,
 	}
 
-	// Check mother
-	if familyInfo.MotherCancer && familyInfo.MotherCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.MotherCancerType == lsc {
-				return 1
-			}
-		}
-	}
-
-	// Check father
-	if familyInfo.FatherCancer && familyInfo.FatherCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.FatherCancerType == lsc {
-				return 1
-			}
-		}
-	}
-
-	// Check siblings
-	if familyInfo.SiblingCancer && familyInfo.SiblingCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.SiblingCancerType == lsc {
-				return 1
+	for _, info := range familyInfo {
+		// First-degree relatives: Mother, Father, Brother, Sister
+		if info.Relative == enum.Mother || info.Relative == enum.Father ||
+			info.Relative == enum.Brother || info.Relative == enum.Sister {
+			for _, lsc := range lscancers {
+				if info.CancerType == lsc {
+					return 1
+				}
 			}
 		}
 	}
@@ -1021,8 +939,8 @@ func mapHasFdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map if SDR has other Lynch syndrome cancers
-func mapHasSdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
-	if familyInfo == nil {
+func mapHasSdrOtherLs(familyInfo []*entity.NewFamilyCancerInfo) int {
+	if len(familyInfo) == 0 {
 		return 0
 	}
 	// Check aunt/uncle for other LS cancers
@@ -1032,30 +950,17 @@ func mapHasSdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
 		enum.CancerTypeLiver,
 	}
 
-	// Check AmeAmo
-	if familyInfo.AmeAmoCancer && familyInfo.AmeAmoCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.AmeAmoCancerType == lsc {
-				return 1
-			}
-		}
-	}
-
-	// Check KhaleDaei
-	if familyInfo.KhaleDaeiCancer && familyInfo.KhaleDaeiCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.KhaleDaeiCancerType == lsc {
-				return 1
-			}
-		}
-	}
-
-	// Check other relatives
-	if familyInfo.OtherRelativeCancer != nil && *familyInfo.OtherRelativeCancer &&
-		familyInfo.OtherRelativeCancerType != nil {
-		for _, lsc := range lscancers {
-			if *familyInfo.OtherRelativeCancerType == lsc {
-				return 1
+	for _, info := range familyInfo {
+		// Second-degree relatives: Uncles, Aunts, Grandparents
+		if info.Relative == enum.PaternalUncle || info.Relative == enum.PaternalAunt ||
+			info.Relative == enum.MaternalUncle || info.Relative == enum.MaternalAunt ||
+			info.Relative == enum.PaternalGrandFather || info.Relative == enum.PaternalGrandMother ||
+			info.Relative == enum.MaternalGrandFather || info.Relative == enum.MaternalGrandMother ||
+			info.Relative == enum.DistantRelative {
+			for _, lsc := range lscancers {
+				if info.CancerType == lsc {
+					return 1
+				}
 			}
 		}
 	}
@@ -1064,37 +969,39 @@ func mapHasSdrOtherLs(familyInfo *entity.FamilyCancerInfo) int {
 }
 
 // Map youngest age at CRC diagnosis
-func mapAgeCrcDx(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
-		(cancerInfo.CancerType == nil || *cancerInfo.CancerType == enum.CancerTypeColon) {
-		return int(*cancerInfo.CancerAge)
+func mapAgeCrcDx(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.CancerType == enum.CancerTypeColon {
+			return int(v.CancerAge)
+		}
 	}
 	return 0
 }
 
 // Map endometrial cancer
-func mapPersonalEndometrial(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer &&
-		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
-		return 1
+func mapPersonalEndometrial(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.CancerType == enum.CancerTypeEndometrial {
+			return 1
+		}
 	}
 	return 0
 }
 
 // Map age at endometrial cancer diagnosis
-func mapAgeEcDx(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.CancerAge != nil &&
-		cancerInfo.CancerType != nil && *cancerInfo.CancerType == enum.CancerTypeEndometrial {
-		return int(*cancerInfo.CancerAge)
+func mapAgeEcDx(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.CancerType == enum.CancerTypeEndometrial {
+			return int(v.CancerAge)
+		}
 	}
 	return 0
 }
 
 // Map other LS-associated cancers
-func mapPersonalLsOther(cancerInfo *entity.CancerInfo) int {
-	if cancerInfo != nil && cancerInfo.Cancer && cancerInfo.CancerType != nil {
-		switch *cancerInfo.CancerType {
-		case enum.CancerTypeOvarian, enum.CancerTypeStomach, enum.CancerTypePancreatic:
+func mapPersonalLsOther(cancerInfo []*entity.CancerInfo) int {
+	for _, v := range cancerInfo {
+		if v.CancerType == enum.CancerTypeOvarian || v.CancerType == enum.CancerTypeStomach || v.CancerType == enum.CancerTypePancreatic {
 			return 1
 		}
 	}

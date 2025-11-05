@@ -255,16 +255,16 @@ func (r *FormRepository) UpdateMamography(db database.Database, info *entity.Mam
 	return db.GetDB().Save(info).Error
 }
 
-func (r *FormRepository) FindCancerByFormID(db database.Database, formID uint) (*entity.CancerInfo, error) {
-	var info entity.CancerInfo
-	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+func (r *FormRepository) FindCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error) {
+	var info []*entity.CancerInfo
+	err := db.GetDB().
+		Where("form_id = ?", formID).
+		Find(&info).Error
+
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
 		return nil, err
 	}
-	return &info, nil
+	return info, nil
 }
 
 func (r *FormRepository) CreateCancer(db database.Database, info *entity.CancerInfo) error {
@@ -272,27 +272,44 @@ func (r *FormRepository) CreateCancer(db database.Database, info *entity.CancerI
 }
 
 func (r *FormRepository) UpdateCancer(db database.Database, info *entity.CancerInfo) error {
-	return db.GetDB().Save(info).Error
+	return db.GetDB().
+		Session(&gorm.Session{FullSaveAssociations: true}).
+		Save(info).Error
 }
 
-func (r *FormRepository) FindFamilyCancerByFormID(db database.Database, formID uint) (*entity.FamilyCancerInfo, error) {
-	var info entity.FamilyCancerInfo
-	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+func (r *FormRepository) FindFamilyCancersByFormID(db database.Database, formID uint) ([]*entity.NewFamilyCancerInfo, error) {
+	var info []*entity.NewFamilyCancerInfo
+	err := db.GetDB().
+		Where("form_id = ?", formID).
+		Order("relative ASC").
+		Find(&info).Error
+
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, nil
-		}
 		return nil, err
 	}
-	return &info, nil
+	return info, nil
 }
 
-func (r *FormRepository) CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error {
+func (r *FormRepository) DeleteCancersByFormID(db database.Database, formID uint) error {
+	return db.GetDB().
+		Where("form_id = ?", formID).
+		Delete(&entity.CancerInfo{}).Error
+}
+
+func (r *FormRepository) DeleteFamilyCancerByFormIDAndNameAndRelation(db database.Database, formID uint, name string, relation uint) error {
+	return db.GetDB().
+		Where("form_id = ? AND name = ? AND relative = ?", formID, name, relation).
+		Delete(&entity.NewFamilyCancerInfo{}).Error
+}
+
+func (r *FormRepository) CreateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error {
 	return db.GetDB().Create(info).Error
 }
 
-func (r *FormRepository) UpdateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error {
-	return db.GetDB().Save(info).Error
+func (r *FormRepository) UpdateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error {
+	return db.GetDB().
+		Session(&gorm.Session{FullSaveAssociations: true}).
+		Save(info).Error
 }
 
 func (r *FormRepository) FindContactByFormID(db database.Database, formID uint) (*entity.ContactInfo, error) {

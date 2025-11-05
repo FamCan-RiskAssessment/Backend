@@ -74,8 +74,8 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
-	case enum.CalcGBR:
-		response, err = calcService.sendFormToGBR(form)
+	case enum.CalcGail:
+		response, err = calcService.sendFormToGail(form)
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
@@ -211,7 +211,7 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 	}, nil
 }
 
-func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelResponse, error) {
+func (calcService *CalcService) sendFormToGail(form *entity.Form) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
@@ -239,18 +239,18 @@ func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelR
 
 	// Calculate current age
 	currentAge := calculateAge(basicInfo.BirthDate)
-	projectionAge := currentAge + 5
+	// projectionAge := currentAge + 5
 
-	// Build GBR request
-	request := calcdto.SendFormToGBRRequest{
-		Age:          currentAge,
-		LaterAge:     projectionAge,
+	// Build Gail request
+	request := calcdto.SendFormToGailRequest{
+		Age: currentAge,
+		// LaterAge:     projectionAge,
 		HorizonYears: 5,
 		MenarcheAge:  mapAgeAtMenarche(mamographyInfo),
 		NumBiopsies:  mapBiopsyCount(mamographyInfo),
 		FLBAge:       mapAgeAtFirstBirth(mamographyInfo),
 		NumRelatives: mapFirstDegreeBreastCancerRelatives(familyCancerInfo),
-		Race:         1, // Default to White
+		Race:         "white", // Default to White
 		ShowRR:       false,
 	}
 
@@ -267,7 +267,7 @@ func (calcService *CalcService) sendFormToGBR(form *entity.Form) (calcdto.ModelR
 	}
 
 	return calcdto.ModelResponse{
-		Name:        "GBR",
+		Name:        "Gail",
 		Probability: gailResponse.AbsoluteRisk,
 	}, nil
 }
@@ -451,14 +451,15 @@ func (calcService *CalcService) callBCRAAPI(request calcdto.SendFormToBCRAReques
 	return bcraResponse, nil
 }
 
-func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGBRRequest) (calcdto.GailResponse, error) {
+func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGailRequest) (calcdto.GailResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
 		return calcdto.GailResponse{}, err
 	}
+	println(string(jsonData))
 
-	fmt.Printf("Gail Request: Age=%d, LaterAge=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%d, ShowRR=%v\n",
-		request.Age, request.LaterAge, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race, request.ShowRR)
+	fmt.Printf("Gail Request: Age=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%s, ShowRR=%v\n",
+		request.Age, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race, request.ShowRR)
 
 	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Gail)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
@@ -521,7 +522,6 @@ func (calcService *CalcService) savePremm5Result(formID uint, premm5Response cal
 	return calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
 }
 
-// saveBCRAResult creates or updates the BCRA result in the database
 func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto.BCRAResponse) error {
 	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, formID)
 	if err != nil {
@@ -572,7 +572,6 @@ func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto
 	return calcService.formRepository.UpdateGailResult(calcService.db, existingResult)
 }
 
-// mapHyperplasiaStatus maps hyperplasia status to BCRA code
 func mapHyperplasiaStatus(mamographyInfo *entity.MamoGraphyInfo) int {
 	if mamographyInfo.HyperplasiaInBiopsy == nil {
 		return 99 // Unknown
@@ -590,7 +589,6 @@ func mapHyperplasiaStatus(mamographyInfo *entity.MamoGraphyInfo) int {
 	}
 }
 
-// mapBiopsyCount maps number of biopsies to BCRA code
 func mapBiopsyCount(mamographyInfo *entity.MamoGraphyInfo) int {
 	if mamographyInfo.NumberOfBreastBiopsies == nil {
 		return 99 // Unknown
@@ -605,7 +603,6 @@ func mapBiopsyCount(mamographyInfo *entity.MamoGraphyInfo) int {
 	return 0
 }
 
-// mapAgeAtMenarche maps GhaedeAge to BCRA AgeMen
 func mapAgeAtMenarche(mamographyInfo *entity.MamoGraphyInfo) int {
 	if mamographyInfo.GhaedeAge > 0 {
 		return int(mamographyInfo.GhaedeAge)
@@ -613,7 +610,6 @@ func mapAgeAtMenarche(mamographyInfo *entity.MamoGraphyInfo) int {
 	return 99 // Unknown
 }
 
-// mapAgeAtFirstBirth maps age at first birth to BCRA code with validation
 func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
 	// First check if patient has children
 	if !mamographyInfo.HasChildren {
@@ -664,7 +660,6 @@ func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
 	return category
 }
 
-// mapFirstDegreeBreastCancerRelatives counts first-degree relatives with breast cancer
 func mapFirstDegreeBreastCancerRelatives(familyInfo *entity.FamilyCancerInfo) int {
 	if familyInfo == nil {
 		return 99 // Unknown

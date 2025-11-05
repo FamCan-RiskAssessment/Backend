@@ -35,6 +35,7 @@ func main() {
 		&entity.ActionLog{},
 		&entity.Premm5Result{},
 		&entity.BCRAResult{},
+		&entity.GailResult{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

@@ -5,7 +5,7 @@ type Calc uint
 const (
 	CalcPremm5 Calc = iota + 1
 	CalcBCRA
-	CalcGBR
+	CalcGail
 )
 
 func (c Calc) String() string {
@@ -14,8 +14,8 @@ func (c Calc) String() string {
 		return "premm5"
 	case CalcBCRA:
 		return "bcra"
-	case CalcGBR:
-		return "gbr"
+	case CalcGail:
+		return "gail"
 	}
 	return "unknown"
 }
@@ -24,6 +24,6 @@ func GetAllCalcs() []Calc {
 	return []Calc{
 		CalcPremm5,
 		CalcBCRA,
-		CalcGBR,
+		CalcGail,
 	}
 }

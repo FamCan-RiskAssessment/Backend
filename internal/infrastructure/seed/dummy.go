@@ -103,7 +103,7 @@ func (d *DummySeeder) seedUsers() {
 func (d *DummySeeder) seedForms() {
 	statuses := []enum.FormStatus{enum.FormStatusPending, enum.FormStatusApproved, enum.FormStatusRejected, enum.FormStatusInComplete, enum.FormStatusReady}
 	menopausalStatuses := enum.GetAllMenopausalStatuses()
-	lifeStatuses := []string{"زنده", "فوت شده", "نامشخص"}
+	lifeStatuses := enum.GetAllLifeStatuss()
 	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
 	insuranceStatuses := []string{"تأمین اجتماعی", "خدمات درمانی", "نیروهای مسلح", "خصوصی", "ندارد"}
 	occupationalExposures := []string{
@@ -294,7 +294,7 @@ func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes 
 	}
 	return cancerInfo
 }
-func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []string, relations []string) *entity.NewFamilyCancerInfo {
+func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []enum.LifeStatus, relations []string) *entity.NewFamilyCancerInfo {
 
 	relative := enum.Relative(formIndex%14 + 1)
 	var relativeRelation *string = nil

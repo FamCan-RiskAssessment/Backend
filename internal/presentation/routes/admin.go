@@ -74,7 +74,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			operatorFormGroup.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			operatorFormGroup.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			operatorFormGroup.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
-			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetCancer)
+			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
 			operatorFormGroup.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
 			operatorFormGroup.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			operatorFormGroup.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
@@ -142,6 +142,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		calc.POST("/model", app.Controllers.Admin.CalcController.SendFormToCalc)
 		calc.GET("/premm5/:formID", app.Controllers.Admin.CalcController.GetPremm5Results)
 		calc.GET("/bcra/:formID", app.Controllers.Admin.CalcController.GetBCRAResults)
+		calc.GET("/gail/:formID", app.Controllers.Admin.CalcController.GetGailResults)
 		calc.GET("/all-models", app.Controllers.Admin.CalcController.GetAllModelTypes)
 	}
 }

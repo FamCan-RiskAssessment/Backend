@@ -30,11 +30,13 @@ func main() {
 		&entity.MamoGraphyInfo{},
 		&entity.CancerInfo{},
 		&entity.FamilyCancerInfo{},
+		&entity.NewFamilyCancerInfo{},
 		&entity.ContactInfo{},
 		&entity.LungCancerInfo{},
 		&entity.ActionLog{},
 		&entity.Premm5Result{},
 		&entity.BCRAResult{},
+		&entity.GailResult{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

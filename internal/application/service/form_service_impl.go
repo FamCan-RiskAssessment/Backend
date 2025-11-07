@@ -379,7 +379,7 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.FamilyCancerR
 	// 	return ForbiddenError
 	// }
 
-	if request.Cancer == false {
+	if !request.Cancer {
 		if err := formService.formRepository.DeleteFamilyCancerByFormIDAndNameAndRelation(formService.db, request.FormID, *request.Name, uint(request.Relative)); err != nil {
 			return err
 		}

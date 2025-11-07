@@ -23,3 +23,8 @@ type BCRAResponse struct {
 	RRStar2    float64 `json:"RR_Star2"`
 	ProjIntvl  float64 `json:"Proj_Intvl"`
 }
+
+type GailResponse struct {
+	AbsoluteRisk float64  `json:"absolute_risk"`
+	RelativeRisk *float64 `json:"relative_risk"`
+}

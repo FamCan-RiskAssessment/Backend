@@ -93,6 +93,12 @@ func (r *FormRepository) DeleteForm(db database.Database, id uint) error {
 		if err := tx.Where("form_id = ?", id).Delete(&entity.Premm5Result{}).Error; err != nil {
 			return err
 		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.BCRAResult{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("form_id = ?", id).Delete(&entity.GailResult{}).Error; err != nil {
+			return err
+		}
 
 		if err := tx.Delete(&entity.Form{}, id).Error; err != nil {
 			return err
@@ -383,5 +389,25 @@ func (r *FormRepository) CreateBCRAResult(db database.Database, result *entity.B
 }
 
 func (r *FormRepository) UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error {
+	return db.GetDB().Save(result).Error
+}
+
+func (r *FormRepository) FindGailResultByFormID(db database.Database, formID uint) (*entity.GailResult, error) {
+	var result entity.GailResult
+	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *FormRepository) CreateGailResult(db database.Database, result *entity.GailResult) error {
+	return db.GetDB().Create(result).Error
+}
+
+func (r *FormRepository) UpdateGailResult(db database.Database, result *entity.GailResult) error {
 	return db.GetDB().Save(result).Error
 }

@@ -42,10 +42,6 @@ type UpsertMamographyResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
-type UpsertCancerResponse struct {
-	Form BasicFormResponse `json:"form"`
-}
-
 type CreateSingleCancerResponse struct {
 	Cancer CancerResponse `json:"cancer"`
 }

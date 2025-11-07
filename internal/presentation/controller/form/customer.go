@@ -283,45 +283,6 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
-func (formController *CustomerFormController) UpsertCancer(ctx *gin.Context) {
-	type CancerParams struct {
-		CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
-		CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
-		Picture    *multipart.FileHeader `form:"picture,omitempty"`
-	}
-	type UpsertCancerParams struct {
-		FormID  uint           `uri:"formID" validate:"required"`
-		Cancer  bool           `form:"cancer"`
-		Cancers []CancerParams `form:"cancers" validate:"required_if=Cancer true,dive"`
-	}
-
-	params := controller.Validate[UpsertCancerParams](ctx)
-
-	userID, _ := ctx.Get(formController.constants.Context.ID)
-
-	var cancers []formdto.CancerRequest
-	for _, v := range params.Cancers {
-		cancers = append(cancers, formdto.CancerRequest{
-			CancerType: v.CancerType,
-			CancerAge:  v.CancerAge,
-			Picture:    v.Picture,
-		})
-	}
-	req := formdto.UpsertCancerRequest{
-		UserID:  userID.(uint),
-		FormID:  params.FormID,
-		Cancer:  params.Cancer,
-		Cancers: cancers,
-	}
-
-	if err := formController.formService.UpsertCancer(req); err != nil {
-		panic(err)
-	}
-
-	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
-	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertCancerResponse{})
-}
 func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Context) {
 	type CancerParams struct {
 		CancerType uint `json:"cancerType" validate:"required,gt=0"`

@@ -81,7 +81,6 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			operatorFormGroup.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateSingleCancer)
 			operatorFormGroup.DELETE("/cancer/:cancerID", app.Controllers.Admin.FormController.DeleteSingleCancer)
 			operatorFormGroup.POST("/cancer", app.Controllers.Admin.FormController.CreateSingleCancer)
-			operatorFormGroup.PATCH("/cancer", app.Controllers.Admin.FormController.UpdateCancer)
 			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
 		}
 	}
@@ -128,7 +127,6 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formManagement.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateSingleCancer)
 			formManagement.DELETE("/cancer/:cancerID", app.Controllers.Admin.FormController.DeleteSingleCancer)
 			formManagement.POST("/cancer", app.Controllers.Admin.FormController.CreateSingleCancer)
-			formManagement.PATCH("/cancer", app.Controllers.Admin.FormController.UpdateCancer)
 			formManagement.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
 		}
 	}

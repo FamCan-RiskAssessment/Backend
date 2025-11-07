@@ -31,7 +31,6 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.PUT("/cancer/:cancerID", app.Controllers.Customer.FormController.UpdateSingleCancer)
 			formGroup.DELETE("/cancer/:cancerID", app.Controllers.Customer.FormController.DeleteSingleCancer)
 			formGroup.POST("/cancer", app.Controllers.Customer.FormController.CreateSingleCancer)
-			formGroup.PUT("/cancer", app.Controllers.Customer.FormController.UpsertCancer)
 			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
 
 			formGroup.DELETE("", app.Controllers.Customer.FormController.DeleteForm)

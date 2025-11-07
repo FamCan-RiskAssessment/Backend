@@ -20,7 +20,6 @@ type FormService interface {
 	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
 	UpsertGeneralHealth(request formdto.UpsertGeneralHealthRequest) error
 	UpsertMamography(request formdto.UpsertMamographyRequest) error
-	UpsertCancer(request formdto.UpsertCancerRequest) error
 	CreateSingleCancer(request formdto.CreateSingleCancerRequest) error
 	UpdateSingleCancer(request formdto.UpdateSingleCancerRequest) (formdto.UpdateSingleCancerResponse, error)
 	DeleteSingleCancer(request formdto.DeleteSingleCancerRequest) error
@@ -30,7 +29,6 @@ type FormService interface {
 
 	UpdateGeneralHealth(request formdto.UpdateGeneralHealthRequest) error
 	UpdateMamography(request formdto.UpdateMamographyRequest) error
-	UpdateCancer(request formdto.UpdateCancerRequest) error
 	UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error
 	UpdateContact(request formdto.UpdateContactRequest) error
 	UpdateLungCancer(request formdto.UpdateLungCancerRequest) error

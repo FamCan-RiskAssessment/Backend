@@ -30,6 +30,7 @@ func main() {
 		&entity.MamoGraphyInfo{},
 		&entity.CancerInfo{},
 		&entity.FamilyCancerInfo{},
+		&entity.NewFamilyCancerInfo{},
 		&entity.ContactInfo{},
 		&entity.LungCancerInfo{},
 		&entity.ActionLog{},

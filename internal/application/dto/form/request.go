@@ -134,7 +134,32 @@ type UpsertMamographyRequest struct {
 type CancerRequest struct {
 	CancerType uint
 	CancerAge  uint
-	// PIC
+	Picture    *multipart.FileHeader `form:"picture,omitempty"`
+}
+
+type CreateSingleCancerRequest struct {
+	UserID uint
+	FormID uint
+
+	CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
+	CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
+	Picture    *multipart.FileHeader `form:"picture,omitempty"`
+}
+
+type UpdateSingleCancerRequest struct {
+	UserID   uint
+	FormID   uint
+	CancerID uint
+
+	CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
+	CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
+	Picture    *multipart.FileHeader `form:"picture,omitempty"`
+}
+
+type DeleteSingleCancerRequest struct {
+	UserID   uint
+	FormID   uint
+	CancerID uint
 }
 
 type UpsertCancerRequest struct {

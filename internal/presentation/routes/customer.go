@@ -15,7 +15,6 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.PUT("/basic", app.Controllers.Customer.FormController.UpdateBasicInfo)
 			formGroup.PUT("/generalhealth", app.Controllers.Customer.FormController.UpsertGeneralHealth)
 			formGroup.PUT("/mamography", app.Controllers.Customer.FormController.UpsertMamography)
-			formGroup.PUT("/cancer", app.Controllers.Customer.FormController.UpsertCancer)
 			formGroup.PUT("/familycancer", app.Controllers.Customer.FormController.UpsertFamilyCancer)
 			formGroup.PUT("/contact", app.Controllers.Customer.FormController.UpsertContact)
 			formGroup.PUT("/lungcancer", app.Controllers.Customer.FormController.UpsertLungCancer)
@@ -24,10 +23,16 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.GET("/basic", app.Controllers.Customer.FormController.GetBasicForm)
 			formGroup.GET("/generalhealth", app.Controllers.Customer.FormController.GetGeneralHealth)
 			formGroup.GET("/mamography", app.Controllers.Customer.FormController.GetMamography)
-			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
 			formGroup.GET("/familycancer", app.Controllers.Customer.FormController.GetFamilyCancer)
 			formGroup.GET("/contact", app.Controllers.Customer.FormController.GetContact)
 			formGroup.GET("/lungcancer", app.Controllers.Customer.FormController.GetLungCancer)
+
+			// Single cancer operations (more specific routes first)
+			formGroup.PUT("/cancer/:cancerID", app.Controllers.Customer.FormController.UpdateSingleCancer)
+			formGroup.DELETE("/cancer/:cancerID", app.Controllers.Customer.FormController.DeleteSingleCancer)
+			formGroup.POST("/cancer", app.Controllers.Customer.FormController.CreateSingleCancer)
+			formGroup.PUT("/cancer", app.Controllers.Customer.FormController.UpsertCancer)
+			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
 
 			formGroup.DELETE("", app.Controllers.Customer.FormController.DeleteForm)
 		}

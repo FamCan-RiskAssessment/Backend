@@ -46,6 +46,18 @@ type UpsertCancerResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
+type CreateSingleCancerResponse struct {
+	Cancer CancerResponse `json:"cancer"`
+}
+
+type UpdateSingleCancerResponse struct {
+	Cancer CancerResponse `json:"cancer"`
+}
+
+type DeleteSingleCancerResponse struct {
+	Message string `json:"message"`
+}
+
 type UpsertFamilyCancerResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
@@ -92,6 +104,7 @@ type CancerResponse struct {
 	ID         uint            `json:"id"`
 	CancerType enum.CancerType `json:"cancerType"`
 	CancerAge  uint            `json:"cancerAge"`
+	Picture    *string         `json:"picture,omitempty"`
 }
 
 type GetCancersResponse struct {

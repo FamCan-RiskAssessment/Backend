@@ -92,8 +92,9 @@ type CancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 
-	CancerAge  uint
-	CancerType enum.CancerType
+	CancerAge   uint
+	CancerType  enum.CancerType
+	PicturePath *string `gorm:"type:varchar(255)"`
 }
 
 type NewFamilyCancerInfo struct {

@@ -64,6 +64,7 @@ type S3 struct {
 
 type BucketName struct {
 	Mamography string
+	Cancer     string
 }
 
 type SuperAdmin struct {
@@ -120,6 +121,7 @@ func NewEnv() *Env {
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
 			Buckets: BucketName{
 				Mamography: os.Getenv("MAMOGRAPHY_BUCKETNAME"),
+				Cancer:     os.Getenv("CANCER_BUCKETNAME"),
 			},
 		},
 		CalcURL: CalcURL{

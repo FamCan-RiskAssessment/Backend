@@ -335,17 +335,314 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 	// 	return ForbiddenError
 	// }
 
+	// Get existing cancers to track old picture paths before deletion
+	existingCancers, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+
+	// Create a map of old picture paths by cancer type and age for cleanup
+	oldPicturePaths := make(map[string]*string)
+	for _, existing := range existingCancers {
+		if existing.PicturePath != nil && *existing.PicturePath != "" {
+			key := fmt.Sprintf("%d-%d", existing.CancerType, existing.CancerAge)
+			oldPicturePaths[key] = existing.PicturePath
+		}
+	}
+
 	if err := formService.formRepository.DeleteCancersByFormID(formService.db, request.FormID); err != nil {
 		return err
 	}
 
-	for _, v := range request.Cancers {
-		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
+	return formService.db.WithTransaction(func(tx database.Database) error {
+		for _, v := range request.Cancers {
+			info := &entity.CancerInfo{
+				FormID:     request.FormID,
+				CancerAge:  v.CancerAge,
+				CancerType: enum.CancerType(v.CancerType),
+			}
 
-		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
+			// Handle picture upload
+			if v.Picture != nil && v.Picture.Filename != "" {
+				pictureKey := formService.constants.BucketPath.GetCancerPath(
+					request.FormID,
+					enum.CancerType(v.CancerType),
+					v.Picture.Filename,
+				)
+				info.PicturePath = &pictureKey
+
+				// Upload picture
+				if err := formService.s3Storage.UploadObject(enum.BucketTypeCancer, pictureKey, v.Picture); err != nil {
+					return err
+				}
+			}
+
+			if err := formService.formRepository.CreateCancer(tx, info); err != nil {
+				return err
+			}
+		}
+
+		// Clean up old pictures that are no longer referenced
+		for _, oldPath := range oldPicturePaths {
+			if oldPath != nil && *oldPath != "" {
+				// Check if this picture path is still being used
+				stillUsed := false
+				for _, v := range request.Cancers {
+					if v.Picture != nil && v.Picture.Filename != "" {
+						newPath := formService.constants.BucketPath.GetCancerPath(
+							request.FormID,
+							enum.CancerType(v.CancerType),
+							v.Picture.Filename,
+						)
+						if *oldPath == newPath {
+							stillUsed = true
+							break
+						}
+					}
+				}
+				if !stillUsed {
+					if err := formService.s3Storage.DeleteObject(enum.BucketTypeCancer, *oldPath); err != nil {
+						fmt.Printf("Warning: failed to delete old cancer picture %s: %v\n", *oldPath, err)
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+}
+
+func (formService *FormService) CreateSingleCancer(request formdto.CreateSingleCancerRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	// Check for duplicate cancer (same type and age)
+	existingCancers, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	for _, existing := range existingCancers {
+		if existing.CancerType == enum.CancerType(request.CancerType) && existing.CancerAge == request.CancerAge {
+			conflictError := exception.ConflictErrors{}
+			conflictError.Add(formService.constants.Field.Cancer, formService.constants.Tag.AlreadyExist)
+			return conflictError
+		}
+	}
+
+	info := &entity.CancerInfo{
+		FormID:     request.FormID,
+		CancerAge:  request.CancerAge,
+		CancerType: enum.CancerType(request.CancerType),
+	}
+
+	// Handle picture upload
+	if request.Picture != nil && request.Picture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetCancerPath(
+			request.FormID,
+			enum.CancerType(request.CancerType),
+			request.Picture.Filename,
+		)
+		info.PicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeCancer, pictureKey, request.Picture); err != nil {
 			return err
 		}
 	}
+
+	if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) UpdateSingleCancer(request formdto.UpdateSingleCancerRequest) (formdto.UpdateSingleCancerResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.UpdateSingleCancerResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.UpdateSingleCancerResponse{}, notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return formdto.UpdateSingleCancerResponse{}, err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return formdto.UpdateSingleCancerResponse{}, err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return formdto.UpdateSingleCancerResponse{}, forbiddenError
+		}
+	}
+
+	cancer, err := formService.formRepository.FindCancerByID(formService.db, request.CancerID)
+	if err != nil {
+		return formdto.UpdateSingleCancerResponse{}, err
+	}
+	if cancer == nil {
+		notFoundError := exception.NotFoundError{Item: "cancer"}
+		return formdto.UpdateSingleCancerResponse{}, notFoundError
+	}
+
+	// Verify the cancer belongs to the form
+	if cancer.FormID != request.FormID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.UpdateSingleCancerResponse{}, forbiddenError
+	}
+
+	// Check for duplicate cancer (same type and age) excluding the current cancer being updated
+	if cancer.CancerType != enum.CancerType(request.CancerType) || cancer.CancerAge != request.CancerAge {
+		existingCancers, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+		if err != nil {
+			return formdto.UpdateSingleCancerResponse{}, err
+		}
+		for _, existing := range existingCancers {
+			if existing.ID != request.CancerID &&
+				existing.CancerType == enum.CancerType(request.CancerType) &&
+				existing.CancerAge == request.CancerAge {
+				conflictError := exception.ConflictErrors{}
+				conflictError.Add(formService.constants.Field.Cancer, formService.constants.Tag.AlreadyExist)
+				return formdto.UpdateSingleCancerResponse{}, conflictError
+			}
+		}
+	}
+
+	// Save old picture path for cleanup
+	var oldPicturePath *string
+	if cancer.PicturePath != nil {
+		oldPicturePath = cancer.PicturePath
+	}
+
+	cancer.CancerType = enum.CancerType(request.CancerType)
+	cancer.CancerAge = request.CancerAge
+
+	// Handle picture upload
+	if request.Picture != nil && request.Picture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetCancerPath(
+			request.FormID,
+			enum.CancerType(request.CancerType),
+			request.Picture.Filename,
+		)
+		cancer.PicturePath = &pictureKey
+
+		// Upload new picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeCancer, pictureKey, request.Picture); err != nil {
+			return formdto.UpdateSingleCancerResponse{}, err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldPicturePath != nil && *oldPicturePath != "" && *oldPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeCancer, *oldPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old cancer picture %s: %v\n", *oldPicturePath, err)
+			}
+		}
+	}
+
+	if err := formService.formRepository.UpdateCancer(formService.db, cancer); err != nil {
+		return formdto.UpdateSingleCancerResponse{}, err
+	}
+
+	var pictureURL *string
+	if cancer.PicturePath != nil && *cancer.PicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeCancer, *cancer.PicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.UpdateSingleCancerResponse{}, err
+		}
+		pictureURL = &presignedURL
+	}
+
+	response := formdto.UpdateSingleCancerResponse{
+		Cancer: formdto.CancerResponse{
+			ID:         cancer.ID,
+			CancerType: cancer.CancerType,
+			CancerAge:  cancer.CancerAge,
+			Picture:    pictureURL,
+		},
+	}
+
+	return response, nil
+}
+
+func (formService *FormService) DeleteSingleCancer(request formdto.DeleteSingleCancerRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	cancer, err := formService.formRepository.FindCancerByID(formService.db, request.CancerID)
+	if err != nil {
+		return err
+	}
+	if cancer == nil {
+		notFoundError := exception.NotFoundError{Item: "cancer"}
+		return notFoundError
+	}
+
+	// Verify the cancer belongs to the form
+	if cancer.FormID != request.FormID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
+	}
+
+	// Delete picture if it exists
+	if cancer.PicturePath != nil && *cancer.PicturePath != "" {
+		if err := formService.s3Storage.DeleteObject(enum.BucketTypeCancer, *cancer.PicturePath); err != nil {
+			fmt.Printf("Warning: failed to delete cancer picture %s: %v\n", *cancer.PicturePath, err)
+		}
+	}
+
+	// Delete cancer record
+	if err := formService.formRepository.DeleteCancerByID(formService.db, request.CancerID); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -753,7 +1050,20 @@ func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest
 
 	cancersResponse.Cancer = true
 	for _, v := range info {
-		cancersResponse.Cancers = append(cancersResponse.Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.CancerType, CancerAge: v.CancerAge})
+		var pictureURL *string
+		if v.PicturePath != nil && *v.PicturePath != "" {
+			presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeCancer, *v.PicturePath, 8*time.Hour)
+			if err != nil {
+				return formdto.GetCancersResponse{}, err
+			}
+			pictureURL = &presignedURL
+		}
+		cancersResponse.Cancers = append(cancersResponse.Cancers, formdto.CancerResponse{
+			ID:         v.ID,
+			CancerType: v.CancerType,
+			CancerAge:  v.CancerAge,
+			Picture:    pictureURL,
+		})
 	}
 	return cancersResponse, nil
 }
@@ -1302,14 +1612,81 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	// 	return ForbiddenError
 	// }
 
-	for _, v := range request.Cancers {
-		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
+	// Get existing cancers to track old picture paths before deletion
+	existingCancers, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
 
-		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
-			return err
+	// Create a map of old picture paths by cancer type and age for cleanup
+	oldPicturePaths := make(map[string]*string)
+	for _, existing := range existingCancers {
+		if existing.PicturePath != nil && *existing.PicturePath != "" {
+			key := fmt.Sprintf("%d-%d", existing.CancerType, existing.CancerAge)
+			oldPicturePaths[key] = existing.PicturePath
 		}
 	}
-	return nil
+
+	if err := formService.formRepository.DeleteCancersByFormID(formService.db, request.FormID); err != nil {
+		return err
+	}
+
+	return formService.db.WithTransaction(func(tx database.Database) error {
+		for _, v := range request.Cancers {
+			info := &entity.CancerInfo{
+				FormID:     request.FormID,
+				CancerAge:  v.CancerAge,
+				CancerType: enum.CancerType(v.CancerType),
+			}
+
+			// Handle picture upload
+			if v.Picture != nil && v.Picture.Filename != "" {
+				pictureKey := formService.constants.BucketPath.GetCancerPath(
+					request.FormID,
+					enum.CancerType(v.CancerType),
+					v.Picture.Filename,
+				)
+				info.PicturePath = &pictureKey
+
+				// Upload picture
+				if err := formService.s3Storage.UploadObject(enum.BucketTypeCancer, pictureKey, v.Picture); err != nil {
+					return err
+				}
+			}
+
+			if err := formService.formRepository.CreateCancer(tx, info); err != nil {
+				return err
+			}
+		}
+
+		// Clean up old pictures that are no longer referenced
+		for _, oldPath := range oldPicturePaths {
+			if oldPath != nil && *oldPath != "" {
+				// Check if this picture path is still being used
+				stillUsed := false
+				for _, v := range request.Cancers {
+					if v.Picture != nil && v.Picture.Filename != "" {
+						newPath := formService.constants.BucketPath.GetCancerPath(
+							request.FormID,
+							enum.CancerType(v.CancerType),
+							v.Picture.Filename,
+						)
+						if *oldPath == newPath {
+							stillUsed = true
+							break
+						}
+					}
+				}
+				if !stillUsed {
+					if err := formService.s3Storage.DeleteObject(enum.BucketTypeCancer, *oldPath); err != nil {
+						fmt.Printf("Warning: failed to delete old cancer picture %s: %v\n", *oldPath, err)
+					}
+				}
+			}
+		}
+
+		return nil
+	})
 }
 
 func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error {

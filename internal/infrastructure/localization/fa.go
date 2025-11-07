@@ -36,6 +36,7 @@ var Persian = map[string]interface{}{
 	"contactInformation":  "پل ارتباطی",
 	"tittle":              "عنوان",
 	"media":               "محتوا",
+	"cancer":              "سرطان",
 	"errors": map[string]interface{}{
 		"generic":                "خطایی رخ داده است، لطفا دوباره تلاش کنید.",
 		"numeric":                "`{0}` باید عدد باشد.",

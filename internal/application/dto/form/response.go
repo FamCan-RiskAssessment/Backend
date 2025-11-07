@@ -7,10 +7,11 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID     uint   `json:"id"`
-	Status     string `json:"status"`
-	UserID     uint   `json:"user_id"`
-	OperatorID *uint  `json:"operatorId,omitempty"`
+	FormID             uint   `json:"id"`
+	Status             string `json:"status"`
+	UserID             uint   `json:"user_id"`
+	OperatorID         *uint  `json:"operatorId,omitempty"`
+	FilledByOperatorID *uint  `json:"filledByOperatorId,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -60,9 +61,7 @@ type UpsertLungCancerResponse struct {
 type GetBasicFormResponse struct {
 	ID                   uint        `json:"id"`
 	Gender               enum.Gender `json:"gender"`
-	BirthYear            uint        `json:"birthYear"`
-	BirthMonth           string      `json:"birthMonth"`
-	BirthDay             uint        `json:"birthDay"`
+	BirthDate            time.Time   `json:"birthDate"`
 	IsAtba               bool        `json:"isAtba"`
 	SocialSecurityNumber string      `json:"socialSecurityNumber"`
 	Height               float64     `json:"height"`
@@ -89,51 +88,27 @@ type GetGeneralHealthResponse struct {
 	CountGheliandailyPast     *string `json:"countGheliandailyPast,omitempty"`
 }
 
-type GetCancerResponse struct {
-	ID         uint             `json:"id"`
-	Cancer     bool             `json:"cancer"`
-	CancerType *enum.CancerType `json:"cancerType,omitempty"`
-	CancerAge  *uint            `json:"cancerAge,omitempty"`
+type CancerResponse struct {
+	ID         uint            `json:"id"`
+	CancerType enum.CancerType `json:"cancerType"`
+	CancerAge  uint            `json:"cancerAge"`
+}
+
+type GetCancersResponse struct {
+	Cancer  bool             `json:"cancer"`
+	Cancers []CancerResponse `json:"cancers"`
+}
+
+type FamilyCancerResponse struct {
+	Relative         enum.Relative    `json:"relative"`
+	RelativeRelation *string          `json:"relation,omitempty"`
+	Name             *string          `json:"name,omitempty"`
+	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
+	Cancers          []CancerResponse `json:"cancers,omitempty"`
 }
 
 type GetFamilyCancerResponse struct {
-	ID                      uint             `json:"id"`
-	ChildCancer             bool             `json:"childCancer"`
-	ChildName               *string          `json:"childName,omitempty"`
-	ChildCancerType         *enum.CancerType `json:"childCancerType,omitempty"`
-	ChildCancerAge          *uint            `json:"childCancerAge,omitempty"`
-	ChildLifeStatus         *string          `json:"childLifeStatus,omitempty"`
-	MotherCancer            bool             `json:"motherCancer"`
-	MotherName              *string          `json:"motherName,omitempty"`
-	MotherLifeStatus        *string          `json:"motherLifeStatus,omitempty"`
-	MotherCancerType        *enum.CancerType `json:"motherCancerType,omitempty"`
-	MotherCancerAge         *uint            `json:"motherCancerAge,omitempty"`
-	FatherCancer            bool             `json:"fatherCancer"`
-	FatherName              *string          `json:"fatherName,omitempty"`
-	FatherLifeStatus        *string          `json:"fatherLifeStatus,omitempty"`
-	FatherCancerType        *enum.CancerType `json:"fatherCancerType,omitempty"`
-	FatherCancerAge         *uint            `json:"fatherCancerAge,omitempty"`
-	SiblingCancer           bool             `json:"siblingCancer"`
-	SiblingName             *string          `json:"siblingName,omitempty"`
-	SiblingLifeStatus       *string          `json:"siblingLifeStatus,omitempty"`
-	SiblingCancerType       *enum.CancerType `json:"siblingCancerType,omitempty"`
-	SiblingCancerAge        *uint            `json:"siblingCancerAge,omitempty"`
-	AmeAmoCancer            bool             `json:"ameAmoCancer"`
-	AmeAmoName              *string          `json:"ameAmoName,omitempty"`
-	AmeAmoLifeStatus        *string          `json:"ameAmoLifeStatus,omitempty"`
-	AmeAmoCancerType        *enum.CancerType `json:"ameAmoCancerType,omitempty"`
-	AmeAmoCancerAge         *uint            `json:"ameAmoCancerAge,omitempty"`
-	KhaleDaeiCancer         bool             `json:"khaleDaeiCancer"`
-	KhaleDaeiName           *string          `json:"khaleDaeiName,omitempty"`
-	KhaleDaeiLifeStatus     *string          `json:"khaleDaeiLifeStatus,omitempty"`
-	KhaleDaeiCancerType     *enum.CancerType `json:"khaleDaeiCancerType,omitempty"`
-	KhaleDaeiCancerAge      *uint            `json:"khaleDaeiCancerAge,omitempty"`
-	OtherRelativeCancer     *bool            `json:"otherRelativeCancer,omitempty"`
-	OtherRelativeName       *string          `json:"otherRelativeName,omitempty"`
-	OtherRelativeRelation   *string          `json:"otherRelativeRelation,omitempty"`
-	OtherRelativeLifeStatus *string          `json:"otherRelativeLifeStatus,omitempty"`
-	OtherRelativeCancerType *enum.CancerType `json:"otherRelativeCancerType,omitempty"`
-	OtherRelativeCancerAge  *uint            `json:"otherRelativeCancerAge,omitempty"`
+	FamilyCancers []FamilyCancerResponse `json:"familyCancers"`
 }
 
 type GetMamographyResponse struct {
@@ -154,7 +129,7 @@ type GetMamographyResponse struct {
 	OralDuration                 *string               `json:"oralDuration,omitempty"`
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
-	MamoGraphyPicture            *string               `json:"mamoGraphyPicture`
+	MamoGraphyPicture            *string               `json:"mamoGraphyPicture"`
 	Falop                        *bool                 `json:"falop,omitempty"`
 	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
 	LeavePestan                  bool                  `json:"leavePestan"`

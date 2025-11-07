@@ -1,16 +1,19 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type Form struct {
 	database.Model
-	Status     enum.FormStatus
-	UserID     uint  `gorm:"not null;index"`
-	User       User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OperatorID *uint `gorm:"type:int"`
+	Status             enum.FormStatus
+	UserID             uint  `gorm:"not null;index"`
+	User               User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	OperatorID         *uint `gorm:"type:int"`
+	FilledByOperatorID *uint `gorm:"type:int;index"`
 }
 
 type BasicInfo struct {
@@ -19,9 +22,7 @@ type BasicInfo struct {
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 1
 	Gender               enum.Gender `gorm:"not null"`
-	BirthYear            uint        `gorm:"not null"`
-	BirthMonth           string      `gorm:"type:varchar(10);not null"`
-	BirthDay             uint        `gorm:"not null"`
+	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
 	SocialSecurityNumber string      `gorm:"not null"`
 	Height               float64     `gorm:"type:decimal(5,2);not null"`
@@ -90,11 +91,22 @@ type CancerInfo struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
-	// page 4
-	Cancer     bool  `gorm:"not null;default:false"`
-	CancerAge  *uint `gorm:"type:int"`
-	CancerType *enum.CancerType
-	// Pics
+
+	CancerAge  uint
+	CancerType enum.CancerType
+}
+
+type NewFamilyCancerInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+
+	Relative         enum.Relative
+	RelativeRelation *string `gorm:"type:varchar(127)"`
+	Name             *string `gorm:"type:varchar(127)"`
+	LifeStatus       *enum.LifeStatus
+	CancerAge        uint
+	CancerType       enum.CancerType
 }
 
 type FamilyCancerInfo struct {
@@ -242,4 +254,13 @@ type BCRAResult struct {
 	RRStar1    float64 `gorm:"type:decimal(10,6);not null"` // Relative risk star 1
 	RRStar2    float64 `gorm:"type:decimal(10,6);not null"` // Relative risk star 2
 	ProjIntvl  float64 `gorm:"type:decimal(10,6);not null"` // Projection interval
+}
+
+type GailResult struct {
+	database.Model
+	FormID uint `gorm:"not null"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
+
+	AbsoluteRisk float64 `gorm:"not null"`
+	RelativeRisk *float64
 }

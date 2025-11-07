@@ -6,12 +6,13 @@ import (
 )
 
 type FormFilters struct {
-	Status        *uint
-	Gender        *string
-	BirthYear     *uint
-	DrinksAlcohol *bool
-	SmokingNow    *bool
-	Cancer        *bool
+	Status             *uint
+	Gender             *string
+	BirthYear          *uint
+	DrinksAlcohol      *bool
+	SmokingNow         *bool
+	Cancer             *bool
+	FilledByOperatorID *uint
 }
 
 type OperatorFormFilters struct {
@@ -47,13 +48,15 @@ type FormRepository interface {
 	CreateMamography(db database.Database, info *entity.MamoGraphyInfo) error
 	UpdateMamography(db database.Database, info *entity.MamoGraphyInfo) error
 
-	FindCancerByFormID(db database.Database, formID uint) (*entity.CancerInfo, error)
+	FindCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error)
+	DeleteCancersByFormID(db database.Database, formID uint) error
 	CreateCancer(db database.Database, info *entity.CancerInfo) error
 	UpdateCancer(db database.Database, info *entity.CancerInfo) error
 
-	FindFamilyCancerByFormID(db database.Database, formID uint) (*entity.FamilyCancerInfo, error)
-	CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error
-	UpdateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error
+	FindFamilyCancersByFormID(db database.Database, formID uint) ([]*entity.NewFamilyCancerInfo, error)
+	DeleteFamilyCancerByFormIDAndNameAndRelation(db database.Database, formID uint, name string, relation uint) error
+	CreateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error
+	UpdateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error
 
 	FindContactByFormID(db database.Database, formID uint) (*entity.ContactInfo, error)
 	CreateContact(db database.Database, info *entity.ContactInfo) error
@@ -70,4 +73,8 @@ type FormRepository interface {
 	FindBCRAResultByFormID(db database.Database, formID uint) (*entity.BCRAResult, error)
 	CreateBCRAResult(db database.Database, result *entity.BCRAResult) error
 	UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error
+
+	FindGailResultByFormID(db database.Database, formID uint) (*entity.GailResult, error)
+	CreateGailResult(db database.Database, result *entity.GailResult) error
+	UpdateGailResult(db database.Database, result *entity.GailResult) error
 }

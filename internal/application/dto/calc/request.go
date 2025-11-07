@@ -42,3 +42,15 @@ type SendFormToBCRARequest struct {
 	N_Rels  int     `json:"N_Rels"`  // Number of first-degree relatives with breast cancer
 	Race    int     `json:"Race"`    // Race code (hardcoded)
 }
+
+type SendFormToGailRequest struct {
+	Age int `json:"age"`
+	// LaterAge     *int   `json:"later_age"`
+	HorizonYears int    `json:"horizon_years"`
+	MenarcheAge  int    `json:"menarche_age"`
+	NumBiopsies  int    `json:"num_biopsies"`
+	FLBAge       int    `json:"flb_age"`
+	NumRelatives int    `json:"num_relatives"`
+	Race         string `json:"race"` // Changed from int to string
+	ShowRR       bool   `json:"show_rr"`
+}

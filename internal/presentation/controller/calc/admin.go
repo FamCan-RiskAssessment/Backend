@@ -90,6 +90,26 @@ func (calcController *AdminCalcController) GetBCRAResults(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", response)
 }
 
+func (calcController *AdminCalcController) GetGailResults(ctx *gin.Context) {
+	type SendFormToCalcParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[SendFormToCalcParams](ctx)
+
+	userID, _ := ctx.Get(calcController.constants.Context.ID)
+	sendFormToCalcRequest := calcdto.SendFormToCalcRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := calcController.calcService.GetGailResults(sendFormToCalcRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
 func (calcController *AdminCalcController) GetAllModelTypes(ctx *gin.Context) {
 	response := calcController.calcService.GetAllModelTypes()
 	controller.Response(ctx, 200, "", response)

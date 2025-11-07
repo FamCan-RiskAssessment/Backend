@@ -44,6 +44,33 @@ func NewFormService(
 	}
 }
 
+func (formService *FormService) canOperatorEditForm(form *entity.Form, operatorID uint) (bool, error) {
+	if form.FilledByOperatorID != nil && *form.FilledByOperatorID == operatorID {
+		return true, nil
+	}
+
+	if form.OperatorID != nil && *form.OperatorID == operatorID {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) isOperator(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.Operator.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
@@ -54,9 +81,25 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, notFoundError
 	}
 
+	if request.FilledByOperatorID != nil {
+		err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		operator, err := formService.userService.GetUserByID(*request.FilledByOperatorID)
+		if err != nil {
+			return formdto.BasicFormResponse{}, err
+		}
+		if operator == nil {
+			notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+			return formdto.BasicFormResponse{}, notFoundError
+		}
+	}
+
 	form := &entity.Form{
-		UserID: request.UserID,
-		Status: enum.FormStatusInComplete,
+		UserID:             request.UserID,
+		Status:             enum.FormStatusInComplete,
+		FilledByOperatorID: request.FilledByOperatorID,
 	}
 
 	if err = formService.formRepository.CreateForm(formService.db, form); err != nil {
@@ -66,9 +109,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthYear:            request.BirthYear,
-		BirthMonth:           request.BirthMonth,
-		BirthDay:             request.BirthDay,
+		BirthDate:            request.BirthDate,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: request.SocialSecurityNumber,
 		Height:               request.Height,
@@ -80,11 +121,12 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	}
 
 	response := formdto.BasicFormResponse{
-		FormID:    form.ID,
-		Status:    form.Status.String(),
-		UserID:    form.UserID,
-		CreatedAt: form.CreatedAt,
-		UpdatedAt: form.UpdatedAt,
+		FormID:             form.ID,
+		Status:             form.Status.String(),
+		UserID:             form.UserID,
+		FilledByOperatorID: form.FilledByOperatorID,
+		CreatedAt:          form.CreatedAt,
+		UpdatedAt:          form.UpdatedAt,
 	}
 
 	return response, nil
@@ -98,6 +140,21 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -145,6 +202,21 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -243,32 +315,41 @@ func (formService *FormService) UpsertCancer(request formdto.UpsertCancerRequest
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
-	if err != nil {
+	if err := formService.formRepository.DeleteCancersByFormID(formService.db, request.FormID); err != nil {
 		return err
 	}
-	if info == nil {
-		info = &entity.CancerInfo{FormID: request.FormID}
-	}
 
-	info.Cancer = request.Cancer
-	if request.CancerType != nil {
-		info.CancerType = (*enum.CancerType)(request.CancerType)
-	}
-	info.CancerAge = request.CancerAge
+	for _, v := range request.Cancers {
+		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
 
-	if info.ID == 0 {
-		return formService.formRepository.CreateCancer(formService.db, info)
+		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
+			return err
+		}
 	}
-	return formService.formRepository.UpdateCancer(formService.db, info)
+	return nil
 }
 
-func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyCancerRequest) error {
+func (formService *FormService) UpsertFamilyCancer(request formdto.FamilyCancerRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -278,80 +359,43 @@ func (formService *FormService) UpsertFamilyCancer(request formdto.UpsertFamilyC
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindFamilyCancerByFormID(formService.db, request.FormID)
-	if err != nil {
-		return err
-	}
-	if info == nil {
-		info = &entity.FamilyCancerInfo{FormID: request.FormID}
+	if !request.Cancer {
+		if err := formService.formRepository.DeleteFamilyCancerByFormIDAndNameAndRelation(formService.db, request.FormID, *request.Name, uint(request.Relative)); err != nil {
+			return err
+		}
+		return nil
 	}
 
-	info.ChildCancer = request.ChildCancer
-	info.ChildName = request.ChildName
-	if request.ChildCancerType != nil {
-		info.ChildCancerType = (*enum.CancerType)(request.ChildCancerType)
+	for _, u := range request.Cancers {
+		info := &entity.NewFamilyCancerInfo{FormID: request.FormID,
+			Relative: request.Relative, RelativeRelation: request.RelativeRelation, Name: request.Name, LifeStatus: request.LifeStatus, CancerAge: u.CancerAge, CancerType: enum.CancerType(u.CancerType),
+		}
+		if err := formService.formRepository.CreateFamilyCancer(formService.db, info); err != nil {
+			return err
+		}
 	}
-	info.ChildCancerAge = request.ChildCancerAge
-	info.ChildLifeStatus = request.ChildLifeStatus
 
-	info.MotherCancer = request.MotherCancer
-	info.MotherName = request.MotherName
-	info.MotherLifeStatus = request.MotherLifeStatus
-	if request.MotherCancerType != nil {
-		info.MotherCancerType = (*enum.CancerType)(request.MotherCancerType)
-	}
-	info.MotherCancerAge = request.MotherCancerAge
-
-	info.FatherCancer = request.FatherCancer
-	info.FatherName = request.FatherName
-	info.FatherLifeStatus = request.FatherLifeStatus
-	if request.FatherCancerType != nil {
-		info.FatherCancerType = (*enum.CancerType)(request.FatherCancerType)
-	}
-	info.FatherCancerAge = request.FatherCancerAge
-
-	info.SiblingCancer = request.SiblingCancer
-	info.SiblingName = request.SiblingName
-	info.SiblingLifeStatus = request.SiblingLifeStatus
-	if request.SiblingCancerType != nil {
-		info.SiblingCancerType = (*enum.CancerType)(request.SiblingCancerType)
-	}
-	info.SiblingCancerAge = request.SiblingCancerAge
-
-	info.AmeAmoCancer = request.AmeAmoCancer
-	info.AmeAmoName = request.AmeAmoName
-	info.AmeAmoLifeStatus = request.AmeAmoLifeStatus
-	if request.AmeAmoCancerType != nil {
-		info.AmeAmoCancerType = (*enum.CancerType)(request.AmeAmoCancerType)
-	}
-	info.AmeAmoCancerAge = request.AmeAmoCancerAge
-
-	info.KhaleDaeiCancer = request.KhaleDaeiCancer
-	info.KhaleDaeiName = request.KhaleDaeiName
-	info.KhaleDaeiLifeStatus = request.KhaleDaeiLifeStatus
-	if request.KhaleDaeiCancerType != nil {
-		info.KhaleDaeiCancerType = (*enum.CancerType)(request.KhaleDaeiCancerType)
-	}
-	info.KhaleDaeiCancerAge = request.KhaleDaeiCancerAge
-
-	info.OtherRelativeCancer = request.OtherRelativeCancer
-	info.OtherRelativeName = request.OtherRelativeName
-	info.OtherRelativeRelation = request.OtherRelativeRelation
-	info.OtherRelativeLifeStatus = request.OtherRelativeLifeStatus
-	if request.OtherRelativeCancerType != nil {
-		info.OtherRelativeCancerType = (*enum.CancerType)(request.OtherRelativeCancerType)
-	}
-	info.OtherRelativeCancerAge = request.OtherRelativeCancerAge
-
-	if info.ID == 0 {
-		return formService.formRepository.CreateFamilyCancer(formService.db, info)
-	}
-	return formService.formRepository.UpdateFamilyCancer(formService.db, info)
+	return nil
 }
 
 func (formService *FormService) UpsertContact(request formdto.UpsertContactRequest) error {
@@ -362,6 +406,21 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -402,6 +461,21 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -533,9 +607,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		Gender:               basic.Gender,
-		BirthYear:            basic.BirthYear,
-		BirthMonth:           basic.BirthMonth,
-		BirthDay:             basic.BirthDay,
+		BirthDate:            basic.BirthDate,
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: basic.SocialSecurityNumber,
 		Height:               basic.Height,
@@ -652,14 +724,14 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 	}, nil
 }
 
-func (formService *FormService) GetCancer(request formdto.GetPartialFormRequest) (formdto.GetCancerResponse, error) {
+func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest) (formdto.GetCancersResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.GetCancerResponse{}, err
+		return formdto.GetCancersResponse{}, err
 	}
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.GetCancerResponse{}, notFoundError
+		return formdto.GetCancersResponse{}, notFoundError
 	}
 
 	// if form.UserID != request.UserID {
@@ -667,21 +739,23 @@ func (formService *FormService) GetCancer(request formdto.GetPartialFormRequest)
 	// 	return formdto.GetCancerResponse{}, ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
+	info, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
 	if err != nil {
-		return formdto.GetCancerResponse{}, err
-	}
-	if info == nil {
-		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
-		return formdto.GetCancerResponse{}, notFoundError
+		return formdto.GetCancersResponse{}, err
 	}
 
-	return formdto.GetCancerResponse{
-		ID:         info.ID,
-		Cancer:     info.Cancer,
-		CancerType: info.CancerType,
-		CancerAge:  info.CancerAge,
-	}, nil
+	cancersResponse := formdto.GetCancersResponse{}
+	if len(info) == 0 {
+		cancersResponse.Cancer = false
+		cancersResponse.Cancers = make([]formdto.CancerResponse, len(info))
+		return cancersResponse, nil
+	}
+
+	cancersResponse.Cancer = true
+	for _, v := range info {
+		cancersResponse.Cancers = append(cancersResponse.Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.CancerType, CancerAge: v.CancerAge})
+	}
+	return cancersResponse, nil
 }
 
 func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error) {
@@ -699,7 +773,7 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 	// 	return formdto.GetFamilyCancerResponse{}, ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindFamilyCancerByFormID(formService.db, request.FormID)
+	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
 	if err != nil {
 		return formdto.GetFamilyCancerResponse{}, err
 	}
@@ -708,45 +782,21 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 		return formdto.GetFamilyCancerResponse{}, notFoundError
 	}
 
-	return formdto.GetFamilyCancerResponse{
-		ID:                      info.ID,
-		ChildCancer:             info.ChildCancer,
-		ChildName:               info.ChildName,
-		ChildCancerType:         info.ChildCancerType,
-		ChildCancerAge:          info.ChildCancerAge,
-		ChildLifeStatus:         info.ChildLifeStatus,
-		MotherCancer:            info.MotherCancer,
-		MotherName:              info.MotherName,
-		MotherLifeStatus:        info.MotherLifeStatus,
-		MotherCancerType:        info.MotherCancerType,
-		MotherCancerAge:         info.MotherCancerAge,
-		FatherCancer:            info.FatherCancer,
-		FatherName:              info.FatherName,
-		FatherLifeStatus:        info.FatherLifeStatus,
-		FatherCancerType:        info.FatherCancerType,
-		FatherCancerAge:         info.FatherCancerAge,
-		SiblingCancer:           info.SiblingCancer,
-		SiblingName:             info.SiblingName,
-		SiblingLifeStatus:       info.SiblingLifeStatus,
-		SiblingCancerType:       info.SiblingCancerType,
-		SiblingCancerAge:        info.SiblingCancerAge,
-		AmeAmoCancer:            info.AmeAmoCancer,
-		AmeAmoName:              info.AmeAmoName,
-		AmeAmoLifeStatus:        info.AmeAmoLifeStatus,
-		AmeAmoCancerType:        info.AmeAmoCancerType,
-		AmeAmoCancerAge:         info.AmeAmoCancerAge,
-		KhaleDaeiCancer:         info.KhaleDaeiCancer,
-		KhaleDaeiName:           info.KhaleDaeiName,
-		KhaleDaeiLifeStatus:     info.KhaleDaeiLifeStatus,
-		KhaleDaeiCancerType:     info.KhaleDaeiCancerType,
-		KhaleDaeiCancerAge:      info.KhaleDaeiCancerAge,
-		OtherRelativeCancer:     info.OtherRelativeCancer,
-		OtherRelativeName:       info.OtherRelativeName,
-		OtherRelativeRelation:   info.OtherRelativeRelation,
-		OtherRelativeLifeStatus: info.OtherRelativeLifeStatus,
-		OtherRelativeCancerType: info.OtherRelativeCancerType,
-		OtherRelativeCancerAge:  info.OtherRelativeCancerAge,
-	}, nil
+	FamilyCancersResponse := formdto.GetFamilyCancerResponse{}
+	if len(info) == 0 {
+		FamilyCancersResponse.FamilyCancers = make([]formdto.FamilyCancerResponse, 0)
+		return FamilyCancersResponse, nil
+	}
+
+	for i, v := range info {
+		if i == 0 || FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Relative != v.Relative {
+			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus}
+			FamilyCancersResponse.FamilyCancers = append(FamilyCancersResponse.FamilyCancers, familyInfo)
+		}
+		FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers = append(FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Cancers, formdto.CancerResponse{ID: v.ID, CancerType: v.CancerType, CancerAge: v.CancerAge})
+	}
+
+	return FamilyCancersResponse, nil
 }
 
 func (formService *FormService) GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error) {
@@ -935,11 +985,8 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
-	if request.BirthDay != nil {
-		info.BirthDay = *request.BirthDay
-	}
-	if request.BirthMonth != nil {
-		info.BirthMonth = *request.BirthMonth
+	if request.BirthDate != nil {
+		info.BirthDate = *request.BirthDate
 	}
 	if request.SocialSecurityNumber != nil {
 		info.SocialSecurityNumber = *request.SocialSecurityNumber
@@ -1255,30 +1302,18 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindCancerByFormID(formService.db, request.FormID)
-	if err != nil {
-		return err
-	}
-	if info == nil {
-		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-		return ForbiddenError
-	}
+	for _, v := range request.Cancers {
+		info := &entity.CancerInfo{FormID: request.FormID, CancerAge: v.CancerAge, CancerType: enum.CancerType(v.CancerType)}
 
-	if request.Cancer != nil {
-		info.Cancer = *request.Cancer
+		if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
+			return err
+		}
 	}
-	if request.CancerType != nil {
-		info.CancerType = (*enum.CancerType)(request.CancerType)
-	}
-	info.CancerAge = request.CancerAge
-
-	if info.ID == 0 {
-		return formService.formRepository.CreateCancer(formService.db, info)
-	}
-	return formService.formRepository.UpdateCancer(formService.db, info)
+	return nil
 }
 
 func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error {
+	// Updating a Family Cancer is absurd, for now this function is mostly the same as UpsertFamilyCancer
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -1293,88 +1328,18 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	// 	return ForbiddenError
 	// }
 
-	info, err := formService.formRepository.FindFamilyCancerByFormID(formService.db, request.FormID)
-	if err != nil {
-		return err
-	}
-	if info == nil {
-		ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-		return ForbiddenError
+	for _, v := range request.FamilyCancers {
+		for _, u := range v.Cancers {
+			info := &entity.NewFamilyCancerInfo{FormID: request.FormID,
+				Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus, CancerAge: u.CancerAge, CancerType: enum.CancerType(u.CancerType),
+			}
+			if err := formService.formRepository.CreateFamilyCancer(formService.db, info); err != nil {
+				return err
+			}
+		}
 	}
 
-	if request.ChildCancer != nil {
-		info.ChildCancer = *request.ChildCancer
-	}
-	info.ChildName = request.ChildName
-	if request.ChildCancerType != nil {
-		info.ChildCancerType = (*enum.CancerType)(request.ChildCancerType)
-	}
-	info.ChildCancerAge = request.ChildCancerAge
-	info.ChildLifeStatus = request.ChildLifeStatus
-
-	if request.MotherCancer != nil {
-		info.MotherCancer = *request.MotherCancer
-	}
-	info.MotherName = request.MotherName
-	info.MotherLifeStatus = request.MotherLifeStatus
-	if request.MotherCancerType != nil {
-		info.MotherCancerType = (*enum.CancerType)(request.MotherCancerType)
-	}
-	info.MotherCancerAge = request.MotherCancerAge
-
-	if request.FatherCancer != nil {
-		info.FatherCancer = *request.FatherCancer
-	}
-	info.FatherName = request.FatherName
-	info.FatherLifeStatus = request.FatherLifeStatus
-	if request.FatherCancerType != nil {
-		info.FatherCancerType = (*enum.CancerType)(request.FatherCancerType)
-	}
-	info.FatherCancerAge = request.FatherCancerAge
-
-	if request.SiblingCancer != nil {
-		info.SiblingCancer = *request.SiblingCancer
-	}
-	info.SiblingName = request.SiblingName
-	info.SiblingLifeStatus = request.SiblingLifeStatus
-	if request.SiblingCancerType != nil {
-		info.SiblingCancerType = (*enum.CancerType)(request.SiblingCancerType)
-	}
-	info.SiblingCancerAge = request.SiblingCancerAge
-
-	if request.AmeAmoCancer != nil {
-		info.AmeAmoCancer = *request.AmeAmoCancer
-	}
-	info.AmeAmoName = request.AmeAmoName
-	info.AmeAmoLifeStatus = request.AmeAmoLifeStatus
-	if request.AmeAmoCancerType != nil {
-		info.AmeAmoCancerType = (*enum.CancerType)(request.AmeAmoCancerType)
-	}
-	info.AmeAmoCancerAge = request.AmeAmoCancerAge
-
-	if request.KhaleDaeiCancer != nil {
-		info.KhaleDaeiCancer = *request.KhaleDaeiCancer
-	}
-	info.KhaleDaeiName = request.KhaleDaeiName
-	info.KhaleDaeiLifeStatus = request.KhaleDaeiLifeStatus
-	if request.KhaleDaeiCancerType != nil {
-		info.KhaleDaeiCancerType = (*enum.CancerType)(request.KhaleDaeiCancerType)
-	}
-	info.KhaleDaeiCancerAge = request.KhaleDaeiCancerAge
-
-	info.OtherRelativeCancer = request.OtherRelativeCancer
-	info.OtherRelativeName = request.OtherRelativeName
-	info.OtherRelativeRelation = request.OtherRelativeRelation
-	info.OtherRelativeLifeStatus = request.OtherRelativeLifeStatus
-	if request.OtherRelativeCancerType != nil {
-		info.OtherRelativeCancerType = (*enum.CancerType)(request.OtherRelativeCancerType)
-	}
-	info.OtherRelativeCancerAge = request.OtherRelativeCancerAge
-
-	if info.ID == 0 {
-		return formService.formRepository.CreateFamilyCancer(formService.db, info)
-	}
-	return formService.formRepository.UpdateFamilyCancer(formService.db, info)
+	return nil
 }
 
 func (formService *FormService) UpdateContact(request formdto.UpdateContactRequest) error {

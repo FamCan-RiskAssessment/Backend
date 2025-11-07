@@ -2,6 +2,7 @@ package seed
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
@@ -102,7 +103,7 @@ func (d *DummySeeder) seedUsers() {
 func (d *DummySeeder) seedForms() {
 	statuses := []enum.FormStatus{enum.FormStatusPending, enum.FormStatusApproved, enum.FormStatusRejected, enum.FormStatusInComplete, enum.FormStatusReady}
 	menopausalStatuses := enum.GetAllMenopausalStatuses()
-	lifeStatuses := []string{"زنده", "فوت شده", "نامشخص"}
+	lifeStatuses := enum.GetAllLifeStatuss()
 	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
 	insuranceStatuses := []string{"تأمین اجتماعی", "خدمات درمانی", "نیروهای مسلح", "خصوصی", "ندارد"}
 	occupationalExposures := []string{
@@ -206,15 +207,15 @@ func (d *DummySeeder) createDummyForm(userID uint, formIndex int, statuses []enu
 	return form
 }
 func (d *DummySeeder) createDummyBasicInfo(formID uint, formIndex int, months []string, genders []enum.Gender) *entity.BasicInfo {
-	birthMonth := months[formIndex%len(months)]
 	gender := genders[formIndex%len(genders)]
+
+	BirthDate := time.Date(1970+(formIndex%40), time.Month(formIndex%len(months)+1), formIndex%28+1, 0, 0, 0, 0, time.UTC)
+	// BirthDate.AddDate(1970 + (formIndex % 40), , (formIndex % 28) + 1)
 
 	basicInfo := &entity.BasicInfo{
 		FormID:               formID,
 		Gender:               gender,
-		BirthYear:            uint(1970 + (formIndex % 40)), // 1970-2009
-		BirthMonth:           birthMonth,
-		BirthDay:             uint((formIndex % 28) + 1), // 1-28
+		BirthDate:            BirthDate,
 		IsAtba:               formIndex%2 == 0,
 		SocialSecurityNumber: fmt.Sprintf("%03d-%06d-%03d", formIndex%1000, formIndex%1000000, formIndex%1000),
 		Height:               float64(150 + (formIndex % 50)), // 150-199 cm
@@ -286,71 +287,40 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 	return mamoGraphyInfo
 }
 func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType) *entity.CancerInfo {
-	hasCancer := formIndex%4 == 0
-
 	cancerInfo := &entity.CancerInfo{
 		FormID:     formID,
-		Cancer:     hasCancer,
-		CancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		CancerAge:  uintPtr(uint(30 + (formIndex % 40))),
+		CancerAge:  uint(30 + (formIndex % 40)),
+		CancerType: cancerTypes[formIndex%len(cancerTypes)],
 	}
 	return cancerInfo
 }
-func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []string, relations []string) *entity.FamilyCancerInfo {
+func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []enum.LifeStatus, relations []string) *entity.NewFamilyCancerInfo {
 
-	hasChildCancer := formIndex%6 == 0
-	hasMotherCancer := formIndex%5 == 0
-	hasFatherCancer := formIndex%7 == 0
-	hasSiblingCancer := formIndex%8 == 0
-	hasAmeAmoCancer := formIndex%9 == 0
-	hasKhaleDaeiCancer := formIndex%10 == 0
-	hasOtherRelativeCancer := formIndex%11 == 0
-
-	familyCancerInfo := &entity.FamilyCancerInfo{
-		FormID:          formID,
-		ChildCancer:     hasChildCancer,
-		ChildName:       stringPtr(fmt.Sprintf("فرزند %d", formIndex+1)),
-		ChildCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		ChildCancerAge:  uintPtr(uint(5 + (formIndex % 20))),
-		ChildLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-
-		MotherCancer:     hasMotherCancer,
-		MotherName:       stringPtr(fmt.Sprintf("مادر %d", formIndex+1)),
-		MotherLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		MotherCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		MotherCancerAge:  uintPtr(uint(40 + (formIndex % 40))),
-
-		FatherCancer:     hasFatherCancer,
-		FatherName:       stringPtr(fmt.Sprintf("پدر %d", formIndex+1)),
-		FatherLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		FatherCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		FatherCancerAge:  uintPtr(uint(45 + (formIndex % 35))),
-
-		SiblingCancer:     hasSiblingCancer,
-		SiblingName:       stringPtr(fmt.Sprintf("خواهر/برادر %d", formIndex+1)),
-		SiblingLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		SiblingCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		SiblingCancerAge:  uintPtr(uint(25 + (formIndex % 30))),
-
-		AmeAmoCancer:     hasAmeAmoCancer,
-		AmeAmoName:       stringPtr(fmt.Sprintf("عمو/عمه %d", formIndex+1)),
-		AmeAmoLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		AmeAmoCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		AmeAmoCancerAge:  uintPtr(uint(35 + (formIndex % 35))),
-
-		KhaleDaeiCancer:     hasKhaleDaeiCancer,
-		KhaleDaeiName:       stringPtr(fmt.Sprintf("خاله/دایی %d", formIndex+1)),
-		KhaleDaeiLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		KhaleDaeiCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		KhaleDaeiCancerAge:  uintPtr(uint(30 + (formIndex % 30))),
-
-		OtherRelativeCancer:     &hasOtherRelativeCancer,
-		OtherRelativeName:       stringPtr(fmt.Sprintf("فامیل %d", formIndex+1)),
-		OtherRelativeRelation:   stringPtr(relations[formIndex%len(relations)]),
-		OtherRelativeLifeStatus: stringPtr(lifeStatuses[formIndex%len(lifeStatuses)]),
-		OtherRelativeCancerType: &cancerTypes[formIndex%len(cancerTypes)],
-		OtherRelativeCancerAge:  uintPtr(uint(25 + (formIndex % 35))),
+	relative := enum.Relative(formIndex%14 + 1)
+	var relativeRelation *string = nil
+	if relative == 14 {
+		relativeRelation = stringPtr("پسرعمو")
 	}
+	name := stringPtr(fmt.Sprintf("%s %d", relative.String(), formIndex+1))
+	var lifeStatus enum.LifeStatus
+	if formIndex%2 == 0 {
+		lifeStatus = enum.Alive
+	} else {
+		lifeStatus = enum.Deceased
+	}
+	cancerAge := uintPtr(uint(25 + (formIndex % 30)))
+	cancerType := cancerTypes[formIndex%len(cancerTypes)]
+
+	familyCancerInfo := &entity.NewFamilyCancerInfo{
+		FormID:           formID,
+		Relative:         relative,
+		RelativeRelation: relativeRelation,
+		LifeStatus:       &lifeStatus,
+		Name:             name,
+		CancerAge:        *cancerAge,
+		CancerType:       cancerType,
+	}
+
 	return familyCancerInfo
 }
 func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string) *entity.ContactInfo {

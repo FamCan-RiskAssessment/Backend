@@ -24,6 +24,12 @@ type PermissionResponse struct {
 	Category string `json:"category"`
 }
 
+type UserValidationResponse struct {
+	ValidationToken string `json:"validationToken"`
+	ExpiresIn       int    `json:"expiresIn"` // seconds
+	UserID          uint   `json:"userId"`
+}
+
 type RoleResponse struct {
 	ID          uint                 `json:"id"`
 	Name        string               `json:"name"`

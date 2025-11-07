@@ -42,3 +42,12 @@ type SetPasswordRequest struct {
 	UserID   uint
 	Password string
 }
+
+type RequestUserValidationOTPRequest struct {
+	Phone string `json:"phone" validate:"required,min=11,max=11"`
+}
+
+type VerifyUserValidationOTPRequest struct {
+	Phone string `json:"phone" validate:"required,min=11,max=11"`
+	OTP   string `json:"otp" validate:"required,min=6,max=6"`
+}

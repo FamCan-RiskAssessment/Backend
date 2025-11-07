@@ -72,7 +72,7 @@ func (am *AuthMiddleware) RequiredWithPermission(allowedPermissions []enum.Permi
 			panic(unauthorizedError)
 		}
 		user, _ := am.userRepository.FindUserByID(am.db, id.(uint))
-		fmt.Println(user.ID, "user")
+		fmt.Println("user sending this req: ", user.ID)
 
 		if err := am.userRepository.FindUserRoles(am.db, user); err != nil {
 			panic(err)

@@ -33,6 +33,7 @@ type Field struct {
 	Permission       string
 	Premm5Result     string
 	BCRAResult       string
+	GailResult       string
 	MamoGraphyInfo   string
 	FamilyCancerInfo string
 }
@@ -68,6 +69,7 @@ func NewConstants() *Constants {
 			Permission:       "permission",
 			Premm5Result:     "premm5_result",
 			BCRAResult:       "bcra_result",
+			GailResult:       "gail_result",
 			MamoGraphyInfo:   "mamography_info",
 			FamilyCancerInfo: "family_cancer_info",
 		},
@@ -93,4 +95,12 @@ func (r *RedisKey) GenerateOTPKey(value string) string {
 
 func (path *BucketPath) GetMamoGraphyPath(formID uint, fileName string) string {
 	return fmt.Sprintf("Radiology/%d/MamoGraphy/%s", formID, fileName)
+}
+
+func (r *RedisKey) GenerateOperatorValidationOTPKey(operatorID uint, phone string) string {
+	return fmt.Sprintf("operator:validation:otp:%d:%s", operatorID, phone)
+}
+
+func (r *RedisKey) GenerateOperatorValidationTokenKey(operatorID uint, userID uint) string {
+	return fmt.Sprintf("operator:validation:token:%d:%d", operatorID, userID)
 }

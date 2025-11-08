@@ -80,6 +80,14 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 			return calcdto.ModelResponse{}, err
 		}
 	}
+
+	// Update form status to sent to calc
+	form.Status = enum.FormStatusSentToCalc
+	err = calcService.formRepository.UpdateForm(calcService.db, form)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
 	return response, nil
 }
 
@@ -302,7 +310,7 @@ func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcR
 	}
 
 	if result == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Premm5Result}
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
 		return calcdto.Premm5Response{}, notFoundError
 	}
 
@@ -337,7 +345,7 @@ func (calcService *CalcService) GetBCRAResults(request calcdto.SendFormToCalcReq
 	}
 
 	if result == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.BCRAResult}
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
 		return calcdto.BCRAResponse{}, notFoundError
 	}
 
@@ -368,7 +376,7 @@ func (calcService *CalcService) GetGailResults(request calcdto.SendFormToCalcReq
 	}
 
 	if result == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.GailResult}
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
 		return calcdto.GailResponse{}, notFoundError
 	}
 

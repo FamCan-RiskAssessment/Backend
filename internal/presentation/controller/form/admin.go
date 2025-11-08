@@ -137,7 +137,9 @@ func (formController *AdminFormController) AcceptForm(ctx *gin.Context) {
 	}
 	params := controller.Validate[AcceptFormParams](ctx)
 
-	err := formController.formService.AcceptForm(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.AcceptForm(params.FormID, userID.(uint))
 	if err != nil {
 		panic(err)
 	}
@@ -153,7 +155,9 @@ func (formController *AdminFormController) RejectForm(ctx *gin.Context) {
 	}
 	params := controller.Validate[RejectFormParams](ctx)
 
-	err := formController.formService.RejectForm(params.FormID)
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.RejectForm(params.FormID, userID.(uint))
 	if err != nil {
 		panic(err)
 	}

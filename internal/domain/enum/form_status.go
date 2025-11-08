@@ -4,24 +4,27 @@ type FormStatus uint
 
 const (
 	FormStatusPending FormStatus = iota + 1
+	FormStatusAssigned
 	FormStatusApproved
 	FormStatusRejected
-	FormStatusInComplete
 	FormStatusReady
+	FormStatusSentToCalc
 )
 
 func (fs FormStatus) String() string {
 	switch fs {
 	case FormStatusPending:
-		return "درحال بررسی"
+		return "در حال برسی"
+	case FormStatusAssigned:
+		return "تخصیص شده"
 	case FormStatusApproved:
 		return "قبول شده"
 	case FormStatusRejected:
 		return "رد شده"
-	case FormStatusInComplete:
-		return "تکمیل نشده"
 	case FormStatusReady:
 		return "ارسال شده"
+	case FormStatusSentToCalc:
+		return "ارسال شده به مدل"
 	}
 	return "unknown"
 }
@@ -29,9 +32,10 @@ func (fs FormStatus) String() string {
 func GetAllFormStatuses() []FormStatus {
 	return []FormStatus{
 		FormStatusPending,
+		FormStatusAssigned,
 		FormStatusApproved,
 		FormStatusRejected,
-		FormStatusInComplete,
 		FormStatusReady,
+		FormStatusSentToCalc,
 	}
 }

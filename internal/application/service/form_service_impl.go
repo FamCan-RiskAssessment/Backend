@@ -71,6 +71,16 @@ func (formService *FormService) isOperator(userID uint) (bool, error) {
 	return false, nil
 }
 
+func (formService *FormService) logOperatorFormUpdate(operatorID, formID uint, sectionName string) {
+	log := actionlogdto.LogAction{
+		ActorID:    operatorID,
+		Action:     enum.ActionTypeOperatorUpdatedForm,
+		ResourceID: &formID,
+		Details:    "اپراتور بخش " + sectionName + " فرم را بروزرسانی کرد",
+	}
+	formService.actionLogService.LogAction(log)
+}
+
 func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicFormRequest) (formdto.BasicFormResponse, error) {
 	user, err := formService.userService.GetUserByID(request.UserID)
 	if err != nil {
@@ -118,6 +128,18 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	if err = formService.formRepository.CreateBasicInfo(formService.db, basic); err != nil {
 		return formdto.BasicFormResponse{}, err
+	}
+
+	// Log operator action if form was created by operator
+	if request.FilledByOperatorID != nil {
+		log := actionlogdto.LogAction{
+			ActorID:    *request.FilledByOperatorID,
+			TargetID:   &request.UserID,
+			Action:     enum.ActionTypeOperatorCreatedForm,
+			ResourceID: &form.ID,
+			Details:    "اپراتور فرم را برای کاربر ایجاد کرد",
+		}
+		formService.actionLogService.LogAction(log)
 	}
 
 	response := formdto.BasicFormResponse{
@@ -189,9 +211,20 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	info.CountGheliandailyPast = request.CountGheliandailyPast
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateGeneralHealth(formService.db, info)
+		err = formService.formRepository.CreateGeneralHealth(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateGeneralHealth(formService.db, info)
 	}
-	return formService.formRepository.UpdateGeneralHealth(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سلامت عمومی")
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpsertMamography(request formdto.UpsertMamographyRequest) error {
@@ -270,7 +303,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	isCreate := info.ID == 0
 
 	if isCreate {
-		return formService.db.WithTransaction(func(tx database.Database) error {
+		err = formService.db.WithTransaction(func(tx database.Database) error {
 			if err := formService.formRepository.CreateMamography(tx, info); err != nil {
 				return err
 			}
@@ -283,23 +316,31 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 
 			return nil
 		})
-	}
+		if err != nil {
+			return err
+		}
+	} else {
+		if pictureKey != "" && request.MamoGraphyPicture != nil {
+			if oldPicturePath != nil && *oldPicturePath != "" && *oldPicturePath != pictureKey {
+				if err := formService.s3Storage.DeleteObject(enum.BucketTypeMamography, *oldPicturePath); err != nil {
+					fmt.Printf("Warning: failed to delete old mamography picture %s: %v\n", *oldPicturePath, err)
 
-	if pictureKey != "" && request.MamoGraphyPicture != nil {
-		if oldPicturePath != nil && *oldPicturePath != "" && *oldPicturePath != pictureKey {
-			if err := formService.s3Storage.DeleteObject(enum.BucketTypeMamography, *oldPicturePath); err != nil {
-				fmt.Printf("Warning: failed to delete old mamography picture %s: %v\n", *oldPicturePath, err)
+				}
+			}
 
+			if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+				return err
 			}
 		}
 
-		if err := formService.s3Storage.UploadObject(enum.BucketTypeMamography, pictureKey, request.MamoGraphyPicture); err != nil {
+		if err := formService.formRepository.UpdateMamography(formService.db, info); err != nil {
 			return err
 		}
 	}
 
-	if err := formService.formRepository.UpdateMamography(formService.db, info); err != nil {
-		return err
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات ماموگرافی")
 	}
 
 	return nil
@@ -366,6 +407,11 @@ func (formService *FormService) CreateCancer(request formdto.CreateCancerRequest
 
 	if err := formService.formRepository.CreateCancer(formService.db, info); err != nil {
 		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان")
 	}
 
 	return nil
@@ -472,6 +518,11 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 		pictureURL = &presignedURL
 	}
 
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان")
+	}
+
 	response := formdto.UpdateCancerResponse{
 		Cancer: formdto.CancerResponse{
 			ID:         cancer.ID,
@@ -534,6 +585,11 @@ func (formService *FormService) DeleteCancer(request formdto.DeleteCancerRequest
 	// Delete cancer record
 	if err := formService.formRepository.DeleteCancerByID(formService.db, request.CancerID); err != nil {
 		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان")
 	}
 
 	return nil
@@ -600,6 +656,11 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 			return formdto.CreateFamilyCancerResponse{}, err
 		}
 		pictureURL = &presignedURL
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان خانوادگی")
 	}
 
 	response := formdto.CreateFamilyCancerResponse{
@@ -706,6 +767,11 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 		pictureURL = &presignedURL
 	}
 
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان خانوادگی")
+	}
+
 	response := formdto.UpdateFamilyCancerResponse{
 		FamilyCancer: formdto.FamilyCancerItemResponse{
 			ID:               familyCancer.ID,
@@ -774,6 +840,11 @@ func (formService *FormService) DeleteFamilyCancer(request formdto.DeleteFamilyC
 		return err
 	}
 
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان خانوادگی")
+	}
+
 	return nil
 }
 
@@ -827,9 +898,20 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.PostalCode = request.PostalCode
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateContact(formService.db, info)
+		err = formService.formRepository.CreateContact(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateContact(formService.db, info)
 	}
-	return formService.formRepository.UpdateContact(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات تماس")
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCancerRequest) error {
@@ -919,9 +1001,20 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateLungCancer(formService.db, info)
+		err = formService.formRepository.CreateLungCancer(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateLungCancer(formService.db, info)
 	}
-	return formService.formRepository.UpdateLungCancer(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان ریه")
+	}
+
+	return nil
 }
 
 func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error) {
@@ -1383,6 +1476,21 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	info, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -1414,6 +1522,11 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 	err = formService.formRepository.UpdateBasicInfo(formService.db, info)
 	if err != nil {
 		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات پایه")
 	}
 
 	return nil
@@ -1568,6 +1681,21 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return notFoundError
 	}
 
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
 	// if form.UserID != request.UserID {
 	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
 	// 	return ForbiddenError
@@ -1615,9 +1743,20 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 	info.CountGheliandailyPast = request.CountGheliandailyPast
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateGeneralHealth(formService.db, info)
+		err = formService.formRepository.CreateGeneralHealth(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateGeneralHealth(formService.db, info)
 	}
-	return formService.formRepository.UpdateGeneralHealth(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سلامت عمومی")
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpdateMamography(request formdto.UpdateMamographyRequest) error {
@@ -1628,6 +1767,21 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -1689,9 +1843,20 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	}
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateMamography(formService.db, info)
+		err = formService.formRepository.CreateMamography(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateMamography(formService.db, info)
 	}
-	return formService.formRepository.UpdateMamography(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات ماموگرافی")
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpdateContact(request formdto.UpdateContactRequest) error {
@@ -1702,6 +1867,21 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -1737,9 +1917,20 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	}
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateContact(formService.db, info)
+		err = formService.formRepository.CreateContact(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateContact(formService.db, info)
 	}
-	return formService.formRepository.UpdateContact(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات تماس")
+	}
+
+	return nil
 }
 
 func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCancerRequest) error {
@@ -1750,6 +1941,21 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
+	}
+	if isOp {
+		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+		if err != nil {
+			return err
+		}
+		if !canEdit {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
 	}
 
 	// if form.UserID != request.UserID {
@@ -1828,9 +2034,20 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 
 	if info.ID == 0 {
-		return formService.formRepository.CreateLungCancer(formService.db, info)
+		err = formService.formRepository.CreateLungCancer(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateLungCancer(formService.db, info)
 	}
-	return formService.formRepository.UpdateLungCancer(formService.db, info)
+	if err != nil {
+		return err
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان ریه")
+	}
+
+	return nil
 }
 
 func (formService *FormService) AssignOperator(request formdto.AssignOperatorRequest) error {

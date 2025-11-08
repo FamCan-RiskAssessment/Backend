@@ -70,12 +70,12 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 			return calcdto.ModelResponse{}, err
 		}
 	case enum.CalcBCRA:
-		response, err = calcService.sendFormToBCRA(form)
+		response, err = calcService.sendFormToBCRA(form, request.UserID)
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
 	case enum.CalcGail:
-		response, err = calcService.sendFormToGail(form)
+		response, err = calcService.sendFormToGail(form, request.UserID)
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
@@ -150,7 +150,7 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 	}, nil
 }
 
-func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.ModelResponse, error) {
+func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	// Load all required data
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
@@ -205,13 +205,20 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form) (calcdto.Model
 		return calcdto.ModelResponse{}, err
 	}
 
+	log := actionlogdto.LogAction{
+		ActorID:    userID,
+		Action:     enum.ActionTypeFormSentToBCRA,
+		ResourceID: &form.ID,
+	}
+	calcService.actionLogService.LogAction(log)
+
 	return calcdto.ModelResponse{
 		Name:        "BCRA",
 		Probability: bcraResponse.AbsRisk,
 	}, nil
 }
 
-func (calcService *CalcService) sendFormToGail(form *entity.Form) (calcdto.ModelResponse, error) {
+func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
 		return calcdto.ModelResponse{}, err
@@ -265,6 +272,13 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form) (calcdto.Model
 	if err != nil {
 		return calcdto.ModelResponse{}, err
 	}
+
+	log := actionlogdto.LogAction{
+		ActorID:    userID,
+		Action:     enum.ActionTypeFormSentToGail,
+		ResourceID: &form.ID,
+	}
+	calcService.actionLogService.LogAction(log)
 
 	return calcdto.ModelResponse{
 		Name:        "Gail",

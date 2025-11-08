@@ -20,15 +20,17 @@ type FormService interface {
 	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
 	UpsertGeneralHealth(request formdto.UpsertGeneralHealthRequest) error
 	UpsertMamography(request formdto.UpsertMamographyRequest) error
-	UpsertCancer(request formdto.UpsertCancerRequest) error
-	UpsertFamilyCancer(request formdto.FamilyCancerRequest) error
+	CreateCancer(request formdto.CreateCancerRequest) error
+	UpdateCancer(request formdto.UpdateCancerRequest) (formdto.UpdateCancerResponse, error)
+	DeleteCancer(request formdto.DeleteCancerRequest) error
+	CreateFamilyCancer(request formdto.CreateFamilyCancerRequest) (formdto.CreateFamilyCancerResponse, error)
+	UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) (formdto.UpdateFamilyCancerResponse, error)
+	DeleteFamilyCancer(request formdto.DeleteFamilyCancerRequest) error
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
 
 	UpdateGeneralHealth(request formdto.UpdateGeneralHealthRequest) error
 	UpdateMamography(request formdto.UpdateMamographyRequest) error
-	UpdateCancer(request formdto.UpdateCancerRequest) error
-	UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) error
 	UpdateContact(request formdto.UpdateContactRequest) error
 	UpdateLungCancer(request formdto.UpdateLungCancerRequest) error
 

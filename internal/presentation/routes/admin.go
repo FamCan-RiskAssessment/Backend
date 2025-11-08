@@ -66,18 +66,27 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			operatorFormGroup.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)
 			operatorFormGroup.PATCH("/generalhealth", app.Controllers.Admin.FormController.UpdateGeneralHealth)
 			operatorFormGroup.PATCH("/mamography", app.Controllers.Admin.FormController.UpdateMamography)
-			operatorFormGroup.PATCH("/cancer", app.Controllers.Admin.FormController.UpdateCancer)
-			operatorFormGroup.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
+			// operatorFormGroup.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
 			operatorFormGroup.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			operatorFormGroup.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
 
 			operatorFormGroup.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			operatorFormGroup.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			operatorFormGroup.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
-			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
 			operatorFormGroup.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
 			operatorFormGroup.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			operatorFormGroup.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
+
+			// Single cancer operations (more specific routes first)
+			operatorFormGroup.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateCancer)
+			operatorFormGroup.DELETE("/cancer/:cancerID", app.Controllers.Admin.FormController.DeleteCancer)
+			operatorFormGroup.POST("/cancer", app.Controllers.Admin.FormController.CreateCancer)
+			operatorFormGroup.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
+
+			// Single family cancer operations (more specific routes first)
+			operatorFormGroup.PATCH("/familycancer/:familyCancerID", app.Controllers.Admin.FormController.UpdateFamilyCancer)
+			operatorFormGroup.DELETE("/familycancer/:familyCancerID", app.Controllers.Admin.FormController.DeleteFamilyCancer)
+			operatorFormGroup.POST("/familycancer", app.Controllers.Admin.FormController.CreateFamilyCancer)
 		}
 	}
 
@@ -108,19 +117,27 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formManagement.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)
 			formManagement.PATCH("/generalhealth", app.Controllers.Admin.FormController.UpdateGeneralHealth)
 			formManagement.PATCH("/mamography", app.Controllers.Admin.FormController.UpdateMamography)
-			formManagement.PATCH("/cancer", app.Controllers.Admin.FormController.UpdateCancer)
-			formManagement.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
+			// formManagement.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
 			formManagement.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			formManagement.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
 
 			formManagement.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			formManagement.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			formManagement.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
-			formManagement.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
-			formManagement.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
 			formManagement.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			formManagement.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
 
+			// Single cancer operations (more specific routes first)
+			formManagement.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateCancer)
+			formManagement.DELETE("/cancer/:cancerID", app.Controllers.Admin.FormController.DeleteCancer)
+			formManagement.POST("/cancer", app.Controllers.Admin.FormController.CreateCancer)
+			formManagement.GET("/cancer", app.Controllers.Admin.FormController.GetAllCancers)
+
+			// Single family cancer operations (more specific routes first)
+			formManagement.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
+			formManagement.POST("/familycancer", app.Controllers.Admin.FormController.CreateFamilyCancer)
+			formManagement.PATCH("/familycancer/:familyCancerID", app.Controllers.Admin.FormController.UpdateFamilyCancer)
+			formManagement.DELETE("/familycancer/:familyCancerID", app.Controllers.Admin.FormController.DeleteFamilyCancer)
 		}
 	}
 

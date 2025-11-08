@@ -30,6 +30,7 @@ func NewS3Storage(
 ) *S3Storage {
 	buckets := make(map[enum.BucketType]string)
 	buckets[enum.BucketTypeMamography] = storage.Buckets.Mamography
+	buckets[enum.BucketTypeCancer] = storage.Buckets.Cancer
 	return &S3Storage{
 		constants: constants,
 		storage:   storage,

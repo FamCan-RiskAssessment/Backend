@@ -1,13 +1,17 @@
 package bootstrap
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+)
 
 type Constants struct {
 	Context      Context
 	RedisKey     RedisKey
 	S3BucketPath BucketPath
-	Field        Field
 	BucketPath   BucketPath
+	Field        Field
 	Tag          Tag
 	SMSTemplates SMSTemplates
 	JWTKeysPath  JWTKeysPath
@@ -36,6 +40,7 @@ type Field struct {
 	GailResult       string
 	MamoGraphyInfo   string
 	FamilyCancerInfo string
+	Cancer           string
 }
 
 type Tag struct {
@@ -72,6 +77,7 @@ func NewConstants() *Constants {
 			GailResult:       "gail_result",
 			MamoGraphyInfo:   "mamography_info",
 			FamilyCancerInfo: "family_cancer_info",
+			Cancer:           "cancer",
 		},
 		Tag: Tag{
 			Expired:      "expired",
@@ -94,7 +100,15 @@ func (r *RedisKey) GenerateOTPKey(value string) string {
 }
 
 func (path *BucketPath) GetMamoGraphyPath(formID uint, fileName string) string {
-	return fmt.Sprintf("Radiology/%d/MamoGraphy/%s", formID, fileName)
+	return fmt.Sprintf("%d/%s", formID, fileName)
+}
+
+func (path *BucketPath) GetCancerPath(formID uint, cancerType enum.CancerType, fileName string) string {
+	return fmt.Sprintf("%d/%s/%s", formID, cancerType.String(), fileName)
+}
+
+func (path *BucketPath) GetFamilyCancerPath(formID uint, cancerType enum.CancerType, fileName string) string {
+	return fmt.Sprintf("familyCancer/%d/%s/%s", formID, cancerType.String(), fileName)
 }
 
 func (r *RedisKey) GenerateOperatorValidationOTPKey(operatorID uint, phone string) string {

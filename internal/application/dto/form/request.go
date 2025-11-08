@@ -34,35 +34,30 @@ type CreateBasicFormRequest struct {
 
 	// page 1
 	BirthDate            time.Time
-	SocialSecurityNumber string  `json:"socialSecurityNumber" binding:"required"`
-	Gender               uint    `json:"gender" binding:"required"`
-	IsAtba               bool    `json:"isAtba"`
-	Height               float64 `json:"height" binding:"required"`
-	Weight               float64 `json:"weight" binding:"required"`
+	SocialSecurityNumber string
+	Gender               uint
+	IsAtba               bool
+	Height               float64
+	Weight               float64
 }
 
 type UpdateBasicFormRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
 	// page 1
 	BirthDate            *time.Time
-	SocialSecurityNumber *string  `json:"socialSecurityNumber"`
-	Gender               *uint    `json:"gender"`
-	IsAtba               *bool    `json:"isAtba"`
-	Height               *float64 `json:"height"`
-	Weight               *float64 `json:"weight"`
+	SocialSecurityNumber *string
+	Gender               *uint
+	IsAtba               *bool
+	Height               *float64
+	Weight               *float64
 }
 
 type GetUserFormsRequest struct {
-	UserID uint `json:"user_id" binding:"required"`
-	Offset int  `json:"offset"`
-	Limit  int  `json:"limit"`
-}
-
-type GetFormRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	Offset int
+	Limit  int
 }
 
 type GetPartialFormRequest struct {
@@ -72,77 +67,126 @@ type GetPartialFormRequest struct {
 
 type DeleteFormRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 }
 
 type UpsertGeneralHealthRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	DrinksAlcohol             *bool   `json:"drinksAlcohol,omitempty"`
-	CupsPerWeek               *string `json:"cupsPerWeek,omitempty"`
-	LastMonthSabzijatMeal     string  `json:"lastMonthSabzijatMeal" binding:"required"`
-	LastMonthSabzijatWeight   string  `json:"lastMonthSabzijatWeight" binding:"required"`
-	MediumActivityMonthInYear uint    `json:"mediumActivityMonthInYear" binding:"required"`
-	MediumActivityHourInWeek  string  `json:"mediumActivityHourInWeek" binding:"required"`
-	HardActivityMonthInYear   uint    `json:"hardActivityMonthInYear" binding:"required"`
-	HardActivityHourInWeek    string  `json:"hardActivityHourInWeek" binding:"required"`
-	SmokeAtLeast100           *bool   `json:"smokeAtLeast100,omitempty"`
-	SmokingAge                *uint   `json:"smokingAge,omitempty"`
-	SmokingNow                bool    `json:"smokingNow"`
-	LeaveSmokingAge           *uint   `json:"leaveSmokingAge,omitempty"`
-	CountSmokingDaily         *string `json:"countSmokingDaily,omitempty"`
-	CountGheliandaily         *string `json:"countGheliandaily,omitempty"`
-	CountSmokingDailyPast     *string `json:"countSmokingDailyPast,omitempty"`
-	CountGheliandailyPast     *string `json:"countGheliandailyPast,omitempty"`
+	DrinksAlcohol             *bool
+	CupsPerWeek               *string
+	LastMonthSabzijatMeal     string
+	LastMonthSabzijatWeight   string
+	MediumActivityMonthInYear uint
+	MediumActivityHourInWeek  string
+	HardActivityMonthInYear   uint
+	HardActivityHourInWeek    string
+	SmokeAtLeast100           *bool
+	SmokingAge                *uint
+	SmokingNow                bool
+	LeaveSmokingAge           *uint
+	CountSmokingDaily         *string
+	CountGheliandaily         *string
+	CountSmokingDailyPast     *string
+	CountGheliandailyPast     *string
 }
 
 type UpsertMamographyRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	GhaedeAge                    uint                  `json:"ghaedeAge" binding:"required"`
-	HasChildren                  bool                  `json:"hasChildren"`
-	NumberOfChildren             *uint                 `json:"numberOfChildren,omitempty"`
-	AgeOfFirstBirth              *uint                 `json:"ageOfFirstBirth,omitempty"`
-	MenopausalStatus             uint                  `json:"menopausalStatus" binding:"required"`
-	MenopauseAge                 *string               `json:"menopauseAge,omitempty"`
-	HRT                          *bool                 `json:"hrt,omitempty"`
-	HRTUseLength                 *uint                 `json:"hrtUseLength,omitempty"`
-	LastFiveYearsHRTUse          bool                  `json:"lastFiveYearsHrtUse"`
-	CurrentHRTUse                *bool                 `json:"currentHrtUse,omitempty"`
-	IntendedHRTUse               *uint                 `json:"intendedHrtUse,omitempty"`
-	HRTType                      *string               `json:"hrtType,omitempty"`
-	Oral                         *bool                 `json:"oral,omitempty"`
-	OralDuration                 *string               `json:"oralDuration,omitempty"`
-	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
-	MamoGraphy                   *bool                 `form:"mamoGraphy,omitempty"`
-	MamoGraphyPicture            *multipart.FileHeader `form:"mamoGraphyPicture,omitempty"`
-	Falop                        *bool                 `json:"falop,omitempty"`
-	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
-	LeavePestan                  bool                  `json:"leavePestan"`
-	LeaveTokhmdan                bool                  `json:"leaveTokhmdan"`
-	LaDeColon                    *bool                 `json:"laDeColon,omitempty"`
-	LaDePol                      *bool                 `json:"laDePol,omitempty"`
-	AspLaMo                      *bool                 `json:"aspLaMo,omitempty"`
-	NsaiDLaMo                    *bool                 `json:"nsaiDLaMo,omitempty"`
-	LastFiveYearBloodTestInStool *bool                 `json:"lastFiveYearBloodTestInStool,omitempty"`
-	NumberOfBreastBiopsies       *uint                 `json:"numberOfBreastBiopsies,omitempty"`
-	HyperplasiaInBiopsy          *uint                 `json:"hyperplasiaInBiopsy,omitempty"`
+	GhaedeAge                    uint
+	HasChildren                  bool
+	NumberOfChildren             *uint
+	AgeOfFirstBirth              *uint
+	MenopausalStatus             uint
+	MenopauseAge                 *string
+	HRT                          *bool
+	HRTUseLength                 *uint
+	LastFiveYearsHRTUse          bool
+	CurrentHRTUse                *bool
+	IntendedHRTUse               *uint
+	HRTType                      *string
+	Oral                         *bool
+	OralDuration                 *string
+	OralTwoLastYears             *bool
+	MamoGraphy                   *bool
+	MamoGraphyPicture            *multipart.FileHeader
+	Falop                        *bool
+	Andometrioz                  *bool
+	LeavePestan                  bool
+	LeaveTokhmdan                bool
+	LaDeColon                    *bool
+	LaDePol                      *bool
+	AspLaMo                      *bool
+	NsaiDLaMo                    *bool
+	LastFiveYearBloodTestInStool *bool
+	NumberOfBreastBiopsies       *uint
+	HyperplasiaInBiopsy          *uint
 }
 
 type CancerRequest struct {
 	CancerType uint
 	CancerAge  uint
-	// PIC
+	Picture    *multipart.FileHeader
 }
 
-type UpsertCancerRequest struct {
+type CreateCancerRequest struct {
 	UserID uint
 	FormID uint
 
-	Cancer  bool
-	Cancers []CancerRequest
+	CancerType uint
+	CancerAge  uint
+	Picture    *multipart.FileHeader
+}
+
+type UpdateCancerRequest struct {
+	UserID   uint
+	FormID   uint
+	CancerID uint
+
+	CancerType uint
+	CancerAge  uint
+	Picture    *multipart.FileHeader
+}
+
+type DeleteCancerRequest struct {
+	UserID   uint
+	FormID   uint
+	CancerID uint
+}
+
+type CreateFamilyCancerRequest struct {
+	UserID uint
+	FormID uint
+
+	Relative         enum.Relative
+	RelativeRelation *string
+	Name             *string
+	LifeStatus       *enum.LifeStatus
+	CancerType       uint
+	CancerAge        uint
+	Picture          *multipart.FileHeader
+}
+
+type UpdateFamilyCancerRequest struct {
+	UserID           uint
+	FormID           uint
+	FamilyCancerID   uint
+	Relative         enum.Relative
+	RelativeRelation *string
+	Name             *string
+	LifeStatus       *enum.LifeStatus
+	CancerType       uint
+	CancerAge        uint
+	Picture          *multipart.FileHeader
+}
+
+type DeleteFamilyCancerRequest struct {
+	UserID         uint
+	FormID         uint
+	FamilyCancerID uint
 }
 
 type FamilyCancerRequest struct {
@@ -157,220 +201,200 @@ type FamilyCancerRequest struct {
 	Cancers          []CancerRequest
 }
 
-type UpsertFamilyCancerRequest struct {
+type UpsertContactRequest struct {
 	UserID uint
 	FormID uint
 
-	FamilyCancers []FamilyCancerRequest
-}
-
-type UpsertContactRequest struct {
-	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
-
-	Name         string  `json:"name" binding:"required"`
-	TestGen      *bool   `json:"testGen,omitempty"`
-	FmTestGen    *bool   `json:"fmTestGen,omitempty"`
-	CallExpert   bool    `json:"callExpert"`
-	BirthCountry *string `json:"birthCountry,omitempty"`
-	Province     *string `json:"province,omitempty"`
-	City         *string `json:"city,omitempty"`
-	Country      *string `json:"country,omitempty"`
-	Address      string  `json:"address" binding:"required"`
-	PostalCode   string  `json:"postalCode" binding:"required"`
+	Name         string
+	TestGen      *bool
+	FmTestGen    *bool
+	CallExpert   bool
+	BirthCountry *string
+	Province     *string
+	City         *string
+	Country      *string
+	Address      string
+	PostalCode   string
 }
 
 type UpsertLungCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	InsuranceStatus           *string `json:"insuranceStatus,omitempty"`
-	SupplementaryInsurances   *string `json:"supplementaryInsurances,omitempty"`
-	Hypertension              bool    `json:"hypertension"`
-	HypertensionTreatment     *bool   `json:"hypertensionTreatment,omitempty"`
-	HeartDisease              bool    `json:"heartDisease"`
-	HeartDiseaseTreatment     *bool   `json:"heartDiseaseTreatment,omitempty"`
-	Diabetes                  bool    `json:"diabetes"`
-	DiabetesTreatment         *bool   `json:"diabetesTreatment,omitempty"`
-	ChronicLungDisease        *bool   `json:"chronicLungDisease,omitempty"`
-	ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType,omitempty"`
-	LungCancerHistory         bool    `json:"lungCancerHistory"`
-	OtherCancerHistory        bool    `json:"otherCancerHistory"`
-	OtherCancerType           *uint   `json:"otherCancerType,omitempty"`
-	LungCancerFamily          *bool   `json:"lungCancerFamily,omitempty"`
-	LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation,omitempty"`
-	OtherCancerFamily         *bool   `json:"otherCancerFamily,omitempty"`
-	OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType,omitempty"`
-	OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation,omitempty"`
-	OccupationalExposure      *string `json:"occupationalExposure,omitempty"`
-	CurrentSmoking            bool    `json:"currentSmoking"`
-	SmokingStartAgeCurrent    *uint   `json:"smokingStartAgeCurrent,omitempty"`
-	SmokingTypesCurrent       *string `json:"smokingTypesCurrent,omitempty"`
-	CigarettesPerDayCurrent   *uint   `json:"cigarettesPerDayCurrent,omitempty"`
-	CigarPerDayCurrent        *uint   `json:"cigarPerDayCurrent,omitempty"`
-	ECigPerDayCurrent         *uint   `json:"eCigPerDayCurrent,omitempty"`
-	PipePerDayCurrent         *uint   `json:"pipePerDayCurrent,omitempty"`
-	ChapoghPerDayCurrent      *uint   `json:"chapoghPerDayCurrent,omitempty"`
-	SmokedOpiumPerDayCurrent  *uint   `json:"smokedOpiumPerDayCurrent,omitempty"`
-	ChewedOpiumPerDayCurrent  *uint   `json:"chewedOpiumPerDayCurrent,omitempty"`
-	HookahPerWeekCurrent      *uint   `json:"hookahPerWeekCurrent,omitempty"`
-	PastSmoking               *string `json:"pastSmoking,omitempty"`
-	SmokingStartAgePast       *uint   `json:"smokingStartAgePast,omitempty"`
-	SmokingTypesPast          *string `json:"smokingTypesPast,omitempty"`
-	CigarettesPerDayPast      *uint   `json:"cigarettesPerDayPast,omitempty"`
-	CigarPerDayPast           *uint   `json:"cigarPerDayPast,omitempty"`
-	ECigPerDayPast            *uint   `json:"eCigPerDayPast,omitempty"`
-	PipePerDayPast            *uint   `json:"pipePerDayPast,omitempty"`
-	ChapoghPerDayPast         *uint   `json:"chapoghPerDayPast,omitempty"`
-	SmokedOpiumPerDayPast     *uint   `json:"smokedOpiumPerDayPast,omitempty"`
-	ChewedOpiumPerDayPast     *uint   `json:"chewedOpiumPerDayPast,omitempty"`
-	HookahPerWeekPast         *uint   `json:"hookahPerWeekPast,omitempty"`
-	SecondhandSmoke           bool    `json:"secondhandSmoke"`
-	SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation,omitempty"`
+	InsuranceStatus           *string
+	SupplementaryInsurances   *string
+	Hypertension              bool
+	HypertensionTreatment     *bool
+	HeartDisease              bool
+	HeartDiseaseTreatment     *bool
+	Diabetes                  bool
+	DiabetesTreatment         *bool
+	ChronicLungDisease        *bool
+	ChronicLungDiseaseType    *string
+	LungCancerHistory         bool
+	OtherCancerHistory        bool
+	OtherCancerType           *uint
+	LungCancerFamily          *bool
+	LungCancerFamilyRelation  *string
+	OtherCancerFamily         *bool
+	OtherCancerFamilyType     *uint
+	OtherCancerFamilyRelation *string
+	OccupationalExposure      *string
+	CurrentSmoking            bool
+	SmokingStartAgeCurrent    *uint
+	SmokingTypesCurrent       *string
+	CigarettesPerDayCurrent   *uint
+	CigarPerDayCurrent        *uint
+	ECigPerDayCurrent         *uint
+	PipePerDayCurrent         *uint
+	ChapoghPerDayCurrent      *uint
+	SmokedOpiumPerDayCurrent  *uint
+	ChewedOpiumPerDayCurrent  *uint
+	HookahPerWeekCurrent      *uint
+	PastSmoking               *string
+	SmokingStartAgePast       *uint
+	SmokingTypesPast          *string
+	CigarettesPerDayPast      *uint
+	CigarPerDayPast           *uint
+	ECigPerDayPast            *uint
+	PipePerDayPast            *uint
+	ChapoghPerDayPast         *uint
+	SmokedOpiumPerDayPast     *uint
+	ChewedOpiumPerDayPast     *uint
+	HookahPerWeekPast         *uint
+	SecondhandSmoke           bool
+	SecondhandSmokeLocation   *string
 }
 
 type ChangeFormStatusRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 }
 
 type AssignOperatorRequest struct {
 	UserID     uint
-	FormID     uint `json:"form_id" binding:"required"`
-	OperatorID uint `json:"operator_id" binding:"required"`
+	FormID     uint
+	OperatorID uint
 }
 
 type UnassignOperatorRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 }
 
 type UpdateGeneralHealthRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	DrinksAlcohol             *bool   `json:"drinksAlcohol"`
-	CupsPerWeek               *string `json:"cupsPerWeek"`
-	LastMonthSabzijatMeal     *string `json:"lastMonthSabzijatMeal"`
-	LastMonthSabzijatWeight   *string `json:"lastMonthSabzijatWeight"`
-	MediumActivityMonthInYear *uint   `json:"mediumActivityMonthInYear"`
-	MediumActivityHourInWeek  *string `json:"mediumActivityHourInWeek"`
-	HardActivityMonthInYear   *uint   `json:"hardActivityMonthInYear"`
-	HardActivityHourInWeek    *string `json:"hardActivityHourInWeek"`
-	SmokeAtLeast100           *bool   `json:"smokeAtLeast100"`
-	SmokingAge                *uint   `json:"smokingAge"`
-	SmokingNow                *bool   `json:"smokingNow"`
-	LeaveSmokingAge           *uint   `json:"leaveSmokingAge"`
-	CountSmokingDaily         *string `json:"countSmokingDaily"`
-	CountGheliandaily         *string `json:"countGheliandaily"`
-	CountSmokingDailyPast     *string `json:"countSmokingDailyPast"`
-	CountGheliandailyPast     *string `json:"countGheliandailyPast"`
+	DrinksAlcohol             *bool
+	CupsPerWeek               *string
+	LastMonthSabzijatMeal     *string
+	LastMonthSabzijatWeight   *string
+	MediumActivityMonthInYear *uint
+	MediumActivityHourInWeek  *string
+	HardActivityMonthInYear   *uint
+	HardActivityHourInWeek    *string
+	SmokeAtLeast100           *bool
+	SmokingAge                *uint
+	SmokingNow                *bool
+	LeaveSmokingAge           *uint
+	CountSmokingDaily         *string
+	CountGheliandaily         *string
+	CountSmokingDailyPast     *string
+	CountGheliandailyPast     *string
 }
 type UpdateMamographyRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
-
-	GhaedeAge                    *uint   `json:"ghaedeAge"`
-	HasChildren                  *bool   `json:"hasChildren"`
-	NumberOfChildren             *uint   `json:"numberOfChildren"`
-	AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth"`
-	MenopausalStatus             *uint   `json:"menopausalStatus"`
-	MenopauseAge                 *string `json:"menopauseAge"`
-	HRT                          *bool   `json:"hrt"`
-	HRTUseLength                 *uint   `json:"hrtUseLength"`
-	LastFiveYearsHRTUse          *bool   `json:"lastFiveYearsHrtUse"`
-	CurrentHRTUse                *bool   `json:"currentHrtUse"`
-	IntendedHRTUse               *uint   `json:"intendedHrtUse"`
-	HRTType                      *string `json:"hrtType"`
-	Oral                         *bool   `json:"oral"`
-	OralDuration                 *string `json:"oralDuration"`
-	OralTwoLastYears             *bool   `json:"oralTwoLastYears"`
-	MamoGraphy                   *bool   `json:"mamoGraphy"`
-	Falop                        *bool   `json:"falop"`
-	Andometrioz                  *bool   `json:"andometrioz"`
-	LeavePestan                  *bool   `json:"leavePestan"`
-	LeaveTokhmdan                *bool   `json:"leaveTokhmdan"`
-	LaDeColon                    *bool   `json:"laDeColon"`
-	LaDePol                      *bool   `json:"laDePol"`
-	AspLaMo                      *bool   `json:"aspLaMo"`
-	NsaiDLaMo                    *bool   `json:"nsaiDLaMo"`
-	LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool"`
-	NumberOfBreastBiopsies       *uint   `json:"numberOfBreastBiopsies,omitempty"`
-	HyperplasiaInBiopsy          *uint   `json:"hyperplasiaInBiopsy,omitempty"`
-}
-type UpdateCancerRequest struct {
-	UserID uint
 	FormID uint
 
-	Cancer  bool
-	Cancers []CancerRequest
-}
-type UpdateFamilyCancerRequest struct {
-	UserID uint
-	FormID uint
-
-	FamilyCancers []FamilyCancerRequest
+	GhaedeAge                    *uint
+	HasChildren                  *bool
+	NumberOfChildren             *uint
+	AgeOfFirstBirth              *uint
+	MenopausalStatus             *uint
+	MenopauseAge                 *string
+	HRT                          *bool
+	HRTUseLength                 *uint
+	LastFiveYearsHRTUse          *bool
+	CurrentHRTUse                *bool
+	IntendedHRTUse               *uint
+	HRTType                      *string
+	Oral                         *bool
+	OralDuration                 *string
+	OralTwoLastYears             *bool
+	MamoGraphy                   *bool
+	Falop                        *bool
+	Andometrioz                  *bool
+	LeavePestan                  *bool
+	LeaveTokhmdan                *bool
+	LaDeColon                    *bool
+	LaDePol                      *bool
+	AspLaMo                      *bool
+	NsaiDLaMo                    *bool
+	LastFiveYearBloodTestInStool *bool
+	NumberOfBreastBiopsies       *uint
+	HyperplasiaInBiopsy          *uint
 }
 type UpdateContactRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	Name         *string `json:"name"`
-	TestGen      *bool   `json:"testGen"`
-	FmTestGen    *bool   `json:"fmTestGen"`
-	CallExpert   *bool   `json:"callExpert"`
-	BirthCountry *string `json:"birthCountry"`
-	Province     *string `json:"province"`
-	City         *string `json:"city"`
-	Country      *string `json:"country"`
-	Address      *string `json:"address"`
-	PostalCode   *string `json:"postalCode"`
+	Name         *string
+	TestGen      *bool
+	FmTestGen    *bool
+	CallExpert   *bool
+	BirthCountry *string
+	Province     *string
+	City         *string
+	Country      *string
+	Address      *string
+	PostalCode   *string
 }
 type UpdateLungCancerRequest struct {
 	UserID uint
-	FormID uint `json:"form_id" binding:"required"`
+	FormID uint
 
-	InsuranceStatus           *string `json:"insuranceStatus"`
-	SupplementaryInsurances   *string `json:"supplementaryInsurances"`
-	Hypertension              *bool   `json:"hypertension"`
-	HypertensionTreatment     *bool   `json:"hypertensionTreatment"`
-	HeartDisease              *bool   `json:"heartDisease"`
-	HeartDiseaseTreatment     *bool   `json:"heartDiseaseTreatment"`
-	Diabetes                  *bool   `json:"diabetes"`
-	DiabetesTreatment         *bool   `json:"diabetesTreatment"`
-	ChronicLungDisease        *bool   `json:"chronicLungDisease"`
-	ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType"`
-	LungCancerHistory         *bool   `json:"lungCancerHistory"`
-	OtherCancerHistory        *bool   `json:"otherCancerHistory"`
-	OtherCancerType           *uint   `json:"otherCancerType"`
-	LungCancerFamily          *bool   `json:"lungCancerFamily"`
-	LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation"`
-	OtherCancerFamily         *bool   `json:"otherCancerFamily"`
-	OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType"`
-	OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation"`
-	OccupationalExposure      *string `json:"occupationalExposure"`
-	CurrentSmoking            *bool   `json:"currentSmoking"`
-	SmokingStartAgeCurrent    *uint   `json:"smokingStartAgeCurrent"`
-	SmokingTypesCurrent       *string `json:"smokingTypesCurrent"`
-	CigarettesPerDayCurrent   *uint   `json:"cigarettesPerDayCurrent"`
-	CigarPerDayCurrent        *uint   `json:"cigarPerDayCurrent"`
-	ECigPerDayCurrent         *uint   `json:"eCigPerDayCurrent"`
-	PipePerDayCurrent         *uint   `json:"pipePerDayCurrent"`
-	ChapoghPerDayCurrent      *uint   `json:"chapoghPerDayCurrent"`
-	SmokedOpiumPerDayCurrent  *uint   `json:"smokedOpiumPerDayCurrent"`
-	ChewedOpiumPerDayCurrent  *uint   `json:"chewedOpiumPerDayCurrent"`
-	HookahPerWeekCurrent      *uint   `json:"hookahPerWeekCurrent"`
-	PastSmoking               *string `json:"pastSmoking"`
-	SmokingStartAgePast       *uint   `json:"smokingStartAgePast"`
-	SmokingTypesPast          *string `json:"smokingTypesPast"`
-	CigarettesPerDayPast      *uint   `json:"cigarettesPerDayPast"`
-	CigarPerDayPast           *uint   `json:"cigarPerDayPast"`
-	ECigPerDayPast            *uint   `json:"eCigPerDayPast"`
-	PipePerDayPast            *uint   `json:"pipePerDayPast"`
-	ChapoghPerDayPast         *uint   `json:"chapoghPerDayPast"`
-	SmokedOpiumPerDayPast     *uint   `json:"smokedOpiumPerDayPast"`
-	ChewedOpiumPerDayPast     *uint   `json:"chewedOpiumPerDayPast"`
-	HookahPerWeekPast         *uint   `json:"hookahPerWeekPast"`
-	SecondhandSmoke           *bool   `json:"secondhandSmoke"`
-	SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation"`
+	InsuranceStatus           *string
+	SupplementaryInsurances   *string
+	Hypertension              *bool
+	HypertensionTreatment     *bool
+	HeartDisease              *bool
+	HeartDiseaseTreatment     *bool
+	Diabetes                  *bool
+	DiabetesTreatment         *bool
+	ChronicLungDisease        *bool
+	ChronicLungDiseaseType    *string
+	LungCancerHistory         *bool
+	OtherCancerHistory        *bool
+	OtherCancerType           *uint
+	LungCancerFamily          *bool
+	LungCancerFamilyRelation  *string
+	OtherCancerFamily         *bool
+	OtherCancerFamilyType     *uint
+	OtherCancerFamilyRelation *string
+	OccupationalExposure      *string
+	CurrentSmoking            *bool
+	SmokingStartAgeCurrent    *uint
+	SmokingTypesCurrent       *string
+	CigarettesPerDayCurrent   *uint
+	CigarPerDayCurrent        *uint
+	ECigPerDayCurrent         *uint
+	PipePerDayCurrent         *uint
+	ChapoghPerDayCurrent      *uint
+	SmokedOpiumPerDayCurrent  *uint
+	ChewedOpiumPerDayCurrent  *uint
+	HookahPerWeekCurrent      *uint
+	PastSmoking               *string
+	SmokingStartAgePast       *uint
+	SmokingTypesPast          *string
+	CigarettesPerDayPast      *uint
+	CigarPerDayPast           *uint
+	ECigPerDayPast            *uint
+	PipePerDayPast            *uint
+	ChapoghPerDayPast         *uint
+	SmokedOpiumPerDayPast     *uint
+	ChewedOpiumPerDayPast     *uint
+	HookahPerWeekPast         *uint
+	SecondhandSmoke           *bool
+	SecondhandSmokeLocation   *string
 }

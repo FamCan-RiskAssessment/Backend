@@ -49,14 +49,18 @@ type FormRepository interface {
 	UpdateMamography(db database.Database, info *entity.MamoGraphyInfo) error
 
 	FindCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error)
+	FindCancerByID(db database.Database, cancerID uint) (*entity.CancerInfo, error)
 	DeleteCancersByFormID(db database.Database, formID uint) error
+	DeleteCancerByID(db database.Database, cancerID uint) error
 	CreateCancer(db database.Database, info *entity.CancerInfo) error
 	UpdateCancer(db database.Database, info *entity.CancerInfo) error
 
-	FindFamilyCancersByFormID(db database.Database, formID uint) ([]*entity.NewFamilyCancerInfo, error)
-	DeleteFamilyCancerByFormIDAndNameAndRelation(db database.Database, formID uint, name string, relation uint) error
-	CreateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error
-	UpdateFamilyCancer(db database.Database, info *entity.NewFamilyCancerInfo) error
+	FindFamilyCancersByFormID(db database.Database, formID uint) ([]*entity.FamilyCancerInfo, error)
+	FindFamilyCancerByID(db database.Database, familyCancerID uint) (*entity.FamilyCancerInfo, error)
+	DeleteFamilyCancersByFormID(db database.Database, formID uint) error
+	DeleteFamilyCancerByID(db database.Database, familyCancerID uint) error
+	CreateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error
+	UpdateFamilyCancer(db database.Database, info *entity.FamilyCancerInfo) error
 
 	FindContactByFormID(db database.Database, formID uint) (*entity.ContactInfo, error)
 	CreateContact(db database.Database, info *entity.ContactInfo) error

@@ -42,8 +42,39 @@ type UpsertMamographyResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
-type UpsertCancerResponse struct {
-	Form BasicFormResponse `json:"form"`
+type CreateCancerResponse struct {
+	Cancer CancerResponse `json:"cancer"`
+}
+
+type UpdateCancerResponse struct {
+	Cancer CancerResponse `json:"cancer"`
+}
+
+type DeleteCancerResponse struct {
+	Message string `json:"message"`
+}
+
+type FamilyCancerItemResponse struct {
+	ID               uint             `json:"id"`
+	Relative         enum.Relative    `json:"relative"`
+	RelativeRelation *string          `json:"relation,omitempty"`
+	Name             *string          `json:"name,omitempty"`
+	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
+	CancerType       enum.CancerType  `json:"cancerType"`
+	CancerAge        uint             `json:"cancerAge"`
+	Picture          *string          `json:"picture,omitempty"`
+}
+
+type CreateFamilyCancerResponse struct {
+	FamilyCancer FamilyCancerItemResponse `json:"familyCancer"`
+}
+
+type UpdateFamilyCancerResponse struct {
+	FamilyCancer FamilyCancerItemResponse `json:"familyCancer"`
+}
+
+type DeleteFamilyCancerResponse struct {
+	Message string `json:"message"`
 }
 
 type UpsertFamilyCancerResponse struct {
@@ -92,6 +123,7 @@ type CancerResponse struct {
 	ID         uint            `json:"id"`
 	CancerType enum.CancerType `json:"cancerType"`
 	CancerAge  uint            `json:"cancerAge"`
+	Picture    *string         `json:"picture,omitempty"`
 }
 
 type GetCancersResponse struct {

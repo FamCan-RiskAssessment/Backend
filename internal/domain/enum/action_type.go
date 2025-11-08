@@ -7,6 +7,10 @@ const (
 	ActionTypeFormUnAssigned
 	ActionTypeUserRoleUpdated
 	ActionTypeFormSentToPremm5
+	ActionTypeFormSentToBCRA
+	ActionTypeFormSentToGail
+	ActionTypeOperatorCreatedForm
+	ActionTypeOperatorUpdatedForm
 )
 
 func (at ActionType) String() string {
@@ -18,7 +22,15 @@ func (at ActionType) String() string {
 	case ActionTypeFormUnAssigned:
 		return "معلق شدن فرم"
 	case ActionTypeFormSentToPremm5:
-		return "فرم به مدل پرم۵ فرستاده شد"
+		return "فرم به مدل Premm5 فرستاده شد"
+	case ActionTypeFormSentToBCRA:
+		return "فرم به مدل BCRA فرستاده شد"
+	case ActionTypeFormSentToGail:
+		return "فرم به مدل Gail فرستاده شد"
+	case ActionTypeOperatorCreatedForm:
+		return "اپراتور فرم ایجاد کرد"
+	case ActionTypeOperatorUpdatedForm:
+		return "اپراتور فرم را بروزرسانی کرد"
 	}
 	return "نامشخص"
 }
@@ -29,5 +41,9 @@ func GetAllActionTypes() []ActionType {
 		ActionTypeUserRoleUpdated,
 		ActionTypeFormUnAssigned,
 		ActionTypeFormSentToPremm5,
+		ActionTypeFormSentToBCRA,
+		ActionTypeFormSentToGail,
+		ActionTypeOperatorCreatedForm,
+		ActionTypeOperatorUpdatedForm,
 	}
 }

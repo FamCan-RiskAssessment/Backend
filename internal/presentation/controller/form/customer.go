@@ -283,50 +283,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertMamographyResponse{})
 }
-func (formController *CustomerFormController) UpsertFamilyCancer(ctx *gin.Context) {
-	type CancerParams struct {
-		CancerType uint `json:"cancerType" validate:"required,gt=0"`
-		CancerAge  uint `json:"cancerAge" validate:"required,gte=0"`
-	}
-	type FamilyCancerParams struct {
-		FormID           uint           `uri:"formID" validate:"required"`
-		Relative         uint           `json:"relative" validate:"required,gt=0"`
-		RelativeRelation *string        `json:"relativeRelation,omitempty"`
-		Name             *string        `json:"name,omitempty"`
-		LifeStatus       *uint          `json:"lifeStatus,omitempty"`
-		Cancer           bool           `json:"cancer" validate:"required"`
-		Cancers          []CancerParams `json:"cancers" validate:"required_if=Cancer true,dive"`
-	}
 
-	params := controller.Validate[FamilyCancerParams](ctx)
-
-	userID, _ := ctx.Get(formController.constants.Context.ID)
-
-	cancers := []formdto.CancerRequest{}
-	for _, c := range params.Cancers {
-		Cancer := formdto.CancerRequest{CancerType: c.CancerType, CancerAge: c.CancerAge}
-		cancers = append(cancers, Cancer)
-	}
-
-	req := formdto.FamilyCancerRequest{
-		UserID:           userID.(uint),
-		FormID:           params.FormID,
-		Relative:         enum.Relative(params.Relative),
-		RelativeRelation: params.RelativeRelation,
-		Name:             params.Name,
-		LifeStatus:       (*enum.LifeStatus)(params.LifeStatus),
-		Cancer:           params.Cancer,
-		Cancers:          cancers,
-	}
-
-	if err := formController.formService.UpsertFamilyCancer(req); err != nil {
-		panic(err)
-	}
-
-	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
-	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertFamilyCancerResponse{})
-}
 func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 	type UpsertContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
@@ -589,19 +546,19 @@ func (formController *CustomerFormController) GetAllCancers(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", response)
 }
 
-func (formController *CustomerFormController) CreateSingleCancer(ctx *gin.Context) {
-	type CreateSingleCancerParams struct {
+func (formController *CustomerFormController) CreateCancer(ctx *gin.Context) {
+	type CreateCancerParams struct {
 		FormID     uint                  `uri:"formID" validate:"required"`
 		CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
 		CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
 		Picture    *multipart.FileHeader `form:"picture,omitempty"`
 	}
 
-	params := controller.Validate[CreateSingleCancerParams](ctx)
+	params := controller.Validate[CreateCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	req := formdto.CreateSingleCancerRequest{
+	req := formdto.CreateCancerRequest{
 		UserID:     userID.(uint),
 		FormID:     params.FormID,
 		CancerType: params.CancerType,
@@ -609,7 +566,7 @@ func (formController *CustomerFormController) CreateSingleCancer(ctx *gin.Contex
 		Picture:    params.Picture,
 	}
 
-	err := formController.formService.CreateSingleCancer(req)
+	err := formController.formService.CreateCancer(req)
 	if err != nil {
 		panic(err)
 	}
@@ -619,8 +576,8 @@ func (formController *CustomerFormController) CreateSingleCancer(ctx *gin.Contex
 	controller.Response(ctx, 201, message, nil)
 }
 
-func (formController *CustomerFormController) UpdateSingleCancer(ctx *gin.Context) {
-	type UpdateSingleCancerParams struct {
+func (formController *CustomerFormController) UpdateCancer(ctx *gin.Context) {
+	type UpdateCancerParams struct {
 		FormID     uint                  `uri:"formID" validate:"required"`
 		CancerID   uint                  `uri:"cancerID" validate:"required"`
 		CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
@@ -628,11 +585,11 @@ func (formController *CustomerFormController) UpdateSingleCancer(ctx *gin.Contex
 		Picture    *multipart.FileHeader `form:"picture,omitempty"`
 	}
 
-	params := controller.Validate[UpdateSingleCancerParams](ctx)
+	params := controller.Validate[UpdateCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	req := formdto.UpdateSingleCancerRequest{
+	req := formdto.UpdateCancerRequest{
 		UserID:     userID.(uint),
 		FormID:     params.FormID,
 		CancerID:   params.CancerID,
@@ -641,7 +598,7 @@ func (formController *CustomerFormController) UpdateSingleCancer(ctx *gin.Contex
 		Picture:    params.Picture,
 	}
 
-	response, err := formController.formService.UpdateSingleCancer(req)
+	response, err := formController.formService.UpdateCancer(req)
 	if err != nil {
 		panic(err)
 	}
@@ -651,23 +608,23 @@ func (formController *CustomerFormController) UpdateSingleCancer(ctx *gin.Contex
 	controller.Response(ctx, 200, message, response)
 }
 
-func (formController *CustomerFormController) DeleteSingleCancer(ctx *gin.Context) {
-	type DeleteSingleCancerParams struct {
+func (formController *CustomerFormController) DeleteCancer(ctx *gin.Context) {
+	type DeleteCancerParams struct {
 		FormID   uint `uri:"formID" validate:"required"`
 		CancerID uint `uri:"cancerID" validate:"required"`
 	}
 
-	params := controller.Validate[DeleteSingleCancerParams](ctx)
+	params := controller.Validate[DeleteCancerParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	req := formdto.DeleteSingleCancerRequest{
+	req := formdto.DeleteCancerRequest{
 		UserID:   userID.(uint),
 		FormID:   params.FormID,
 		CancerID: params.CancerID,
 	}
 
-	err := formController.formService.DeleteSingleCancer(req)
+	err := formController.formService.DeleteCancer(req)
 	if err != nil {
 		panic(err)
 	}
@@ -676,6 +633,121 @@ func (formController *CustomerFormController) DeleteSingleCancer(ctx *gin.Contex
 	message, _ := trans.Translate("successMessage.deleteForm")
 	controller.Response(ctx, 200, message, nil)
 }
+
+func (formController *CustomerFormController) CreateFamilyCancer(ctx *gin.Context) {
+	type CreateFamilyCancerParams struct {
+		FormID           uint                  `uri:"formID" validate:"required"`
+		Relative         uint                  `form:"relative" validate:"required,gt=0"`
+		RelativeRelation *string               `form:"relativeRelation,omitempty"`
+		Name             *string               `form:"name,omitempty"`
+		LifeStatus       *uint                 `form:"lifeStatus,omitempty"`
+		CancerType       uint                  `form:"cancerType" validate:"required,gt=0"`
+		CancerAge        uint                  `form:"cancerAge" validate:"required,gte=0"`
+		Picture          *multipart.FileHeader `form:"picture,omitempty"`
+	}
+
+	params := controller.Validate[CreateFamilyCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	var lifeStatus *enum.LifeStatus
+	if params.LifeStatus != nil {
+		ls := enum.LifeStatus(*params.LifeStatus)
+		lifeStatus = &ls
+	}
+
+	req := formdto.CreateFamilyCancerRequest{
+		UserID:           userID.(uint),
+		FormID:           params.FormID,
+		Relative:         enum.Relative(params.Relative),
+		RelativeRelation: params.RelativeRelation,
+		Name:             params.Name,
+		LifeStatus:       lifeStatus,
+		CancerType:       params.CancerType,
+		CancerAge:        params.CancerAge,
+		Picture:          params.Picture,
+	}
+
+	response, err := formController.formService.CreateFamilyCancer(req)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.createForm")
+	controller.Response(ctx, 201, message, response)
+}
+
+func (formController *CustomerFormController) UpdateFamilyCancer(ctx *gin.Context) {
+	type UpdateFamilyCancerParams struct {
+		FormID           uint                  `uri:"formID" validate:"required"`
+		FamilyCancerID   uint                  `uri:"familyCancerID" validate:"required"`
+		Relative         uint                  `form:"relative" validate:"required,gt=0"`
+		RelativeRelation *string               `form:"relativeRelation,omitempty"`
+		Name             *string               `form:"name,omitempty"`
+		LifeStatus       *uint                 `form:"lifeStatus,omitempty"`
+		CancerType       uint                  `form:"cancerType" validate:"required,gt=0"`
+		CancerAge        uint                  `form:"cancerAge" validate:"required,gte=0"`
+		Picture          *multipart.FileHeader `form:"picture,omitempty"`
+	}
+
+	params := controller.Validate[UpdateFamilyCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	var lifeStatus *enum.LifeStatus
+	if params.LifeStatus != nil {
+		ls := enum.LifeStatus(*params.LifeStatus)
+		lifeStatus = &ls
+	}
+
+	req := formdto.UpdateFamilyCancerRequest{
+		UserID:           userID.(uint),
+		FormID:           params.FormID,
+		FamilyCancerID:   params.FamilyCancerID,
+		Relative:         enum.Relative(params.Relative),
+		RelativeRelation: params.RelativeRelation,
+		Name:             params.Name,
+		LifeStatus:       lifeStatus,
+		CancerType:       params.CancerType,
+		CancerAge:        params.CancerAge,
+		Picture:          params.Picture,
+	}
+
+	response, err := formController.formService.UpdateFamilyCancer(req)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 200, message, response)
+}
+
+func (formController *CustomerFormController) DeleteFamilyCancer(ctx *gin.Context) {
+	type DeleteFamilyCancerParams struct {
+		FormID         uint `uri:"formID" validate:"required"`
+		FamilyCancerID uint `uri:"familyCancerID" validate:"required"`
+	}
+
+	params := controller.Validate[DeleteFamilyCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	req := formdto.DeleteFamilyCancerRequest{
+		UserID:         userID.(uint),
+		FormID:         params.FormID,
+		FamilyCancerID: params.FamilyCancerID,
+	}
+
+	err := formController.formService.DeleteFamilyCancer(req)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", nil)
+}
+
 func (formController *CustomerFormController) GetFamilyCancer(ctx *gin.Context) {
 	type GetFamilyCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`

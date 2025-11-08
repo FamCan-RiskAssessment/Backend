@@ -60,11 +60,6 @@ type GetUserFormsRequest struct {
 	Limit  int
 }
 
-type GetFormRequest struct {
-	UserID uint
-	FormID uint
-}
-
 type GetPartialFormRequest struct {
 	UserID uint
 	FormID uint
@@ -137,7 +132,7 @@ type CancerRequest struct {
 	Picture    *multipart.FileHeader
 }
 
-type CreateSingleCancerRequest struct {
+type CreateCancerRequest struct {
 	UserID uint
 	FormID uint
 
@@ -146,7 +141,7 @@ type CreateSingleCancerRequest struct {
 	Picture    *multipart.FileHeader
 }
 
-type UpdateSingleCancerRequest struct {
+type UpdateCancerRequest struct {
 	UserID   uint
 	FormID   uint
 	CancerID uint
@@ -156,10 +151,42 @@ type UpdateSingleCancerRequest struct {
 	Picture    *multipart.FileHeader
 }
 
-type DeleteSingleCancerRequest struct {
+type DeleteCancerRequest struct {
 	UserID   uint
 	FormID   uint
 	CancerID uint
+}
+
+type CreateFamilyCancerRequest struct {
+	UserID uint
+	FormID uint
+
+	Relative         enum.Relative
+	RelativeRelation *string
+	Name             *string
+	LifeStatus       *enum.LifeStatus
+	CancerType       uint
+	CancerAge        uint
+	Picture          *multipart.FileHeader
+}
+
+type UpdateFamilyCancerRequest struct {
+	UserID           uint
+	FormID           uint
+	FamilyCancerID   uint
+	Relative         enum.Relative
+	RelativeRelation *string
+	Name             *string
+	LifeStatus       *enum.LifeStatus
+	CancerType       uint
+	CancerAge        uint
+	Picture          *multipart.FileHeader
+}
+
+type DeleteFamilyCancerRequest struct {
+	UserID         uint
+	FormID         uint
+	FamilyCancerID uint
 }
 
 type FamilyCancerRequest struct {
@@ -172,13 +199,6 @@ type FamilyCancerRequest struct {
 	LifeStatus       *enum.LifeStatus
 	Cancer           bool
 	Cancers          []CancerRequest
-}
-
-type UpsertFamilyCancerRequest struct {
-	UserID uint
-	FormID uint
-
-	FamilyCancers []FamilyCancerRequest
 }
 
 type UpsertContactRequest struct {
@@ -314,12 +334,6 @@ type UpdateMamographyRequest struct {
 	LastFiveYearBloodTestInStool *bool
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
-}
-type UpdateFamilyCancerRequest struct {
-	UserID uint
-	FormID uint
-
-	FamilyCancers []FamilyCancerRequest
 }
 type UpdateContactRequest struct {
 	UserID uint

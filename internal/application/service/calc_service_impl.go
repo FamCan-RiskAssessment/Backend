@@ -655,7 +655,7 @@ func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
 	return category
 }
 
-func mapFirstDegreeBreastCancerRelatives(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapFirstDegreeBreastCancerRelatives(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 99 // Unknown
 	}
@@ -722,7 +722,7 @@ func mapPersonalCrcCount(cancerInfo []*entity.CancerInfo) int {
 }
 
 // Map count of first-degree relatives with CRC (0, 1, or 2+)
-func mapNumFdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapNumFdrCrc(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -743,7 +743,7 @@ func mapNumFdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map youngest age among FDR with CRC
-func mapYoungestFdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapYoungestFdrCrcAge(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -766,7 +766,7 @@ func mapYoungestFdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map count of FDR with endometrial cancer
-func mapNumFdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapNumFdrEc(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -786,7 +786,7 @@ func mapNumFdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map youngest age among FDR with endometrial cancer
-func mapYoungestFdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapYoungestFdrEcAge(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -809,7 +809,7 @@ func mapYoungestFdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map count of second-degree relatives with CRC (0, 1, or 2+)
-func mapNumSdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapNumSdrCrc(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -832,7 +832,7 @@ func mapNumSdrCrc(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map youngest age among SDR with CRC
-func mapYoungestSdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapYoungestSdrCrcAge(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -858,7 +858,7 @@ func mapYoungestSdrCrcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map count of SDR with endometrial cancer
-func mapNumSdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapNumSdrEc(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -881,7 +881,7 @@ func mapNumSdrEc(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map youngest age among SDR with endometrial cancer
-func mapYoungestSdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapYoungestSdrEcAge(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -907,7 +907,7 @@ func mapYoungestSdrEcAge(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map if FDR has other Lynch syndrome cancers
-func mapHasFdrOtherLs(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapHasFdrOtherLs(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}
@@ -934,7 +934,7 @@ func mapHasFdrOtherLs(familyInfo []*entity.NewFamilyCancerInfo) int {
 }
 
 // Map if SDR has other Lynch syndrome cancers
-func mapHasSdrOtherLs(familyInfo []*entity.NewFamilyCancerInfo) int {
+func mapHasSdrOtherLs(familyInfo []*entity.FamilyCancerInfo) int {
 	if len(familyInfo) == 0 {
 		return 0
 	}

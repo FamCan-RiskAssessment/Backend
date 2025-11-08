@@ -97,7 +97,7 @@ type CancerInfo struct {
 	PicturePath *string `gorm:"type:varchar(255)"`
 }
 
-type NewFamilyCancerInfo struct {
+type FamilyCancerInfo struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
@@ -108,56 +108,7 @@ type NewFamilyCancerInfo struct {
 	LifeStatus       *enum.LifeStatus
 	CancerAge        uint
 	CancerType       enum.CancerType
-}
-
-type FamilyCancerInfo struct {
-	database.Model
-	FormID uint `gorm:"not null;index"`
-	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
-	// page 5
-	ChildCancer     bool    `gorm:"not null;default:false"`
-	ChildName       *string `gorm:"type:varchar(50)"`
-	ChildCancerType *enum.CancerType
-	ChildCancerAge  *uint   `gorm:"type:int"`
-	ChildLifeStatus *string `gorm:"type:varchar(50)"`
-	// Pics
-	MotherCancer     bool    `gorm:"not null;default:false"`
-	MotherName       *string `gorm:"type:varchar(50)"`
-	MotherLifeStatus *string `gorm:"type:varchar(50)"`
-	MotherCancerType *enum.CancerType
-	MotherCancerAge  *uint `gorm:"type:int"`
-	// Pics
-	FatherCancer     bool    `gorm:"not null;default:false"`
-	FatherName       *string `gorm:"type:varchar(50)"`
-	FatherLifeStatus *string `gorm:"type:varchar(50)"`
-	FatherCancerType *enum.CancerType
-	FatherCancerAge  *uint `gorm:"type:int"`
-	// Pics
-	SiblingCancer     bool    `gorm:"not null;default:false"`
-	SiblingName       *string `gorm:"type:varchar(50)"`
-	SiblingLifeStatus *string `gorm:"type:varchar(50)"`
-	SiblingCancerType *enum.CancerType
-	SiblingCancerAge  *uint `gorm:"type:int"`
-	// Pics
-	AmeAmoCancer     bool    `gorm:"not null;default:false"`
-	AmeAmoName       *string `gorm:"type:varchar(50)"`
-	AmeAmoLifeStatus *string `gorm:"type:varchar(50)"`
-	AmeAmoCancerType *enum.CancerType
-	AmeAmoCancerAge  *uint `gorm:"type:int"`
-	// Pics
-	KhaleDaeiCancer     bool    `gorm:"not null;default:false"`
-	KhaleDaeiName       *string `gorm:"type:varchar(50)"`
-	KhaleDaeiLifeStatus *string `gorm:"type:varchar(50)"`
-	KhaleDaeiCancerType *enum.CancerType
-	KhaleDaeiCancerAge  *uint `gorm:"type:int"`
-	// Pics
-	OtherRelativeCancer     *bool   `gorm:"type:boolean"`
-	OtherRelativeName       *string `gorm:"type:varchar(50)"`
-	OtherRelativeRelation   *string `gorm:"type:varchar(50)"`
-	OtherRelativeLifeStatus *string `gorm:"type:varchar(50)"`
-	OtherRelativeCancerType *enum.CancerType
-	OtherRelativeCancerAge  *uint `gorm:"type:int"`
-	// Pics
+	PicturePath      *string `gorm:"type:varchar(255)"`
 }
 
 type ContactInfo struct {

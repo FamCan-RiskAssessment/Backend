@@ -107,6 +107,10 @@ func (path *BucketPath) GetCancerPath(formID uint, cancerType enum.CancerType, f
 	return fmt.Sprintf("%d/%s/%s", formID, cancerType.String(), fileName)
 }
 
+func (path *BucketPath) GetFamilyCancerPath(formID uint, cancerType enum.CancerType, fileName string) string {
+	return fmt.Sprintf("familyCancer/%d/%s/%s", formID, cancerType.String(), fileName)
+}
+
 func (r *RedisKey) GenerateOperatorValidationOTPKey(operatorID uint, phone string) string {
 	return fmt.Sprintf("operator:validation:otp:%d:%s", operatorID, phone)
 }

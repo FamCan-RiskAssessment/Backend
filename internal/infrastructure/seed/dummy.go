@@ -294,7 +294,7 @@ func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes 
 	}
 	return cancerInfo
 }
-func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []enum.LifeStatus, relations []string) *entity.NewFamilyCancerInfo {
+func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []enum.LifeStatus, relations []string) *entity.FamilyCancerInfo {
 
 	relative := enum.Relative(formIndex%14 + 1)
 	var relativeRelation *string = nil
@@ -311,7 +311,7 @@ func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancer
 	cancerAge := uintPtr(uint(25 + (formIndex % 30)))
 	cancerType := cancerTypes[formIndex%len(cancerTypes)]
 
-	familyCancerInfo := &entity.NewFamilyCancerInfo{
+	familyCancerInfo := &entity.FamilyCancerInfo{
 		FormID:           formID,
 		Relative:         relative,
 		RelativeRelation: relativeRelation,

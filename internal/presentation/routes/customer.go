@@ -15,7 +15,7 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.PUT("/basic", app.Controllers.Customer.FormController.UpdateBasicInfo)
 			formGroup.PUT("/generalhealth", app.Controllers.Customer.FormController.UpsertGeneralHealth)
 			formGroup.PUT("/mamography", app.Controllers.Customer.FormController.UpsertMamography)
-			formGroup.PUT("/familycancer", app.Controllers.Customer.FormController.UpsertFamilyCancer)
+			// formGroup.PUT("/familycancer", app.Controllers.Customer.FormController.UpsertFamilyCancer)
 			formGroup.PUT("/contact", app.Controllers.Customer.FormController.UpsertContact)
 			formGroup.PUT("/lungcancer", app.Controllers.Customer.FormController.UpsertLungCancer)
 			formGroup.PUT("/status", app.Controllers.Customer.FormController.ChangeFormStatus)
@@ -28,10 +28,15 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.GET("/lungcancer", app.Controllers.Customer.FormController.GetLungCancer)
 
 			// Single cancer operations (more specific routes first)
-			formGroup.PUT("/cancer/:cancerID", app.Controllers.Customer.FormController.UpdateSingleCancer)
-			formGroup.DELETE("/cancer/:cancerID", app.Controllers.Customer.FormController.DeleteSingleCancer)
-			formGroup.POST("/cancer", app.Controllers.Customer.FormController.CreateSingleCancer)
+			formGroup.PUT("/cancer/:cancerID", app.Controllers.Customer.FormController.UpdateCancer)
+			formGroup.DELETE("/cancer/:cancerID", app.Controllers.Customer.FormController.DeleteCancer)
+			formGroup.POST("/cancer", app.Controllers.Customer.FormController.CreateCancer)
 			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
+
+			// Single family cancer operations (more specific routes first)
+			formGroup.POST("/familycancer", app.Controllers.Customer.FormController.CreateFamilyCancer)
+			formGroup.PUT("/familycancer/:familyCancerID", app.Controllers.Customer.FormController.UpdateFamilyCancer)
+			formGroup.DELETE("/familycancer/:familyCancerID", app.Controllers.Customer.FormController.DeleteFamilyCancer)
 
 			formGroup.DELETE("", app.Controllers.Customer.FormController.DeleteForm)
 		}

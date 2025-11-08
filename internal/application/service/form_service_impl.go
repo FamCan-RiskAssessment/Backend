@@ -71,6 +71,42 @@ func (formService *FormService) isOperator(userID uint) (bool, error) {
 	return false, nil
 }
 
+func (formService *FormService) isSupervisor(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.Supervisor.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) hasPermission(userID uint, permission enum.PermissionType) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	permissionName := permission.String()
+	allPermissionName := enum.PermissionAll.String()
+
+	for _, role := range userRoles {
+		for _, perm := range role.Permissions {
+			// PermissionResponse.Name is permission.Type.String()
+			if perm.Name == permissionName || perm.Name == allPermissionName {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
 func (formService *FormService) logOperatorFormUpdate(operatorID, formID uint, sectionName string) {
 	log := actionlogdto.LogAction{
 		ActorID:    operatorID,
@@ -108,7 +144,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	form := &entity.Form{
 		UserID:             request.UserID,
-		Status:             enum.FormStatusInComplete,
+		Status:             enum.FormStatusPending,
 		FilledByOperatorID: request.FilledByOperatorID,
 	}
 
@@ -1631,7 +1667,7 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	return formResponses, count, nil
 }
 
-func (formService *FormService) AcceptForm(formID uint) error {
+func (formService *FormService) AcceptForm(formID uint, userID uint) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {
 		return err
@@ -1640,6 +1676,21 @@ func (formService *FormService) AcceptForm(formID uint) error {
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor (has PermissionHandleOperators) or assigned operator can accept forms
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can accept forms"}
+		return forbiddenError
 	}
 
 	form.Status = enum.FormStatusApproved
@@ -1651,7 +1702,7 @@ func (formService *FormService) AcceptForm(formID uint) error {
 	return nil
 }
 
-func (formService *FormService) RejectForm(formID uint) error {
+func (formService *FormService) RejectForm(formID uint, userID uint) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, formID)
 	if err != nil {
 		return err
@@ -1660,6 +1711,21 @@ func (formService *FormService) RejectForm(formID uint) error {
 	if form == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
 		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor (has PermissionHandleOperators) or assigned operator can reject forms
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can reject forms"}
+		return forbiddenError
 	}
 
 	form.Status = enum.FormStatusRejected
@@ -2085,6 +2151,7 @@ func (formService *FormService) AssignOperator(request formdto.AssignOperatorReq
 	}
 
 	form.OperatorID = &request.OperatorID
+	form.Status = enum.FormStatusAssigned
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
 		return err

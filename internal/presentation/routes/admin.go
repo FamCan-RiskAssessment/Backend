@@ -63,6 +63,8 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 		operatorFormGroup := operators.Group("/form/:formID")
 		{
+			operatorFormGroup.PUT("/accept", app.Controllers.Admin.FormController.AcceptForm)
+			operatorFormGroup.PUT("/reject", app.Controllers.Admin.FormController.RejectForm)
 			operatorFormGroup.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)
 			operatorFormGroup.PATCH("/generalhealth", app.Controllers.Admin.FormController.UpdateGeneralHealth)
 			operatorFormGroup.PATCH("/mamography", app.Controllers.Admin.FormController.UpdateMamography)
@@ -107,13 +109,12 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		{
 			supervisorFormManagement.PUT("/operator", app.Controllers.Admin.FormController.AssignOperator)
 			supervisorFormManagement.DELETE("/operator", app.Controllers.Admin.FormController.UnassignOperator)
-
+			supervisorFormManagement.PUT("/accept", app.Controllers.Admin.FormController.AcceptForm)
+			supervisorFormManagement.PUT("/reject", app.Controllers.Admin.FormController.RejectForm)
 		}
 
 		formManagement := forms.Group("/:formID")
 		{
-			formManagement.PUT("accept", app.Controllers.Admin.FormController.AcceptForm)
-			formManagement.PUT("reject", app.Controllers.Admin.FormController.RejectForm)
 			formManagement.PATCH("/basic", app.Controllers.Admin.FormController.UpdateBasicInfo)
 			formManagement.PATCH("/generalhealth", app.Controllers.Admin.FormController.UpdateGeneralHealth)
 			formManagement.PATCH("/mamography", app.Controllers.Admin.FormController.UpdateMamography)

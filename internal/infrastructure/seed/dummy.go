@@ -101,7 +101,7 @@ func (d *DummySeeder) seedUsers() {
 }
 
 func (d *DummySeeder) seedForms() {
-	statuses := []enum.FormStatus{enum.FormStatusPending, enum.FormStatusApproved, enum.FormStatusRejected, enum.FormStatusInComplete, enum.FormStatusReady}
+	statuses := enum.GetAllFormStatuses()
 	menopausalStatuses := enum.GetAllMenopausalStatuses()
 	lifeStatuses := enum.GetAllLifeStatuss()
 	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
@@ -295,20 +295,18 @@ func (d *DummySeeder) createDummyCancer(formID uint, formIndex int, cancerTypes 
 	return cancerInfo
 }
 func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancerTypes []enum.CancerType, lifeStatuses []enum.LifeStatus, relations []string) *entity.FamilyCancerInfo {
+	allRelatives := enum.GetAllRelatives()
+	relative := allRelatives[formIndex%len(allRelatives)]
 
-	relative := enum.Relative(formIndex%14 + 1)
 	var relativeRelation *string = nil
-	if relative == 14 {
-		relativeRelation = stringPtr("پسرعمو")
+	if relative == enum.DistantRelative && len(relations) > 0 {
+		relativeRelation = stringPtr(relations[formIndex%len(relations)])
 	}
+
 	name := stringPtr(fmt.Sprintf("%s %d", relative.String(), formIndex+1))
-	var lifeStatus enum.LifeStatus
-	if formIndex%2 == 0 {
-		lifeStatus = enum.Alive
-	} else {
-		lifeStatus = enum.Deceased
-	}
-	cancerAge := uintPtr(uint(25 + (formIndex % 30)))
+
+	lifeStatus := lifeStatuses[formIndex%len(lifeStatuses)]
+	cancerAge := uint(25 + (formIndex % 30))
 	cancerType := cancerTypes[formIndex%len(cancerTypes)]
 
 	familyCancerInfo := &entity.FamilyCancerInfo{
@@ -317,7 +315,7 @@ func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancer
 		RelativeRelation: relativeRelation,
 		LifeStatus:       &lifeStatus,
 		Name:             name,
-		CancerAge:        *cancerAge,
+		CancerAge:        cancerAge,
 		CancerType:       cancerType,
 	}
 

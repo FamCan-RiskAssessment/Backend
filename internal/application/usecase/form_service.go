@@ -38,8 +38,8 @@ type FormService interface {
 	DeleteForm(request formdto.DeleteFormRequest) error
 	GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error)
 	GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error)
-	AcceptForm(formID uint) error
-	RejectForm(formID uint) error
+	AcceptForm(formID uint, userID uint) error
+	RejectForm(formID uint, userID uint) error
 	AssignOperator(request formdto.AssignOperatorRequest) error
 	UnassignOperator(request formdto.UnassignOperatorRequest) error
 

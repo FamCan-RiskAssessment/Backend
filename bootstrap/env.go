@@ -40,9 +40,12 @@ type Redis struct {
 }
 
 type SMSGateway struct {
-	APIKey string
+	Provider string
+	APIKey   string
+	Username string
+	Password string
+	Source   string
 }
-
 type Pagination struct {
 	DefaultPage     int
 	DefaultPageSize int
@@ -100,7 +103,11 @@ func NewEnv() *Env {
 			RDBNumber: os.Getenv("RDB_NUMBER"),
 		},
 		SMSGateway: SMSGateway{
-			APIKey: os.Getenv("SMS_API_KEY"),
+			Provider: os.Getenv("SMS_PROVIDER"),
+			APIKey:   os.Getenv("SMS_API_KEY"),
+			Username: os.Getenv("SMS_USERNAME"),
+			Password: os.Getenv("SMS_PASSWORD"),
+			Source:   os.Getenv("SMS_SOURCE"),
 		},
 		Pagination: Pagination{
 			DefaultPage:     getEnvInt("PAGINATION_DEFAULT_PAGE", 1),

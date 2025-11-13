@@ -49,4 +49,5 @@ type FormService interface {
 	GetAllFormStatuses() ([]generaldto.EnumResponse, error)
 	GetAllHyperplasiaInBiopsyStatuses() ([]generaldto.EnumResponse, error)
 	GetAllLifeStatuses() ([]generaldto.EnumResponse, error)
+	GetAllRelativeTypes() ([]generaldto.EnumResponse, error)
 }

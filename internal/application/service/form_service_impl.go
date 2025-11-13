@@ -2266,3 +2266,15 @@ func (formService *FormService) GetAllLifeStatuses() ([]generaldto.EnumResponse,
 	}
 	return response, nil
 }
+
+func (formService *FormService) GetAllRelativeTypes() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllRelatives()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}

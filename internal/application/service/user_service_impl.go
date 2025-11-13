@@ -100,10 +100,10 @@ func (userService *UserService) Login(loginInfo userdto.LoginRequest) error {
 		return err
 	}
 
-	// err = userService.smsService.SendOTP(loginInfo.Phone, otp)
-	// if err != nil {
-	// 	return err
-	// }
+	err = userService.smsService.SendOTP(loginInfo.Phone, otp)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

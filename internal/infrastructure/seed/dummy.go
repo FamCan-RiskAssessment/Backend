@@ -103,7 +103,7 @@ func (d *DummySeeder) seedUsers() {
 func (d *DummySeeder) seedForms() {
 	statuses := enum.GetAllFormStatuses()
 	menopausalStatuses := enum.GetAllMenopausalStatuses()
-	lifeStatuses := enum.GetAllLifeStatuss()
+	lifeStatuses := enum.GetAllLifeStatus()
 	hrtTypes := []string{"استروژن", "پروژسترون", "ترکیبی", "سایر"}
 	insuranceStatuses := []string{"تأمین اجتماعی", "خدمات درمانی", "نیروهای مسلح", "خصوصی", "ندارد"}
 	occupationalExposures := []string{

@@ -57,3 +57,11 @@ func (fc *GeneralFormController) GetAllHyperplasiaInBiopsyStatuses(ctx *gin.Cont
 	}
 	controller.Response(ctx, 200, "", statuses)
 }
+
+func (fc *GeneralFormController) GetAllLifeStatuses(ctx *gin.Context) {
+	statuses, err := fc.formService.GetAllLifeStatuses()
+	if err != nil {
+		panic(err)
+	}
+	controller.Response(ctx, 200, "", statuses)
+}

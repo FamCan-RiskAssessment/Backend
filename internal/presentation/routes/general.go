@@ -23,6 +23,7 @@ func SetupGeneralRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		enums.GET("/menopausal-statuses", app.Controllers.General.FormController.GetAllMenopausalStatuses)
 		enums.GET("/form-statuses", app.Controllers.General.FormController.GetAllFormStatuses)
 		enums.GET("/hyperplasiaInBiopsy-statuses", app.Controllers.General.FormController.GetAllHyperplasiaInBiopsyStatuses)
+		enums.GET("/life-statuses", app.Controllers.General.FormController.GetAllLifeStatuses)
 
 	}
 }

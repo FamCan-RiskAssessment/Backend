@@ -2254,3 +2254,15 @@ func (formService *FormService) GetAllHyperplasiaInBiopsyStatuses() ([]generaldt
 	}
 	return response, nil
 }
+
+func (formService *FormService) GetAllLifeStatuses() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllLifeStatus()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}

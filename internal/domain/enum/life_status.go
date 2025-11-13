@@ -17,7 +17,7 @@ func (g LifeStatus) String() string {
 	return "نامشخص"
 }
 
-func GetAllLifeStatuss() []LifeStatus {
+func GetAllLifeStatus() []LifeStatus {
 	return []LifeStatus{
 		Alive,
 		Deceased,

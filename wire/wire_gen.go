@@ -60,12 +60,12 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
 	smsGateway := ProvideSMSGatewayConfig(config)
 	smsTemplates := ProvideSMSTemplates(config)
-	smsService := sms.NewSMSService(smsGateway, smsTemplates)
+	asanakSMSService := sms.NewAsanakSMSService(smsGateway, smsTemplates)
 	otp := ProvideOTPConfig(config)
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
 	actionLogRepository := postgres.NewActionLogRepository()
 	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
-	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase)
+	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, asanakSMSService, otpService, actionLogService, postgresDatabase)
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	formRepository := postgres.NewFormRepository()
 	s3 := ProvideStorageConfig(config)
@@ -115,7 +115,7 @@ var DatabaseProviderSet = wire.NewSet(database.NewPostgresDatabase, database.New
 
 var RepositoryProviderSet = wire.NewSet(postgres.NewUserRepository, postgres.NewFormRepository, postgres.NewActionLogRepository, redis.NewUserCacheRepository, wire.Bind(new(postgres2.UserRepository), new(*postgres.UserRepository)), wire.Bind(new(postgres2.FormRepository), new(*postgres.FormRepository)), wire.Bind(new(postgres2.ActionLogRepository), new(*postgres.ActionLogRepository)), wire.Bind(new(redis2.UserCacheRepository), new(*redis.UserCacheRepository)))
 
-var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, sms.NewSMSService, service.NewActionLogService, service.NewCalcService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)), wire.Bind(new(usecase.CalcService), new(*service.CalcService)))
+var ServiceProviderSet = wire.NewSet(service.NewUserService, service.NewFormService, service.NewJWTService, service.NewOTPService, service.NewActionLogService, service.NewCalcService, wire.Bind(new(usecase.UserService), new(*service.UserService)), wire.Bind(new(usecase.FormService), new(*service.FormService)), wire.Bind(new(usecase.OtpService), new(*service.OTPService)), wire.Bind(new(usecase.JwtService), new(*service.JWTService)), wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)), wire.Bind(new(usecase.CalcService), new(*service.CalcService)))
 
 var GeneralControllerProviderSet = wire.NewSet(user.NewGeneralUserController, form.NewGeneralFormController, wire.Struct(new(GeneralControllers), "*"))
 
@@ -125,7 +125,7 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)))
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)))
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
 

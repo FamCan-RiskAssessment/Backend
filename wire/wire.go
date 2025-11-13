@@ -51,14 +51,12 @@ var ServiceProviderSet = wire.NewSet(
 	service.NewFormService,
 	service.NewJWTService,
 	service.NewOTPService,
-	sms.NewSMSService,
 	service.NewActionLogService,
 	service.NewCalcService,
 	wire.Bind(new(usecase.UserService), new(*service.UserService)),
 	wire.Bind(new(usecase.FormService), new(*service.FormService)),
 	wire.Bind(new(usecase.OtpService), new(*service.OTPService)),
 	wire.Bind(new(usecase.JwtService), new(*service.JWTService)),
-	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
 	wire.Bind(new(usecase.ActionLogService), new(*service.ActionLogService)),
 	wire.Bind(new(usecase.CalcService), new(*service.CalcService)),
 )
@@ -90,7 +88,9 @@ var AdapterProviderSet = wire.NewSet(
 	infraJWT.NewJWTKeyManager,
 	infraLocalization.NewTranslationService,
 	infraStorage.NewS3Storage,
+	sms.NewAsanakSMSService,
 	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.S3Storage)),
+	wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)),
 )
 
 var MiddlewareProviderSet = wire.NewSet(

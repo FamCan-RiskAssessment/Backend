@@ -54,3 +54,23 @@ type SendFormToGailRequest struct {
 	Race         string `json:"race"` // Changed from int to string
 	ShowRR       bool   `json:"show_rr"`
 }
+
+type SendFormToPLCORequest struct {
+	Age                   int     `json:"age"`
+	Education             int     `json:"education"`
+	BMI                   float64 `json:"bmi"`
+	COPD                  int     `json:"copd"`
+	PersonalCancerHistory int     `json:"personal_cancer_history"`
+	FamilyLungCancer      int     `json:"family_lung_cancer"`
+	RaceWhite             int     `json:"race_white"`
+	RaceBlack             int     `json:"race_black"`
+	RaceHispanic          int     `json:"race_hispanic"`
+	RaceAsian             int     `json:"race_asian"`
+	RaceNHPI              int     `json:"race_nhpi"`
+	RaceAmericanIndian    int     `json:"race_american_indian"`
+	SmokingStatus         int     `json:"smoking_status"`
+	CigarettesPerDay      float64 `json:"cigarettes_per_day"`
+	SmokingDuration       int     `json:"smoking_duration"`
+	YearsQuit             int     `json:"years_quit"`
+	ScreeningResult       *string `json:"screening_result,omitempty"`
+}

@@ -76,6 +76,7 @@ type CalcURL struct {
 	Premm5 string
 	BCRA   string
 	Gail   string
+	PLCO   string
 }
 
 func NewEnv() *Env {
@@ -128,6 +129,7 @@ func NewEnv() *Env {
 			Premm5: os.Getenv("PREMM5_API_URL"),
 			BCRA:   os.Getenv("BCRA_API_URL"),
 			Gail:   os.Getenv("GAIL_API_URL"),
+			PLCO:   os.Getenv("PLCO_API_URL"),
 		},
 	}
 }

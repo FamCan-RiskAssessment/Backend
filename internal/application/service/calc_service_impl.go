@@ -79,6 +79,11 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		if err != nil {
 			return calcdto.ModelResponse{}, err
 		}
+	case enum.CalcPLCO:
+		response, err = calcService.sendFormToPLCO(form, request.UserID)
+		if err != nil {
+			return calcdto.ModelResponse{}, err
+		}
 	}
 
 	// Update form status to sent to calc
@@ -388,6 +393,42 @@ func (calcService *CalcService) GetGailResults(request calcdto.SendFormToCalcReq
 	return response, nil
 }
 
+func (calcService *CalcService) GetPLCOResults(request calcdto.SendFormToCalcRequest) (calcdto.PLCOResponse, error) {
+	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.PLCOResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
+		return calcdto.PLCOResponse{}, notFoundError
+	}
+
+	result, err := calcService.formRepository.FindPLCOResultByFormID(calcService.db, request.FormID)
+	if err != nil {
+		return calcdto.PLCOResponse{}, err
+	}
+
+	if result == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
+		return calcdto.PLCOResponse{}, notFoundError
+	}
+
+	response := calcdto.PLCOResponse{
+		PLCOM20126YrRisk:     result.PLCOM20126YrRisk,
+		PLCOM20123YrRisk:     result.PLCOM20123YrRisk,
+		PLCOM2012RiskPercent: result.PLCOM2012RiskPercent,
+	}
+
+	if result.PLCO2012Results3Yr != nil && result.PLCO2012Results6Yr != nil {
+		response.PLCO2012Results = map[string]float64{
+			"risk_3yr": *result.PLCO2012Results3Yr,
+			"risk_6yr": *result.PLCO2012Results6Yr,
+		}
+	}
+
+	return response, nil
+}
+
 func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
@@ -587,6 +628,228 @@ func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto
 	}
 
 	return calcService.formRepository.UpdateGailResult(calcService.db, existingResult)
+}
+
+func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
+	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	lungCancerInfo, err := calcService.formRepository.FindLungCancerByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	if lungCancerInfo == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
+		return calcdto.ModelResponse{}, notFoundError
+	}
+
+	cancerInfo, err := calcService.formRepository.FindCancersByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	// Calculate current age
+	currentAge := calculateAge(basicInfo.BirthDate)
+
+	// Calculate BMI from height and weight
+	bmi := basicInfo.Weight / ((basicInfo.Height / 100) * (basicInfo.Height / 100))
+
+	// Map COPD from ChronicLungDisease
+	copd := 0
+	if lungCancerInfo.ChronicLungDisease != nil && *lungCancerInfo.ChronicLungDisease {
+		copd = 1
+	}
+
+	// Map personal cancer history
+	personalCancerHistory := 0
+	if len(cancerInfo) > 0 {
+		personalCancerHistory = 1
+	}
+
+	// Map family lung cancer history
+	familyLungCancer := 0
+	for _, info := range familyCancerInfo {
+		if info.CancerType == enum.CancerTypeLung {
+			familyLungCancer = 1
+			break
+		}
+	}
+
+	// Map smoking status and history
+	smokingStatus := 0 // 0 = Former smoker
+	cigarettesPerDay := 0.0
+	smokingDuration := 0
+	yearsQuit := 0
+
+	if lungCancerInfo.CurrentSmoking {
+		smokingStatus = 1 // 1 = Current smoker
+		if lungCancerInfo.CigarettesPerDayCurrent != nil {
+			cigarettesPerDay = float64(*lungCancerInfo.CigarettesPerDayCurrent)
+		}
+		if lungCancerInfo.SmokingStartAgeCurrent != nil {
+			smokingDuration = currentAge - int(*lungCancerInfo.SmokingStartAgeCurrent)
+			if smokingDuration < 0 {
+				smokingDuration = 0
+			}
+		}
+	} else if lungCancerInfo.PastSmoking != nil && *lungCancerInfo.PastSmoking != "" {
+		// Former smoker
+		if lungCancerInfo.CigarettesPerDayPast != nil {
+			cigarettesPerDay = float64(*lungCancerInfo.CigarettesPerDayPast)
+		}
+		if lungCancerInfo.SmokingStartAgePast != nil {
+			// Estimate smoking duration - assume they smoked until recently or use a reasonable estimate
+			// Since we don't have quit age, we'll estimate years quit as 0 (recently quit)
+			// This is conservative and the model can handle it
+			estimatedQuitAge := currentAge - 1 // Assume they quit 1 year ago
+			if estimatedQuitAge > int(*lungCancerInfo.SmokingStartAgePast) {
+				smokingDuration = estimatedQuitAge - int(*lungCancerInfo.SmokingStartAgePast)
+				yearsQuit = 1 // Assume quit 1 year ago
+			} else {
+				smokingDuration = currentAge - int(*lungCancerInfo.SmokingStartAgePast)
+				yearsQuit = 0
+			}
+			if smokingDuration < 0 {
+				smokingDuration = 0
+			}
+		}
+	}
+
+	// Build PLCO request
+	request := calcdto.SendFormToPLCORequest{
+		Age:                   currentAge,
+		Education:             4, // Default to "Some college" (can be updated when education field is added)
+		BMI:                   bmi,
+		COPD:                  copd,
+		PersonalCancerHistory: personalCancerHistory,
+		FamilyLungCancer:      familyLungCancer,
+		RaceWhite:             1, // Default to White (can be updated when race field is added)
+		RaceBlack:             0,
+		RaceHispanic:          0,
+		RaceAsian:             0,
+		RaceNHPI:              0,
+		RaceAmericanIndian:    0,
+		SmokingStatus:         smokingStatus,
+		CigarettesPerDay:      cigarettesPerDay,
+		SmokingDuration:       smokingDuration,
+		YearsQuit:             yearsQuit,
+		ScreeningResult:       nil, // Optional - not currently collected
+	}
+
+	// Make API call
+	plcoResponse, err := calcService.callPLCOAPI(request)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	// Save result to database
+	err = calcService.savePLCOResult(form.ID, plcoResponse)
+	if err != nil {
+		return calcdto.ModelResponse{}, err
+	}
+
+	log := actionlogdto.LogAction{
+		ActorID:    userID,
+		Action:     enum.ActionTypeFormSentToPLCO,
+		ResourceID: &form.ID,
+	}
+	calcService.actionLogService.LogAction(log)
+
+	return calcdto.ModelResponse{
+		Name:        "PLCO",
+		Probability: plcoResponse.PLCOM2012RiskPercent / 100.0,
+	}, nil
+}
+
+func (calcService *CalcService) callPLCOAPI(request calcdto.SendFormToPLCORequest) (calcdto.PLCOResponse, error) {
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		return calcdto.PLCOResponse{}, fmt.Errorf("failed to marshal PLCO request: %w", err)
+	}
+
+	fmt.Printf("PLCO Request: Age=%d, Education=%d, BMI=%.2f, COPD=%d, PersonalCancer=%d, FamilyLungCancer=%d, SmokingStatus=%d, CigarettesPerDay=%.1f, SmokingDuration=%d, YearsQuit=%d\n",
+		request.Age, request.Education, request.BMI, request.COPD, request.PersonalCancerHistory, request.FamilyLungCancer, request.SmokingStatus, request.CigarettesPerDay, request.SmokingDuration, request.YearsQuit)
+
+	url := fmt.Sprintf("%s/calculate", calcService.calcURL.PLCO)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return calcdto.PLCOResponse{}, fmt.Errorf("failed to create PLCO request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return calcdto.PLCOResponse{}, fmt.Errorf("failed to call PLCO API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return calcdto.PLCOResponse{}, fmt.Errorf("failed to read PLCO response: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return calcdto.PLCOResponse{}, fmt.Errorf("PLCO API returned error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	var plcoResponse calcdto.PLCOResponse
+	err = json.Unmarshal(body, &plcoResponse)
+	if err != nil {
+		return calcdto.PLCOResponse{}, fmt.Errorf("failed to parse PLCO response: %w", err)
+	}
+
+	return plcoResponse, nil
+}
+
+func (calcService *CalcService) savePLCOResult(formID uint, plcoResponse calcdto.PLCOResponse) error {
+	existingResult, err := calcService.formRepository.FindPLCOResultByFormID(calcService.db, formID)
+	if err != nil {
+		return err
+	}
+
+	if existingResult == nil {
+		plcoResult := &entity.PLCOResult{
+			FormID:               formID,
+			PLCOM20126YrRisk:     plcoResponse.PLCOM20126YrRisk,
+			PLCOM20123YrRisk:     plcoResponse.PLCOM20123YrRisk,
+			PLCOM2012RiskPercent: plcoResponse.PLCOM2012RiskPercent,
+		}
+
+		if plcoResponse.PLCO2012Results != nil {
+			if risk3yr, ok := plcoResponse.PLCO2012Results["risk_3yr"]; ok {
+				plcoResult.PLCO2012Results3Yr = &risk3yr
+			}
+			if risk6yr, ok := plcoResponse.PLCO2012Results["risk_6yr"]; ok {
+				plcoResult.PLCO2012Results6Yr = &risk6yr
+			}
+		}
+
+		return calcService.formRepository.CreatePLCOResult(calcService.db, plcoResult)
+	}
+
+	existingResult.PLCOM20126YrRisk = plcoResponse.PLCOM20126YrRisk
+	existingResult.PLCOM20123YrRisk = plcoResponse.PLCOM20123YrRisk
+	existingResult.PLCOM2012RiskPercent = plcoResponse.PLCOM2012RiskPercent
+
+	if plcoResponse.PLCO2012Results != nil {
+		if risk3yr, ok := plcoResponse.PLCO2012Results["risk_3yr"]; ok {
+			existingResult.PLCO2012Results3Yr = &risk3yr
+		}
+		if risk6yr, ok := plcoResponse.PLCO2012Results["risk_6yr"]; ok {
+			existingResult.PLCO2012Results6Yr = &risk6yr
+		}
+	}
+
+	return calcService.formRepository.UpdatePLCOResult(calcService.db, existingResult)
 }
 
 func mapHyperplasiaStatus(mamographyInfo *entity.MamoGraphyInfo) int {

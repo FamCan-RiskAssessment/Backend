@@ -216,3 +216,15 @@ type GailResult struct {
 	AbsoluteRisk float64 `gorm:"not null"`
 	RelativeRisk *float64
 }
+
+type PLCOResult struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:onDelete:CASCADE"`
+
+	PLCOM20126YrRisk     float64  `gorm:"type:decimal(10,6);not null"`
+	PLCOM20123YrRisk     float64  `gorm:"type:decimal(10,6);not null"`
+	PLCOM2012RiskPercent float64  `gorm:"type:decimal(10,6);not null"`
+	PLCO2012Results3Yr   *float64 `gorm:"type:decimal(10,6)"`
+	PLCO2012Results6Yr   *float64 `gorm:"type:decimal(10,6)"`
+}

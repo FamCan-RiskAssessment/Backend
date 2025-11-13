@@ -81,4 +81,8 @@ type FormRepository interface {
 	FindGailResultByFormID(db database.Database, formID uint) (*entity.GailResult, error)
 	CreateGailResult(db database.Database, result *entity.GailResult) error
 	UpdateGailResult(db database.Database, result *entity.GailResult) error
+
+	FindPLCOResultByFormID(db database.Database, formID uint) (*entity.PLCOResult, error)
+	CreatePLCOResult(db database.Database, result *entity.PLCOResult) error
+	UpdatePLCOResult(db database.Database, result *entity.PLCOResult) error
 }

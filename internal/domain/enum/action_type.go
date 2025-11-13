@@ -9,6 +9,7 @@ const (
 	ActionTypeFormSentToPremm5
 	ActionTypeFormSentToBCRA
 	ActionTypeFormSentToGail
+	ActionTypeFormSentToPLCO
 	ActionTypeOperatorCreatedForm
 	ActionTypeOperatorUpdatedForm
 )
@@ -27,6 +28,8 @@ func (at ActionType) String() string {
 		return "فرم به مدل BCRA فرستاده شد"
 	case ActionTypeFormSentToGail:
 		return "فرم به مدل Gail فرستاده شد"
+	case ActionTypeFormSentToPLCO:
+		return "فرم به مدل PLCO فرستاده شد"
 	case ActionTypeOperatorCreatedForm:
 		return "اپراتور فرم ایجاد کرد"
 	case ActionTypeOperatorUpdatedForm:
@@ -43,6 +46,7 @@ func GetAllActionTypes() []ActionType {
 		ActionTypeFormSentToPremm5,
 		ActionTypeFormSentToBCRA,
 		ActionTypeFormSentToGail,
+		ActionTypeFormSentToPLCO,
 		ActionTypeOperatorCreatedForm,
 		ActionTypeOperatorUpdatedForm,
 	}

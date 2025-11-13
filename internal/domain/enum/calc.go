@@ -6,6 +6,7 @@ const (
 	CalcPremm5 Calc = iota + 1
 	CalcBCRA
 	CalcGail
+	CalcPLCO
 )
 
 func (c Calc) String() string {
@@ -16,6 +17,8 @@ func (c Calc) String() string {
 		return "bcra"
 	case CalcGail:
 		return "gail"
+	case CalcPLCO:
+		return "plco"
 	}
 	return "unknown"
 }
@@ -25,5 +28,6 @@ func GetAllCalcs() []Calc {
 		CalcPremm5,
 		CalcBCRA,
 		CalcGail,
+		CalcPLCO,
 	}
 }

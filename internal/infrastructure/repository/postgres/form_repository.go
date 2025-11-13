@@ -445,3 +445,23 @@ func (r *FormRepository) CreateGailResult(db database.Database, result *entity.G
 func (r *FormRepository) UpdateGailResult(db database.Database, result *entity.GailResult) error {
 	return db.GetDB().Save(result).Error
 }
+
+func (r *FormRepository) FindPLCOResultByFormID(db database.Database, formID uint) (*entity.PLCOResult, error) {
+	var result entity.PLCOResult
+	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *FormRepository) CreatePLCOResult(db database.Database, result *entity.PLCOResult) error {
+	return db.GetDB().Create(result).Error
+}
+
+func (r *FormRepository) UpdatePLCOResult(db database.Database, result *entity.PLCOResult) error {
+	return db.GetDB().Save(result).Error
+}

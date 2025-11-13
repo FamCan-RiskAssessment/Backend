@@ -28,3 +28,10 @@ type GailResponse struct {
 	AbsoluteRisk float64  `json:"absolute_risk"`
 	RelativeRisk *float64 `json:"relative_risk"`
 }
+
+type PLCOResponse struct {
+	PLCOM20126YrRisk     float64            `json:"plcom2012_6yr_risk"`
+	PLCOM20123YrRisk     float64            `json:"plcom2012_3yr_risk"`
+	PLCOM2012RiskPercent float64            `json:"plcom2012_risk_percent"`
+	PLCO2012Results      map[string]float64 `json:"plco2012results,omitempty"`
+}

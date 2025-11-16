@@ -66,8 +66,11 @@ type S3 struct {
 }
 
 type BucketName struct {
-	Mamography string
-	Cancer     string
+	Mamography        string
+	Cancer            string
+	GeneticTest       string
+	FatherGeneticTest string
+	MotherGeneticTest string
 }
 
 type SuperAdmin struct {
@@ -128,8 +131,11 @@ func NewEnv() *Env {
 			SecretKey: os.Getenv("S3_SECRET_KEY"),
 			Endpoint:  os.Getenv("S3_ENDPOINT"),
 			Buckets: BucketName{
-				Mamography: os.Getenv("MAMOGRAPHY_BUCKETNAME"),
-				Cancer:     os.Getenv("CANCER_BUCKETNAME"),
+				Mamography:        os.Getenv("MAMOGRAPHY_BUCKETNAME"),
+				Cancer:            os.Getenv("CANCER_BUCKETNAME"),
+				GeneticTest:       os.Getenv("GENETIC_TEST_BUCKETNAME"),
+				FatherGeneticTest: os.Getenv("FATHER_GENETIC_TEST_BUCKETNAME"),
+				MotherGeneticTest: os.Getenv("MOTHER_GENETIC_TEST_BUCKETNAME"),
 			},
 		},
 		CalcURL: CalcURL{

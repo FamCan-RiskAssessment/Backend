@@ -31,6 +31,9 @@ func NewS3Storage(
 	buckets := make(map[enum.BucketType]string)
 	buckets[enum.BucketTypeMamography] = storage.Buckets.Mamography
 	buckets[enum.BucketTypeCancer] = storage.Buckets.Cancer
+	buckets[enum.BucketTypeGeneticTest] = storage.Buckets.GeneticTest
+	buckets[enum.BucketTypeFatherGeneticTest] = storage.Buckets.FatherGeneticTest
+	buckets[enum.BucketTypeMotherGeneticTest] = storage.Buckets.MotherGeneticTest
 	return &S3Storage{
 		constants: constants,
 		storage:   storage,

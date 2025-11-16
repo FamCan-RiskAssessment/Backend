@@ -288,16 +288,19 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 	type UpsertContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		Name         string  `json:"name" validate:"required"`
-		TestGen      *bool   `json:"testGen,omitempty"`
-		FmTestGen    *bool   `json:"fmTestGen,omitempty"`
-		CallExpert   bool    `json:"callExpert"`
-		BirthCountry *string `json:"birthCountry,omitempty"`
-		Province     *string `json:"province,omitempty"`
-		City         *string `json:"city,omitempty"`
-		Country      *string `json:"country,omitempty"`
-		Address      string  `json:"address" validate:"required"`
-		PostalCode   string  `json:"postalCode" validate:"required"`
+		Name                 string                `form:"name" validate:"required"`
+		TestGen              *bool                 `form:"testGen,omitempty"`
+		TestGenPicture       *multipart.FileHeader `form:"testGenPicture,omitempty"`
+		FmTestGen            *bool                 `form:"fmTestGen,omitempty"`
+		FatherTestGenPicture *multipart.FileHeader `form:"fatherTestGenPicture,omitempty"`
+		MotherTestGenPicture *multipart.FileHeader `form:"motherTestGenPicture,omitempty"`
+		CallExpert           bool                  `form:"callExpert"`
+		BirthCountry         *string               `form:"birthCountry,omitempty"`
+		Province             *string               `form:"province,omitempty"`
+		City                 *string               `form:"city,omitempty"`
+		Country              *string               `form:"country,omitempty"`
+		Address              string                `form:"address" validate:"required"`
+		PostalCode           string                `form:"postalCode" validate:"required"`
 	}
 
 	params := controller.Validate[UpsertContactParams](ctx)
@@ -305,18 +308,21 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	req := formdto.UpsertContactRequest{
-		UserID:       userID.(uint),
-		FormID:       params.FormID,
-		Name:         params.Name,
-		TestGen:      params.TestGen,
-		FmTestGen:    params.FmTestGen,
-		CallExpert:   params.CallExpert,
-		BirthCountry: params.BirthCountry,
-		Province:     params.Province,
-		City:         params.City,
-		Country:      params.Country,
-		Address:      params.Address,
-		PostalCode:   params.PostalCode,
+		UserID:               userID.(uint),
+		FormID:               params.FormID,
+		Name:                 params.Name,
+		TestGen:              params.TestGen,
+		TestGenPicture:       params.TestGenPicture,
+		FmTestGen:            params.FmTestGen,
+		FatherTestGenPicture: params.FatherTestGenPicture,
+		MotherTestGenPicture: params.MotherTestGenPicture,
+		CallExpert:           params.CallExpert,
+		BirthCountry:         params.BirthCountry,
+		Province:             params.Province,
+		City:                 params.City,
+		Country:              params.Country,
+		Address:              params.Address,
+		PostalCode:           params.PostalCode,
 	}
 
 	if err := formController.formService.UpsertContact(req); err != nil {

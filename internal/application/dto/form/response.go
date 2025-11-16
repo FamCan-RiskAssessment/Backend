@@ -180,17 +180,20 @@ type ChangeFormStatusResponse struct {
 }
 
 type GetContactResponse struct {
-	ID           uint    `json:"id"`
-	TestGen      *bool   `json:"testGen,omitempty"`
-	Name         string  `json:"name"`
-	FmTestGen    *bool   `json:"fmTestGen,omitempty"`
-	CallExpert   bool    `json:"callExpert"`
-	BirthCountry *string `json:"birthCountry,omitempty"`
-	Province     *string `json:"province,omitempty"`
-	City         *string `json:"city,omitempty"`
-	Country      *string `json:"country,omitempty"`
-	Address      string  `json:"address"`
-	PostalCode   string  `json:"postalCode"`
+	ID                   uint    `json:"id"`
+	TestGen              *bool   `json:"testGen,omitempty"`
+	TestGenPicture       *string `json:"testGenPicture,omitempty"`
+	Name                 string  `json:"name"`
+	FmTestGen            *bool   `json:"fmTestGen,omitempty"`
+	FatherTestGenPicture *string `json:"fatherTestGenPicture,omitempty"`
+	MotherTestGenPicture *string `json:"motherTestGenPicture,omitempty"`
+	CallExpert           bool    `json:"callExpert"`
+	BirthCountry         *string `json:"birthCountry,omitempty"`
+	Province             *string `json:"province,omitempty"`
+	City                 *string `json:"city,omitempty"`
+	Country              *string `json:"country,omitempty"`
+	Address              string  `json:"address"`
+	PostalCode           string  `json:"postalCode"`
 }
 
 type GetLungCancerResponse struct {

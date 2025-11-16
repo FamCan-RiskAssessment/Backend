@@ -922,6 +922,20 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		info = &entity.ContactInfo{FormID: request.FormID}
 	}
 
+	// Save old picture paths for cleanup
+	var oldTestGenPicturePath *string
+	var oldFatherTestGenPicturePath *string
+	var oldMotherTestGenPicturePath *string
+	if info.TestGenPicturePath != nil {
+		oldTestGenPicturePath = info.TestGenPicturePath
+	}
+	if info.FatherTestGenPicturePath != nil {
+		oldFatherTestGenPicturePath = info.FatherTestGenPicturePath
+	}
+	if info.MotherTestGenPicturePath != nil {
+		oldMotherTestGenPicturePath = info.MotherTestGenPicturePath
+	}
+
 	info.Name = request.Name
 	info.TestGen = request.TestGen
 	info.FmTestGen = request.FmTestGen
@@ -932,6 +946,70 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Country = request.Country
 	info.Address = request.Address
 	info.PostalCode = request.PostalCode
+
+	// Handle TestGen picture upload
+	if request.TestGenPicture != nil && request.TestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetGeneticTestPath(
+			request.FormID,
+			"user",
+			request.TestGenPicture.Filename,
+		)
+		info.TestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.TestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldTestGenPicturePath != nil && *oldTestGenPicturePath != "" && *oldTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old genetic test picture %s: %v\n", *oldTestGenPicturePath, err)
+			}
+		}
+	}
+
+	// Handle FatherTestGen picture upload
+	if request.FatherTestGenPicture != nil && request.FatherTestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetFatherGeneticTestPath(
+			request.FormID,
+			request.FatherTestGenPicture.Filename,
+		)
+		info.FatherTestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.FatherTestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldFatherTestGenPicturePath != nil && *oldFatherTestGenPicturePath != "" && *oldFatherTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldFatherTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old father genetic test picture %s: %v\n", *oldFatherTestGenPicturePath, err)
+			}
+		}
+	}
+
+	// Handle MotherTestGen picture upload
+	if request.MotherTestGenPicture != nil && request.MotherTestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetMotherGeneticTestPath(
+			request.FormID,
+			request.MotherTestGenPicture.Filename,
+		)
+		info.MotherTestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.MotherTestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldMotherTestGenPicturePath != nil && *oldMotherTestGenPicturePath != "" && *oldMotherTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldMotherTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old mother genetic test picture %s: %v\n", *oldMotherTestGenPicturePath, err)
+			}
+		}
+	}
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateContact(formService.db, info)
@@ -1359,18 +1437,49 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		return formdto.GetContactResponse{}, notFoundError
 	}
 
+	// Generate presigned URLs for pictures
+	var testGenPictureURL *string
+	if info.TestGenPicturePath != nil && *info.TestGenPicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeGeneticTest, *info.TestGenPicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.GetContactResponse{}, err
+		}
+		testGenPictureURL = &presignedURL
+	}
+
+	var fatherTestGenPictureURL *string
+	if info.FatherTestGenPicturePath != nil && *info.FatherTestGenPicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeGeneticTest, *info.FatherTestGenPicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.GetContactResponse{}, err
+		}
+		fatherTestGenPictureURL = &presignedURL
+	}
+
+	var motherTestGenPictureURL *string
+	if info.MotherTestGenPicturePath != nil && *info.MotherTestGenPicturePath != "" {
+		presignedURL, err := formService.s3Storage.GetPresignedURL(enum.BucketTypeGeneticTest, *info.MotherTestGenPicturePath, 8*time.Hour)
+		if err != nil {
+			return formdto.GetContactResponse{}, err
+		}
+		motherTestGenPictureURL = &presignedURL
+	}
+
 	return formdto.GetContactResponse{
-		ID:           info.ID,
-		Name:         info.Name,
-		TestGen:      info.TestGen,
-		FmTestGen:    info.FmTestGen,
-		CallExpert:   info.CallExpert,
-		BirthCountry: info.BirthCountry,
-		Province:     info.Province,
-		City:         info.City,
-		Country:      info.Country,
-		Address:      info.Address,
-		PostalCode:   info.PostalCode,
+		ID:                   info.ID,
+		Name:                 info.Name,
+		TestGen:              info.TestGen,
+		TestGenPicture:       testGenPictureURL,
+		FmTestGen:            info.FmTestGen,
+		FatherTestGenPicture: fatherTestGenPictureURL,
+		MotherTestGenPicture: motherTestGenPictureURL,
+		CallExpert:           info.CallExpert,
+		BirthCountry:         info.BirthCountry,
+		Province:             info.Province,
+		City:                 info.City,
+		Country:              info.Country,
+		Address:              info.Address,
+		PostalCode:           info.PostalCode,
 	}, nil
 }
 
@@ -1963,6 +2072,20 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 		info = &entity.ContactInfo{FormID: request.FormID}
 	}
 
+	// Save old picture paths for cleanup
+	var oldTestGenPicturePath *string
+	var oldFatherTestGenPicturePath *string
+	var oldMotherTestGenPicturePath *string
+	if info.TestGenPicturePath != nil {
+		oldTestGenPicturePath = info.TestGenPicturePath
+	}
+	if info.FatherTestGenPicturePath != nil {
+		oldFatherTestGenPicturePath = info.FatherTestGenPicturePath
+	}
+	if info.MotherTestGenPicturePath != nil {
+		oldMotherTestGenPicturePath = info.MotherTestGenPicturePath
+	}
+
 	if request.Name != nil {
 		info.Name = *request.Name
 	}
@@ -1980,6 +2103,70 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	}
 	if request.PostalCode != nil {
 		info.PostalCode = *request.PostalCode
+	}
+
+	// Handle TestGen picture upload
+	if request.TestGenPicture != nil && request.TestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetGeneticTestPath(
+			request.FormID,
+			"user",
+			request.TestGenPicture.Filename,
+		)
+		info.TestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.TestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldTestGenPicturePath != nil && *oldTestGenPicturePath != "" && *oldTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old genetic test picture %s: %v\n", *oldTestGenPicturePath, err)
+			}
+		}
+	}
+
+	// Handle FatherTestGen picture upload
+	if request.FatherTestGenPicture != nil && request.FatherTestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetFatherGeneticTestPath(
+			request.FormID,
+			request.FatherTestGenPicture.Filename,
+		)
+		info.FatherTestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.FatherTestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldFatherTestGenPicturePath != nil && *oldFatherTestGenPicturePath != "" && *oldFatherTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldFatherTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old father genetic test picture %s: %v\n", *oldFatherTestGenPicturePath, err)
+			}
+		}
+	}
+
+	// Handle MotherTestGen picture upload
+	if request.MotherTestGenPicture != nil && request.MotherTestGenPicture.Filename != "" {
+		pictureKey := formService.constants.BucketPath.GetMotherGeneticTestPath(
+			request.FormID,
+			request.MotherTestGenPicture.Filename,
+		)
+		info.MotherTestGenPicturePath = &pictureKey
+
+		// Upload picture
+		if err := formService.s3Storage.UploadObject(enum.BucketTypeGeneticTest, pictureKey, request.MotherTestGenPicture); err != nil {
+			return err
+		}
+
+		// Delete old picture if it exists and is different
+		if oldMotherTestGenPicturePath != nil && *oldMotherTestGenPicturePath != "" && *oldMotherTestGenPicturePath != pictureKey {
+			if err := formService.s3Storage.DeleteObject(enum.BucketTypeGeneticTest, *oldMotherTestGenPicturePath); err != nil {
+				fmt.Printf("Warning: failed to delete old mother genetic test picture %s: %v\n", *oldMotherTestGenPicturePath, err)
+			}
+		}
 	}
 
 	if info.ID == 0 {

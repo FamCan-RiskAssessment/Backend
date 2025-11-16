@@ -94,6 +94,7 @@ func (c *AsanakClient) SendSMS(req SendSMSRequest) (SendSMSResponse, error) {
 	// Send request
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
+		println("failed to send req")
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()

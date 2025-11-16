@@ -358,16 +358,19 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	type UpdateContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		Name         *string `json:"name"`
-		TestGen      *bool   `json:"testGen"`
-		FmTestGen    *bool   `json:"fmTestGen"`
-		CallExpert   *bool   `json:"callExpert"`
-		BirthCountry *string `json:"birthCountry"`
-		Province     *string `json:"province"`
-		City         *string `json:"city"`
-		Country      *string `json:"country"`
-		Address      *string `json:"address"`
-		PostalCode   *string `json:"postalCode"`
+		Name                 *string               `form:"name"`
+		TestGen              *bool                 `form:"testGen"`
+		TestGenPicture       *multipart.FileHeader `form:"testGenPicture,omitempty"`
+		FmTestGen            *bool                 `form:"fmTestGen"`
+		FatherTestGenPicture *multipart.FileHeader `form:"fatherTestGenPicture,omitempty"`
+		MotherTestGenPicture *multipart.FileHeader `form:"motherTestGenPicture,omitempty"`
+		CallExpert           *bool                 `form:"callExpert"`
+		BirthCountry         *string               `form:"birthCountry"`
+		Province             *string               `form:"province"`
+		City                 *string               `form:"city"`
+		Country              *string               `form:"country"`
+		Address              *string               `form:"address"`
+		PostalCode           *string               `form:"postalCode"`
 	}
 
 	params := controller.Validate[UpdateContactParams](ctx)
@@ -375,18 +378,21 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	req := formdto.UpdateContactRequest{
-		UserID:       userID.(uint),
-		FormID:       params.FormID,
-		Name:         params.Name,
-		TestGen:      params.TestGen,
-		FmTestGen:    params.FmTestGen,
-		CallExpert:   params.CallExpert,
-		BirthCountry: params.BirthCountry,
-		Province:     params.Province,
-		City:         params.City,
-		Country:      params.Country,
-		Address:      params.Address,
-		PostalCode:   params.PostalCode,
+		UserID:               userID.(uint),
+		FormID:               params.FormID,
+		Name:                 params.Name,
+		TestGen:              params.TestGen,
+		TestGenPicture:       params.TestGenPicture,
+		FmTestGen:            params.FmTestGen,
+		FatherTestGenPicture: params.FatherTestGenPicture,
+		MotherTestGenPicture: params.MotherTestGenPicture,
+		CallExpert:           params.CallExpert,
+		BirthCountry:         params.BirthCountry,
+		Province:             params.Province,
+		City:                 params.City,
+		Country:              params.Country,
+		Address:              params.Address,
+		PostalCode:           params.PostalCode,
 	}
 
 	if err := formController.formService.UpdateContact(req); err != nil {

@@ -205,16 +205,19 @@ type UpsertContactRequest struct {
 	UserID uint
 	FormID uint
 
-	Name         string
-	TestGen      *bool
-	FmTestGen    *bool
-	CallExpert   bool
-	BirthCountry *string
-	Province     *string
-	City         *string
-	Country      *string
-	Address      string
-	PostalCode   string
+	Name                 string
+	TestGen              *bool
+	TestGenPicture       *multipart.FileHeader
+	FmTestGen            *bool
+	FatherTestGenPicture *multipart.FileHeader
+	MotherTestGenPicture *multipart.FileHeader
+	CallExpert           bool
+	BirthCountry         *string
+	Province             *string
+	City                 *string
+	Country              *string
+	Address              string
+	PostalCode           string
 }
 
 type UpsertLungCancerRequest struct {
@@ -339,16 +342,19 @@ type UpdateContactRequest struct {
 	UserID uint
 	FormID uint
 
-	Name         *string
-	TestGen      *bool
-	FmTestGen    *bool
-	CallExpert   *bool
-	BirthCountry *string
-	Province     *string
-	City         *string
-	Country      *string
-	Address      *string
-	PostalCode   *string
+	Name                 *string
+	TestGen              *bool
+	TestGenPicture       *multipart.FileHeader
+	FmTestGen            *bool
+	FatherTestGenPicture *multipart.FileHeader
+	MotherTestGenPicture *multipart.FileHeader
+	CallExpert           *bool
+	BirthCountry         *string
+	Province             *string
+	City                 *string
+	Country              *string
+	Address              *string
+	PostalCode           *string
 }
 type UpdateLungCancerRequest struct {
 	UserID uint

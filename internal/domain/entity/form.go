@@ -116,18 +116,19 @@ type ContactInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 6
-	Name    string `gorm:"type:varchar(255);not null"`
-	TestGen *bool  `gorm:"type:boolean"`
-	// Pics
-	FmTestGen *bool `gorm:"type:boolean"`
-	// Pics
-	CallExpert   bool    `gorm:"not null;default:true"`
-	BirthCountry *string `gorm:"type:varchar(50)"`
-	Province     *string `gorm:"type:varchar(50)"`
-	City         *string `gorm:"type:varchar(50)"`
-	Country      *string `gorm:"type:varchar(50)"`
-	Address      string  `gorm:"type:text;not null"`
-	PostalCode   string  `gorm:"not null"`
+	Name                     string  `gorm:"type:varchar(255);not null"`
+	TestGen                  *bool   `gorm:"type:boolean"`
+	TestGenPicturePath       *string `gorm:"type:varchar(255)"`
+	FmTestGen                *bool   `gorm:"type:boolean"`
+	FatherTestGenPicturePath *string `gorm:"type:varchar(255)"`
+	MotherTestGenPicturePath *string `gorm:"type:varchar(255)"`
+	CallExpert               bool    `gorm:"not null;default:true"`
+	BirthCountry             *string `gorm:"type:varchar(50)"`
+	Province                 *string `gorm:"type:varchar(50)"`
+	City                     *string `gorm:"type:varchar(50)"`
+	Country                  *string `gorm:"type:varchar(50)"`
+	Address                  string  `gorm:"type:text;not null"`
+	PostalCode               string  `gorm:"not null"`
 }
 
 type LungCancerInfo struct {

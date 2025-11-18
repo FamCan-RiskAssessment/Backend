@@ -82,7 +82,7 @@ type UpsertGeneralHealthRequest struct {
 	MediumActivityHourInWeek  string
 	HardActivityMonthInYear   uint
 	HardActivityHourInWeek    string
-	SmokeAtLeast100           *bool
+	SmokeAtLeast100           enum.Answer
 	SmokingAge                *uint
 	SmokingNow                bool
 	LeaveSmokingAge           *uint
@@ -102,26 +102,26 @@ type UpsertMamographyRequest struct {
 	AgeOfFirstBirth              *uint
 	MenopausalStatus             uint
 	MenopauseAge                 *string
-	HRT                          *bool
+	HRT                          enum.Answer
 	HRTUseLength                 *uint
 	LastFiveYearsHRTUse          bool
-	CurrentHRTUse                *bool
+	CurrentHRTUse                enum.Answer
 	IntendedHRTUse               *uint
 	HRTType                      *string
-	Oral                         *bool
+	Oral                         enum.Answer
 	OralDuration                 *string
-	OralTwoLastYears             *bool
+	OralTwoLastYears             enum.Answer
 	MamoGraphy                   *bool
 	MamoGraphyPicture            *multipart.FileHeader
 	Falop                        *bool
-	Andometrioz                  *bool
+	Andometrioz                  enum.Answer
 	LeavePestan                  bool
 	LeaveTokhmdan                bool
-	LaDeColon                    *bool
-	LaDePol                      *bool
-	AspLaMo                      *bool
-	NsaiDLaMo                    *bool
-	LastFiveYearBloodTestInStool *bool
+	LaDeColon                    enum.Answer
+	LaDePol                      enum.Answer
+	AspLaMo                      enum.Answer
+	NsaiDLaMo                    enum.Answer
+	LastFiveYearBloodTestInStool enum.Answer
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
 }
@@ -206,9 +206,9 @@ type UpsertContactRequest struct {
 	FormID uint
 
 	Name                 string
-	TestGen              *bool
+	TestGen              enum.Answer
 	TestGenPicture       *multipart.FileHeader
-	FmTestGen            *bool
+	FmTestGen            enum.Answer
 	FatherTestGenPicture *multipart.FileHeader
 	MotherTestGenPicture *multipart.FileHeader
 	CallExpert           bool
@@ -232,7 +232,7 @@ type UpsertLungCancerRequest struct {
 	HeartDiseaseTreatment     *bool
 	Diabetes                  bool
 	DiabetesTreatment         *bool
-	ChronicLungDisease        *bool
+	ChronicLungDisease        enum.Answer
 	ChronicLungDiseaseType    *string
 	LungCancerHistory         bool
 	OtherCancerHistory        bool

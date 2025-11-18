@@ -73,3 +73,11 @@ func (fc *GeneralFormController) GetAllRelativeTypes(ctx *gin.Context) {
 	}
 	controller.Response(ctx, 200, "", statuses)
 }
+
+func (fc *GeneralFormController) GetAllDefiniteAnswers(ctx *gin.Context) {
+	statuses, err := fc.formService.GetAllDefiniteAnswers()
+	if err != nil {
+		panic(err)
+	}
+	controller.Response(ctx, 200, "", statuses)
+}

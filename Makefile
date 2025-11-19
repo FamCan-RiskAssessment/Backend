@@ -6,5 +6,11 @@ up:
 ps:
 	docker ps --format "table {{.Names}}\t{{.Status}}"
 
+test:
+	go test ./internal/application/service -coverprofile=coverage.out
+
+cover:
+	go tool cover -html=coverage.out
+
 log:
 	git log --oneline -n 10

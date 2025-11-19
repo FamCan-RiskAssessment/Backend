@@ -237,13 +237,7 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	info.MediumActivityHourInWeek = request.MediumActivityHourInWeek
 	info.HardActivityMonthInYear = request.HardActivityMonthInYear
 	info.HardActivityHourInWeek = request.HardActivityHourInWeek
-	if request.SmokeAtLeast100 == enum.Yes {
-		b := true
-		info.SmokeAtLeast100 = &b
-	} else if request.SmokeAtLeast100 == enum.No {
-		b := false
-		info.SmokeAtLeast100 = &b
-	}
+	info.SmokeAtLeast100 = request.SmokeAtLeast100
 	info.SmokingAge = request.SmokingAge
 	info.SmokingNow = request.SmokingNow
 	info.LeaveSmokingAge = request.LeaveSmokingAge
@@ -308,85 +302,25 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
 	info.MenopausalStatus = enum.MenopausalStatus(uint(request.MenopausalStatus))
 	info.MenopauseAge = request.MenopauseAge
-	if request.HRT == enum.Yes {
-		b := true
-		info.HRT = &b
-	} else if request.HRT == enum.No {
-		b := false
-		info.HRT = &b
-	}
+	info.HRT = request.HRT
 	info.HRTUseLength = request.HRTUseLength
 	info.LastFiveYearsHRTUse = request.LastFiveYearsHRTUse
-	if request.CurrentHRTUse == enum.Yes {
-		b := true
-		info.CurrentHRTUse = &b
-	} else if request.CurrentHRTUse == enum.No {
-		b := false
-		info.CurrentHRTUse = &b
-	}
+	info.CurrentHRTUse = request.CurrentHRTUse
 	info.IntendedHRTUse = request.IntendedHRTUse
 	info.HRTType = request.HRTType
-	if request.Oral == enum.Yes {
-		b := true
-		info.Oral = &b
-	} else if request.Oral == enum.No {
-		b := false
-		info.Oral = &b
-	}
+	info.Oral = request.Oral
 	info.OralDuration = request.OralDuration
-	if request.OralTwoLastYears == enum.Yes {
-		b := true
-		info.OralTwoLastYears = &b
-	} else if request.OralTwoLastYears == enum.No {
-		b := false
-		info.OralTwoLastYears = &b
-	}
+	info.OralTwoLastYears = request.OralTwoLastYears
 	info.MamoGraphy = request.MamoGraphy
 	info.Falop = request.Falop
-	if request.Andometrioz == enum.Yes {
-		b := true
-		info.Andometrioz = &b
-	} else if request.Andometrioz == enum.No {
-		b := false
-		info.Andometrioz = &b
-	}
+	info.Andometrioz = request.Andometrioz
 	info.LeavePestan = request.LeavePestan
 	info.LeaveTokhmdan = request.LeaveTokhmdan
-	if request.LaDeColon == enum.Yes {
-		b := true
-		info.LaDeColon = &b
-	} else if request.LaDeColon == enum.No {
-		b := false
-		info.LaDeColon = &b
-	}
-	if request.LaDePol == enum.Yes {
-		b := true
-		info.LaDePol = &b
-	} else if request.LaDePol == enum.No {
-		b := false
-		info.LaDePol = &b
-	}
-	if request.AspLaMo == enum.Yes {
-		b := true
-		info.AspLaMo = &b
-	} else if request.AspLaMo == enum.No {
-		b := false
-		info.AspLaMo = &b
-	}
-	if request.NsaiDLaMo == enum.Yes {
-		b := true
-		info.NsaiDLaMo = &b
-	} else if request.NsaiDLaMo == enum.No {
-		b := false
-		info.NsaiDLaMo = &b
-	}
-	if request.LastFiveYearBloodTestInStool == enum.Yes {
-		b := true
-		info.LastFiveYearBloodTestInStool = &b
-	} else if request.LastFiveYearBloodTestInStool == enum.No {
-		b := false
-		info.LastFiveYearBloodTestInStool = &b
-	}
+	info.LaDeColon = request.LaDeColon
+	info.LaDePol = request.LaDePol
+	info.AspLaMo = request.AspLaMo
+	info.NsaiDLaMo = request.NsaiDLaMo
+	info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
 	info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
 	info.HyperplasiaInBiopsy = (*enum.HyperplasiaInBiopsyStatus)(request.HyperplasiaInBiopsy)
 
@@ -1003,20 +937,8 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	}
 
 	info.Name = request.Name
-	if request.TestGen == enum.Yes {
-		b := true
-		info.TestGen = &b
-	} else if request.TestGen == enum.No {
-		b := false
-		info.TestGen = &b
-	}
-	if request.FmTestGen == enum.Yes {
-		b := true
-		info.FmTestGen = &b
-	} else if request.FmTestGen == enum.No {
-		b := false
-		info.FmTestGen = &b
-	}
+	info.TestGen = request.TestGen
+	info.FmTestGen = request.FmTestGen
 	info.CallExpert = request.CallExpert
 	info.BirthCountry = request.BirthCountry
 	info.Province = request.Province
@@ -1152,13 +1074,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
 	info.Diabetes = request.Diabetes
 	info.DiabetesTreatment = request.DiabetesTreatment
-	if request.ChronicLungDisease == enum.Yes {
-		b := true
-		info.ChronicLungDisease = &b
-	} else if request.ChronicLungDisease == enum.No {
-		b := false
-		info.ChronicLungDisease = &b
-	}
+	info.ChronicLungDisease = request.ChronicLungDisease
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	info.LungCancerHistory = request.LungCancerHistory
 	info.OtherCancerHistory = request.OtherCancerHistory
@@ -2540,18 +2456,6 @@ func (formService *FormService) GetAllLifeStatuses() ([]generaldto.EnumResponse,
 
 func (formService *FormService) GetAllRelativeTypes() ([]generaldto.EnumResponse, error) {
 	statuses := enum.GetAllRelatives()
-	response := make([]generaldto.EnumResponse, len(statuses))
-	for i, status := range statuses {
-		response[i] = generaldto.EnumResponse{
-			ID:   uint(status),
-			Name: status.String(),
-		}
-	}
-	return response, nil
-}
-
-func (formService *FormService) GetAllDefiniteAnswers() ([]generaldto.EnumResponse, error) {
-	statuses := enum.GetAllAnswers()
 	response := make([]generaldto.EnumResponse, len(statuses))
 	for i, status := range statuses {
 		response[i] = generaldto.EnumResponse{

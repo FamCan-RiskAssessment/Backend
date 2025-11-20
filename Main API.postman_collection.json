@@ -1,0 +1,3777 @@
+{
+	"info": {
+		"_postman_id": "9915ccf9-5993-4008-b37a-e4e16d5ed215",
+		"name": "Main API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42861738",
+		"_collection_link": "https://bargheno.postman.co/workspace/FamCan~222b5d5a-9afb-4dfc-a646-38f234930f9e/collection/38753882-9915ccf9-5993-4008-b37a-e4e16d5ed215?action=share&source=collection_link&creator=42861738"
+	},
+	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "R&P",
+					"item": [
+						{
+							"name": "get permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/permission",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"permission"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create role",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"تولید قصه\",\n    \"permissionIDs\": [4, 5, 6]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/role",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/role",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get role",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/role/2",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get role owners",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/role/2/owners",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role",
+										"2",
+										"owners"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get user roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/user/2/role",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"user",
+										"2",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete role",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/role/2",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update role",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/role/9",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"role",
+										"9"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update user roles",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"roleIDs\": [2]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/user/2/role",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"user",
+										"2",
+										"role"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get permission roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/permission/1/roles",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"permission",
+										"1",
+										"roles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/user",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"user"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325794\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/login",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify otp",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325794\",\n    \"otp\": \"111111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/verify-otp",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set password",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"password\": \"kian\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/users/password",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "login with password",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325794\",\n    \"password\": \"123456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/admin/login",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"admin",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "form",
+					"item": [
+						{
+							"name": "create basic form",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/basic/",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"basic",
+										""
+									]
+								},
+								"description": "Submits a new form, using the basic information provided in request's body."
+							},
+							"response": []
+						},
+						{
+							"name": "upsert basic form",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"basic"
+									]
+								},
+								"description": "upsert's the basic information questions of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get basic form",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/7/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"7",
+										"basic"
+									]
+								},
+								"description": "Get the basic secion of specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert general health",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"drinksAlcohol\": false,\n    \"lastMonthSabzijatMeal\": \"کمتر از 1 وعده در هفته\",\n    \"lastMonthSabzijatWeight\": \"نصف فنجان یا کمتر\",\n    \"mediumActivityMonthInYear\": 2,\n    \"mediumActivityHourInWeek\": \"بین 1 تا 2 ساعت در هفته\",\n    \"hardActivityMonthInYear\": 10,\n    \"hardActivityHourInWeek\": \"تا یکساعت در هفته\",\n    \"smokeAtLeast100\": false,\n    \"smokingNow\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"generalhealth"
+									]
+								},
+								"description": "upsert's the general health answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get general health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"generalhealth"
+									]
+								},
+								"description": "Get the general health section of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert mamography",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "ghaedeAge",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "hasChildren",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "numberOfChildren",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "ageOfFirstBirth",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "menopausalStatus",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "menopauseAge",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrt",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtUseLength",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearsHrtUse",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "currentHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "intendedHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtType",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oral",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralDuration",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralTwoLastYears",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamoGraphy",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamographyPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "falop",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "andometrioz",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "leavePestan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "leaveTokhmdan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "laDeColon",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "laDePol",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "aspLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "nsaiDLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearBloodTestInStool",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "numberOfBreastBiopsies",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hyperplasiaInBiopsy",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "upsert's the mamography answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get mamography",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "get the submitted mamography information of the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "create cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer"
+									]
+								},
+								"description": "creates the cancer for the specified form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "Updates the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "delete cancer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "deletes the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "get cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/20/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"20",
+										"cancer"
+									]
+								},
+								"description": "get all submited cancers of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "create family cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"familycancer"
+									]
+								},
+								"description": "creates the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify family cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/familycancer/22",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"familycancer",
+										"22"
+									]
+								},
+								"description": "modify the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get family cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"familycancer"
+									]
+								},
+								"description": "get submited cancers for all family members"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert contact info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "آریا رفیعی",
+											"type": "text"
+										},
+										{
+											"key": "testGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "testGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "fmTestGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "fatherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "motherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "callExpert",
+											"value": "true",
+											"type": "text"
+										},
+										{
+											"key": "birthCountry",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "province",
+											"value": "مازندران",
+											"type": "text"
+										},
+										{
+											"key": "city",
+											"value": "بابلسر",
+											"type": "text"
+										},
+										{
+											"key": "country",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "address",
+											"value": "بلوار آیت‌ا.. طالقانی، خیایان انصاری، نبش کوچه فهمیده، ساختمان نیلوفر",
+											"type": "text"
+										},
+										{
+											"key": "postalCode",
+											"value": "4857951525",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "upsert contact info for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "get contact info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "get contact information for the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert lungcancer info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"testGen\": false,\r\n    \"fmTestGen\": false,\r\n    \"callExpert\": false,\r\n    \"name\": \"امیرمحمد اکبری\",\r\n    \"sa\": \"\",\r\n    \"province\": \"متبم\",\r\n    \"city\": \"تهران\",\r\n    \"postalCode\": \"77878\",\r\n    \"address\": \"4382 Shearwood Forest Drive\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "upsert the lung cancer information for designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get lungcancer info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "get the lung cancer information for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "delete form",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"1"
+									]
+								},
+								"description": "delete the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "assign Operator",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"operatorId\" : 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/2/operator",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"2",
+										"operator"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unassign Operator",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/2/operator",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"2",
+										"operator"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "all forms",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/?filledByOperatorID=18",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										""
+									],
+									"query": [
+										{
+											"key": "filledByOperatorID",
+											"value": "18"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "calc",
+					"item": [
+						{
+							"name": "call model",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"calcID\": 4,\n    \"formID\": 11\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/calc/model",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"model"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "all models",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/calc/all-models",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"all-models"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "premm5",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/calc/premm5/7",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"premm5",
+										"7"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "bcra",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/calc/bcra/7",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"bcra",
+										"7"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "gail",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/calc/gail/7",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"gail",
+										"7"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "plco",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/calc/plco/7",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"calc",
+										"plco",
+										"7"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "log",
+					"item": [
+						{
+							"name": "all logs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/log",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"log"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "all action types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/log/types",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"log",
+										"types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjYyNDc5MzEsImlhdCI6MTc2MzY1NTkzMSwic3ViIjoxfQ.B_Cm-ceX8n5ori2raTj6RCKqdUoRMXY_ZVurvhExPfLobLWJrTcKswMCa1ZFUWKFzrRAQpHqOa-QrtGG23mSq7f5rN3p3KHPhAu3q_Hd3S-0bBRmlJ70I9BYyv7s6tgK_b6JnZobFemLedUL_R_swTHnaDwPIqrNkNE9fPgtf8MGF-fWh94RzFmc1A49tcKE7QjL2Q6EfEokdKtd31Sa5zKheYQFsRciiWBi5XbcAN5gsFpq2ugvBa9UDvHnc4XOGFJsXuTAaiUbBJpP4Yuvi7LhLPx0Z9J_ridIpXR3s2LmjAKz_bElCt9vnTqTOOioo3In2YiSuB_HpthzbovysA",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Patient",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325792\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/login",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								},
+								"description": "Sends OTP to given phone number to login/signup."
+							},
+							"response": []
+						},
+						{
+							"name": "verify otp",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325792\",\n    \"otp\": \"111111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/verify-otp",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								},
+								"description": "Receives phone number & OTP, to login/signup. Outputs access token, refresh token and user's permissions."
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "form",
+					"item": [
+						{
+							"name": "create basic form",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/form/basic/",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"basic",
+										""
+									]
+								},
+								"description": "Submits a new form, using the basic information provided in request's body."
+							},
+							"response": []
+						},
+						{
+							"name": "upsert basic form",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"basic"
+									]
+								},
+								"description": "upsert's the basic information questions of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get basic form",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/7/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"7",
+										"basic"
+									]
+								},
+								"description": "Get the basic secion of specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert general health",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"drinksAlcohol\": false,\n    \"lastMonthSabzijatMeal\": \"کمتر از 1 وعده در هفته\",\n    \"lastMonthSabzijatWeight\": \"نصف فنجان یا کمتر\",\n    \"mediumActivityMonthInYear\": 2,\n    \"mediumActivityHourInWeek\": \"بین 1 تا 2 ساعت در هفته\",\n    \"hardActivityMonthInYear\": 10,\n    \"hardActivityHourInWeek\": \"تا یکساعت در هفته\",\n    \"smokeAtLeast100\": false,\n    \"smokingNow\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/form/6/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"6",
+										"generalhealth"
+									]
+								},
+								"description": "upsert's the general health answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get general health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/3/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"generalhealth"
+									]
+								},
+								"description": "Get the general health section of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert mamography",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "ghaedeAge",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "hasChildren",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "numberOfChildren",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "ageOfFirstBirth",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "menopausalStatus",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "menopauseAge",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrt",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtUseLength",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearsHrtUse",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "currentHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "intendedHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtType",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oral",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralDuration",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralTwoLastYears",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamoGraphy",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamographyPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "falop",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "andometrioz",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "leavePestan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "leaveTokhmdan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "laDeColon",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "laDePol",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "aspLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "nsaiDLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearBloodTestInStool",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "numberOfBreastBiopsies",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hyperplasiaInBiopsy",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "upsert's the mamography answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get mamography",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "get the submitted mamography information of the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "create cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"cancer"
+									]
+								},
+								"description": "creates the cancer for the specified form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "Updates the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "delete cancer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "deletes the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "get cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/20/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"20",
+										"cancer"
+									]
+								},
+								"description": "get all submited cancers of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "create family cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/6/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"6",
+										"familycancer"
+									]
+								},
+								"description": "creates the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify family cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/6/familycancer/22",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"6",
+										"familycancer",
+										"22"
+									]
+								},
+								"description": "modify the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get family cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/3/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"familycancer"
+									]
+								},
+								"description": "get submited cancers for all family members"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert contact info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "آریا رفیعی",
+											"type": "text"
+										},
+										{
+											"key": "testGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "testGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "fmTestGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "fatherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "motherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "callExpert",
+											"value": "true",
+											"type": "text"
+										},
+										{
+											"key": "birthCountry",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "province",
+											"value": "مازندران",
+											"type": "text"
+										},
+										{
+											"key": "city",
+											"value": "بابلسر",
+											"type": "text"
+										},
+										{
+											"key": "country",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "address",
+											"value": "بلوار آیت‌ا.. طالقانی، خیایان انصاری، نبش کوچه فهمیده، ساختمان نیلوفر",
+											"type": "text"
+										},
+										{
+											"key": "postalCode",
+											"value": "4857951525",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "upsert contact info for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "get contact info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "get contact information for the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert lungcancer info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"testGen\": false,\r\n    \"fmTestGen\": false,\r\n    \"callExpert\": false,\r\n    \"name\": \"امیرمحمد اکبری\",\r\n    \"sa\": \"\",\r\n    \"province\": \"متبم\",\r\n    \"city\": \"تهران\",\r\n    \"postalCode\": \"77878\",\r\n    \"address\": \"4382 Shearwood Forest Drive\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "upsert the lung cancer information for designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get lungcancer info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "get the lung cancer information for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "get user's forms",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form"
+									]
+								},
+								"description": "get all submited forms by the user."
+							},
+							"response": []
+						},
+						{
+							"name": "delete form",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/form/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"form",
+										"1"
+									]
+								},
+								"description": "delete the specified form"
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjYyNDAxODcsImlhdCI6MTc2MzY0ODE4Nywic3ViIjoxMX0.ne9xt5qJJ4B7wlpJ5vWjk2Xh7HFthDmwj9S43pvNJoxYadYPZiqo63cLVP1-zQBbDM5uY6QddZ0Jmf2q5tOFkH0YTK2v3Ss24gaXF85YVEi-9KcHu7QAU9_q6dmHlKKhlSA2rzyE5xEFKjVTwgw2BDM2pMo3gYWTuwZk6rtsfjB_hfT1XcVFFgmT_MkS5X4wjBxWaA5C7dfYMbtQUg14mryGyKoeB2tl5pwq_Za07UBFtq5U7uRyLL2wTCdHADKTcn3x7Qb5RGCq_RZxMcK3Yyc_tXnIbBs0UVeBEoezK6zvH3ofEatT4lKBGS5GS1NiSrcVkSUY844sYQ_bAMHpdA",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Operator",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325793\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/login",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify otp",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325793\",\n    \"otp\": \"111111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/verify-otp",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "set password",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"password\": \"kian\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/users/password",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "login with password",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09111325793\",\n    \"password\": \"123456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/auth/admin/login",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"auth",
+										"admin",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjE1NTUxMzksImlhdCI6MTc1ODk2MzEzOSwic3ViIjoyfQ.uBgbFrVqMHEIB4T29M7ozlv-f8_BCVLhqcyFwUly7wWgRHFHMkrlahnbftIAo9Ad5f7juOP9N9pbUOKMD_jwBo4YA9sWFiIqwPLnfsOrpHSRPqjWLjxEBcEd8-lUDDWeOWRjblcpMDe6fpyrD742bvb7QecavJFhAQcsdUq3S7M",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "form",
+					"item": [
+						{
+							"name": "create basic form",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/basic/",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"basic",
+										""
+									]
+								},
+								"description": "Submits a new form, using the basic information provided in request's body."
+							},
+							"response": []
+						},
+						{
+							"name": "upsert basic form",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"isAtba\": false,\n    \"height\": 190.0,\n    \"weight\": 24.4\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"basic"
+									]
+								},
+								"description": "upsert's the basic information questions of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get basic form",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/7/basic",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"7",
+										"basic"
+									]
+								},
+								"description": "Get the basic secion of specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert general health",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"drinksAlcohol\": false,\n    \"lastMonthSabzijatMeal\": \"کمتر از 1 وعده در هفته\",\n    \"lastMonthSabzijatWeight\": \"نصف فنجان یا کمتر\",\n    \"mediumActivityMonthInYear\": 2,\n    \"mediumActivityHourInWeek\": \"بین 1 تا 2 ساعت در هفته\",\n    \"hardActivityMonthInYear\": 10,\n    \"hardActivityHourInWeek\": \"تا یکساعت در هفته\",\n    \"smokeAtLeast100\": false,\n    \"smokingNow\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"generalhealth"
+									]
+								},
+								"description": "upsert's the general health answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get general health",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/generalhealth",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"generalhealth"
+									]
+								},
+								"description": "Get the general health section of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert mamography",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "ghaedeAge",
+											"value": "13",
+											"type": "text"
+										},
+										{
+											"key": "hasChildren",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "numberOfChildren",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "ageOfFirstBirth",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "menopausalStatus",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "menopauseAge",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrt",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtUseLength",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearsHrtUse",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "currentHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "intendedHrtUse",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hrtType",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oral",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralDuration",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "oralTwoLastYears",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamoGraphy",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "mamographyPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "falop",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "andometrioz",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "leavePestan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "leaveTokhmdan",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "laDeColon",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "laDePol",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "aspLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "nsaiDLaMo",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "lastFiveYearBloodTestInStool",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "numberOfBreastBiopsies",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "hyperplasiaInBiopsy",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "upsert's the mamography answers of survey."
+							},
+							"response": []
+						},
+						{
+							"name": "get mamography",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/mamography",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"mamography"
+									]
+								},
+								"description": "get the submitted mamography information of the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "create cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer"
+									]
+								},
+								"description": "creates the cancer for the specified form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "cancerType",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "Updates the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "delete cancer",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/cancer/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"cancer",
+										"1"
+									]
+								},
+								"description": "deletes the defined cancer classification within the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "get cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/20/cancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"20",
+										"cancer"
+									]
+								},
+								"description": "get all submited cancers of the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "create family cancer",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"familycancer"
+									]
+								},
+								"description": "creates the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "modify family cancer",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "relative",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "relativeRelation",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "هوشنگ اعتمادی",
+											"type": "text"
+										},
+										{
+											"key": "lifeStatus",
+											"value": "0",
+											"type": "text"
+										},
+										{
+											"key": "cancerType",
+											"value": "3",
+											"type": "text"
+										},
+										{
+											"key": "cancerAge",
+											"value": "52",
+											"type": "text"
+										},
+										{
+											"key": "picture",
+											"type": "file",
+											"src": "postman-cloud:///1f07aaef-c41e-4340-808f-aa99501ee248"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/6/familycancer/22",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"6",
+										"familycancer",
+										"22"
+									]
+								},
+								"description": "modify the cancer for a family member in the designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get family cancer",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/familycancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"familycancer"
+									]
+								},
+								"description": "get submited cancers for all family members"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert contact info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "آریا رفیعی",
+											"type": "text"
+										},
+										{
+											"key": "testGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "testGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "fmTestGen",
+											"value": "false",
+											"type": "text"
+										},
+										{
+											"key": "fatherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "motherTestGenPicture",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "callExpert",
+											"value": "true",
+											"type": "text"
+										},
+										{
+											"key": "birthCountry",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "province",
+											"value": "مازندران",
+											"type": "text"
+										},
+										{
+											"key": "city",
+											"value": "بابلسر",
+											"type": "text"
+										},
+										{
+											"key": "country",
+											"value": "ایران",
+											"type": "text"
+										},
+										{
+											"key": "address",
+											"value": "بلوار آیت‌ا.. طالقانی، خیایان انصاری، نبش کوچه فهمیده، ساختمان نیلوفر",
+											"type": "text"
+										},
+										{
+											"key": "postalCode",
+											"value": "4857951525",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "upsert contact info for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "get contact info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/contact",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"contact"
+									]
+								},
+								"description": "get contact information for the designated form"
+							},
+							"response": []
+						},
+						{
+							"name": "upsert lungcancer info",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"testGen\": false,\r\n    \"fmTestGen\": false,\r\n    \"callExpert\": false,\r\n    \"name\": \"امیرمحمد اکبری\",\r\n    \"sa\": \"\",\r\n    \"province\": \"متبم\",\r\n    \"city\": \"تهران\",\r\n    \"postalCode\": \"77878\",\r\n    \"address\": \"4382 Shearwood Forest Drive\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "upsert the lung cancer information for designated form."
+							},
+							"response": []
+						},
+						{
+							"name": "get lungcancer info",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/3/lungcancer",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"3",
+										"lungcancer"
+									]
+								},
+								"description": "get the lung cancer information for the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "delete form",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/1",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"1"
+									]
+								},
+								"description": "delete the specified form"
+							},
+							"response": []
+						},
+						{
+							"name": "assign Operator",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"operatorId\" : 5\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/form/2/operator",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"2",
+										"operator"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "unassign Operator",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{server-base}}/admin/form/2/operator",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"form",
+										"2",
+										"operator"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get all Operator's forms",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/operator-form/",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"operator-form",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create form for user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userID\": 23,\n    \"name\": \"Yakuza\",\n    \"gender\": 1,\n    \"birthDate\": \"2004-02-01\",\n    \"socialSecurityNumber\": \"59595959\",\n    \"height\": 190,\n    \"weight\": 24\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/operator/form",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"operator",
+										"form"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "validate user request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09123456765\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/operator/validate-user/request",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"operator",
+										"validate-user",
+										"request"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "verify user",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"phone\": \"09123456765\",\n    \"otp\": \"111111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server-base}}/admin/operator/validate-user/verify",
+									"host": [
+										"{{server-base}}"
+									],
+									"path": [
+										"admin",
+										"operator",
+										"validate-user",
+										"verify"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjYyNDc5MzEsImlhdCI6MTc2MzY1NTkzMSwic3ViIjoxfQ.B_Cm-ceX8n5ori2raTj6RCKqdUoRMXY_ZVurvhExPfLobLWJrTcKswMCa1ZFUWKFzrRAQpHqOa-QrtGG23mSq7f5rN3p3KHPhAu3q_Hd3S-0bBRmlJ70I9BYyv7s6tgK_b6JnZobFemLedUL_R_swTHnaDwPIqrNkNE9fPgtf8MGF-fWh94RzFmc1A49tcKE7QjL2Q6EfEokdKtd31Sa5zKheYQFsRciiWBi5XbcAN5gsFpq2ugvBa9UDvHnc4XOGFJsXuTAaiUbBJpP4Yuvi7LhLPx0Z9J_ridIpXR3s2LmjAKz_bElCt9vnTqTOOioo3In2YiSuB_HpthzbovysA",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "enum",
+			"item": [
+				{
+					"name": "cancer types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/cancer-types",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"cancer-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "menopausal statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/menopausal-statuses",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"menopausal-statuses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "form statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/form-statuses",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"form-statuses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "gender",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/genders",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"genders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "hyperplasiaInBiopsy statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/hyperplasiaInBiopsy-statuses",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"hyperplasiaInBiopsy-statuses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "life statuses",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/life-statuses",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"life-statuses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "relative types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{server-base}}/enum/relatives",
+							"host": [
+								"{{server-base}}"
+							],
+							"path": [
+								"enum",
+								"relatives"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "These APIs output enum values for specified types."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "local-base",
+			"value": "localhost:8080"
+		},
+		{
+			"key": "server-base",
+			"value": ""
+		}
+	]
+}

@@ -208,11 +208,11 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	type UpsertMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		GhaedeAge                    uint                  `form:"ghaedeAge" validate:"required"`
+		GhaedeAge                    uint                  `form:"ghaedeAge"`
 		HasChildren                  bool                  `form:"hasChildren"`
 		NumberOfChildren             *uint                 `form:"numberOfChildren,omitempty"`
 		AgeOfFirstBirth              *uint                 `form:"ageOfFirstBirth,omitempty"`
-		MenopausalStatus             uint                  `form:"menopausalStatus" validate:"required"`
+		MenopausalStatus             uint                  `form:"menopausalStatus"`
 		MenopauseAge                 *string               `form:"menopauseAge,omitempty"`
 		HRT                          *bool                 `form:"hrt,omitempty"`
 		HRTUseLength                 *uint                 `form:"hrtUseLength,omitempty"`

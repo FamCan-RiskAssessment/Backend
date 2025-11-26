@@ -358,13 +358,13 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	type UpdateContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		Name                 *string               `form:"name"`
-		TestGen              *bool                 `form:"testGen"`
-		TestGenPicture       *multipart.FileHeader `form:"testGenPicture,omitempty"`
-		FmTestGen            *bool                 `form:"fmTestGen"`
-		FatherTestGenPicture *multipart.FileHeader `form:"fatherTestGenPicture,omitempty"`
-		MotherTestGenPicture *multipart.FileHeader `form:"motherTestGenPicture,omitempty"`
-		CallExpert           *bool                 `form:"callExpert"`
+		Name                  *string                   `form:"name"`
+		TestGen               *bool                     `form:"testGen"`
+		TestGenPictures       []*multipart.FileHeader `form:"testGenPictures,omitempty"`
+		FmTestGen             *bool                     `form:"fmTestGen"`
+		FatherTestGenPictures []*multipart.FileHeader `form:"fatherTestGenPictures,omitempty"`
+		MotherTestGenPictures []*multipart.FileHeader `form:"motherTestGenPictures,omitempty"`
+		CallExpert            *bool                     `form:"callExpert"`
 		BirthCountry         *string               `form:"birthCountry"`
 		Province             *string               `form:"province"`
 		City                 *string               `form:"city"`
@@ -378,21 +378,21 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	req := formdto.UpdateContactRequest{
-		UserID:               userID.(uint),
-		FormID:               params.FormID,
-		Name:                 params.Name,
-		TestGen:              params.TestGen,
-		TestGenPicture:       params.TestGenPicture,
-		FmTestGen:            params.FmTestGen,
-		FatherTestGenPicture: params.FatherTestGenPicture,
-		MotherTestGenPicture: params.MotherTestGenPicture,
-		CallExpert:           params.CallExpert,
-		BirthCountry:         params.BirthCountry,
-		Province:             params.Province,
-		City:                 params.City,
-		Country:              params.Country,
-		Address:              params.Address,
-		PostalCode:           params.PostalCode,
+		UserID:                userID.(uint),
+		FormID:                params.FormID,
+		Name:                  params.Name,
+		TestGen:               params.TestGen,
+		TestGenPictures:       params.TestGenPictures,
+		FmTestGen:             params.FmTestGen,
+		FatherTestGenPictures: params.FatherTestGenPictures,
+		MotherTestGenPictures: params.MotherTestGenPictures,
+		CallExpert:            params.CallExpert,
+		BirthCountry:          params.BirthCountry,
+		Province:              params.Province,
+		City:                  params.City,
+		Country:               params.Country,
+		Address:               params.Address,
+		PostalCode:            params.PostalCode,
 	}
 
 	if err := formController.formService.UpdateContact(req); err != nil {
@@ -581,10 +581,10 @@ func (formController *AdminFormController) GetAllCancers(ctx *gin.Context) {
 
 func (formController *AdminFormController) CreateCancer(ctx *gin.Context) {
 	type CreateCancerParams struct {
-		FormID     uint                  `uri:"formID" validate:"required"`
-		CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
-		CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
-		Picture    *multipart.FileHeader `form:"picture,omitempty"`
+		FormID     uint                    `uri:"formID" validate:"required"`
+		CancerType uint                    `form:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint                    `form:"cancerAge" validate:"required,gte=0"`
+		Pictures   []*multipart.FileHeader `form:"pictures,omitempty"`
 	}
 
 	params := controller.Validate[CreateCancerParams](ctx)
@@ -596,7 +596,7 @@ func (formController *AdminFormController) CreateCancer(ctx *gin.Context) {
 		FormID:     params.FormID,
 		CancerType: params.CancerType,
 		CancerAge:  params.CancerAge,
-		Picture:    params.Picture,
+		Pictures:   params.Pictures,
 	}
 
 	err := formController.formService.CreateCancer(req)
@@ -611,11 +611,11 @@ func (formController *AdminFormController) CreateCancer(ctx *gin.Context) {
 
 func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 	type UpdateCancerParams struct {
-		FormID     uint                  `uri:"formID" validate:"required"`
-		CancerID   uint                  `uri:"cancerID" validate:"required"`
-		CancerType uint                  `form:"cancerType" validate:"required,gt=0"`
-		CancerAge  uint                  `form:"cancerAge" validate:"required,gte=0"`
-		Picture    *multipart.FileHeader `form:"picture,omitempty"`
+		FormID     uint                    `uri:"formID" validate:"required"`
+		CancerID   uint                    `uri:"cancerID" validate:"required"`
+		CancerType uint                    `form:"cancerType" validate:"required,gt=0"`
+		CancerAge  uint                    `form:"cancerAge" validate:"required,gte=0"`
+		Pictures   []*multipart.FileHeader `form:"pictures,omitempty"`
 	}
 
 	params := controller.Validate[UpdateCancerParams](ctx)
@@ -628,7 +628,7 @@ func (formController *AdminFormController) UpdateCancer(ctx *gin.Context) {
 		CancerID:   params.CancerID,
 		CancerType: params.CancerType,
 		CancerAge:  params.CancerAge,
-		Picture:    params.Picture,
+		Pictures:   params.Pictures,
 	}
 
 	response, err := formController.formService.UpdateCancer(req)
@@ -669,14 +669,14 @@ func (formController *AdminFormController) DeleteCancer(ctx *gin.Context) {
 
 func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) {
 	type CreateFamilyCancerParams struct {
-		FormID           uint                  `uri:"formID" validate:"required"`
-		Relative         uint                  `form:"relative" validate:"required,gt=0"`
-		RelativeRelation *string               `form:"relativeRelation,omitempty"`
-		Name             *string               `form:"name,omitempty"`
-		LifeStatus       *uint                 `form:"lifeStatus,omitempty"`
-		CancerType       uint                  `form:"cancerType" validate:"required,gt=0"`
-		CancerAge        uint                  `form:"cancerAge" validate:"required,gte=0"`
-		Picture          *multipart.FileHeader `form:"picture,omitempty"`
+		FormID           uint                    `uri:"formID" validate:"required"`
+		Relative         uint                    `form:"relative" validate:"required,gt=0"`
+		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
+		Name             *string                 `form:"name,omitempty"`
+		LifeStatus       *uint                   `form:"lifeStatus,omitempty"`
+		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
+		CancerAge        uint                    `form:"cancerAge" validate:"required,gte=0"`
+		Pictures         []*multipart.FileHeader `form:"pictures,omitempty"`
 	}
 
 	params := controller.Validate[CreateFamilyCancerParams](ctx)
@@ -698,7 +698,7 @@ func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) 
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,
 		CancerAge:        params.CancerAge,
-		Picture:          params.Picture,
+		Pictures:         params.Pictures,
 	}
 
 	response, err := formController.formService.CreateFamilyCancer(req)
@@ -713,15 +713,15 @@ func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) 
 
 func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) {
 	type UpdateFamilyCancerParams struct {
-		FormID           uint                  `uri:"formID" validate:"required"`
-		FamilyCancerID   uint                  `uri:"familyCancerID" validate:"required"`
-		Relative         uint                  `form:"relative" validate:"required,gt=0"`
-		RelativeRelation *string               `form:"relativeRelation,omitempty"`
-		Name             *string               `form:"name,omitempty"`
-		LifeStatus       *uint                 `form:"lifeStatus,omitempty"`
-		CancerType       uint                  `form:"cancerType" validate:"required,gt=0"`
-		CancerAge        uint                  `form:"cancerAge" validate:"required,gte=0"`
-		Picture          *multipart.FileHeader `form:"picture,omitempty"`
+		FormID           uint                    `uri:"formID" validate:"required"`
+		FamilyCancerID   uint                    `uri:"familyCancerID" validate:"required"`
+		Relative         uint                    `form:"relative" validate:"required,gt=0"`
+		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
+		Name             *string                 `form:"name,omitempty"`
+		LifeStatus       *uint                   `form:"lifeStatus,omitempty"`
+		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
+		CancerAge        uint                    `form:"cancerAge" validate:"required,gte=0"`
+		Pictures         []*multipart.FileHeader `form:"pictures,omitempty"`
 	}
 
 	params := controller.Validate[UpdateFamilyCancerParams](ctx)
@@ -744,7 +744,7 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,
 		CancerAge:        params.CancerAge,
-		Picture:          params.Picture,
+		Pictures:         params.Pictures,
 	}
 
 	response, err := formController.formService.UpdateFamilyCancer(req)

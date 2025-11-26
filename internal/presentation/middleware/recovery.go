@@ -42,6 +42,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleValidationError(ctx, validationErrors, recovery.constants.Context.Translator)
 	} else if bindingError, ok := err.(exception.BindingError); ok {
 		handleBindingError(ctx, bindingError, recovery.constants.Context.Translator)
+	} else if fileValidationError, ok := err.(exception.FileValidationError); ok {
+		handleFileValidationError(ctx, fileValidationError)
 	} else if rateLimitError, ok := err.(*exception.RateLimitError); ok {
 		handleRateLimitError(ctx, *rateLimitError, recovery.constants.Context.Translator)
 	} else if conflictErrors, ok := err.(exception.ConflictErrors); ok {
@@ -86,6 +88,10 @@ func handleBindingError(ctx *gin.Context, bindingError exception.BindingError, t
 	}
 
 	controller.Response(ctx, 400, message, nil)
+}
+
+func handleFileValidationError(ctx *gin.Context, fileValidationError exception.FileValidationError) {
+	controller.Response(ctx, 400, fileValidationError.Message, nil)
 }
 
 func handleRateLimitError(ctx *gin.Context, rateLimitError exception.RateLimitError, transKey string) {

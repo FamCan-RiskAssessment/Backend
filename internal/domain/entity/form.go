@@ -73,7 +73,7 @@ type MamoGraphyInfo struct {
 	OralDuration                 *string                         `gorm:"type:varchar(50)"`
 	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
 	MamoGraphy                   *bool                           `gorm:"type:boolean"`
-	MamoGraphyPicturePath        *string                         `gorm:"type:varchar(255)"`
+	MamoGraphyPicturePaths       []string                        `gorm:"type:jsonb;serializer:json"`
 	Falop                        *bool                           `gorm:"type:boolean"`
 	Andometrioz                  *bool                           `gorm:"type:boolean"`
 	LeavePestan                  bool                            `gorm:"not null;default:false"`
@@ -92,9 +92,9 @@ type CancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 
-	CancerAge   uint
-	CancerType  enum.CancerType
-	PicturePath *string `gorm:"type:varchar(255)"`
+	CancerAge    uint
+	CancerType   enum.CancerType
+	PicturePaths []string `gorm:"type:jsonb;serializer:json"`
 }
 
 type FamilyCancerInfo struct {
@@ -108,7 +108,7 @@ type FamilyCancerInfo struct {
 	LifeStatus       *enum.LifeStatus
 	CancerAge        uint
 	CancerType       enum.CancerType
-	PicturePath      *string `gorm:"type:varchar(255)"`
+	PicturePaths     []string `gorm:"type:jsonb;serializer:json"`
 }
 
 type ContactInfo struct {
@@ -116,13 +116,13 @@ type ContactInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 6
-	Name                     string  `gorm:"type:varchar(255);not null"`
-	TestGen                  *bool   `gorm:"type:boolean"`
-	TestGenPicturePath       *string `gorm:"type:varchar(255)"`
-	FmTestGen                *bool   `gorm:"type:boolean"`
-	FatherTestGenPicturePath *string `gorm:"type:varchar(255)"`
-	MotherTestGenPicturePath *string `gorm:"type:varchar(255)"`
-	CallExpert               bool    `gorm:"not null;default:true"`
+	Name                      string   `gorm:"type:varchar(255);not null"`
+	TestGen                   *bool    `gorm:"type:boolean"`
+	TestGenPicturePaths       []string `gorm:"type:jsonb;serializer:json"`
+	FmTestGen                 *bool    `gorm:"type:boolean"`
+	FatherTestGenPicturePaths []string `gorm:"type:jsonb;serializer:json"`
+	MotherTestGenPicturePaths []string `gorm:"type:jsonb;serializer:json"`
+	CallExpert                bool     `gorm:"not null;default:true"`
 	BirthCountry             *string `gorm:"type:varchar(50)"`
 	Province                 *string `gorm:"type:varchar(50)"`
 	City                     *string `gorm:"type:varchar(50)"`

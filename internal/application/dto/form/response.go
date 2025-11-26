@@ -62,7 +62,7 @@ type FamilyCancerItemResponse struct {
 	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
 	CancerType       enum.CancerType  `json:"cancerType"`
 	CancerAge        uint             `json:"cancerAge"`
-	Picture          *string          `json:"picture,omitempty"`
+	Pictures         []string         `json:"pictures,omitempty"`
 }
 
 type CreateFamilyCancerResponse struct {
@@ -123,7 +123,7 @@ type CancerResponse struct {
 	ID         uint            `json:"id"`
 	CancerType enum.CancerType `json:"cancerType"`
 	CancerAge  uint            `json:"cancerAge"`
-	Picture    *string         `json:"picture,omitempty"`
+	Pictures   []string        `json:"pictures,omitempty"`
 }
 
 type GetCancersResponse struct {
@@ -161,7 +161,7 @@ type GetMamographyResponse struct {
 	OralDuration                 *string               `json:"oralDuration,omitempty"`
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
-	MamoGraphyPicture            *string               `json:"mamoGraphyPicture"`
+	MamoGraphyPictures           []string              `json:"mamoGraphyPictures,omitempty"`
 	Falop                        *bool                 `json:"falop,omitempty"`
 	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
 	LeavePestan                  bool                  `json:"leavePestan"`
@@ -180,20 +180,20 @@ type ChangeFormStatusResponse struct {
 }
 
 type GetContactResponse struct {
-	ID                   uint    `json:"id"`
-	TestGen              *bool   `json:"testGen,omitempty"`
-	TestGenPicture       *string `json:"testGenPicture,omitempty"`
-	Name                 string  `json:"name"`
-	FmTestGen            *bool   `json:"fmTestGen,omitempty"`
-	FatherTestGenPicture *string `json:"fatherTestGenPicture,omitempty"`
-	MotherTestGenPicture *string `json:"motherTestGenPicture,omitempty"`
-	CallExpert           bool    `json:"callExpert"`
-	BirthCountry         *string `json:"birthCountry,omitempty"`
-	Province             *string `json:"province,omitempty"`
-	City                 *string `json:"city,omitempty"`
-	Country              *string `json:"country,omitempty"`
-	Address              string  `json:"address"`
-	PostalCode           string  `json:"postalCode"`
+	ID                    uint     `json:"id"`
+	TestGen               *bool    `json:"testGen,omitempty"`
+	TestGenPictures       []string `json:"testGenPictures,omitempty"`
+	Name                  string   `json:"name"`
+	FmTestGen             *bool    `json:"fmTestGen,omitempty"`
+	FatherTestGenPictures []string `json:"fatherTestGenPictures,omitempty"`
+	MotherTestGenPictures []string `json:"motherTestGenPictures,omitempty"`
+	CallExpert            bool     `json:"callExpert"`
+	BirthCountry          *string  `json:"birthCountry,omitempty"`
+	Province              *string  `json:"province,omitempty"`
+	City                  *string  `json:"city,omitempty"`
+	Country               *string  `json:"country,omitempty"`
+	Address               string   `json:"address"`
+	PostalCode            string   `json:"postalCode"`
 }
 
 type GetLungCancerResponse struct {

@@ -112,7 +112,7 @@ type UpsertMamographyRequest struct {
 	OralDuration                 *string
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
-	MamoGraphyPicture            *multipart.FileHeader
+	MamoGraphyPictures           []*multipart.FileHeader
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  bool
@@ -129,7 +129,7 @@ type UpsertMamographyRequest struct {
 type CancerRequest struct {
 	CancerType uint
 	CancerAge  uint
-	Picture    *multipart.FileHeader
+	Pictures   []*multipart.FileHeader
 }
 
 type CreateCancerRequest struct {
@@ -138,7 +138,7 @@ type CreateCancerRequest struct {
 
 	CancerType uint
 	CancerAge  uint
-	Picture    *multipart.FileHeader
+	Pictures   []*multipart.FileHeader
 }
 
 type UpdateCancerRequest struct {
@@ -148,7 +148,7 @@ type UpdateCancerRequest struct {
 
 	CancerType uint
 	CancerAge  uint
-	Picture    *multipart.FileHeader
+	Pictures   []*multipart.FileHeader
 }
 
 type DeleteCancerRequest struct {
@@ -167,7 +167,7 @@ type CreateFamilyCancerRequest struct {
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint
-	Picture          *multipart.FileHeader
+	Pictures         []*multipart.FileHeader
 }
 
 type UpdateFamilyCancerRequest struct {
@@ -180,7 +180,7 @@ type UpdateFamilyCancerRequest struct {
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint
-	Picture          *multipart.FileHeader
+	Pictures         []*multipart.FileHeader
 }
 
 type DeleteFamilyCancerRequest struct {
@@ -205,19 +205,19 @@ type UpsertContactRequest struct {
 	UserID uint
 	FormID uint
 
-	Name                 string
-	TestGen              *bool
-	TestGenPicture       *multipart.FileHeader
-	FmTestGen            *bool
-	FatherTestGenPicture *multipart.FileHeader
-	MotherTestGenPicture *multipart.FileHeader
-	CallExpert           bool
-	BirthCountry         *string
-	Province             *string
-	City                 *string
-	Country              *string
-	Address              string
-	PostalCode           string
+	Name                  string
+	TestGen               *bool
+	TestGenPictures       []*multipart.FileHeader
+	FmTestGen             *bool
+	FatherTestGenPictures []*multipart.FileHeader
+	MotherTestGenPictures []*multipart.FileHeader
+	CallExpert            bool
+	BirthCountry          *string
+	Province              *string
+	City                  *string
+	Country               *string
+	Address               string
+	PostalCode            string
 }
 
 type UpsertLungCancerRequest struct {
@@ -342,19 +342,19 @@ type UpdateContactRequest struct {
 	UserID uint
 	FormID uint
 
-	Name                 *string
-	TestGen              *bool
-	TestGenPicture       *multipart.FileHeader
-	FmTestGen            *bool
-	FatherTestGenPicture *multipart.FileHeader
-	MotherTestGenPicture *multipart.FileHeader
-	CallExpert           *bool
-	BirthCountry         *string
-	Province             *string
-	City                 *string
-	Country              *string
-	Address              *string
-	PostalCode           *string
+	Name                  *string
+	TestGen               *bool
+	TestGenPictures       []*multipart.FileHeader
+	FmTestGen             *bool
+	FatherTestGenPictures []*multipart.FileHeader
+	MotherTestGenPictures []*multipart.FileHeader
+	CallExpert            *bool
+	BirthCountry          *string
+	Province              *string
+	City                  *string
+	Country               *string
+	Address               *string
+	PostalCode            *string
 }
 type UpdateLungCancerRequest struct {
 	UserID uint

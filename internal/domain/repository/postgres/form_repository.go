@@ -85,4 +85,8 @@ type FormRepository interface {
 	FindPLCOResultByFormID(db database.Database, formID uint) (*entity.PLCOResult, error)
 	CreatePLCOResult(db database.Database, result *entity.PLCOResult) error
 	UpdatePLCOResult(db database.Database, result *entity.PLCOResult) error
+
+	FindAttentionQuestionsByFormID(db database.Database, formID uint) (*entity.AttentionQuestions, error)
+	CreateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error
+	UpdateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error
 }

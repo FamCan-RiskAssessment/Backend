@@ -229,3 +229,12 @@ type PLCOResult struct {
 	PLCO2012Results3Yr   *float64 `gorm:"type:decimal(10,6)"`
 	PLCO2012Results6Yr   *float64 `gorm:"type:decimal(10,6)"`
 }
+
+type AttentionQuestions struct {
+	database.Model
+	FormID           uint  `gorm:"not null;uniqueIndex"`
+	Form             Form  `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	GeneralHealthCorrect  *bool
+	MamographyCorrect     *bool
+	LungCancerCorrect     *bool
+}

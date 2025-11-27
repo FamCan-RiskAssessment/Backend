@@ -465,3 +465,23 @@ func (r *FormRepository) CreatePLCOResult(db database.Database, result *entity.P
 func (r *FormRepository) UpdatePLCOResult(db database.Database, result *entity.PLCOResult) error {
 	return db.GetDB().Save(result).Error
 }
+
+func (r *FormRepository) FindAttentionQuestionsByFormID(db database.Database, formID uint) (*entity.AttentionQuestions, error) {
+	var result entity.AttentionQuestions
+	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (r *FormRepository) CreateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error {
+	return db.GetDB().Create(questions).Error
+}
+
+func (r *FormRepository) UpdateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error {
+	return db.GetDB().Save(questions).Error
+}

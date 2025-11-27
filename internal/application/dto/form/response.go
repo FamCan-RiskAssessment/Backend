@@ -15,6 +15,8 @@ type BasicFormResponse struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+
+	AttentionQuestionsCorrect *int `json:"attentionQuestionsCorrect"`
 }
 
 type CreateFormResponse struct {

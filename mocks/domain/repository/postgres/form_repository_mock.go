@@ -310,3 +310,21 @@ func (f *FormRepositoryMock) UpdatePLCOResult(db database.Database, result *enti
 	args := f.Called(db, result)
 	return args.Error(0)
 }
+
+func (f *FormRepositoryMock) FindAttentionQuestionsByFormID(db database.Database, formID uint) (*entity.AttentionQuestions, error) {
+	args := f.Called(db, formID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.AttentionQuestions), args.Error(1)
+}
+
+func (f *FormRepositoryMock) CreateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error {
+	args := f.Called(db, questions)
+	return args.Error(0)
+}
+
+func (f *FormRepositoryMock) UpdateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error {
+	args := f.Called(db, questions)
+	return args.Error(0)
+}

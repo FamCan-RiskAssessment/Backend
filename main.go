@@ -37,6 +37,7 @@ func main() {
 		&entity.BCRAResult{},
 		&entity.GailResult{},
 		&entity.PLCOResult{},
+		&entity.AttentionQuestions{},
 	)
 
 	app.Seeds.RoleSeeder.SeedRoles()

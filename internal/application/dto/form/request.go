@@ -90,6 +90,9 @@ type UpsertGeneralHealthRequest struct {
 	CountGheliandaily         *string
 	CountSmokingDailyPast     *string
 	CountGheliandailyPast     *string
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 
 type UpsertMamographyRequest struct {
@@ -124,6 +127,9 @@ type UpsertMamographyRequest struct {
 	LastFiveYearBloodTestInStool *bool
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 
 type CancerRequest struct {
@@ -267,6 +273,9 @@ type UpsertLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           bool
 	SecondhandSmokeLocation   *string
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 
 type ChangeFormStatusRequest struct {
@@ -305,6 +314,9 @@ type UpdateGeneralHealthRequest struct {
 	CountGheliandaily         *string
 	CountSmokingDailyPast     *string
 	CountGheliandailyPast     *string
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 type UpdateMamographyRequest struct {
 	UserID uint
@@ -337,6 +349,9 @@ type UpdateMamographyRequest struct {
 	LastFiveYearBloodTestInStool *bool
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 type UpdateContactRequest struct {
 	UserID uint
@@ -403,4 +418,7 @@ type UpdateLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           *bool
 	SecondhandSmokeLocation   *string
+
+	// Attention question answer
+	AttentionCorrect *bool
 }

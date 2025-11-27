@@ -88,6 +88,26 @@ func (formService *FormService) isSupervisor(userID uint) (bool, error) {
 	return false, nil
 }
 
+func (formService *FormService) countAttentionQuestionsCorrect(formID uint) *int {
+	attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, formID)
+	if err != nil || attentionQ == nil {
+		return nil
+	}
+
+	count := 0
+	if attentionQ.GeneralHealthCorrect != nil && *attentionQ.GeneralHealthCorrect {
+		count++
+	}
+	if attentionQ.MamographyCorrect != nil && *attentionQ.MamographyCorrect {
+		count++
+	}
+	if attentionQ.LungCancerCorrect != nil && *attentionQ.LungCancerCorrect {
+		count++
+	}
+
+	return &count
+}
+
 func (formService *FormService) hasPermission(userID uint, permission enum.PermissionType) (bool, error) {
 	userRoles, err := formService.userService.GetUserRoles(userID)
 	if err != nil {
@@ -276,12 +296,13 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	}
 
 	response := formdto.BasicFormResponse{
-		FormID:             form.ID,
-		Status:             form.Status.String(),
-		UserID:             form.UserID,
-		FilledByOperatorID: form.FilledByOperatorID,
-		CreatedAt:          form.CreatedAt,
-		UpdatedAt:          form.UpdatedAt,
+		FormID:                    form.ID,
+		Status:                    form.Status.String(),
+		UserID:                    form.UserID,
+		FilledByOperatorID:        form.FilledByOperatorID,
+		CreatedAt:                 form.CreatedAt,
+		UpdatedAt:                 form.UpdatedAt,
+		AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
 	}
 
 	return response, nil
@@ -310,12 +331,10 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -352,6 +371,28 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 		return err
 	}
 
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:                request.FormID,
+				GeneralHealthCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.GeneralHealthCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
 	// Log operator action if performed by operator
 	if isOp {
 		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سلامت عمومی")
@@ -383,6 +424,9 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -470,6 +514,28 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 		formService.deleteOldPictures(enum.BucketTypeMamography, oldPaths, info.MamoGraphyPicturePaths)
 	}
 
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:              request.FormID,
+				MamographyCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.MamographyCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
 	// Log operator action if performed by operator
 	if isOp {
 		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات ماموگرافی")
@@ -501,6 +567,9 @@ func (formService *FormService) CreateCancer(request formdto.CreateCancerRequest
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
 
 	// Check for duplicate cancer (same type and age)
@@ -578,6 +647,9 @@ func (formService *FormService) UpdateCancer(request formdto.UpdateCancerRequest
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return formdto.UpdateCancerResponse{}, forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.UpdateCancerResponse{}, forbiddenError
 	}
 
 	cancer, err := formService.formRepository.FindCancerByID(formService.db, request.CancerID)
@@ -696,6 +768,9 @@ func (formService *FormService) DeleteCancer(request formdto.DeleteCancerRequest
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
 
 	cancer, err := formService.formRepository.FindCancerByID(formService.db, request.CancerID)
@@ -752,6 +827,9 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return formdto.CreateFamilyCancerResponse{}, forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.CreateFamilyCancerResponse{}, forbiddenError
 	}
 
 	info := &entity.FamilyCancerInfo{
@@ -839,6 +917,9 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return formdto.UpdateFamilyCancerResponse{}, forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.UpdateFamilyCancerResponse{}, forbiddenError
 	}
 
 	familyCancer, err := formService.formRepository.FindFamilyCancerByID(formService.db, request.FamilyCancerID)
@@ -948,6 +1029,9 @@ func (formService *FormService) DeleteFamilyCancer(request formdto.DeleteFamilyC
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
 
 	familyCancer, err := formService.formRepository.FindFamilyCancerByID(formService.db, request.FamilyCancerID)
@@ -1004,12 +1088,10 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1150,12 +1232,10 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1222,6 +1302,28 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 		return err
 	}
 
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:            request.FormID,
+				LungCancerCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.LungCancerCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
 	// Log operator action if performed by operator
 	if isOp {
 		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سرطان ریه")
@@ -1275,10 +1377,10 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		return formdto.GetBasicFormResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetBasicFormResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetBasicFormResponse{}, forbiddenError
+	}
 
 	basic, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1310,10 +1412,10 @@ func (formService *FormService) GetGeneralHealth(request formdto.GetPartialFormR
 		return formdto.GetGeneralHealthResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetGeneralHealthResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetGeneralHealthResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1355,10 +1457,10 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		return formdto.GetMamographyResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetMamographyResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetMamographyResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1425,10 +1527,10 @@ func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest
 		return formdto.GetCancersResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetCancerResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetCancersResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1469,10 +1571,10 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 		return formdto.GetFamilyCancerResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetFamilyCancerResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1522,10 +1624,10 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		return formdto.GetContactResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetContactResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetContactResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1580,10 +1682,10 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		return formdto.GetLungCancerResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.GetLungCancerResponse{}, ForbiddenError
-	// }
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.GetLungCancerResponse{}, forbiddenError
+	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -1668,12 +1770,14 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:     form.ID,
-			Status:     form.Status.String(),
-			UserID:     form.UserID,
-			OperatorID: form.OperatorID,
-			CreatedAt:  form.CreatedAt,
-			UpdatedAt:  form.UpdatedAt,
+			FormID:                       form.ID,
+			Status:                       form.Status.String(),
+			UserID:                       form.UserID,
+			OperatorID:                   form.OperatorID,
+			FilledByOperatorID:           form.FilledByOperatorID,
+			CreatedAt:                    form.CreatedAt,
+			UpdatedAt:                    form.UpdatedAt,
+			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -1801,12 +1905,14 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:     form.ID,
-			Status:     form.Status.String(),
-			UserID:     form.UserID,
-			OperatorID: form.OperatorID,
-			CreatedAt:  form.CreatedAt,
-			UpdatedAt:  form.UpdatedAt,
+			FormID:                       form.ID,
+			Status:                       form.Status.String(),
+			UserID:                       form.UserID,
+			OperatorID:                   form.OperatorID,
+			FilledByOperatorID:           form.FilledByOperatorID,
+			CreatedAt:                    form.CreatedAt,
+			UpdatedAt:                    form.UpdatedAt,
+			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -1851,12 +1957,14 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:     form.ID,
-			Status:     form.Status.String(),
-			UserID:     form.UserID,
-			OperatorID: form.OperatorID,
-			CreatedAt:  form.CreatedAt,
-			UpdatedAt:  form.UpdatedAt,
+			FormID:                       form.ID,
+			Status:                       form.Status.String(),
+			UserID:                       form.UserID,
+			OperatorID:                   form.OperatorID,
+			FilledByOperatorID:           form.FilledByOperatorID,
+			CreatedAt:                    form.CreatedAt,
+			UpdatedAt:                    form.UpdatedAt,
+			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -1956,12 +2064,10 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -2013,6 +2119,28 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return err
 	}
 
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:                request.FormID,
+				GeneralHealthCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.GeneralHealthCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
 	// Log operator action if performed by operator
 	if isOp {
 		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات سلامت عمومی")
@@ -2044,12 +2172,10 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -2113,6 +2239,28 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		return err
 	}
 
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:               request.FormID,
+				MamographyCorrect:    request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.MamographyCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
 	// Log operator action if performed by operator
 	if isOp {
 		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات ماموگرافی")
@@ -2144,12 +2292,10 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -2298,12 +2444,10 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
+	} else if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return forbiddenError
 	}
-
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return ForbiddenError
-	// }
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
 	if err != nil {
@@ -2382,6 +2526,28 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	}
 	if err != nil {
 		return err
+	}
+
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:               request.FormID,
+				LungCancerCorrect:    request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.LungCancerCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	// Log operator action if performed by operator

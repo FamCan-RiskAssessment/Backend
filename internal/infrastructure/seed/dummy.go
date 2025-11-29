@@ -131,7 +131,7 @@ func (d *DummySeeder) seedForms() {
 	months := []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
 		"مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
 	degrees := []string{"ابتدایی یا کمتر", "دیپلم", "فوق دیپلم/مدارک فنی حرفه ای بالای دیپلم", "لیسانس", "فوق لیسانس", "دکتری حرفه ای یا تخصصی"}
-	lungDiseases := []string{"بیماری انسداد ریوی مزمن (COPD)", "برونشیت مزمن", "آمفیزم", "هیچکدام"}
+	lungDiseases := []string{"بیماری انسداد ریوی مزمن (COPD)", "برونشیت مزمن", "آمفیزم", ""}
 	genders := enum.GetAllGenders()
 
 	roles, err := d.userRepository.FindAllRoles(d.db)
@@ -413,7 +413,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		HookahPerWeekPast:         uintPtr(uint((formIndex % 5) + 1)),
 		SecondhandSmoke:           secondhandSmoke,
 		SecondhandSmokeLocation:   &secondhandSmokeLocation,
-		LungDiseaseHistory:        lungDiseaseHistory,
+		LungDiseaseHistory:        stringPtr(lungDiseaseHistory),
 	}
 	return lungCancerInfo
 }

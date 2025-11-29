@@ -244,5 +244,5 @@ type GetLungCancerResponse struct {
 	HookahPerWeekPast         *uint            `json:"hookahPerWeekPast,omitempty"`
 	SecondhandSmoke           bool             `json:"secondhandSmoke"`
 	SecondhandSmokeLocation   *string          `json:"secondhandSmokeLocation,omitempty"`
-	LungDiseaseHistory        string           `json:"lungDiseaseHistory,omitempty"`
+	LungDiseaseHistory        *string          `json:"lungDiseaseHistory,omitempty"`
 }

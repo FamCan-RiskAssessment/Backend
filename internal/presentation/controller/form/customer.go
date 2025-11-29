@@ -387,7 +387,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		SecondhandSmoke           bool    `json:"secondhandSmoke"`
 		SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation,omitempty"`
 		AttentionCorrect          *bool   `json:"attentionCorrect,omitempty"`
-		LungDiseaseHistory        string  `json:"lungDiseaseHistory" validate:"required"`
+		LungDiseaseHistory        *string `json:"lungDiseaseHistory,omitempty"`
 	}
 
 	params := controller.Validate[UpsertLungCancerParams](ctx)

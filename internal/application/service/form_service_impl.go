@@ -2651,9 +2651,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		info.SecondhandSmoke = *request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
-	if request.LungDiseaseHistory != nil {
-		info.LungDiseaseHistory = *request.LungDiseaseHistory
-	}
+	info.LungDiseaseHistory = request.LungDiseaseHistory
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateLungCancer(formService.db, info)

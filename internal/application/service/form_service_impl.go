@@ -345,6 +345,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		Status:                    form.Status.String(),
 		UserID:                    form.UserID,
 		FilledByOperatorID:        form.FilledByOperatorID,
+		SocialSecurityNumber:      basic.SocialSecurityNumber,
 		CreatedAt:                 form.CreatedAt,
 		UpdatedAt:                 form.UpdatedAt,
 		AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
@@ -1860,6 +1861,11 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		return nil, 0, err
 	}
 
+	basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[0].ID)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
 	if err != nil {
 		return nil, 0, err
@@ -1869,6 +1875,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
+			SocialSecurityNumber:      basicInfo.SocialSecurityNumber,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,

@@ -7,11 +7,12 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID             uint   `json:"id"`
-	Status             string `json:"status"`
-	UserID             uint   `json:"user_id"`
-	OperatorID         *uint  `json:"operatorId,omitempty"`
-	FilledByOperatorID *uint  `json:"filledByOperatorId,omitempty"`
+	FormID               uint   `json:"id"`
+	Status               string `json:"status"`
+	UserID               uint   `json:"user_id"`
+	OperatorID           *uint  `json:"operatorId,omitempty"`
+	FilledByOperatorID   *uint  `json:"filledByOperatorId,omitempty"`
+	SocialSecurityNumber string `json:"socialSecurityNumber"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

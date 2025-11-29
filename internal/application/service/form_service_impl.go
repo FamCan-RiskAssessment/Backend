@@ -433,7 +433,7 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 
 		if attentionQ == nil {
 			attentionQ = &entity.AttentionQuestions{
-				FormID:                request.FormID,
+				FormID:               request.FormID,
 				GeneralHealthCorrect: request.AttentionCorrect,
 			}
 			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
@@ -584,7 +584,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 
 		if attentionQ == nil {
 			attentionQ = &entity.AttentionQuestions{
-				FormID:              request.FormID,
+				FormID:            request.FormID,
 				MamographyCorrect: request.AttentionCorrect,
 			}
 			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
@@ -1209,6 +1209,7 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Country = request.Country
 	info.Address = request.Address
 	info.PostalCode = request.PostalCode
+	info.Education = request.Education
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string
@@ -1764,6 +1765,7 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		Country:               info.Country,
 		Address:               info.Address,
 		PostalCode:            info.PostalCode,
+		Education:             info.Education,
 	}, nil
 }
 
@@ -1864,14 +1866,14 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:                       form.ID,
-			Status:                       form.Status.String(),
-			UserID:                       form.UserID,
-			OperatorID:                   form.OperatorID,
-			FilledByOperatorID:           form.FilledByOperatorID,
-			CreatedAt:                    form.CreatedAt,
-			UpdatedAt:                    form.UpdatedAt,
-			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
+			FormID:                    form.ID,
+			Status:                    form.Status.String(),
+			UserID:                    form.UserID,
+			OperatorID:                form.OperatorID,
+			FilledByOperatorID:        form.FilledByOperatorID,
+			CreatedAt:                 form.CreatedAt,
+			UpdatedAt:                 form.UpdatedAt,
+			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -1999,14 +2001,14 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:                       form.ID,
-			Status:                       form.Status.String(),
-			UserID:                       form.UserID,
-			OperatorID:                   form.OperatorID,
-			FilledByOperatorID:           form.FilledByOperatorID,
-			CreatedAt:                    form.CreatedAt,
-			UpdatedAt:                    form.UpdatedAt,
-			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
+			FormID:                    form.ID,
+			Status:                    form.Status.String(),
+			UserID:                    form.UserID,
+			OperatorID:                form.OperatorID,
+			FilledByOperatorID:        form.FilledByOperatorID,
+			CreatedAt:                 form.CreatedAt,
+			UpdatedAt:                 form.UpdatedAt,
+			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -2051,14 +2053,14 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
-			FormID:                       form.ID,
-			Status:                       form.Status.String(),
-			UserID:                       form.UserID,
-			OperatorID:                   form.OperatorID,
-			FilledByOperatorID:           form.FilledByOperatorID,
-			CreatedAt:                    form.CreatedAt,
-			UpdatedAt:                    form.UpdatedAt,
-			AttentionQuestionsCorrect:    formService.countAttentionQuestionsCorrect(form.ID),
+			FormID:                    form.ID,
+			Status:                    form.Status.String(),
+			UserID:                    form.UserID,
+			OperatorID:                form.OperatorID,
+			FilledByOperatorID:        form.FilledByOperatorID,
+			CreatedAt:                 form.CreatedAt,
+			UpdatedAt:                 form.UpdatedAt,
+			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
 		}
 	}
 
@@ -2230,7 +2232,7 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 
 		if attentionQ == nil {
 			attentionQ = &entity.AttentionQuestions{
-				FormID:                request.FormID,
+				FormID:               request.FormID,
 				GeneralHealthCorrect: request.AttentionCorrect,
 			}
 			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
@@ -2358,8 +2360,8 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 
 		if attentionQ == nil {
 			attentionQ = &entity.AttentionQuestions{
-				FormID:               request.FormID,
-				MamographyCorrect:    request.AttentionCorrect,
+				FormID:            request.FormID,
+				MamographyCorrect: request.AttentionCorrect,
 			}
 			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
 		} else {
@@ -2445,6 +2447,9 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	}
 	if request.PostalCode != nil {
 		info.PostalCode = *request.PostalCode
+	}
+	if request.Education != nil {
+		info.Education = *request.Education
 	}
 
 	// Handle TestGen pictures upload
@@ -2663,8 +2668,8 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 		if attentionQ == nil {
 			attentionQ = &entity.AttentionQuestions{
-				FormID:               request.FormID,
-				LungCancerCorrect:    request.AttentionCorrect,
+				FormID:            request.FormID,
+				LungCancerCorrect: request.AttentionCorrect,
 			}
 			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
 		} else {

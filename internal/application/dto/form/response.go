@@ -196,6 +196,7 @@ type GetContactResponse struct {
 	Country               *string  `json:"country,omitempty"`
 	Address               string   `json:"address"`
 	PostalCode            string   `json:"postalCode"`
+	Education             string   `json:"education"`
 }
 
 type GetLungCancerResponse struct {

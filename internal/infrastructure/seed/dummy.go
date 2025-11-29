@@ -130,6 +130,7 @@ func (d *DummySeeder) seedForms() {
 	countries := []string{"ایران", "ترکیه", "آلمان", "کانادا", "آمریکا"}
 	months := []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
 		"مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
+	degrees := []string{"ابتدایی یا کمتر", "دیپلم", "فوق دیپلم/مدارک فنی حرفه ای بالای دیپلم", "لیسانس", "فوق لیسانس", "دکتری حرفه ای یا تخصصی"}
 	genders := enum.GetAllGenders()
 
 	roles, err := d.userRepository.FindAllRoles(d.db)
@@ -185,7 +186,7 @@ func (d *DummySeeder) seedForms() {
 			if err := d.formRepository.CreateFamilyCancer(d.db, familyCancer); err != nil {
 				panic(err)
 			}
-			contact := d.createDummyContact(form.ID, j, names, addresses, provinces, cities, countries)
+			contact := d.createDummyContact(form.ID, j, names, addresses, provinces, cities, countries, degrees)
 			if err := d.formRepository.CreateContact(d.db, contact); err != nil {
 				panic(err)
 			}
@@ -321,7 +322,7 @@ func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancer
 
 	return familyCancerInfo
 }
-func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string) *entity.ContactInfo {
+func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string, degrees []string) *entity.ContactInfo {
 	name := names[formIndex%len(names)]
 	address := addresses[formIndex%len(addresses)]
 	hasTestGen := formIndex%5 == 0
@@ -329,6 +330,7 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 	province := provinces[formIndex%len(provinces)]
 	city := cities[formIndex%len(cities)]
 	country := countries[formIndex%len(countries)]
+	degree := degrees[formIndex%len(degrees)]
 
 	contactInfo := &entity.ContactInfo{
 		FormID:       formID,
@@ -342,6 +344,7 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 		Country:      &country,
 		Address:      address,
 		PostalCode:   fmt.Sprintf("%05d", 10000+(formIndex%90000)),
+		Education:    degree,
 	}
 	return contactInfo
 }

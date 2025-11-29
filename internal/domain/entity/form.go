@@ -123,12 +123,13 @@ type ContactInfo struct {
 	FatherTestGenPicturePaths []string `gorm:"type:jsonb;serializer:json"`
 	MotherTestGenPicturePaths []string `gorm:"type:jsonb;serializer:json"`
 	CallExpert                bool     `gorm:"not null;default:true"`
-	BirthCountry             *string `gorm:"type:varchar(50)"`
-	Province                 *string `gorm:"type:varchar(50)"`
-	City                     *string `gorm:"type:varchar(50)"`
-	Country                  *string `gorm:"type:varchar(50)"`
-	Address                  string  `gorm:"type:text;not null"`
-	PostalCode               string  `gorm:"not null"`
+	BirthCountry              *string  `gorm:"type:varchar(50)"`
+	Province                  *string  `gorm:"type:varchar(50)"`
+	City                      *string  `gorm:"type:varchar(50)"`
+	Country                   *string  `gorm:"type:varchar(50)"`
+	Address                   string   `gorm:"type:text;not null"`
+	PostalCode                string   `gorm:"not null"`
+	Education                 string   `gorm:"type:varchar(127)"`
 }
 
 type LungCancerInfo struct {
@@ -232,9 +233,9 @@ type PLCOResult struct {
 
 type AttentionQuestions struct {
 	database.Model
-	FormID           uint  `gorm:"not null;uniqueIndex"`
-	Form             Form  `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
-	GeneralHealthCorrect  *bool
-	MamographyCorrect     *bool
-	LungCancerCorrect     *bool
+	FormID               uint `gorm:"not null;uniqueIndex"`
+	Form                 Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	GeneralHealthCorrect *bool
+	MamographyCorrect    *bool
+	LungCancerCorrect    *bool
 }

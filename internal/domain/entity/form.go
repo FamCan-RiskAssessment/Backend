@@ -180,6 +180,7 @@ type LungCancerInfo struct {
 	HookahPerWeekPast         *uint   `gorm:"type:int"`
 	SecondhandSmoke           bool    `gorm:"not null;default:false"`
 	SecondhandSmokeLocation   *string `gorm:"type:varchar(50)"`
+	LungDiseaseHistory        string  `gorm:"type:varchar(127)"`
 }
 
 type Premm5Result struct {

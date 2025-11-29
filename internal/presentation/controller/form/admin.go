@@ -458,6 +458,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		SecondhandSmoke           *bool   `json:"secondhandSmoke"`
 		SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation"`
 		AttentionCorrect          *bool   `json:"attentionCorrect"`
+		LungDiseaseHistory        *string `json:"lungDiseaseHistory"`
 	}
 
 	params := controller.Validate[UpdateLungCancerParams](ctx)
@@ -511,6 +512,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		SecondhandSmoke:           params.SecondhandSmoke,
 		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
 		AttentionCorrect:          params.AttentionCorrect,
+		LungDiseaseHistory:        params.LungDiseaseHistory,
 	}
 
 	if err := formController.formService.UpdateLungCancer(req); err != nil {

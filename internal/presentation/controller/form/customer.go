@@ -387,6 +387,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		SecondhandSmoke           bool    `json:"secondhandSmoke"`
 		SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation,omitempty"`
 		AttentionCorrect          *bool   `json:"attentionCorrect,omitempty"`
+		LungDiseaseHistory        string  `json:"lungDiseaseHistory" validate:"required"`
 	}
 
 	params := controller.Validate[UpsertLungCancerParams](ctx)
@@ -440,6 +441,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		SecondhandSmoke:           params.SecondhandSmoke,
 		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
 		AttentionCorrect:          params.AttentionCorrect,
+		LungDiseaseHistory:        params.LungDiseaseHistory,
 	}
 
 	if err := formController.formService.UpsertLungCancer(req); err != nil {

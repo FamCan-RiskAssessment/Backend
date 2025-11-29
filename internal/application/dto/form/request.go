@@ -274,6 +274,7 @@ type UpsertLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           bool
 	SecondhandSmokeLocation   *string
+	LungDiseaseHistory        string
 
 	// Attention question answer
 	AttentionCorrect *bool
@@ -420,6 +421,7 @@ type UpdateLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           *bool
 	SecondhandSmokeLocation   *string
+	LungDiseaseHistory        *string
 
 	// Attention question answer
 	AttentionCorrect *bool

@@ -1394,6 +1394,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	info.SecondhandSmoke = request.SecondhandSmoke
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	info.LungDiseaseHistory = request.LungDiseaseHistory
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateLungCancer(formService.db, info)
@@ -1837,6 +1838,7 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		HookahPerWeekPast:         info.HookahPerWeekPast,
 		SecondhandSmoke:           info.SecondhandSmoke,
 		SecondhandSmokeLocation:   info.SecondhandSmokeLocation,
+		LungDiseaseHistory:        info.LungDiseaseHistory,
 	}, nil
 }
 
@@ -2649,6 +2651,9 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		info.SecondhandSmoke = *request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	if request.LungDiseaseHistory != nil {
+		info.LungDiseaseHistory = *request.LungDiseaseHistory
+	}
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateLungCancer(formService.db, info)

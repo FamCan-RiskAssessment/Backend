@@ -88,6 +88,51 @@ func (formService *FormService) isSupervisor(userID uint) (bool, error) {
 	return false, nil
 }
 
+func (formService *FormService) isSuperAdmin(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.SuperAdmin.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) canUserAccessForm(form *entity.Form, userID uint) error {
+	// Allow access if user owns the form
+	if form.UserID == userID {
+		return nil
+	}
+
+	// Allow access if user is the assigned operator
+	if form.OperatorID != nil && *form.OperatorID == userID {
+		return nil
+	}
+
+	// Allow access if user filled the form as operator
+	if form.FilledByOperatorID != nil && *form.FilledByOperatorID == userID {
+		return nil
+	}
+
+	// Allow access if user is SuperAdmin
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return err
+	}
+	if isSuperAdminUser {
+		return nil
+	}
+
+	// Deny access otherwise
+	forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+	return forbiddenError
+}
+
 func (formService *FormService) countAttentionQuestionsCorrect(formID uint) *int {
 	attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, formID)
 	if err != nil || attentionQ == nil {
@@ -318,22 +363,30 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
@@ -411,22 +464,30 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -554,22 +615,30 @@ func (formService *FormService) CreateCancer(request formdto.CreateCancerRequest
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	// Check for duplicate cancer (same type and age)
@@ -755,22 +824,30 @@ func (formService *FormService) DeleteCancer(request formdto.DeleteCancerRequest
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	cancer, err := formService.formRepository.FindCancerByID(formService.db, request.CancerID)
@@ -1016,22 +1093,30 @@ func (formService *FormService) DeleteFamilyCancer(request formdto.DeleteFamilyC
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	familyCancer, err := formService.formRepository.FindFamilyCancerByID(formService.db, request.FamilyCancerID)
@@ -1075,22 +1160,30 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
@@ -1219,22 +1312,30 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
@@ -1377,9 +1478,8 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		return formdto.GetBasicFormResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetBasicFormResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetBasicFormResponse{}, err
 	}
 
 	basic, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
@@ -1412,9 +1512,8 @@ func (formService *FormService) GetGeneralHealth(request formdto.GetPartialFormR
 		return formdto.GetGeneralHealthResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetGeneralHealthResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetGeneralHealthResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
@@ -1457,9 +1556,8 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		return formdto.GetMamographyResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetMamographyResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetMamographyResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -1527,9 +1625,8 @@ func (formService *FormService) GetCancers(request formdto.GetPartialFormRequest
 		return formdto.GetCancersResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetCancersResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetCancersResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
@@ -1571,9 +1668,8 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 		return formdto.GetFamilyCancerResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetFamilyCancerResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetFamilyCancerResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
@@ -1624,9 +1720,8 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		return formdto.GetContactResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetContactResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetContactResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
@@ -1682,9 +1777,8 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		return formdto.GetLungCancerResponse{}, notFoundError
 	}
 
-	if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.GetLungCancerResponse{}, forbiddenError
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetLungCancerResponse{}, err
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
@@ -2051,22 +2145,30 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
@@ -2159,22 +2261,30 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -2279,22 +2389,30 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
@@ -2431,22 +2549,30 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
 		if err != nil {
 			return err
 		}
-		if !canEdit {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return forbiddenError
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)

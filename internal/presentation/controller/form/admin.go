@@ -362,19 +362,20 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 	type UpdateContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		Name                  *string                   `form:"name"`
-		TestGen               *bool                     `form:"testGen"`
+		Name                  *string                 `form:"name"`
+		TestGen               *bool                   `form:"testGen"`
 		TestGenPictures       []*multipart.FileHeader `form:"testGenPictures,omitempty"`
-		FmTestGen             *bool                     `form:"fmTestGen"`
+		FmTestGen             *bool                   `form:"fmTestGen"`
 		FatherTestGenPictures []*multipart.FileHeader `form:"fatherTestGenPictures,omitempty"`
 		MotherTestGenPictures []*multipart.FileHeader `form:"motherTestGenPictures,omitempty"`
-		CallExpert            *bool                     `form:"callExpert"`
-		BirthCountry         *string               `form:"birthCountry"`
-		Province             *string               `form:"province"`
-		City                 *string               `form:"city"`
-		Country              *string               `form:"country"`
-		Address              *string               `form:"address"`
-		PostalCode           *string               `form:"postalCode"`
+		CallExpert            *bool                   `form:"callExpert"`
+		BirthCountry          *string                 `form:"birthCountry"`
+		Province              *string                 `form:"province"`
+		City                  *string                 `form:"city"`
+		Country               *string                 `form:"country"`
+		Address               *string                 `form:"address"`
+		PostalCode            *string                 `form:"postalCode"`
+		Education             *string                 `form:"education"`
 	}
 
 	params := controller.Validate[UpdateContactParams](ctx)
@@ -397,6 +398,7 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 		Country:               params.Country,
 		Address:               params.Address,
 		PostalCode:            params.PostalCode,
+		Education:             params.Education,
 	}
 
 	if err := formController.formService.UpdateContact(req); err != nil {
@@ -456,6 +458,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		SecondhandSmoke           *bool   `json:"secondhandSmoke"`
 		SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation"`
 		AttentionCorrect          *bool   `json:"attentionCorrect"`
+		LungDiseaseHistory        *string `json:"lungDiseaseHistory"`
 	}
 
 	params := controller.Validate[UpdateLungCancerParams](ctx)
@@ -509,6 +512,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		SecondhandSmoke:           params.SecondhandSmoke,
 		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
 		AttentionCorrect:          params.AttentionCorrect,
+		LungDiseaseHistory:        params.LungDiseaseHistory,
 	}
 
 	if err := formController.formService.UpdateLungCancer(req); err != nil {

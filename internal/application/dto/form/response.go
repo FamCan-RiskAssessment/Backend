@@ -197,6 +197,7 @@ type GetContactResponse struct {
 	Country               *string  `json:"country,omitempty"`
 	Address               string   `json:"address"`
 	PostalCode            string   `json:"postalCode"`
+	Education             string   `json:"education"`
 }
 
 type GetLungCancerResponse struct {
@@ -244,4 +245,5 @@ type GetLungCancerResponse struct {
 	HookahPerWeekPast         *uint            `json:"hookahPerWeekPast,omitempty"`
 	SecondhandSmoke           bool             `json:"secondhandSmoke"`
 	SecondhandSmokeLocation   *string          `json:"secondhandSmokeLocation,omitempty"`
+	LungDiseaseHistory        *string          `json:"lungDiseaseHistory,omitempty"`
 }

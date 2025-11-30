@@ -338,6 +338,7 @@ type UpdateMamographyRequest struct {
 	OralDuration                 *string
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
+	MamoGraphyPictures           []*multipart.FileHeader
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  *bool

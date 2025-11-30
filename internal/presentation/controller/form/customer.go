@@ -210,35 +210,35 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 	type UpsertMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		GhaedeAge                    uint                  `form:"ghaedeAge"`
-		HasChildren                  bool                  `form:"hasChildren"`
-		NumberOfChildren             *uint                 `form:"numberOfChildren,omitempty"`
-		AgeOfFirstBirth              *uint                 `form:"ageOfFirstBirth,omitempty"`
-		MenopausalStatus             uint                  `form:"menopausalStatus"`
-		MenopauseAge                 *string               `form:"menopauseAge,omitempty"`
-		HRT                          *bool                 `form:"hrt,omitempty"`
-		HRTUseLength                 *uint                 `form:"hrtUseLength,omitempty"`
-		LastFiveYearsHRTUse          bool                  `form:"lastFiveYearsHrtUse"`
-		CurrentHRTUse                *bool                 `form:"currentHrtUse,omitempty"`
-		IntendedHRTUse               *uint                 `form:"intendedHrtUse,omitempty"`
-		HRTType                      *string               `form:"hrtType,omitempty"`
-		Oral                         *bool                 `form:"oral,omitempty"`
-		OralDuration                 *string               `form:"oralDuration,omitempty"`
-		OralTwoLastYears             *bool                 `form:"oralTwoLastYears,omitempty"`
-		MamoGraphy                   *bool                     `form:"mamoGraphy,omitempty"`
-		MamoGraphyPictures           []*multipart.FileHeader `form:"mamographyPictures"`
-		Falop                        *bool                     `form:"falop,omitempty"`
-		Andometrioz                  *bool                 `form:"andometrioz,omitempty"`
-		LeavePestan                  bool                  `form:"leavePestan"`
-		LeaveTokhmdan                bool                  `form:"leaveTokhmdan"`
-		LaDeColon                    *bool                 `form:"laDeColon,omitempty"`
-		LaDePol                      *bool                 `form:"laDePol,omitempty"`
-		AspLaMo                      *bool                 `form:"aspLaMo,omitempty"`
-		NsaiDLaMo                    *bool                 `form:"nsaiDLaMo,omitempty"`
-		LastFiveYearBloodTestInStool *bool                 `form:"lastFiveYearBloodTestInStool,omitempty"`
-		NumberOfBreastBiopsies       *uint                 `form:"numberOfBreastBiopsies,omitempty"`
-		HyperplasiaInBiopsy          *uint                 `form:"hyperplasiaInBiopsy,omitempty"`
-		AttentionCorrect             *bool                 `form:"attentionCorrect,omitempty"`
+		GhaedeAge                    uint                    `form:"ghaedeAge"`
+		HasChildren                  bool                    `form:"hasChildren"`
+		NumberOfChildren             *uint                   `form:"numberOfChildren,omitempty"`
+		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
+		MenopausalStatus             uint                    `form:"menopausalStatus"`
+		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
+		HRT                          *bool                   `form:"hrt,omitempty"`
+		HRTUseLength                 *uint                   `form:"hrtUseLength,omitempty"`
+		LastFiveYearsHRTUse          bool                    `form:"lastFiveYearsHrtUse"`
+		CurrentHRTUse                *bool                   `form:"currentHrtUse,omitempty"`
+		IntendedHRTUse               *uint                   `form:"intendedHrtUse,omitempty"`
+		HRTType                      *string                 `form:"hrtType,omitempty"`
+		Oral                         *bool                   `form:"oral,omitempty"`
+		OralDuration                 *string                 `form:"oralDuration,omitempty"`
+		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
+		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
+		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
+		Falop                        *bool                   `form:"falop,omitempty"`
+		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
+		LeavePestan                  bool                    `form:"leavePestan"`
+		LeaveTokhmdan                bool                    `form:"leaveTokhmdan"`
+		LaDeColon                    *bool                   `form:"laDeColon,omitempty"`
+		LaDePol                      *bool                   `form:"laDePol,omitempty"`
+		AspLaMo                      *bool                   `form:"aspLaMo,omitempty"`
+		NsaiDLaMo                    *bool                   `form:"nsaiDLaMo,omitempty"`
+		LastFiveYearBloodTestInStool *bool                   `form:"lastFiveYearBloodTestInStool,omitempty"`
+		NumberOfBreastBiopsies       *uint                   `form:"numberOfBreastBiopsies,omitempty"`
+		HyperplasiaInBiopsy          *uint                   `form:"hyperplasiaInBiopsy,omitempty"`
+		AttentionCorrect             *bool                   `form:"attentionCorrect,omitempty"`
 	}
 
 	params := controller.Validate[UpsertMamographyParams](ctx)
@@ -292,19 +292,19 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 	type UpsertContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		Name                  string                    `form:"name" validate:"required"`
-		TestGen               *bool                     `form:"testGen,omitempty"`
+		Name                  string                  `form:"name" validate:"required"`
+		TestGen               *bool                   `form:"testGen,omitempty"`
 		TestGenPictures       []*multipart.FileHeader `form:"testGenPictures,omitempty"`
-		FmTestGen             *bool                     `form:"fmTestGen,omitempty"`
+		FmTestGen             *bool                   `form:"fmTestGen,omitempty"`
 		FatherTestGenPictures []*multipart.FileHeader `form:"fatherTestGenPictures,omitempty"`
 		MotherTestGenPictures []*multipart.FileHeader `form:"motherTestGenPictures,omitempty"`
-		CallExpert            bool                      `form:"callExpert"`
-		BirthCountry         *string               `form:"birthCountry,omitempty"`
-		Province             *string               `form:"province,omitempty"`
-		City                 *string               `form:"city,omitempty"`
-		Country              *string               `form:"country,omitempty"`
-		Address              string                `form:"address" validate:"required"`
-		PostalCode           string                `form:"postalCode" validate:"required"`
+		CallExpert            bool                    `form:"callExpert"`
+		BirthCountry          *string                 `form:"birthCountry,omitempty"`
+		Province              *string                 `form:"province,omitempty"`
+		City                  *string                 `form:"city,omitempty"`
+		Country               *string                 `form:"country,omitempty"`
+		Address               string                  `form:"address" validate:"required"`
+		PostalCode            string                  `form:"postalCode" validate:"required"`
 	}
 
 	params := controller.Validate[UpsertContactParams](ctx)

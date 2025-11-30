@@ -198,6 +198,8 @@ type GetContactResponse struct {
 	Address               string   `json:"address"`
 	PostalCode            string   `json:"postalCode"`
 	Education             string   `json:"education"`
+	Phone2                *string  `json:"phone2,omitempty"`
+	Phone3                *string  `json:"phone3,omitempty"`
 }
 
 type GetLungCancerResponse struct {

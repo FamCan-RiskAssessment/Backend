@@ -376,6 +376,8 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 		Address               *string                 `form:"address"`
 		PostalCode            *string                 `form:"postalCode"`
 		Education             *string                 `form:"education"`
+		Phone2                *string                 `form:"phone2"`
+		Phone3                *string                 `form:"phone3"`
 	}
 
 	params := controller.Validate[UpdateContactParams](ctx)
@@ -399,6 +401,8 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 		Address:               params.Address,
 		PostalCode:            params.PostalCode,
 		Education:             params.Education,
+		Phone2:                params.Phone2,
+		Phone3:                params.Phone3,
 	}
 
 	if err := formController.formService.UpdateContact(req); err != nil {

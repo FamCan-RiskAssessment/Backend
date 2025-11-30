@@ -225,6 +225,8 @@ type UpsertContactRequest struct {
 	Address               string
 	PostalCode            string
 	Education             string
+	Phone2                *string
+	Phone3                *string
 }
 
 type UpsertLungCancerRequest struct {
@@ -373,6 +375,8 @@ type UpdateContactRequest struct {
 	Address               *string
 	PostalCode            *string
 	Education             *string
+	Phone2                *string
+	Phone3                *string
 }
 type UpdateLungCancerRequest struct {
 	UserID uint

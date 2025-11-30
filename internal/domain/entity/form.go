@@ -130,6 +130,8 @@ type ContactInfo struct {
 	Address                   string   `gorm:"type:text;not null"`
 	PostalCode                string   `gorm:"not null"`
 	Education                 string   `gorm:"type:varchar(127)"`
+	Phone2                    *string  `gorm:"type:varchar(11)"`
+	Phone3                    *string  `gorm:"type:varchar(11)"`
 }
 
 type LungCancerInfo struct {

@@ -306,6 +306,8 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 		Address               string                  `form:"address" validate:"required"`
 		PostalCode            string                  `form:"postalCode" validate:"required"`
 		Education             string                  `form:"education" validate:"required"`
+		Phone2                *string                 `form:"phone2"`
+		Phone3                *string                 `form:"phone3"`
 	}
 
 	params := controller.Validate[UpsertContactParams](ctx)
@@ -329,6 +331,8 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 		Address:               params.Address,
 		PostalCode:            params.PostalCode,
 		Education:             params.Education,
+		Phone2:                params.Phone2,
+		Phone3:                params.Phone3,
 	}
 
 	if err := formController.formService.UpsertContact(req); err != nil {

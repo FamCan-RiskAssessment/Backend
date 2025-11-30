@@ -1211,6 +1211,14 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Address = request.Address
 	info.PostalCode = request.PostalCode
 	info.Education = request.Education
+	if request.Phone2 != nil && len(*request.Phone2) != 11 {
+		return exception.FieldError{Field: "Phone 2", Tag: "phone"}
+	}
+	if request.Phone3 != nil && len(*request.Phone3) != 11 {
+		return exception.FieldError{Field: "Phone 3", Tag: "phone"}
+	}
+	info.Phone2 = request.Phone2
+	info.Phone3 = request.Phone3
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string
@@ -1768,6 +1776,8 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		Address:               info.Address,
 		PostalCode:            info.PostalCode,
 		Education:             info.Education,
+		Phone2:                info.Phone2,
+		Phone3:                info.Phone3,
 	}, nil
 }
 
@@ -2460,6 +2470,14 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	if request.Education != nil {
 		info.Education = *request.Education
 	}
+	if request.Phone2 != nil && len(*request.Phone2) != 11 {
+		return exception.FieldError{Field: "Phone 2", Tag: "phone"}
+	}
+	if request.Phone3 != nil && len(*request.Phone3) != 11 {
+		return exception.FieldError{Field: "Phone 3", Tag: "phone"}
+	}
+	info.Phone2 = request.Phone2
+	info.Phone3 = request.Phone3
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string

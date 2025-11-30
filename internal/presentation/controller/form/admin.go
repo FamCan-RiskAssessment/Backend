@@ -286,32 +286,33 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 	type UpdateMamographyParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		GhaedeAge                    *uint   `json:"ghaedeAge"`
-		HasChildren                  *bool   `json:"hasChildren"`
-		NumberOfChildren             *uint   `json:"numberOfChildren"`
-		AgeOfFirstBirth              *uint   `json:"ageOfFirstBirth"`
-		MenopausalStatus             *uint   `json:"menopausalStatus"`
-		MenopauseAge                 *string `json:"menopauseAge"`
-		HRT                          *bool   `json:"hrt"`
-		HRTUseLength                 *uint   `json:"hrtUseLength"`
-		LastFiveYearsHRTUse          *bool   `json:"lastFiveYearsHrtUse"`
-		CurrentHRTUse                *bool   `json:"currentHrtUse"`
-		IntendedHRTUse               *uint   `json:"intendedHrtUse"`
-		HRTType                      *string `json:"hrtType"`
-		Oral                         *bool   `json:"oral"`
-		OralDuration                 *string `json:"oralDuration"`
-		OralTwoLastYears             *bool   `json:"oralTwoLastYears"`
-		MamoGraphy                   *bool   `json:"mamoGraphy"`
-		Falop                        *bool   `json:"falop"`
-		Andometrioz                  *bool   `json:"andometrioz"`
-		LeavePestan                  *bool   `json:"leavePestan"`
-		LeaveTokhmdan                *bool   `json:"leaveTokhmdan"`
-		LaDeColon                    *bool   `json:"laDeColon"`
-		LaDePol                      *bool   `json:"laDePol"`
-		AspLaMo                      *bool   `json:"aspLaMo"`
-		NsaiDLaMo                    *bool   `json:"nsaiDLaMo"`
-		LastFiveYearBloodTestInStool *bool   `json:"lastFiveYearBloodTestInStool"`
-		AttentionCorrect             *bool   `json:"attentionCorrect"`
+		GhaedeAge                    uint                    `form:"ghaedeAge"`
+		HasChildren                  bool                    `form:"hasChildren"`
+		NumberOfChildren             *uint                   `form:"numberOfChildren,omitempty"`
+		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
+		MenopausalStatus             uint                    `form:"menopausalStatus"`
+		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
+		HRT                          *bool                   `form:"hrt,omitempty"`
+		HRTUseLength                 *uint                   `form:"hrtUseLength,omitempty"`
+		LastFiveYearsHRTUse          bool                    `form:"lastFiveYearsHrtUse"`
+		CurrentHRTUse                *bool                   `form:"currentHrtUse,omitempty"`
+		IntendedHRTUse               *uint                   `form:"intendedHrtUse,omitempty"`
+		HRTType                      *string                 `form:"hrtType,omitempty"`
+		Oral                         *bool                   `form:"oral,omitempty"`
+		OralDuration                 *string                 `form:"oralDuration,omitempty"`
+		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
+		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
+		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
+		Falop                        *bool                   `form:"falop,omitempty"`
+		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
+		LeavePestan                  bool                    `form:"leavePestan"`
+		LeaveTokhmdan                bool                    `form:"leaveTokhmdan"`
+		LaDeColon                    *bool                   `form:"laDeColon,omitempty"`
+		LaDePol                      *bool                   `form:"laDePol,omitempty"`
+		AspLaMo                      *bool                   `form:"aspLaMo,omitempty"`
+		NsaiDLaMo                    *bool                   `form:"nsaiDLaMo,omitempty"`
+		LastFiveYearBloodTestInStool *bool                   `form:"lastFiveYearBloodTestInStool,omitempty"`
+		AttentionCorrect             *bool                   `form:"attentionCorrect,omitempty"`
 	}
 
 	params := controller.Validate[UpdateMamographyParams](ctx)
@@ -321,15 +322,15 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 	req := formdto.UpdateMamographyRequest{
 		UserID:                       userID.(uint),
 		FormID:                       params.FormID,
-		GhaedeAge:                    params.GhaedeAge,
-		HasChildren:                  params.HasChildren,
+		GhaedeAge:                    &params.GhaedeAge,
+		HasChildren:                  &params.HasChildren,
 		NumberOfChildren:             params.NumberOfChildren,
 		AgeOfFirstBirth:              params.AgeOfFirstBirth,
-		MenopausalStatus:             params.MenopausalStatus,
+		MenopausalStatus:             &params.MenopausalStatus,
 		MenopauseAge:                 params.MenopauseAge,
 		HRT:                          params.HRT,
 		HRTUseLength:                 params.HRTUseLength,
-		LastFiveYearsHRTUse:          params.LastFiveYearsHRTUse,
+		LastFiveYearsHRTUse:          &params.LastFiveYearsHRTUse,
 		CurrentHRTUse:                params.CurrentHRTUse,
 		IntendedHRTUse:               params.IntendedHRTUse,
 		HRTType:                      params.HRTType,
@@ -337,10 +338,11 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		OralDuration:                 params.OralDuration,
 		OralTwoLastYears:             params.OralTwoLastYears,
 		MamoGraphy:                   params.MamoGraphy,
+		MamoGraphyPictures:           params.MamoGraphyPictures,
 		Falop:                        params.Falop,
 		Andometrioz:                  params.Andometrioz,
-		LeavePestan:                  params.LeavePestan,
-		LeaveTokhmdan:                params.LeaveTokhmdan,
+		LeavePestan:                  &params.LeavePestan,
+		LeaveTokhmdan:                &params.LeaveTokhmdan,
 		LaDeColon:                    params.LaDeColon,
 		LaDePol:                      params.LaDePol,
 		AspLaMo:                      params.AspLaMo,

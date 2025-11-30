@@ -226,7 +226,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		OralDuration                 *string                 `form:"oralDuration,omitempty"`
 		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
 		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
-		MamoGraphyPictures           []*multipart.FileHeader `form:"mamographyPictures"`
+		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
 		Falop                        *bool                   `form:"falop,omitempty"`
 		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
 		LeavePestan                  bool                    `form:"leavePestan"`

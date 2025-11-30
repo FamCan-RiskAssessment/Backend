@@ -1210,6 +1210,15 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Country = request.Country
 	info.Address = request.Address
 	info.PostalCode = request.PostalCode
+	info.Education = request.Education
+	if request.Phone2 != nil && len(*request.Phone2) != 11 {
+		return exception.FieldError{Field: "Phone 2", Tag: "phone"}
+	}
+	if request.Phone3 != nil && len(*request.Phone3) != 11 {
+		return exception.FieldError{Field: "Phone 3", Tag: "phone"}
+	}
+	info.Phone2 = request.Phone2
+	info.Phone3 = request.Phone3
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string
@@ -1394,6 +1403,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	info.SecondhandSmoke = request.SecondhandSmoke
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	info.LungDiseaseHistory = request.LungDiseaseHistory
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateLungCancer(formService.db, info)
@@ -1765,6 +1775,9 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		Country:               info.Country,
 		Address:               info.Address,
 		PostalCode:            info.PostalCode,
+		Education:             info.Education,
+		Phone2:                info.Phone2,
+		Phone3:                info.Phone3,
 	}, nil
 }
 
@@ -1836,6 +1849,7 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		HookahPerWeekPast:         info.HookahPerWeekPast,
 		SecondhandSmoke:           info.SecondhandSmoke,
 		SecondhandSmokeLocation:   info.SecondhandSmokeLocation,
+		LungDiseaseHistory:        info.LungDiseaseHistory,
 	}, nil
 }
 
@@ -2453,6 +2467,17 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	if request.PostalCode != nil {
 		info.PostalCode = *request.PostalCode
 	}
+	if request.Education != nil {
+		info.Education = *request.Education
+	}
+	if request.Phone2 != nil && len(*request.Phone2) != 11 {
+		return exception.FieldError{Field: "Phone 2", Tag: "phone"}
+	}
+	if request.Phone3 != nil && len(*request.Phone3) != 11 {
+		return exception.FieldError{Field: "Phone 3", Tag: "phone"}
+	}
+	info.Phone2 = request.Phone2
+	info.Phone3 = request.Phone3
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string
@@ -2651,6 +2676,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		info.SecondhandSmoke = *request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	info.LungDiseaseHistory = request.LungDiseaseHistory
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateLungCancer(formService.db, info)

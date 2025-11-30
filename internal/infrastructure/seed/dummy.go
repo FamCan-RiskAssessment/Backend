@@ -130,6 +130,8 @@ func (d *DummySeeder) seedForms() {
 	countries := []string{"ایران", "ترکیه", "آلمان", "کانادا", "آمریکا"}
 	months := []string{"فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
 		"مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"}
+	degrees := []string{"ابتدایی یا کمتر", "دیپلم", "فوق دیپلم/مدارک فنی حرفه ای بالای دیپلم", "لیسانس", "فوق لیسانس", "دکتری حرفه ای یا تخصصی"}
+	lungDiseases := []string{"بیماری انسداد ریوی مزمن (COPD)", "برونشیت مزمن", "آمفیزم", ""}
 	genders := enum.GetAllGenders()
 
 	roles, err := d.userRepository.FindAllRoles(d.db)
@@ -185,11 +187,11 @@ func (d *DummySeeder) seedForms() {
 			if err := d.formRepository.CreateFamilyCancer(d.db, familyCancer); err != nil {
 				panic(err)
 			}
-			contact := d.createDummyContact(form.ID, j, names, addresses, provinces, cities, countries)
+			contact := d.createDummyContact(form.ID, j, names, addresses, provinces, cities, countries, degrees)
 			if err := d.formRepository.CreateContact(d.db, contact); err != nil {
 				panic(err)
 			}
-			lungCancer := d.createDummyLungCancer(form.ID, j, insuranceStatuses, occupationalExposures, lungDiseaseTypes, smokingTypes, pastSmokingStatuses, secondhandSmokeLocations, cancerTypes, relations)
+			lungCancer := d.createDummyLungCancer(form.ID, j, insuranceStatuses, occupationalExposures, lungDiseaseTypes, smokingTypes, pastSmokingStatuses, secondhandSmokeLocations, cancerTypes, relations, lungDiseases)
 			if err := d.formRepository.CreateLungCancer(d.db, lungCancer); err != nil {
 				panic(err)
 			}
@@ -321,7 +323,7 @@ func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancer
 
 	return familyCancerInfo
 }
-func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string) *entity.ContactInfo {
+func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string, degrees []string) *entity.ContactInfo {
 	name := names[formIndex%len(names)]
 	address := addresses[formIndex%len(addresses)]
 	hasTestGen := formIndex%5 == 0
@@ -329,6 +331,7 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 	province := provinces[formIndex%len(provinces)]
 	city := cities[formIndex%len(cities)]
 	country := countries[formIndex%len(countries)]
+	degree := degrees[formIndex%len(degrees)]
 
 	contactInfo := &entity.ContactInfo{
 		FormID:       formID,
@@ -342,10 +345,11 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 		Country:      &country,
 		Address:      address,
 		PostalCode:   fmt.Sprintf("%05d", 10000+(formIndex%90000)),
+		Education:    degree,
 	}
 	return contactInfo
 }
-func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []string, secondhandSmokeLocations []string, cancerTypes []enum.CancerType, relations []string) *entity.LungCancerInfo {
+func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []string, secondhandSmokeLocations []string, cancerTypes []enum.CancerType, relations []string, lungDiseases []string) *entity.LungCancerInfo {
 	drinksAlcohol := formIndex%4 == 0
 	insuranceStatus := insuranceStatuses[formIndex%len(insuranceStatuses)]
 	hasHypertension := formIndex%4 == 0
@@ -362,6 +366,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 	smokingType := smokingTypes[formIndex%len(smokingTypes)]
 	pastSmokingStatus := pastSmokingStatuses[formIndex%len(pastSmokingStatuses)]
 	secondhandSmokeLocation := secondhandSmokeLocations[formIndex%len(secondhandSmokeLocations)]
+	lungDiseaseHistory := lungDiseases[formIndex%len(lungDiseases)]
 
 	lungCancerInfo := &entity.LungCancerInfo{
 		FormID:                    formID,
@@ -408,6 +413,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		HookahPerWeekPast:         uintPtr(uint((formIndex % 5) + 1)),
 		SecondhandSmoke:           secondhandSmoke,
 		SecondhandSmokeLocation:   &secondhandSmokeLocation,
+		LungDiseaseHistory:        stringPtr(lungDiseaseHistory),
 	}
 	return lungCancerInfo
 }

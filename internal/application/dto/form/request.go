@@ -224,6 +224,9 @@ type UpsertContactRequest struct {
 	Country               *string
 	Address               string
 	PostalCode            string
+	Education             string
+	Phone2                *string
+	Phone3                *string
 }
 
 type UpsertLungCancerRequest struct {
@@ -273,6 +276,7 @@ type UpsertLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           bool
 	SecondhandSmokeLocation   *string
+	LungDiseaseHistory        *string
 
 	// Attention question answer
 	AttentionCorrect *bool
@@ -371,6 +375,9 @@ type UpdateContactRequest struct {
 	Country               *string
 	Address               *string
 	PostalCode            *string
+	Education             *string
+	Phone2                *string
+	Phone3                *string
 }
 type UpdateLungCancerRequest struct {
 	UserID uint
@@ -419,6 +426,7 @@ type UpdateLungCancerRequest struct {
 	HookahPerWeekPast         *uint
 	SecondhandSmoke           *bool
 	SecondhandSmokeLocation   *string
+	LungDiseaseHistory        *string
 
 	// Attention question answer
 	AttentionCorrect *bool

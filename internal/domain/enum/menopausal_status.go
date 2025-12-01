@@ -4,21 +4,21 @@ type MenopausalStatus uint
 
 const (
 	MenopausalStatusPreMenopausal MenopausalStatus = iota + 1
-	MenopausalStatusPeriMenopausal
 	MenopausalStatusPostMenopausal
+	MenopausalStatusMedicationInduced
 	MenopausalStatusUnknown
 )
 
 func (ms MenopausalStatus) String() string {
 	switch ms {
 	case MenopausalStatusPreMenopausal:
-		return "پیش از یائسگی"
-	case MenopausalStatusPeriMenopausal:
-		return "دوران یائسگی"
+		return "خیر (Premenopausal)"
 	case MenopausalStatusPostMenopausal:
-		return "پس از یائسگی"
+		return "بله (Postmenopausal)"
+	case MenopausalStatusMedicationInduced:
+		return "در اثر مصرف موقتا متوقف شده است"
 	case MenopausalStatusUnknown:
-		return "نامشخص"
+		return "اطلاع ندارم"
 	}
 	return "نامشخص"
 }
@@ -26,8 +26,8 @@ func (ms MenopausalStatus) String() string {
 func GetAllMenopausalStatuses() []MenopausalStatus {
 	return []MenopausalStatus{
 		MenopausalStatusPreMenopausal,
-		MenopausalStatusPeriMenopausal,
 		MenopausalStatusPostMenopausal,
+		MenopausalStatusMedicationInduced,
 		MenopausalStatusUnknown,
 	}
 }

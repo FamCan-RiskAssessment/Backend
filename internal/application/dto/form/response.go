@@ -13,6 +13,7 @@ type BasicFormResponse struct {
 	OperatorID           *uint  `json:"operatorId,omitempty"`
 	FilledByOperatorID   *uint  `json:"filledByOperatorId,omitempty"`
 	SocialSecurityNumber string `json:"socialSecurityNumber"`
+	Name                 string `json:"name"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

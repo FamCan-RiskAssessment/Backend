@@ -239,6 +239,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 		SmokeAtLeast100           *bool   `json:"smokeAtLeast100"`
 		SmokingAge                *uint   `json:"smokingAge"`
 		SmokingNow                *bool   `json:"smokingNow"`
+		YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
 		LeaveSmokingAge           *uint   `json:"leaveSmokingAge"`
 		CountSmokingDaily         *string `json:"countSmokingDaily"`
 		CountGheliandaily         *string `json:"countGheliandaily"`
@@ -265,6 +266,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 		SmokeAtLeast100:           params.SmokeAtLeast100,
 		SmokingAge:                params.SmokingAge,
 		SmokingNow:                params.SmokingNow,
+		YearSmoke:                 params.YearSmoke,
 		LeaveSmokingAge:           params.LeaveSmokingAge,
 		CountSmokingDaily:         params.CountSmokingDaily,
 		CountGheliandaily:         params.CountGheliandaily,
@@ -289,6 +291,8 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		GhaedeAge                    uint                    `form:"ghaedeAge"`
 		HasChildren                  bool                    `form:"hasChildren"`
 		NumberOfChildren             *uint                   `form:"numberOfChildren,omitempty"`
+		SonCount                     *uint                   `form:"sonCount,omitempty"`
+		DaughterCount                *uint                   `form:"daughterCount,omitempty"`
 		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
 		MenopausalStatus             uint                    `form:"menopausalStatus"`
 		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
@@ -325,6 +329,8 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		GhaedeAge:                    &params.GhaedeAge,
 		HasChildren:                  &params.HasChildren,
 		NumberOfChildren:             params.NumberOfChildren,
+		SonCount:                     params.SonCount,
+		DaughterCount:                params.DaughterCount,
 		AgeOfFirstBirth:              params.AgeOfFirstBirth,
 		MenopausalStatus:             &params.MenopausalStatus,
 		MenopauseAge:                 params.MenopauseAge,
@@ -420,51 +426,53 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 	type UpdateLungCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		InsuranceStatus           *string `json:"insuranceStatus"`
-		SupplementaryInsurances   *string `json:"supplementaryInsurances"`
-		Hypertension              *bool   `json:"hypertension"`
-		HypertensionTreatment     *bool   `json:"hypertensionTreatment"`
-		HeartDisease              *bool   `json:"heartDisease"`
-		HeartDiseaseTreatment     *bool   `json:"heartDiseaseTreatment"`
-		Diabetes                  *bool   `json:"diabetes"`
-		DiabetesTreatment         *bool   `json:"diabetesTreatment"`
-		ChronicLungDisease        *bool   `json:"chronicLungDisease"`
-		ChronicLungDiseaseType    *string `json:"chronicLungDiseaseType"`
-		LungCancerHistory         *bool   `json:"lungCancerHistory"`
-		OtherCancerHistory        *bool   `json:"otherCancerHistory"`
-		OtherCancerType           *uint   `json:"otherCancerType"`
-		LungCancerFamily          *bool   `json:"lungCancerFamily"`
-		LungCancerFamilyRelation  *string `json:"lungCancerFamilyRelation"`
-		OtherCancerFamily         *bool   `json:"otherCancerFamily"`
-		OtherCancerFamilyType     *uint   `json:"otherCancerFamilyType"`
-		OtherCancerFamilyRelation *string `json:"otherCancerFamilyRelation"`
-		OccupationalExposure      *string `json:"occupationalExposure"`
-		CurrentSmoking            *bool   `json:"currentSmoking"`
-		SmokingStartAgeCurrent    *uint   `json:"smokingStartAgeCurrent"`
-		SmokingTypesCurrent       *string `json:"smokingTypesCurrent"`
-		CigarettesPerDayCurrent   *uint   `json:"cigarettesPerDayCurrent"`
-		CigarPerDayCurrent        *uint   `json:"cigarPerDayCurrent"`
-		ECigPerDayCurrent         *uint   `json:"eCigPerDayCurrent"`
-		PipePerDayCurrent         *uint   `json:"pipePerDayCurrent"`
-		ChapoghPerDayCurrent      *uint   `json:"chapoghPerDayCurrent"`
-		SmokedOpiumPerDayCurrent  *uint   `json:"smokedOpiumPerDayCurrent"`
-		ChewedOpiumPerDayCurrent  *uint   `json:"chewedOpiumPerDayCurrent"`
-		HookahPerWeekCurrent      *uint   `json:"hookahPerWeekCurrent"`
-		PastSmoking               *string `json:"pastSmoking"`
-		SmokingStartAgePast       *uint   `json:"smokingStartAgePast"`
-		SmokingTypesPast          *string `json:"smokingTypesPast"`
-		CigarettesPerDayPast      *uint   `json:"cigarettesPerDayPast"`
-		CigarPerDayPast           *uint   `json:"cigarPerDayPast"`
-		ECigPerDayPast            *uint   `json:"eCigPerDayPast"`
-		PipePerDayPast            *uint   `json:"pipePerDayPast"`
-		ChapoghPerDayPast         *uint   `json:"chapoghPerDayPast"`
-		SmokedOpiumPerDayPast     *uint   `json:"smokedOpiumPerDayPast"`
-		ChewedOpiumPerDayPast     *uint   `json:"chewedOpiumPerDayPast"`
-		HookahPerWeekPast         *uint   `json:"hookahPerWeekPast"`
-		SecondhandSmoke           *bool   `json:"secondhandSmoke"`
-		SecondhandSmokeLocation   *string `json:"secondhandSmokeLocation"`
-		AttentionCorrect          *bool   `json:"attentionCorrect"`
-		LungDiseaseHistory        *string `json:"lungDiseaseHistory"`
+		InsuranceStatus              *string `json:"insuranceStatus"`
+		SupplementaryInsuranceStatus *bool   `json:"takmilBime"`
+		SupplementaryInsurances      *string `json:"supplementaryInsurances"`
+		Hypertension                 *bool   `json:"hypertension"`
+		HypertensionTreatment        *bool   `json:"hypertensionTreatment"`
+		HeartDisease                 *bool   `json:"heartDisease"`
+		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment"`
+		Diabetes                     *bool   `json:"diabetes"`
+		DiabetesTreatment            *bool   `json:"diabetesTreatment"`
+		ChronicLungDisease           *bool   `json:"chronicLungDisease"`
+		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType"`
+		LungCancerHistory            *bool   `json:"lungCancerHistory"`
+		OtherCancerHistory           *bool   `json:"otherCancerHistory"`
+		OtherCancerType              *uint   `json:"otherCancerType"`
+		LungCancerFamily             *bool   `json:"lungCancerFamily"`
+		LungCancerFamilyRelation     *string `json:"lungCancerFamilyRelation"`
+		OtherCancerFamily            *bool   `json:"otherCancerFamily"`
+		OtherCancerFamilyType        *uint   `json:"otherCancerFamilyType"`
+		OtherCancerFamilyRelation    *string `json:"otherCancerFamilyRelation"`
+		OccupationalExposure         *string `json:"occupationalExposure"`
+		CurrentSmoking               *bool   `json:"currentSmoking"`
+		SmokingStartAgeCurrent       *uint   `json:"smokingStartAgeCurrent"`
+		SmokingTypesCurrent          *string `json:"smokingTypesCurrent"`
+		CigarettesPerDayCurrent      *uint   `json:"cigarettesPerDayCurrent"`
+		CigarPerDayCurrent           *uint   `json:"cigarPerDayCurrent"`
+		ECigPerDayCurrent            *uint   `json:"eCigPerDayCurrent"`
+		PipePerDayCurrent            *uint   `json:"pipePerDayCurrent"`
+		ChapoghPerDayCurrent         *uint   `json:"chapoghPerDayCurrent"`
+		SmokedOpiumPerDayCurrent     *uint   `json:"smokedOpiumPerDayCurrent"`
+		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
+		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
+		PastSmoking                  *string `json:"pastSmoking"`
+		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
+		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
+		SmokingTypesPast             *string `json:"smokingTypesPast"`
+		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast"`
+		CigarPerDayPast              *uint   `json:"cigarPerDayPast"`
+		ECigPerDayPast               *uint   `json:"eCigPerDayPast"`
+		PipePerDayPast               *uint   `json:"pipePerDayPast"`
+		ChapoghPerDayPast            *uint   `json:"chapoghPerDayPast"`
+		SmokedOpiumPerDayPast        *uint   `json:"smokedOpiumPerDayPast"`
+		ChewedOpiumPerDayPast        *uint   `json:"chewedOpiumPerDayPast"`
+		HookahPerWeekPast            *uint   `json:"hookahPerWeekPast"`
+		SecondhandSmoke              *bool   `json:"secondhandSmoke"`
+		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation"`
+		AttentionCorrect             *bool   `json:"attentionCorrect"`
+		LungDiseaseHistory           *string `json:"lungDiseaseHistory"`
 	}
 
 	params := controller.Validate[UpdateLungCancerParams](ctx)
@@ -472,53 +480,55 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
 	req := formdto.UpdateLungCancerRequest{
-		UserID:                    userID.(uint),
-		FormID:                    params.FormID,
-		InsuranceStatus:           params.InsuranceStatus,
-		SupplementaryInsurances:   params.SupplementaryInsurances,
-		Hypertension:              params.Hypertension,
-		HypertensionTreatment:     params.HypertensionTreatment,
-		HeartDisease:              params.HeartDisease,
-		HeartDiseaseTreatment:     params.HeartDiseaseTreatment,
-		Diabetes:                  params.Diabetes,
-		DiabetesTreatment:         params.DiabetesTreatment,
-		ChronicLungDisease:        params.ChronicLungDisease,
-		ChronicLungDiseaseType:    params.ChronicLungDiseaseType,
-		LungCancerHistory:         params.LungCancerHistory,
-		OtherCancerHistory:        params.OtherCancerHistory,
-		OtherCancerType:           params.OtherCancerType,
-		LungCancerFamily:          params.LungCancerFamily,
-		LungCancerFamilyRelation:  params.LungCancerFamilyRelation,
-		OtherCancerFamily:         params.OtherCancerFamily,
-		OtherCancerFamilyType:     params.OtherCancerFamilyType,
-		OtherCancerFamilyRelation: params.OtherCancerFamilyRelation,
-		OccupationalExposure:      params.OccupationalExposure,
-		CurrentSmoking:            params.CurrentSmoking,
-		SmokingStartAgeCurrent:    params.SmokingStartAgeCurrent,
-		SmokingTypesCurrent:       params.SmokingTypesCurrent,
-		CigarettesPerDayCurrent:   params.CigarettesPerDayCurrent,
-		CigarPerDayCurrent:        params.CigarPerDayCurrent,
-		ECigPerDayCurrent:         params.ECigPerDayCurrent,
-		PipePerDayCurrent:         params.PipePerDayCurrent,
-		ChapoghPerDayCurrent:      params.ChapoghPerDayCurrent,
-		SmokedOpiumPerDayCurrent:  params.SmokedOpiumPerDayCurrent,
-		ChewedOpiumPerDayCurrent:  params.ChewedOpiumPerDayCurrent,
-		HookahPerWeekCurrent:      params.HookahPerWeekCurrent,
-		PastSmoking:               params.PastSmoking,
-		SmokingStartAgePast:       params.SmokingStartAgePast,
-		SmokingTypesPast:          params.SmokingTypesPast,
-		CigarettesPerDayPast:      params.CigarettesPerDayPast,
-		CigarPerDayPast:           params.CigarPerDayPast,
-		ECigPerDayPast:            params.ECigPerDayPast,
-		PipePerDayPast:            params.PipePerDayPast,
-		ChapoghPerDayPast:         params.ChapoghPerDayPast,
-		SmokedOpiumPerDayPast:     params.SmokedOpiumPerDayPast,
-		ChewedOpiumPerDayPast:     params.ChewedOpiumPerDayPast,
-		HookahPerWeekPast:         params.HookahPerWeekPast,
-		SecondhandSmoke:           params.SecondhandSmoke,
-		SecondhandSmokeLocation:   params.SecondhandSmokeLocation,
-		AttentionCorrect:          params.AttentionCorrect,
-		LungDiseaseHistory:        params.LungDiseaseHistory,
+		UserID:                       userID.(uint),
+		FormID:                       params.FormID,
+		InsuranceStatus:              params.InsuranceStatus,
+		SupplementaryInsuranceStatus: params.SupplementaryInsuranceStatus,
+		SupplementaryInsurances:      params.SupplementaryInsurances,
+		Hypertension:                 params.Hypertension,
+		HypertensionTreatment:        params.HypertensionTreatment,
+		HeartDisease:                 params.HeartDisease,
+		HeartDiseaseTreatment:        params.HeartDiseaseTreatment,
+		Diabetes:                     params.Diabetes,
+		DiabetesTreatment:            params.DiabetesTreatment,
+		ChronicLungDisease:           params.ChronicLungDisease,
+		ChronicLungDiseaseType:       params.ChronicLungDiseaseType,
+		LungCancerHistory:            params.LungCancerHistory,
+		OtherCancerHistory:           params.OtherCancerHistory,
+		OtherCancerType:              params.OtherCancerType,
+		LungCancerFamily:             params.LungCancerFamily,
+		LungCancerFamilyRelation:     params.LungCancerFamilyRelation,
+		OtherCancerFamily:            params.OtherCancerFamily,
+		OtherCancerFamilyType:        params.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    params.OtherCancerFamilyRelation,
+		OccupationalExposure:         params.OccupationalExposure,
+		CurrentSmoking:               params.CurrentSmoking,
+		SmokingStartAgeCurrent:       params.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          params.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      params.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           params.CigarPerDayCurrent,
+		ECigPerDayCurrent:            params.ECigPerDayCurrent,
+		PipePerDayCurrent:            params.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         params.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     params.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
+		PastSmoking:                  params.PastSmoking,
+		LeaveSmoke:                   params.LeaveSmoke,
+		SmokingStartAgePast:          params.SmokingStartAgePast,
+		SmokingTypesPast:             params.SmokingTypesPast,
+		CigarettesPerDayPast:         params.CigarettesPerDayPast,
+		CigarPerDayPast:              params.CigarPerDayPast,
+		ECigPerDayPast:               params.ECigPerDayPast,
+		PipePerDayPast:               params.PipePerDayPast,
+		ChapoghPerDayPast:            params.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        params.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        params.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            params.HookahPerWeekPast,
+		SecondhandSmoke:              params.SecondhandSmoke,
+		SecondhandSmokeLocation:      params.SecondhandSmokeLocation,
+		AttentionCorrect:             params.AttentionCorrect,
+		LungDiseaseHistory:           params.LungDiseaseHistory,
 	}
 
 	if err := formController.formService.UpdateLungCancer(req); err != nil {

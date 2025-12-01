@@ -139,50 +139,51 @@ type LungCancerInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 7
-	InsuranceStatus           *string `gorm:"type:varchar(127)"`
-	SupplementaryInsurances   *string `gorm:"type:varchar(50)"`
-	Hypertension              bool    `gorm:"not null;default:false"`
-	HypertensionTreatment     *bool   `gorm:"type:boolean"`
-	HeartDisease              bool    `gorm:"not null;default:false"`
-	HeartDiseaseTreatment     *bool   `gorm:"type:boolean"`
-	Diabetes                  bool    `gorm:"not null;default:false"`
-	DiabetesTreatment         *bool   `gorm:"type:boolean"`
-	ChronicLungDisease        *bool   `gorm:"type:boolean"`
-	ChronicLungDiseaseType    *string `gorm:"type:varchar(50)"`
-	LungCancerHistory         bool    `gorm:"not null;default:false"`
-	OtherCancerHistory        bool    `gorm:"not null;default:false"`
-	OtherCancerType           *enum.CancerType
-	LungCancerFamily          *bool   `gorm:"type:boolean"`
-	LungCancerFamilyRelation  *string `gorm:"type:varchar(50)"`
-	OtherCancerFamily         *bool   `gorm:"type:boolean"`
-	OtherCancerFamilyType     *enum.CancerType
-	OtherCancerFamilyRelation *string `gorm:"type:varchar(50)"`
-	OccupationalExposure      *string `gorm:"type:varchar(255)"`
-	CurrentSmoking            bool    `gorm:"not null;default:false"`
-	SmokingStartAgeCurrent    *uint   `gorm:"type:int"`
-	SmokingTypesCurrent       *string `gorm:"type:varchar(50)"`
-	CigarettesPerDayCurrent   *uint   `gorm:"type:int"`
-	CigarPerDayCurrent        *uint   `gorm:"type:int"`
-	ECigPerDayCurrent         *uint   `gorm:"type:int"`
-	PipePerDayCurrent         *uint   `gorm:"type:int"`
-	ChapoghPerDayCurrent      *uint   `gorm:"type:int"`
-	SmokedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
-	ChewedOpiumPerDayCurrent  *uint   `gorm:"type:int"`
-	HookahPerWeekCurrent      *uint   `gorm:"type:int"`
-	PastSmoking               *string `gorm:"type:varchar(127)"`
-	SmokingStartAgePast       *uint   `gorm:"type:int"`
-	SmokingTypesPast          *string `gorm:"type:varchar(50)"`
-	CigarettesPerDayPast      *uint   `gorm:"type:int"`
-	CigarPerDayPast           *uint   `gorm:"type:int"`
-	ECigPerDayPast            *uint   `gorm:"type:int"`
-	PipePerDayPast            *uint   `gorm:"type:int"`
-	ChapoghPerDayPast         *uint   `gorm:"type:int"`
-	SmokedOpiumPerDayPast     *uint   `gorm:"type:int"`
-	ChewedOpiumPerDayPast     *uint   `gorm:"type:int"`
-	HookahPerWeekPast         *uint   `gorm:"type:int"`
-	SecondhandSmoke           bool    `gorm:"not null;default:false"`
-	SecondhandSmokeLocation   *string `gorm:"type:varchar(50)"`
-	LungDiseaseHistory        *string `gorm:"type:varchar(127)"`
+	InsuranceStatus              *string `gorm:"type:varchar(127)"`
+	SupplementaryInsuranceStatus *bool   `gorm:"type:boolean"`
+	SupplementaryInsurances      *string `gorm:"type:varchar(50)"`
+	Hypertension                 bool    `gorm:"not null;default:false"`
+	HypertensionTreatment        *bool   `gorm:"type:boolean"`
+	HeartDisease                 bool    `gorm:"not null;default:false"`
+	HeartDiseaseTreatment        *bool   `gorm:"type:boolean"`
+	Diabetes                     bool    `gorm:"not null;default:false"`
+	DiabetesTreatment            *bool   `gorm:"type:boolean"`
+	ChronicLungDisease           *bool   `gorm:"type:boolean"`
+	ChronicLungDiseaseType       *string `gorm:"type:varchar(50)"`
+	LungCancerHistory            bool    `gorm:"not null;default:false"`
+	OtherCancerHistory           bool    `gorm:"not null;default:false"`
+	OtherCancerType              *enum.CancerType
+	LungCancerFamily             *bool   `gorm:"type:boolean"`
+	LungCancerFamilyRelation     *string `gorm:"type:varchar(50)"`
+	OtherCancerFamily            *bool   `gorm:"type:boolean"`
+	OtherCancerFamilyType        *enum.CancerType
+	OtherCancerFamilyRelation    *string `gorm:"type:varchar(50)"`
+	OccupationalExposure         *string `gorm:"type:varchar(255)"`
+	CurrentSmoking               bool    `gorm:"not null;default:false"`
+	SmokingStartAgeCurrent       *uint   `gorm:"type:int"`
+	SmokingTypesCurrent          *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayCurrent      *uint   `gorm:"type:int"`
+	CigarPerDayCurrent           *uint   `gorm:"type:int"`
+	ECigPerDayCurrent            *uint   `gorm:"type:int"`
+	PipePerDayCurrent            *uint   `gorm:"type:int"`
+	ChapoghPerDayCurrent         *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
+	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
+	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	SmokingStartAgePast          *uint   `gorm:"type:int"`
+	SmokingTypesPast             *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayPast         *uint   `gorm:"type:int"`
+	CigarPerDayPast              *uint   `gorm:"type:int"`
+	ECigPerDayPast               *uint   `gorm:"type:int"`
+	PipePerDayPast               *uint   `gorm:"type:int"`
+	ChapoghPerDayPast            *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayPast        *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayPast        *uint   `gorm:"type:int"`
+	HookahPerWeekPast            *uint   `gorm:"type:int"`
+	SecondhandSmoke              bool    `gorm:"not null;default:false"`
+	SecondhandSmokeLocation      *string `gorm:"type:varchar(50)"`
+	LungDiseaseHistory           *string `gorm:"type:varchar(127)"`
 }
 
 type Premm5Result struct {

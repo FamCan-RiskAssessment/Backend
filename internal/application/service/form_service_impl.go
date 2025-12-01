@@ -1356,6 +1356,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 		info = &entity.LungCancerInfo{FormID: request.FormID}
 	}
 
+	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
 	info.Hypertension = request.Hypertension
@@ -1805,51 +1806,52 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 	}
 
 	return formdto.GetLungCancerResponse{
-		ID:                        info.ID,
-		InsuranceStatus:           info.InsuranceStatus,
-		SupplementaryInsurances:   info.SupplementaryInsurances,
-		Hypertension:              info.Hypertension,
-		HypertensionTreatment:     info.HypertensionTreatment,
-		HeartDisease:              info.HeartDisease,
-		HeartDiseaseTreatment:     info.HeartDiseaseTreatment,
-		Diabetes:                  info.Diabetes,
-		DiabetesTreatment:         info.DiabetesTreatment,
-		ChronicLungDisease:        info.ChronicLungDisease,
-		ChronicLungDiseaseType:    info.ChronicLungDiseaseType,
-		LungCancerHistory:         info.LungCancerHistory,
-		OtherCancerHistory:        info.OtherCancerHistory,
-		OtherCancerType:           info.OtherCancerType,
-		LungCancerFamily:          info.LungCancerFamily,
-		LungCancerFamilyRelation:  info.LungCancerFamilyRelation,
-		OtherCancerFamily:         info.OtherCancerFamily,
-		OtherCancerFamilyType:     info.OtherCancerFamilyType,
-		OtherCancerFamilyRelation: info.OtherCancerFamilyRelation,
-		OccupationalExposure:      info.OccupationalExposure,
-		CurrentSmoking:            info.CurrentSmoking,
-		SmokingStartAgeCurrent:    info.SmokingStartAgeCurrent,
-		SmokingTypesCurrent:       info.SmokingTypesCurrent,
-		CigarettesPerDayCurrent:   info.CigarettesPerDayCurrent,
-		CigarPerDayCurrent:        info.CigarPerDayCurrent,
-		ECigPerDayCurrent:         info.ECigPerDayCurrent,
-		PipePerDayCurrent:         info.PipePerDayCurrent,
-		ChapoghPerDayCurrent:      info.ChapoghPerDayCurrent,
-		SmokedOpiumPerDayCurrent:  info.SmokedOpiumPerDayCurrent,
-		ChewedOpiumPerDayCurrent:  info.ChewedOpiumPerDayCurrent,
-		HookahPerWeekCurrent:      info.HookahPerWeekCurrent,
-		PastSmoking:               info.PastSmoking,
-		SmokingStartAgePast:       info.SmokingStartAgePast,
-		SmokingTypesPast:          info.SmokingTypesPast,
-		CigarettesPerDayPast:      info.CigarettesPerDayPast,
-		CigarPerDayPast:           info.CigarPerDayPast,
-		ECigPerDayPast:            info.ECigPerDayPast,
-		PipePerDayPast:            info.PipePerDayPast,
-		ChapoghPerDayPast:         info.ChapoghPerDayPast,
-		SmokedOpiumPerDayPast:     info.SmokedOpiumPerDayPast,
-		ChewedOpiumPerDayPast:     info.ChewedOpiumPerDayPast,
-		HookahPerWeekPast:         info.HookahPerWeekPast,
-		SecondhandSmoke:           info.SecondhandSmoke,
-		SecondhandSmokeLocation:   info.SecondhandSmokeLocation,
-		LungDiseaseHistory:        info.LungDiseaseHistory,
+		ID:                           info.ID,
+		InsuranceStatus:              info.InsuranceStatus,
+		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
+		SupplementaryInsurances:      info.SupplementaryInsurances,
+		Hypertension:                 info.Hypertension,
+		HypertensionTreatment:        info.HypertensionTreatment,
+		HeartDisease:                 info.HeartDisease,
+		HeartDiseaseTreatment:        info.HeartDiseaseTreatment,
+		Diabetes:                     info.Diabetes,
+		DiabetesTreatment:            info.DiabetesTreatment,
+		ChronicLungDisease:           info.ChronicLungDisease,
+		ChronicLungDiseaseType:       info.ChronicLungDiseaseType,
+		LungCancerHistory:            info.LungCancerHistory,
+		OtherCancerHistory:           info.OtherCancerHistory,
+		OtherCancerType:              info.OtherCancerType,
+		LungCancerFamily:             info.LungCancerFamily,
+		LungCancerFamilyRelation:     info.LungCancerFamilyRelation,
+		OtherCancerFamily:            info.OtherCancerFamily,
+		OtherCancerFamilyType:        info.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    info.OtherCancerFamilyRelation,
+		OccupationalExposure:         info.OccupationalExposure,
+		CurrentSmoking:               info.CurrentSmoking,
+		SmokingStartAgeCurrent:       info.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          info.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      info.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           info.CigarPerDayCurrent,
+		ECigPerDayCurrent:            info.ECigPerDayCurrent,
+		PipePerDayCurrent:            info.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         info.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     info.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
+		PastSmoking:                  info.PastSmoking,
+		SmokingStartAgePast:          info.SmokingStartAgePast,
+		SmokingTypesPast:             info.SmokingTypesPast,
+		CigarettesPerDayPast:         info.CigarettesPerDayPast,
+		CigarPerDayPast:              info.CigarPerDayPast,
+		ECigPerDayPast:               info.ECigPerDayPast,
+		PipePerDayPast:               info.PipePerDayPast,
+		ChapoghPerDayPast:            info.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        info.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        info.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            info.HookahPerWeekPast,
+		SecondhandSmoke:              info.SecondhandSmoke,
+		SecondhandSmokeLocation:      info.SecondhandSmokeLocation,
+		LungDiseaseHistory:           info.LungDiseaseHistory,
 	}, nil
 }
 
@@ -2632,6 +2634,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
+	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
 	if request.Hypertension != nil {
 		info.Hypertension = *request.Hypertension
 	}

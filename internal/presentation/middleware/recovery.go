@@ -50,6 +50,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleConflictError(ctx, conflictErrors, recovery.constants.Context.Translator)
 	} else if authError, ok := err.(*exception.AuthError); ok {
 		handleAuthError(ctx, *authError, recovery.constants.Context.Translator)
+	} else if calcError, ok := err.(exception.CalcError); ok {
+		handleCalcError(ctx, calcError, recovery.constants.Context.Translator)
 	} else if notFoundError, ok := err.(exception.NotFoundError); ok {
 		handleNotFoundError(ctx, notFoundError, recovery.constants.Context.Translator)
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
@@ -161,6 +163,29 @@ func handleFieldError(ctx *gin.Context, fieldError exception.FieldError, transKe
 	fieldName, _ := trans.Translate(fieldError.Field)
 	message, _ := trans.Translate(fmt.Sprintf("errors.%s", fieldError.Tag), fieldName)
 	controller.Response(ctx, 400, message, nil)
+}
+
+func handleCalcError(ctx *gin.Context, calcError exception.CalcError, transKey string) {
+	trans := controller.GetTranslator(ctx, transKey)
+	errorMessage, _ := trans.Translate(genericError)
+
+	statusCode := 500
+	switch calcError.Type {
+	case exception.ErrorTypeAPIFailure:
+		errorMessage, _ = trans.Translate("errors.calcAPIFailure", calcError.Model)
+		statusCode = 503
+	case exception.ErrorTypeMissingData:
+		errorMessage, _ = trans.Translate("errors.calcMissingData", calcError.Model)
+		statusCode = 422
+	case exception.ErrorTypeInvalidData:
+		errorMessage, _ = trans.Translate("errors.calcInvalidData", calcError.Model)
+		statusCode = 400
+	case exception.ErrorTypeDatabaseError:
+		errorMessage, _ = trans.Translate("errors.calcDatabaseError")
+		statusCode = 500
+	}
+
+	controller.Response(ctx, statusCode, errorMessage, nil)
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {

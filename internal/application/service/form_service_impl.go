@@ -1890,7 +1890,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
-			Name:                      contactInfo.Name,
+			Name:                      &contactInfo.Name,
 			SocialSecurityNumber:      basicInfo.SocialSecurityNumber,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,

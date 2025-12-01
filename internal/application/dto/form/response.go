@@ -240,6 +240,7 @@ type GetLungCancerResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
 	CigarettesPerDayPast         *uint            `json:"cigarettesPerDayPast,omitempty"`

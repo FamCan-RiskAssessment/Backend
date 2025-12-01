@@ -174,6 +174,7 @@ type LungCancerInfo struct {
 	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
 	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	LeaveSmoke                   *uint   `gorm:"type:int"`
 	SmokingStartAgePast          *uint   `gorm:"type:int"`
 	SmokingTypesPast             *string `gorm:"type:varchar(50)"`
 	CigarettesPerDayPast         *uint   `gorm:"type:int"`

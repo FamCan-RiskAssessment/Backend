@@ -458,6 +458,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
 		PastSmoking                  *string `json:"pastSmoking"`
+		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
 		SmokingTypesPast             *string `json:"smokingTypesPast"`
 		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast"`
@@ -513,6 +514,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
+		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
 		CigarettesPerDayPast:         params.CigarettesPerDayPast,

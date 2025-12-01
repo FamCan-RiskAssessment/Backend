@@ -408,6 +408,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		ChewedOpiumPerDayCurrent:     uintPtr(uint((formIndex % 3) + 1)),
 		HookahPerWeekCurrent:         uintPtr(uint((formIndex % 7) + 1)),
 		PastSmoking:                  &pastSmokingStatus,
+		LeaveSmoke:                   uintPtr(uint((formIndex % 20) + 1)),
 		SmokingStartAgePast:          uintPtr(uint(15 + (formIndex % 20))),
 		SmokingTypesPast:             &smokingType,
 		CigarettesPerDayPast:         uintPtr(uint((formIndex % 30) + 1)),

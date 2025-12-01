@@ -1395,6 +1395,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast
@@ -1845,6 +1846,7 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
+		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
 		CigarettesPerDayPast:         info.CigarettesPerDayPast,
@@ -2689,6 +2691,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast

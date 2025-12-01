@@ -268,6 +268,7 @@ type UpsertLungCancerRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
 	CigarettesPerDayPast         *uint
@@ -422,6 +423,7 @@ type UpdateLungCancerRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
 	CigarettesPerDayPast         *uint

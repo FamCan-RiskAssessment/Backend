@@ -239,6 +239,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 		SmokeAtLeast100           *bool   `json:"smokeAtLeast100"`
 		SmokingAge                *uint   `json:"smokingAge"`
 		SmokingNow                *bool   `json:"smokingNow"`
+		YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
 		LeaveSmokingAge           *uint   `json:"leaveSmokingAge"`
 		CountSmokingDaily         *string `json:"countSmokingDaily"`
 		CountGheliandaily         *string `json:"countGheliandaily"`
@@ -265,6 +266,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 		SmokeAtLeast100:           params.SmokeAtLeast100,
 		SmokingAge:                params.SmokingAge,
 		SmokingNow:                params.SmokingNow,
+		YearSmoke:                 params.YearSmoke,
 		LeaveSmokingAge:           params.LeaveSmokingAge,
 		CountSmokingDaily:         params.CountSmokingDaily,
 		CountGheliandaily:         params.CountGheliandaily,

@@ -45,6 +45,7 @@ type GeneralHealthInfo struct {
 	SmokeAtLeast100           *bool   `gorm:"type:boolean"`
 	SmokingAge                *uint   `gorm:"type:int"`
 	SmokingNow                bool    `gorm:"not null;default:false"`
+	YearSmoke                 *uint   `gorm:"type:int"`
 	LeaveSmokingAge           *uint   `gorm:"type:int"`
 	CountSmokingDaily         *string `gorm:"type:varchar(50)"`
 	CountGheliandaily         *string `gorm:"type:varchar(50)"`

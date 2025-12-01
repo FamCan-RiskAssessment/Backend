@@ -116,6 +116,7 @@ type GetGeneralHealthResponse struct {
 	SmokeAtLeast100           *bool   `json:"smokeAtLeast100,omitempty"`
 	SmokingAge                *uint   `json:"smokingAge,omitempty"`
 	SmokingNow                bool    `json:"smokingNow"`
+	YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
 	LeaveSmokingAge           *uint   `json:"leaveSmokingAge,omitempty"`
 	CountSmokingDaily         *string `json:"countSmokingDaily,omitempty"`
 	CountGheliandaily         *string `json:"countGheliandaily,omitempty"`

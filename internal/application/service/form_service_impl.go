@@ -410,6 +410,7 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	info.SmokeAtLeast100 = request.SmokeAtLeast100
 	info.SmokingAge = request.SmokingAge
 	info.SmokingNow = request.SmokingNow
+	info.YearSmoke = request.YearSmoke
 	info.LeaveSmokingAge = request.LeaveSmokingAge
 	info.CountSmokingDaily = request.CountSmokingDaily
 	info.CountGheliandaily = request.CountGheliandaily
@@ -1552,6 +1553,7 @@ func (formService *FormService) GetGeneralHealth(request formdto.GetPartialFormR
 		SmokeAtLeast100:           info.SmokeAtLeast100,
 		SmokingAge:                info.SmokingAge,
 		SmokingNow:                info.SmokingNow,
+		YearSmoke:                 info.YearSmoke,
 		LeaveSmokingAge:           info.LeaveSmokingAge,
 		CountSmokingDaily:         info.CountSmokingDaily,
 		CountGheliandaily:         info.CountGheliandaily,
@@ -2245,6 +2247,7 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 	}
 	info.SmokeAtLeast100 = request.SmokeAtLeast100
 	info.SmokingAge = request.SmokingAge
+	info.YearSmoke = request.YearSmoke
 	if request.SmokingNow != nil {
 		info.SmokingNow = *request.SmokingNow
 	}

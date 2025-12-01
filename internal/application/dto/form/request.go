@@ -85,6 +85,7 @@ type UpsertGeneralHealthRequest struct {
 	SmokeAtLeast100           *bool
 	SmokingAge                *uint
 	SmokingNow                bool
+	YearSmoke                 *uint
 	LeaveSmokingAge           *uint
 	CountSmokingDaily         *string
 	CountGheliandaily         *string
@@ -316,6 +317,7 @@ type UpdateGeneralHealthRequest struct {
 	SmokeAtLeast100           *bool
 	SmokingAge                *uint
 	SmokingNow                *bool
+	YearSmoke                 *uint
 	LeaveSmokingAge           *uint
 	CountSmokingDaily         *string
 	CountGheliandaily         *string

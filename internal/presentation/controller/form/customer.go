@@ -164,6 +164,7 @@ func (formController *CustomerFormController) UpsertGeneralHealth(ctx *gin.Conte
 		SmokeAtLeast100           *bool   `json:"smokeAtLeast100,omitempty"`
 		SmokingAge                *uint   `json:"smokingAge,omitempty"`
 		SmokingNow                bool    `json:"smokingNow"`
+		YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
 		LeaveSmokingAge           *uint   `json:"leaveSmokingAge,omitempty"`
 		CountSmokingDaily         *string `json:"countSmokingDaily,omitempty"`
 		CountGheliandaily         *string `json:"countGheliandaily,omitempty"`
@@ -190,6 +191,7 @@ func (formController *CustomerFormController) UpsertGeneralHealth(ctx *gin.Conte
 		SmokeAtLeast100:           params.SmokeAtLeast100,
 		SmokingAge:                params.SmokingAge,
 		SmokingNow:                params.SmokingNow,
+		YearSmoke:                 params.YearSmoke,
 		LeaveSmokingAge:           params.LeaveSmokingAge,
 		CountSmokingDaily:         params.CountSmokingDaily,
 		CountGheliandaily:         params.CountGheliandaily,

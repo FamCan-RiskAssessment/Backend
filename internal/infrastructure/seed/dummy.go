@@ -244,6 +244,7 @@ func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *enti
 		SmokeAtLeast100:       &smokingNow,
 		SmokingAge:            uintPtr(uint(15 + (formIndex % 20))),
 		SmokingNow:            smokingNow,
+		YearSmoke:             uintPtr(uint(15 + (formIndex % 20))),
 		LeaveSmokingAge:       uintPtr(uint(20 + (formIndex % 30))),
 		CountSmokingDaily:     stringPtr(fmt.Sprintf("%d", (formIndex%20)+1)),
 		CountGheliandaily:     stringPtr(fmt.Sprintf("%d", (formIndex%10)+1)),

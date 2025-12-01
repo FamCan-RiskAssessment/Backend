@@ -1870,6 +1870,9 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	if err != nil {
 		return nil, 0, err
 	}
+	if len(forms) == 0 {
+		return nil, 0, nil
+	}
 
 	basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[0].ID)
 	if err != nil {

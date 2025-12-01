@@ -102,6 +102,8 @@ type UpsertMamographyRequest struct {
 	GhaedeAge                    uint
 	HasChildren                  bool
 	NumberOfChildren             *uint
+	DaughterCount                *uint
+	SonCount                     *uint
 	AgeOfFirstBirth              *uint
 	MenopausalStatus             uint
 	MenopauseAge                 *string
@@ -330,6 +332,8 @@ type UpdateMamographyRequest struct {
 	GhaedeAge                    *uint
 	HasChildren                  *bool
 	NumberOfChildren             *uint
+	DaughterCount                *uint
+	SonCount                     *uint
 	AgeOfFirstBirth              *uint
 	MenopausalStatus             *uint
 	MenopauseAge                 *string

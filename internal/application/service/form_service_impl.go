@@ -502,6 +502,8 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.GhaedeAge = request.GhaedeAge
 	info.HasChildren = request.HasChildren
 	info.NumberOfChildren = request.NumberOfChildren
+	info.SonCount = request.SonCount
+	info.DaughterCount = request.DaughterCount
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
 	info.MenopausalStatus = enum.MenopausalStatus(uint(request.MenopausalStatus))
 	info.MenopauseAge = request.MenopauseAge
@@ -1599,6 +1601,8 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		GhaedeAge:                    info.GhaedeAge,
 		HasChildren:                  info.HasChildren,
 		NumberOfChildren:             info.NumberOfChildren,
+		SonCount:                     info.SonCount,
+		DaughterCount:                info.DaughterCount,
 		AgeOfFirstBirth:              info.AgeOfFirstBirth,
 		MenopausalStatus:             info.MenopausalStatus,
 		MenopauseAge:                 info.MenopauseAge,
@@ -2341,6 +2345,8 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		info.HasChildren = *request.HasChildren
 	}
 	info.NumberOfChildren = request.NumberOfChildren
+	info.SonCount = request.SonCount
+	info.DaughterCount = request.DaughterCount
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
 	if request.MenopausalStatus != nil {
 		info.MenopausalStatus = enum.MenopausalStatus(uint(*request.MenopausalStatus))

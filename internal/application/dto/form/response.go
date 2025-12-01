@@ -152,6 +152,8 @@ type GetMamographyResponse struct {
 	GhaedeAge                    uint                  `json:"ghaedeAge"`
 	HasChildren                  bool                  `json:"hasChildren"`
 	NumberOfChildren             *uint                 `json:"numberOfChildren,omitempty"`
+	DaughterCount                *uint                 `json:"daughterCount,omitempty"`
+	SonCount                     *uint                 `json:"sonCount,omitempty"`
 	AgeOfFirstBirth              *uint                 `json:"ageOfFirstBirth,omitempty"`
 	MenopausalStatus             enum.MenopausalStatus `json:"menopausalStatus"`
 	MenopauseAge                 *string               `json:"menopauseAge,omitempty"`

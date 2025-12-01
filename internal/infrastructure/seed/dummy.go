@@ -257,12 +257,16 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 	hasChildren := formIndex%3 == 0
 	hrtType := hrtTypes[formIndex%len(hrtTypes)]
 	menopausalStatus := menopausalStatuses[formIndex%len(menopausalStatuses)]
+	SonCount := uint((formIndex % 3) + 1)
+	DaughterCount := uint((formIndex % 3) + 1)
 
 	mamoGraphyInfo := &entity.MamoGraphyInfo{
 		FormID:                       formID,
 		GhaedeAge:                    uint(12 + (formIndex % 10)),
 		HasChildren:                  hasChildren,
-		NumberOfChildren:             uintPtr(uint((formIndex % 5) + 1)),
+		NumberOfChildren:             uintPtr(uint(SonCount + DaughterCount)),
+		SonCount:                     &SonCount,
+		DaughterCount:                &DaughterCount,
 		AgeOfFirstBirth:              uintPtr(uint(18 + (formIndex % 20))),
 		MenopausalStatus:             menopausalStatus,
 		MenopauseAge:                 stringPtr(fmt.Sprintf("%d", 45+(formIndex%15))),

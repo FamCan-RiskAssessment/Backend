@@ -60,6 +60,8 @@ type MamoGraphyInfo struct {
 	GhaedeAge                    uint                            `gorm:"not null"`
 	HasChildren                  bool                            `gorm:"not null;default:false"`
 	NumberOfChildren             *uint                           `gorm:"type:int"`
+	SonCount                     *uint                           `gorm:"type:int"`
+	DaughterCount                *uint                           `gorm:"type:int"`
 	AgeOfFirstBirth              *uint                           `gorm:"type:int"`
 	MenopausalStatus             enum.MenopausalStatus           `gorm:"not null"`
 	MenopauseAge                 *string                         `gorm:"type:varchar(50)"`

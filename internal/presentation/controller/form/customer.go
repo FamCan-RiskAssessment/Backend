@@ -213,6 +213,8 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		GhaedeAge                    uint                    `form:"ghaedeAge"`
 		HasChildren                  bool                    `form:"hasChildren"`
 		NumberOfChildren             *uint                   `form:"numberOfChildren,omitempty"`
+		SonCount                     *uint                   `form:"sonCount,omitempty"`
+		DaughterCount                *uint                   `form:"daughterCount,omitempty"`
 		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
 		MenopausalStatus             uint                    `form:"menopausalStatus"`
 		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
@@ -251,6 +253,8 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		GhaedeAge:                    params.GhaedeAge,
 		HasChildren:                  params.HasChildren,
 		NumberOfChildren:             params.NumberOfChildren,
+		SonCount:                     params.SonCount,
+		DaughterCount:                params.DaughterCount,
 		AgeOfFirstBirth:              params.AgeOfFirstBirth,
 		MenopausalStatus:             params.MenopausalStatus,
 		MenopauseAge:                 params.MenopauseAge,

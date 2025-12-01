@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/yaa110/go-persian-calendar"
 )
 
 type CalcService struct {
@@ -44,10 +46,13 @@ func NewCalcService(
 }
 
 func calculateAge(birthDate time.Time) int {
-	today := time.Now()
+	// Convert to Iranian calendar (Jalali)
+	today := ptime.Now()
+	birthDateJalali := ptime.New(birthDate)
 
-	age := today.Year() - birthDate.Year()
-	if today.YearDay() < birthDate.YearDay() {
+	age := today.Year() - birthDateJalali.Year()
+	if today.Month() < birthDateJalali.Month() ||
+		(today.Month() == birthDateJalali.Month() && today.Day() < birthDateJalali.Day()) {
 		age--
 	}
 	return age
@@ -56,12 +61,44 @@ func calculateAge(birthDate time.Time) int {
 func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcRequest) (calcdto.ModelResponse, error) {
 	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC] Database error finding form ID %d: %v", request.FormID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Message: "failed to fetch form from database",
+			OrigErr: err,
+		}
 	}
 	if form == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Form}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC] Form not found - FormID: %d, UserID: %d", request.FormID, request.UserID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.Form}
 	}
+
+	// Validate calculation ID
+	validCalcID := false
+	var modelName string
+	switch enum.Calc(request.CalcID) {
+	case enum.CalcPremm5:
+		validCalcID = true
+		modelName = "PREMM5"
+	case enum.CalcBCRA:
+		validCalcID = true
+		modelName = "BCRA"
+	case enum.CalcGail:
+		validCalcID = true
+		modelName = "Gail"
+	case enum.CalcPLCO:
+		validCalcID = true
+		modelName = "PLCO"
+	}
+
+	if !validCalcID {
+		log.Printf("[CALC] Invalid calculation model - CalcID: %d, UserID: %d", request.CalcID, request.UserID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Message: fmt.Sprintf("invalid calculation model ID: %d", request.CalcID),
+		}
+	}
+
 	var response calcdto.ModelResponse
 	switch enum.Calc(request.CalcID) {
 	case enum.CalcPremm5:
@@ -90,29 +127,72 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	form.Status = enum.FormStatusSentToCalc
 	err = calcService.formRepository.UpdateForm(calcService.db, form)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   modelName,
+			Message: "failed to update form status in database",
+			OrigErr: err,
+		}
 	}
 
+	log.Printf("[CALC] Form successfully sent to %s - FormID: %d, UserID: %d", modelName, request.FormID, request.UserID)
 	return response, nil
 }
 
 func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PREMM5] Database error fetching basic info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PREMM5",
+			Message: "failed to fetch basic information",
+			OrigErr: err,
+		}
+	}
+	if basicInfo == nil {
+		log.Printf("[CALC:PREMM5] Missing basic info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeMissingData,
+			Model:   "PREMM5",
+			Message: "basic information not found in form",
+		}
 	}
 
 	cancerInfo, err := calcService.formRepository.FindCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PREMM5] Database error fetching cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PREMM5",
+			Message: "failed to fetch cancer information",
+			OrigErr: err,
+		}
 	}
 
 	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PREMM5] Database error fetching family cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PREMM5",
+			Message: "failed to fetch family cancer information",
+			OrigErr: err,
+		}
 	}
 
 	currentAge := calculateAge(basicInfo.BirthDate)
+
+	// Validate age is within acceptable range
+	if currentAge < 0 || currentAge > 120 {
+		log.Printf("[CALC:PREMM5] Invalid age calculated - FormID: %d, Age: %d, BirthDate: %v", form.ID, currentAge, basicInfo.BirthDate)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "PREMM5",
+			Message: fmt.Sprintf("calculated age %d is outside valid range (0-120)", currentAge),
+		}
+	}
 
 	request := calcdto.SendFormToPremm5Request{
 		Sex:        mapGenderToPremm5(basicInfo.Gender),
@@ -147,16 +227,23 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 	// Save result to database
 	err = calcService.savePremm5Result(form.ID, premm5Response)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PREMM5] Database error saving result - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PREMM5",
+			Message: "failed to save calculation result",
+			OrigErr: err,
+		}
 	}
 
-	log := actionlogdto.LogAction{
+	actionLog := actionlogdto.LogAction{
 		ActorID:    userID,
 		Action:     enum.ActionTypeFormSentToPremm5,
 		ResourceID: &form.ID,
 	}
-	calcService.actionLogService.LogAction(log)
+	calcService.actionLogService.LogAction(actionLog)
 
+	log.Printf("[CALC:PREMM5] Calculation successful - FormID: %d, Probability: %.4f", form.ID, premm5Response.PAny)
 	return calcdto.ModelResponse{
 		Name:        "PREMM5",
 		Probability: premm5Response.PAny,
@@ -167,31 +254,68 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 	// Load all required data
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:BCRA] Database error fetching basic info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "BCRA",
+			Message: "failed to fetch basic information",
+			OrigErr: err,
+		}
+	}
+	if basicInfo == nil {
+		log.Printf("[CALC:BCRA] Missing basic info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeMissingData,
+			Model:   "BCRA",
+			Message: "basic information not found in form",
+		}
 	}
 
 	mamographyInfo, err := calcService.formRepository.FindMamographyByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:BCRA] Database error fetching mamography info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "BCRA",
+			Message: "failed to fetch mamography information",
+			OrigErr: err,
+		}
 	}
 
 	if mamographyInfo == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC:BCRA] Missing mamography info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
 	}
 
 	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:BCRA] Database error fetching family cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "BCRA",
+			Message: "failed to fetch family cancer information",
+			OrigErr: err,
+		}
 	}
 
 	if len(familyCancerInfo) == 0 {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC:BCRA] Missing family cancer info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
 	}
 
 	// Calculate current age
 	currentAge := float64(calculateAge(basicInfo.BirthDate))
+
+	// Validate age
+	if currentAge < 0 || currentAge > 120 {
+		log.Printf("[CALC:BCRA] Invalid age - FormID: %d, Age: %.1f", form.ID, currentAge)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "BCRA",
+			Message: fmt.Sprintf("calculated age %.1f is outside valid range", currentAge),
+		}
+	}
+
 	projectionAge := currentAge + 5.0
 
 	// Build BCRA request
@@ -215,16 +339,23 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 	// Save result to database
 	err = calcService.saveBCRAResult(form.ID, bcraResponse)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:BCRA] Database error saving result - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "BCRA",
+			Message: "failed to save calculation result",
+			OrigErr: err,
+		}
 	}
 
-	log := actionlogdto.LogAction{
+	actionLog := actionlogdto.LogAction{
 		ActorID:    userID,
 		Action:     enum.ActionTypeFormSentToBCRA,
 		ResourceID: &form.ID,
 	}
-	calcService.actionLogService.LogAction(log)
+	calcService.actionLogService.LogAction(actionLog)
 
+	log.Printf("[CALC:BCRA] Calculation successful - FormID: %d, AbsRisk: %.4f", form.ID, bcraResponse.AbsRisk)
 	return calcdto.ModelResponse{
 		Name:        "BCRA",
 		Probability: bcraResponse.AbsRisk,
@@ -234,37 +365,71 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:Gail] Database error fetching basic info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "Gail",
+			Message: "failed to fetch basic information",
+			OrigErr: err,
+		}
+	}
+	if basicInfo == nil {
+		log.Printf("[CALC:Gail] Missing basic info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeMissingData,
+			Model:   "Gail",
+			Message: "basic information not found in form",
+		}
 	}
 
 	mamographyInfo, err := calcService.formRepository.FindMamographyByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:Gail] Database error fetching mamography info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "Gail",
+			Message: "failed to fetch mamography information",
+			OrigErr: err,
+		}
 	}
 
 	if mamographyInfo == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC:Gail] Missing mamography info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
 	}
 
 	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:Gail] Database error fetching family cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "Gail",
+			Message: "failed to fetch family cancer information",
+			OrigErr: err,
+		}
 	}
 
 	if len(familyCancerInfo) == 0 {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC:Gail] Missing family cancer info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.FamilyCancerInfo}
 	}
 
 	// Calculate current age
 	currentAge := calculateAge(basicInfo.BirthDate)
-	// projectionAge := currentAge + 5
+
+	// Validate age
+	if currentAge < 0 || currentAge > 120 {
+		log.Printf("[CALC:Gail] Invalid age - FormID: %d, Age: %d", form.ID, currentAge)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "Gail",
+			Message: fmt.Sprintf("calculated age %d is outside valid range (0-120)", currentAge),
+		}
+	}
 
 	// Build Gail request
 	request := calcdto.SendFormToGailRequest{
-		Age: currentAge,
-		// LaterAge:     projectionAge,
+		Age:          currentAge,
 		HorizonYears: 5,
 		MenarcheAge:  mapAgeAtMenarche(mamographyInfo),
 		NumBiopsies:  mapBiopsyCount(mamographyInfo),
@@ -283,16 +448,23 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (
 	// Save result to database
 	err = calcService.saveGailResult(form.ID, gailResponse)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:Gail] Database error saving result - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "Gail",
+			Message: "failed to save calculation result",
+			OrigErr: err,
+		}
 	}
 
-	log := actionlogdto.LogAction{
+	actionLog := actionlogdto.LogAction{
 		ActorID:    userID,
 		Action:     enum.ActionTypeFormSentToGail,
 		ResourceID: &form.ID,
 	}
-	calcService.actionLogService.LogAction(log)
+	calcService.actionLogService.LogAction(actionLog)
 
+	log.Printf("[CALC:Gail] Calculation successful - FormID: %d, AbsoluteRisk: %.4f", form.ID, gailResponse.AbsoluteRisk)
 	return calcdto.ModelResponse{
 		Name:        "Gail",
 		Probability: gailResponse.AbsoluteRisk,
@@ -432,122 +604,234 @@ func (calcService *CalcService) GetPLCOResults(request calcdto.SendFormToCalcReq
 func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to marshal PREMM5 request: %w", err)
+		log.Printf("[CALC:PREMM5:API] Error marshaling request: %v", err)
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "PREMM5",
+			Message: "failed to marshal request data",
+			OrigErr: err,
+		}
 	}
+
+	log.Printf("[CALC:PREMM5:API] Calling PREMM5 API - CurrentAge=%d, PersonalCrcCount=%d, NumFdrCrc=%d",
+		request.CurrentAge, request.PersonalCrcCount, request.NumFdrCrc)
 
 	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Premm5)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to create PREMM5 request: %w", err)
+		log.Printf("[CALC:PREMM5:API] Error creating request: %v", err)
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PREMM5",
+			Message: "failed to create API request",
+			OrigErr: err,
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to call PREMM5 API: %w", err)
+		log.Printf("[CALC:PREMM5:API] API call failed: %v", err)
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PREMM5",
+			Message: "failed to call PREMM5 API",
+			OrigErr: err,
+		}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to read PREMM5 response: %w", err)
+		log.Printf("[CALC:PREMM5:API] Error reading response: %v", err)
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PREMM5",
+			Message: "failed to read API response",
+			OrigErr: err,
+		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return calcdto.Premm5Response{}, fmt.Errorf("PREMM5 API returned error (status %d): %s", resp.StatusCode, string(body))
+		log.Printf("[CALC:PREMM5:API] API returned error status %d: %s", resp.StatusCode, string(body))
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PREMM5",
+			Message: fmt.Sprintf("API returned error status %d", resp.StatusCode),
+			OrigErr: fmt.Errorf("response: %s", string(body)),
+		}
 	}
 
 	var premm5Response calcdto.Premm5Response
 	err = json.Unmarshal(body, &premm5Response)
 	if err != nil {
-		return calcdto.Premm5Response{}, fmt.Errorf("failed to parse PREMM5 response: %w", err)
+		log.Printf("[CALC:PREMM5:API] Error parsing response: %v", err)
+		return calcdto.Premm5Response{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PREMM5",
+			Message: "failed to parse API response",
+			OrigErr: err,
+		}
 	}
 
+	log.Printf("[CALC:PREMM5:API] API call successful - PAny: %.4f", premm5Response.PAny)
 	return premm5Response, nil
 }
 
 func (calcService *CalcService) callBCRAAPI(request calcdto.SendFormToBCRARequest) (calcdto.BCRAResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
-		return calcdto.BCRAResponse{}, err
+		log.Printf("[CALC:BCRA:API] Error marshaling request: %v", err)
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "BCRA",
+			Message: "failed to marshal request data",
+			OrigErr: err,
+		}
 	}
 
-	// Log the request for debugging
-	fmt.Printf("BCRA Request: T1=%.1f, T2=%.1f, N_Biop=%d, HypPlas=%d, AgeMen=%d, Age1st=%d, N_Rels=%d, Race=%d\n",
-		request.T1, request.T2, request.N_Biop, request.HypPlas, request.AgeMen, request.Age1st, request.N_Rels, request.Race)
+	log.Printf("[CALC:BCRA:API] Calling BCRA API - T1=%.1f, T2=%.1f, N_Biop=%d, HypPlas=%d, AgeMen=%d, Age1st=%d, N_Rels=%d",
+		request.T1, request.T2, request.N_Biop, request.HypPlas, request.AgeMen, request.Age1st, request.N_Rels)
 
 	url := fmt.Sprintf("%s/calculate", calcService.calcURL.BCRA)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return calcdto.BCRAResponse{}, err
+		log.Printf("[CALC:BCRA:API] Error creating request: %v", err)
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "BCRA",
+			Message: "failed to create API request",
+			OrigErr: err,
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to call BCRA API: %w", err)
+		log.Printf("[CALC:BCRA:API] API call failed: %v", err)
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "BCRA",
+			Message: "failed to call BCRA API",
+			OrigErr: err,
+		}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to read BCRA response: %w", err)
+		log.Printf("[CALC:BCRA:API] Error reading response: %v", err)
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "BCRA",
+			Message: "failed to read API response",
+			OrigErr: err,
+		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return calcdto.BCRAResponse{}, fmt.Errorf("BCRA API returned error (status %d): %s", resp.StatusCode, string(body))
+		log.Printf("[CALC:BCRA:API] API returned error status %d: %s", resp.StatusCode, string(body))
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "BCRA",
+			Message: fmt.Sprintf("API returned error status %d", resp.StatusCode),
+			OrigErr: fmt.Errorf("response: %s", string(body)),
+		}
 	}
 
 	var bcraResponse calcdto.BCRAResponse
 	err = json.Unmarshal(body, &bcraResponse)
 	if err != nil {
-		return calcdto.BCRAResponse{}, fmt.Errorf("failed to parse BCRA response: %w", err)
+		log.Printf("[CALC:BCRA:API] Error parsing response: %v", err)
+		return calcdto.BCRAResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "BCRA",
+			Message: "failed to parse API response",
+			OrigErr: err,
+		}
 	}
 
+	log.Printf("[CALC:BCRA:API] API call successful - AbsRisk: %.4f", bcraResponse.AbsRisk)
 	return bcraResponse, nil
 }
 
 func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGailRequest) (calcdto.GailResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
-		return calcdto.GailResponse{}, err
+		log.Printf("[CALC:Gail:API] Error marshaling request: %v", err)
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "Gail",
+			Message: "failed to marshal request data",
+			OrigErr: err,
+		}
 	}
-	println(string(jsonData))
 
-	fmt.Printf("Gail Request: Age=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%s, ShowRR=%v\n",
-		request.Age, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race, request.ShowRR)
+	log.Printf("[CALC:Gail:API] Calling Gail API - Age=%d, MenarcheAge=%d, NumBiopsies=%d, FLBAge=%d, NumRelatives=%d, Race=%s",
+		request.Age, request.MenarcheAge, request.NumBiopsies, request.FLBAge, request.NumRelatives, request.Race)
 
 	url := fmt.Sprintf("%s/calculate", calcService.calcURL.Gail)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return calcdto.GailResponse{}, err
+		log.Printf("[CALC:Gail:API] Error creating request: %v", err)
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "Gail",
+			Message: "failed to create API request",
+			OrigErr: err,
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to call Gail API: %w", err)
+		log.Printf("[CALC:Gail:API] API call failed: %v", err)
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "Gail",
+			Message: "failed to call Gail API",
+			OrigErr: err,
+		}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to read Gail response: %w", err)
+		log.Printf("[CALC:Gail:API] Error reading response: %v", err)
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "Gail",
+			Message: "failed to read API response",
+			OrigErr: err,
+		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return calcdto.GailResponse{}, fmt.Errorf("gail API returned error (status %d): %s", resp.StatusCode, string(body))
+		log.Printf("[CALC:Gail:API] API returned error status %d: %s", resp.StatusCode, string(body))
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "Gail",
+			Message: fmt.Sprintf("API returned error status %d", resp.StatusCode),
+			OrigErr: fmt.Errorf("response: %s", string(body)),
+		}
 	}
 
 	var gailResponse calcdto.GailResponse
 	err = json.Unmarshal(body, &gailResponse)
 	if err != nil {
-		return calcdto.GailResponse{}, fmt.Errorf("failed to parse Gail response: %w", err)
+		log.Printf("[CALC:Gail:API] Error parsing response: %v", err)
+		return calcdto.GailResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "Gail",
+			Message: "failed to parse API response",
+			OrigErr: err,
+		}
 	}
 
+	log.Printf("[CALC:Gail:API] API call successful - AbsoluteRisk: %.4f", gailResponse.AbsoluteRisk)
 	return gailResponse, nil
 }
 
@@ -633,31 +917,83 @@ func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto
 func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
 	basicInfo, err := calcService.formRepository.FindBasicInfoByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PLCO] Database error fetching basic info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PLCO",
+			Message: "failed to fetch basic information",
+			OrigErr: err,
+		}
+	}
+	if basicInfo == nil {
+		log.Printf("[CALC:PLCO] Missing basic info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeMissingData,
+			Model:   "PLCO",
+			Message: "basic information not found in form",
+		}
 	}
 
 	lungCancerInfo, err := calcService.formRepository.FindLungCancerByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PLCO] Database error fetching lung cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PLCO",
+			Message: "failed to fetch lung cancer information",
+			OrigErr: err,
+		}
 	}
 
 	if lungCancerInfo == nil {
-		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.MamoGraphyInfo}
-		return calcdto.ModelResponse{}, notFoundError
+		log.Printf("[CALC:PLCO] Missing lung cancer info - FormID: %d", form.ID)
+		return calcdto.ModelResponse{}, exception.NotFoundError{Item: "lung cancer information"}
 	}
 
 	cancerInfo, err := calcService.formRepository.FindCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PLCO] Database error fetching cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PLCO",
+			Message: "failed to fetch cancer information",
+			OrigErr: err,
+		}
 	}
 
 	familyCancerInfo, err := calcService.formRepository.FindFamilyCancersByFormID(calcService.db, form.ID)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PLCO] Database error fetching family cancer info - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PLCO",
+			Message: "failed to fetch family cancer information",
+			OrigErr: err,
+		}
 	}
 
 	// Calculate current age
 	currentAge := calculateAge(basicInfo.BirthDate)
+
+	// Validate age is within acceptable range (0-120)
+	if currentAge < 0 || currentAge > 120 {
+		log.Printf("[CALC:PLCO] Invalid age - FormID: %d, Age: %d, BirthDate: %v", form.ID, currentAge, basicInfo.BirthDate)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "PLCO",
+			Message: fmt.Sprintf("calculated age %d is outside valid range (0-120)", currentAge),
+		}
+	}
+
+	// Validate BMI parameters
+	if basicInfo.Height <= 0 || basicInfo.Weight < 0 {
+		log.Printf("[CALC:PLCO] Invalid height/weight - FormID: %d, Height: %.2f, Weight: %.2f", form.ID, basicInfo.Height, basicInfo.Weight)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "PLCO",
+			Message: "invalid height or weight values",
+		}
+	}
 
 	// Calculate BMI from height and weight
 	bmi := basicInfo.Weight / ((basicInfo.Height / 100) * (basicInfo.Height / 100))
@@ -753,16 +1089,23 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 	// Save result to database
 	err = calcService.savePLCOResult(form.ID, plcoResponse)
 	if err != nil {
-		return calcdto.ModelResponse{}, err
+		log.Printf("[CALC:PLCO] Database error saving result - FormID: %d, Error: %v", form.ID, err)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeDatabaseError,
+			Model:   "PLCO",
+			Message: "failed to save calculation result",
+			OrigErr: err,
+		}
 	}
 
-	log := actionlogdto.LogAction{
+	actionLog := actionlogdto.LogAction{
 		ActorID:    userID,
 		Action:     enum.ActionTypeFormSentToPLCO,
 		ResourceID: &form.ID,
 	}
-	calcService.actionLogService.LogAction(log)
+	calcService.actionLogService.LogAction(actionLog)
 
+	log.Printf("[CALC:PLCO] Calculation successful - FormID: %d, RiskPercent: %.2f", form.ID, plcoResponse.PLCOM2012RiskPercent)
 	return calcdto.ModelResponse{
 		Name:        "PLCO",
 		Probability: plcoResponse.PLCOM2012RiskPercent / 100.0,
@@ -772,41 +1115,78 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 func (calcService *CalcService) callPLCOAPI(request calcdto.SendFormToPLCORequest) (calcdto.PLCOResponse, error) {
 	jsonData, err := json.Marshal(request)
 	if err != nil {
-		return calcdto.PLCOResponse{}, fmt.Errorf("failed to marshal PLCO request: %w", err)
+		log.Printf("[CALC:PLCO:API] Error marshaling request: %v", err)
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Model:   "PLCO",
+			Message: "failed to marshal request data",
+			OrigErr: err,
+		}
 	}
 
-	fmt.Printf("PLCO Request: Age=%d, Education=%d, BMI=%.2f, COPD=%d, PersonalCancer=%d, FamilyLungCancer=%d, SmokingStatus=%d, CigarettesPerDay=%.1f, SmokingDuration=%d, YearsQuit=%d\n",
-		request.Age, request.Education, request.BMI, request.COPD, request.PersonalCancerHistory, request.FamilyLungCancer, request.SmokingStatus, request.CigarettesPerDay, request.SmokingDuration, request.YearsQuit)
+	log.Printf("[CALC:PLCO:API] Calling PLCO API - Age=%d, BMI=%.2f, SmokingStatus=%d, CigarettesPerDay=%.1f, SmokingDuration=%d, YearsQuit=%d",
+		request.Age, request.BMI, request.SmokingStatus, request.CigarettesPerDay, request.SmokingDuration, request.YearsQuit)
 
 	url := fmt.Sprintf("%s/calculate", calcService.calcURL.PLCO)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return calcdto.PLCOResponse{}, fmt.Errorf("failed to create PLCO request: %w", err)
+		log.Printf("[CALC:PLCO:API] Error creating request: %v", err)
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PLCO",
+			Message: "failed to create API request",
+			OrigErr: err,
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return calcdto.PLCOResponse{}, fmt.Errorf("failed to call PLCO API: %w", err)
+		log.Printf("[CALC:PLCO:API] API call failed: %v", err)
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PLCO",
+			Message: "failed to call PLCO API",
+			OrigErr: err,
+		}
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return calcdto.PLCOResponse{}, fmt.Errorf("failed to read PLCO response: %w", err)
+		log.Printf("[CALC:PLCO:API] Error reading response: %v", err)
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PLCO",
+			Message: "failed to read API response",
+			OrigErr: err,
+		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return calcdto.PLCOResponse{}, fmt.Errorf("PLCO API returned error (status %d): %s", resp.StatusCode, string(body))
+		log.Printf("[CALC:PLCO:API] API returned error status %d: %s", resp.StatusCode, string(body))
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PLCO",
+			Message: fmt.Sprintf("API returned error status %d", resp.StatusCode),
+			OrigErr: fmt.Errorf("response: %s", string(body)),
+		}
 	}
 
 	var plcoResponse calcdto.PLCOResponse
 	err = json.Unmarshal(body, &plcoResponse)
 	if err != nil {
-		return calcdto.PLCOResponse{}, fmt.Errorf("failed to parse PLCO response: %w", err)
+		log.Printf("[CALC:PLCO:API] Error parsing response: %v", err)
+		return calcdto.PLCOResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeAPIFailure,
+			Model:   "PLCO",
+			Message: "failed to parse API response",
+			OrigErr: err,
+		}
 	}
 
+	log.Printf("[CALC:PLCO:API] API call successful - RiskPercent: %.2f", plcoResponse.PLCOM2012RiskPercent)
 	return plcoResponse, nil
 }
 

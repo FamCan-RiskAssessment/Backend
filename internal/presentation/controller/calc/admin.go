@@ -1,7 +1,7 @@
 package calc
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/calc"
@@ -41,7 +41,8 @@ func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {
 
 	response, err := calcController.calcService.SendFormToCalc(sendFormToCalcRequest)
 	if err != nil {
-		fmt.Printf("ERROR in SendFormToCalc: %v\n", err)
+		log.Printf("[CALC ERROR] SendFormToCalc failed - UserID: %d, FormID: %d, CalcID: %d, Error: %v\n",
+			sendFormToCalcRequest.UserID, params.FormID, params.CalcID, err)
 		panic(err)
 	}
 
@@ -64,6 +65,8 @@ func (calcController *AdminCalcController) GetPremm5Results(ctx *gin.Context) {
 
 	response, err := calcController.calcService.GetPremm5Results(sendFormToCalcRequest)
 	if err != nil {
+		log.Printf("[CALC ERROR] GetPremm5Results failed - UserID: %d, FormID: %d, Error: %v\n",
+			sendFormToCalcRequest.UserID, params.FormID, err)
 		panic(err)
 	}
 
@@ -84,6 +87,8 @@ func (calcController *AdminCalcController) GetBCRAResults(ctx *gin.Context) {
 
 	response, err := calcController.calcService.GetBCRAResults(sendFormToCalcRequest)
 	if err != nil {
+		log.Printf("[CALC ERROR] GetBCRAResults failed - UserID: %d, FormID: %d, Error: %v\n",
+			sendFormToCalcRequest.UserID, params.FormID, err)
 		panic(err)
 	}
 
@@ -104,6 +109,8 @@ func (calcController *AdminCalcController) GetGailResults(ctx *gin.Context) {
 
 	response, err := calcController.calcService.GetGailResults(sendFormToCalcRequest)
 	if err != nil {
+		log.Printf("[CALC ERROR] GetGailResults failed - UserID: %d, FormID: %d, Error: %v\n",
+			sendFormToCalcRequest.UserID, params.FormID, err)
 		panic(err)
 	}
 
@@ -124,6 +131,8 @@ func (calcController *AdminCalcController) GetPLCOResults(ctx *gin.Context) {
 
 	response, err := calcController.calcService.GetPLCOResults(sendFormToCalcRequest)
 	if err != nil {
+		log.Printf("[CALC ERROR] GetPLCOResults failed - UserID: %d, FormID: %d, Error: %v\n",
+			sendFormToCalcRequest.UserID, params.FormID, err)
 		panic(err)
 	}
 

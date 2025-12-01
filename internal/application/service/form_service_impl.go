@@ -1885,7 +1885,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	}
 	var Name *string
 	if contactInfo == nil {
-		Name = &contactInfo.Name
+		Name = nil
 	} else {
 		Name = &contactInfo.Name
 	}

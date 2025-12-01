@@ -1880,6 +1880,12 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	if err != nil {
 		return nil, 0, err
 	}
+	var Name *string
+	if contactInfo == nil {
+		Name = &contactInfo.Name
+	} else {
+		Name = &contactInfo.Name
+	}
 
 	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
 	if err != nil {
@@ -1890,7 +1896,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
-			Name:                      &contactInfo.Name,
+			Name:                      Name,
 			SocialSecurityNumber:      basicInfo.SocialSecurityNumber,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,

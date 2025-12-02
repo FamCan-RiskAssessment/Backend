@@ -1600,6 +1600,11 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		hyperplasiaInBiopsy = &val
 	}
 
+	var BreastDensity string
+	if info.BreastDensity != nil {
+		BreastDensity = *info.BreastDensity
+	}
+
 	return formdto.GetMamographyResponse{
 		ID:                           info.ID,
 		GhaedeAge:                    info.GhaedeAge,
@@ -1632,7 +1637,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		LastFiveYearBloodTestInStool: info.LastFiveYearBloodTestInStool,
 		NumberOfBreastBiopsies:       info.NumberOfBreastBiopsies,
 		HyperplasiaInBiopsy:          hyperplasiaInBiopsy,
-		BreastDensity:                info.BreastDensity,
+		BreastDensity:                BreastDensity,
 	}, nil
 }
 

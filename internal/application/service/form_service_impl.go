@@ -518,6 +518,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	info.OralDuration = request.OralDuration
 	info.OralTwoLastYears = request.OralTwoLastYears
 	info.MamoGraphy = request.MamoGraphy
+	info.BreastDensity = request.BreastDensity
 	info.Falop = request.Falop
 	info.Andometrioz = request.Andometrioz
 	info.LeavePestan = request.LeavePestan
@@ -1631,6 +1632,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		LastFiveYearBloodTestInStool: info.LastFiveYearBloodTestInStool,
 		NumberOfBreastBiopsies:       info.NumberOfBreastBiopsies,
 		HyperplasiaInBiopsy:          hyperplasiaInBiopsy,
+		BreastDensity:                info.BreastDensity,
 	}, nil
 }
 
@@ -2369,6 +2371,7 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	info.OralDuration = request.OralDuration
 	info.OralTwoLastYears = request.OralTwoLastYears
 	info.MamoGraphy = request.MamoGraphy
+	info.BreastDensity = request.BreastDensity
 	info.Falop = request.Falop
 	info.Andometrioz = request.Andometrioz
 	if request.LeavePestan != nil {

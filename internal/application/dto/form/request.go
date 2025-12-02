@@ -119,6 +119,7 @@ type UpsertMamographyRequest struct {
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
 	MamoGraphyPictures           []*multipart.FileHeader
+	BreastDensity                *string
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  bool
@@ -351,6 +352,7 @@ type UpdateMamographyRequest struct {
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
 	MamoGraphyPictures           []*multipart.FileHeader
+	BreastDensity                *string
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  *bool

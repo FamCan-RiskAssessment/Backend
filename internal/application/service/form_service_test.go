@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
-	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
+	externalMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/external"
 	formRepositoryMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
 	s3Mocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/storage/s3"
 	databaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/database"
-	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -25,13 +26,14 @@ import (
 
 type FormServiceTestSuite struct {
 	suite.Suite
-	constants            *bootstrap.Constants
-	formRepository       *formRepositoryMocks.FormRepositoryMock
-	userService          *usecaseMocks.UserServiceMock
-	actionLogService     *usecaseMocks.ActionLogServiceMock
-	s3Storage            *s3Mocks.S3StorageMock
-	db                   *databaseMocks.DatabaseMock
-	formService          *FormService
+	constants          *bootstrap.Constants
+	formRepository     *formRepositoryMocks.FormRepositoryMock
+	userService        *usecaseMocks.UserServiceMock
+	actionLogService   *usecaseMocks.ActionLogServiceMock
+	s3Storage          *s3Mocks.S3StorageMock
+	db                 *databaseMocks.DatabaseMock
+	verificationClient *externalMocks.VerificationClientMock
+	formService        *FormService
 }
 
 func (suite *FormServiceTestSuite) SetupTest() {
@@ -41,6 +43,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 	suite.actionLogService = usecaseMocks.NewActionLogServiceMock()
 	suite.s3Storage = s3Mocks.NewS3StorageMock()
 	suite.db = databaseMocks.NewDatabaseMock()
+	suite.verificationClient = externalMocks.NewVerificationClientMock()
 
 	suite.formService = NewFormService(
 		suite.constants,
@@ -49,6 +52,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		suite.actionLogService,
 		suite.s3Storage,
 		suite.db,
+		suite.verificationClient,
 	)
 }
 
@@ -69,6 +73,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 
 	form := &entity.Form{}
 	form.ID = 1
@@ -80,6 +85,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, request.SocialSecurityNumber).Return(true, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
 		return f.UserID == userID && f.Status == enum.FormStatusPending
 	})).Run(func(args mock.Arguments) {
@@ -91,6 +97,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	suite.formRepository.On("CreateBasicInfo", suite.db, mock.MatchedBy(func(b *entity.BasicInfo) bool {
 		return b.FormID == form.ID
 	})).Return(nil)
+	suite.formRepository.On("FindAttentionQuestionsByFormID", suite.db, mock.Anything).Return(nil, nil)
 
 	// Act
 	response, err := suite.formService.CreateBasicInfoForm(request)
@@ -163,6 +170,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 	operator := &entity.User{}
 	operator.ID = operatorID
 
@@ -176,6 +184,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, mock.Anything).Return(true, nil)
 	suite.userService.On("ValidateUserForFormCreation", operatorID, userID).Return(nil)
 	suite.userService.On("GetUserByID", operatorID).Return(operator, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
@@ -189,6 +198,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 	suite.formRepository.On("CreateBasicInfo", suite.db, mock.MatchedBy(func(b *entity.BasicInfo) bool {
 		return b.FormID == form.ID
 	})).Return(nil)
+	suite.formRepository.On("FindAttentionQuestionsByFormID", suite.db, mock.Anything).Return(nil, nil)
 	suite.actionLogService.On("LogAction", mock.MatchedBy(func(log actionlogdto.LogAction) bool {
 		return log.ActorID == operatorID && log.TargetID != nil && *log.TargetID == userID
 	})).Return(nil)
@@ -211,10 +221,12 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_FormCreationFails() {
 	}
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 	repoError := errors.New("database error")
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, mock.Anything).Return(true, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.Anything).Return(repoError)
 
 	// Act
@@ -577,17 +589,17 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertGeneralHealthRequest{
-		UserID:                     userID,
-		FormID:                     formID,
-		DrinksAlcohol:              boolPtr(true),
-		CupsPerWeek:                strPtr("5"),
-		LastMonthSabzijatMeal:      "high",
-		LastMonthSabzijatWeight:    "2kg",
-		MediumActivityMonthInYear:  3,
-		MediumActivityHourInWeek:   "3",
-		HardActivityMonthInYear:    1,
-		HardActivityHourInWeek:     "1",
-		SmokingNow:                 true,
+		UserID:                    userID,
+		FormID:                    formID,
+		DrinksAlcohol:             boolPtr(true),
+		CupsPerWeek:               strPtr("5"),
+		LastMonthSabzijatMeal:     "high",
+		LastMonthSabzijatWeight:   "2kg",
+		MediumActivityMonthInYear: 3,
+		MediumActivityHourInWeek:  "3",
+		HardActivityMonthInYear:   1,
+		HardActivityHourInWeek:    "1",
+		SmokingNow:                true,
 	}
 
 	form := &entity.Form{}
@@ -1000,11 +1012,11 @@ func (suite *FormServiceTestSuite) TestUpsertMamography_Create() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertMamographyRequest{
-		UserID:               userID,
-		FormID:               formID,
-		GhaedeAge:            45,
-		HasChildren:          true,
-		MenopausalStatus:     uint(enum.MenopausalStatusPreMenopausal),
+		UserID:           userID,
+		FormID:           formID,
+		GhaedeAge:        45,
+		HasChildren:      true,
+		MenopausalStatus: uint(enum.MenopausalStatusPreMenopausal),
 	}
 
 	form := &entity.Form{}
@@ -1037,10 +1049,10 @@ func (suite *FormServiceTestSuite) TestCreateCancer_Success() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.CreateCancerRequest{
-		UserID:      userID,
-		FormID:      formID,
-		CancerAge:   35,
-		CancerType:  uint(enum.CancerTypeBreast),
+		UserID:     userID,
+		FormID:     formID,
+		CancerAge:  35,
+		CancerType: uint(enum.CancerTypeBreast),
 	}
 
 	form := &entity.Form{}
@@ -1073,10 +1085,10 @@ func (suite *FormServiceTestSuite) TestCreateCancer_FormNotFound() {
 	userID := uint(1)
 	formID := uint(999)
 	request := formdto.CreateCancerRequest{
-		UserID:      userID,
-		FormID:      formID,
-		CancerAge:   35,
-		CancerType:  uint(enum.CancerTypeBreast),
+		UserID:     userID,
+		FormID:     formID,
+		CancerAge:  35,
+		CancerType: uint(enum.CancerTypeBreast),
 	}
 
 	// Setup expectations
@@ -1547,9 +1559,9 @@ func (suite *FormServiceTestSuite) TestUpsertContact_Create() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertContactRequest{
-		UserID: userID,
-		FormID: formID,
-		Name:   "John Doe",
+		UserID:  userID,
+		FormID:  formID,
+		Name:    "John Doe",
 		Address: "123 Main St",
 	}
 
@@ -1722,7 +1734,7 @@ func (suite *FormServiceTestSuite) TestAssignOperator_Success() {
 	formID := uint(1)
 	operatorID := uint(2)
 	request := formdto.AssignOperatorRequest{
-		FormID:    formID,
+		FormID:     formID,
 		OperatorID: operatorID,
 	}
 

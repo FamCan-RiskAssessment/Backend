@@ -2950,3 +2950,7 @@ func (formService *FormService) GetAllRelativeTypes() ([]generaldto.EnumResponse
 	}
 	return response, nil
 }
+
+func (formService *FormService) GetAddressByPostalCode(postalCode string) (*formdto.PostalCodeInfoResponse, error) {
+	return formService.verificationClient.GetAddressByPostalCode(postalCode)
+}

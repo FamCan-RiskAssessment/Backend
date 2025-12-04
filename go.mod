@@ -16,6 +16,7 @@ require (
 	github.com/kavenegar/kavenegar-go v0.0.0-20240205151018-77039f51467d
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/stretchr/testify v1.11.1
+	github.com/yaa110/go-persian-calendar v1.3.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 )
@@ -50,7 +51,6 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.0 // indirect
-	github.com/yaa110/go-persian-calendar v1.3.0 // indirect
 	golang.org/x/arch v0.18.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0 // indirect

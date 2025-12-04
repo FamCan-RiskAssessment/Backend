@@ -443,3 +443,7 @@ type UpdateLungCancerRequest struct {
 	// Attention question answer
 	AttentionCorrect *bool
 }
+
+type PostalCodeInfoRequest struct {
+	PostalCode string
+}

@@ -844,3 +844,18 @@ func (formController *CustomerFormController) GetLungCancer(ctx *gin.Context) {
 
 	controller.Response(ctx, 200, "", response)
 }
+
+func (formController *CustomerFormController) GetAddressByPostalCode(ctx *gin.Context) {
+	type PostalCodeParams struct {
+		PostalCode string `json:"postalCode" validate:"required,len=10"`
+	}
+
+	params := controller.Validate[PostalCodeParams](ctx)
+
+	response, err := formController.formService.GetAddressByPostalCode(params.PostalCode)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}

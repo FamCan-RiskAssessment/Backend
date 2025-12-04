@@ -11,11 +11,13 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
+	external2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/external"
 	postgres2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
@@ -70,7 +72,9 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	formRepository := postgres.NewFormRepository()
 	s3 := ProvideStorageConfig(config)
 	s3Storage := storage.NewS3Storage(constants, s3)
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase)
+	verificationAPI := ProvideVerificationAPIConfig(config)
+	verificationClientImpl := external.NewVerificationClient(verificationAPI)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -125,7 +129,7 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)))
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
 
@@ -175,6 +179,10 @@ func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
 	return &container.Env.CalcURL
 }
 
+func ProvideVerificationAPIConfig(container *bootstrap.Config) *bootstrap.VerificationAPI {
+	return &container.Env.VerificationAPI
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -196,6 +204,7 @@ var ProviderSet = wire.NewSet(
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
 	ProvideCalcURL,
+	ProvideVerificationAPIConfig,
 	SeedProviderSet,
 )
 

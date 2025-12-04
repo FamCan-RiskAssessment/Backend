@@ -13,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/external"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/validation"
@@ -20,12 +21,13 @@ import (
 )
 
 type FormService struct {
-	constants        *bootstrap.Constants
-	formRepository   postgres.FormRepository
-	userService      usecase.UserService
-	actionLogService usecase.ActionLogService
-	s3Storage        s3.S3Storage
-	db               database.Database
+	constants          *bootstrap.Constants
+	formRepository     postgres.FormRepository
+	userService        usecase.UserService
+	actionLogService   usecase.ActionLogService
+	s3Storage          s3.S3Storage
+	db                 database.Database
+	verificationClient external.VerificationClient
 }
 
 func NewFormService(
@@ -35,14 +37,16 @@ func NewFormService(
 	actionLogService usecase.ActionLogService,
 	s3Storage s3.S3Storage,
 	db database.Database,
+	verificationClient external.VerificationClient,
 ) *FormService {
 	return &FormService{
-		constants:        constants,
-		formRepository:   formRepository,
-		userService:      userService,
-		actionLogService: actionLogService,
-		s3Storage:        s3Storage,
-		db:               db,
+		constants:          constants,
+		formRepository:     formRepository,
+		userService:        userService,
+		actionLogService:   actionLogService,
+		s3Storage:          s3Storage,
+		db:                 db,
+		verificationClient: verificationClient,
 	}
 }
 
@@ -287,6 +291,18 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	if user == nil {
 		notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
 		return formdto.BasicFormResponse{}, notFoundError
+	}
+
+	isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, request.SocialSecurityNumber)
+	if err != nil {
+		return formdto.BasicFormResponse{}, fmt.Errorf("failed to verify phone and social security number: %w", err)
+	}
+	if !isMatch {
+		verificationError := exception.VerificationError{
+			Field:   "socialSecurityNumber",
+			Message: "Phone number and social security number do not match",
+		}
+		return formdto.BasicFormResponse{}, verificationError
 	}
 
 	if request.FilledByOperatorID != nil {
@@ -1978,11 +1994,33 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
+	if request.SocialSecurityNumber != nil {
+		user, err := formService.userService.GetUserByID(form.UserID)
+		if err != nil {
+			return err
+		}
+		if user == nil {
+			notFoundError := exception.NotFoundError{Item: formService.constants.Field.User}
+			return notFoundError
+		}
+
+		isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, *request.SocialSecurityNumber)
+		if err != nil {
+			return fmt.Errorf("failed to verify phone and social security number: %w", err)
+		}
+		if !isMatch {
+			verificationError := exception.VerificationError{
+				Field:   "socialSecurityNumber",
+				Message: "Phone number and social security number do not match",
+			}
+			return verificationError
+		}
+
+		info.SocialSecurityNumber = *request.SocialSecurityNumber
+	}
+
 	if request.BirthDate != nil {
 		info.BirthDate = *request.BirthDate
-	}
-	if request.SocialSecurityNumber != nil {
-		info.SocialSecurityNumber = *request.SocialSecurityNumber
 	}
 	if request.Gender != nil {
 		info.Gender = enum.Gender(uint(*request.Gender))

@@ -50,8 +50,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleConflictError(ctx, conflictErrors, recovery.constants.Context.Translator)
 	} else if authError, ok := err.(*exception.AuthError); ok {
 		handleAuthError(ctx, *authError, recovery.constants.Context.Translator)
-	} else if calcError, ok := err.(exception.CalcError); ok {
-		handleCalcError(ctx, calcError, recovery.constants.Context.Translator)
+	} else if calcError, ok := err.(*exception.CalcError); ok {
+		handleCalcError(ctx, *calcError, recovery.constants.Context.Translator)
 	} else if notFoundError, ok := err.(exception.NotFoundError); ok {
 		handleNotFoundError(ctx, notFoundError, recovery.constants.Context.Translator)
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
@@ -185,7 +185,14 @@ func handleCalcError(ctx *gin.Context, calcError exception.CalcError, transKey s
 		statusCode = 500
 	}
 
-	controller.Response(ctx, statusCode, errorMessage, nil)
+	// Include specific error details in response data
+	responseData := map[string]interface{}{
+		"error": calcError.Message,
+		"model": calcError.Model,
+		"type":  string(calcError.Type),
+	}
+
+	controller.Response(ctx, statusCode, errorMessage, responseData)
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {

@@ -186,7 +186,7 @@ func handleCalcError(ctx *gin.Context, calcError exception.CalcError, transKey s
 	}
 
 	// Include specific error details in response data
-	responseData := map[string]interface{}{
+	responseData := map[string]any{
 		"error": calcError.Message,
 		"model": calcError.Model,
 		"type":  string(calcError.Type),

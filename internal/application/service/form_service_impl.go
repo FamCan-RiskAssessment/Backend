@@ -1891,20 +1891,21 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		return nil, 0, nil
 	}
 
-	basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[0].ID)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[0].ID)
-	if err != nil {
-		return nil, 0, err
-	}
+	var SocialSecurityNumber string
 	var Name *string
-	if contactInfo == nil {
-		Name = nil
-	} else {
-		Name = &contactInfo.Name
+	for i := 0; i <= len(forms)-1; i++ {
+		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if basicInfo != nil {
+			SocialSecurityNumber = basicInfo.SocialSecurityNumber
+		}
+		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if contactInfo != nil {
+			Name = &contactInfo.Name
+		}
 	}
 
 	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
@@ -1917,7 +1918,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			Name:                      Name,
-			SocialSecurityNumber:      basicInfo.SocialSecurityNumber,
+			SocialSecurityNumber:      SocialSecurityNumber,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,

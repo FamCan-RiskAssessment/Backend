@@ -1600,7 +1600,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		hyperplasiaInBiopsy = &val
 	}
 
-	var BreastDensity string
+	var BreastDensity uint
 	if info.BreastDensity != nil {
 		BreastDensity = *info.BreastDensity
 	}

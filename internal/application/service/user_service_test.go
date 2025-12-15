@@ -8,13 +8,13 @@ import (
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
-	postgresRepository "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
-	redisRepository "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/repository/redis"
-	communicationMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/communication"
-	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
-	databaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/database"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
+	communicationMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/communication"
+	postgresRepository "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
+	databaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/database"
+	redisRepository "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/repository/redis"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -29,6 +29,7 @@ type UserServiceTestSuite struct {
 	smsService          *communicationMocks.SmsServiceMock
 	otpService          *usecaseMocks.OtpServiceMock
 	actionLogService    *usecaseMocks.ActionLogServiceMock
+	passwordHasher      *usecaseMocks.PasswordHasherMock
 	db                  *databaseMocks.DatabaseMock
 	constants           *bootstrap.Constants
 }
@@ -40,6 +41,7 @@ func (suite *UserServiceTestSuite) SetupTest() {
 	suite.smsService = communicationMocks.NewSmsServiceMock()
 	suite.otpService = usecaseMocks.NewOtpServiceMock()
 	suite.actionLogService = usecaseMocks.NewActionLogServiceMock()
+	suite.passwordHasher = usecaseMocks.NewPasswordHasherMock()
 	suite.db = databaseMocks.NewDatabaseMock()
 
 	// Create a simple constants structure for testing
@@ -61,6 +63,7 @@ func (suite *UserServiceTestSuite) SetupTest() {
 		suite.otpService,
 		suite.actionLogService,
 		suite.db,
+		suite.passwordHasher,
 	)
 }
 

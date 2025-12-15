@@ -27,6 +27,7 @@ type UserService struct {
 	otpService          usecase.OtpService
 	actionLogService    usecase.ActionLogService
 	db                  database.Database
+	passwordHasher      usecase.PasswordHasher
 }
 
 func NewUserService(
@@ -38,6 +39,7 @@ func NewUserService(
 	otpService usecase.OtpService,
 	actionLogService usecase.ActionLogService,
 	db database.Database,
+	passwordHasher usecase.PasswordHasher,
 ) *UserService {
 	return &UserService{
 		constants:           constants,
@@ -48,6 +50,7 @@ func NewUserService(
 		otpService:          otpService,
 		actionLogService:    actionLogService,
 		db:                  db,
+		passwordHasher:      passwordHasher,
 	}
 }
 
@@ -159,7 +162,11 @@ func (userService *UserService) SetPassword(request userdto.SetPasswordRequest) 
 		return notFoundError
 	}
 
-	user.Password = request.Password
+	hashedPassword, err := userService.passwordHasher.HashPassword(request.Password)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
 	if err := userService.userRepository.UpdateUser(userService.db, user); err != nil {
 		return err
 	}
@@ -178,7 +185,7 @@ func (userService *UserService) LoginWithPassword(loginInfo userdto.LoginRequest
 		return userdto.LoginResponse{}, notFoundError
 	}
 
-	if user.Password != loginInfo.Password {
+	if err := userService.passwordHasher.VerifyPassword(loginInfo.Password, user.Password); err != nil {
 		authError := exception.NewInvalidCredentialsError("phone and password not match", nil)
 		return userdto.LoginResponse{}, authError
 	}

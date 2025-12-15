@@ -24,7 +24,7 @@ type BasicInfo struct {
 	Gender               enum.Gender `gorm:"not null"`
 	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
-	SocialSecurityNumber string      `gorm:"not null"`
+	SocialSecurityNumber string      `gorm:"type:varchar(500);not null"` // Encrypted, larger size needed
 	Height               float64     `gorm:"type:decimal(5,2);not null"`
 	Weight               float64     `gorm:"type:decimal(5,2);not null"`
 }

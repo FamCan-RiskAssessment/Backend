@@ -53,14 +53,11 @@ func (otpService *OTPService) VerifyOTP(redisKey, otp string) error {
 		validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Expired)
 		return validationErrors
 	}
-	if otp == "111111" || otp == redisValue.OTP {
-		return nil
-	}
-	validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Invalid)
-	return validationErrors
 
-	// if otp != redisValue.OTP {
-	// 	return exception.ErrInvalidOTP
-	// }
-	// return nil
+	if otp != redisValue.OTP {
+		validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Invalid)
+		return validationErrors
+	}
+
+	return nil
 }

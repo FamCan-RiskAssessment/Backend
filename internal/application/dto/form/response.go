@@ -93,7 +93,7 @@ type UpsertLungCancerResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
-type UpsertNavidQuestionsResponse struct {
+type UpsertNavidFormResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
@@ -212,6 +212,56 @@ type GetContactResponse struct {
 }
 
 type GetLungCancerResponse struct {
+	ID                           uint             `json:"id"`
+	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
+	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
+	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
+	Hypertension                 bool             `json:"hypertension"`
+	HypertensionTreatment        *bool            `json:"hypertensionTreatment,omitempty"`
+	HeartDisease                 bool             `json:"heartDisease"`
+	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment,omitempty"`
+	Diabetes                     bool             `json:"diabetes"`
+	DiabetesTreatment            *bool            `json:"diabetesTreatment,omitempty"`
+	ChronicLungDisease           *bool            `json:"chronicLungDisease,omitempty"`
+	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`
+	LungCancerHistory            bool             `json:"lungCancerHistory"`
+	OtherCancerHistory           bool             `json:"otherCancerHistory"`
+	OtherCancerType              *enum.CancerType `json:"otherCancerType,omitempty"`
+	LungCancerFamily             *bool            `json:"lungCancerFamily,omitempty"`
+	LungCancerFamilyRelation     *string          `json:"lungCancerFamilyRelation,omitempty"`
+	OtherCancerFamily            *bool            `json:"otherCancerFamily,omitempty"`
+	OtherCancerFamilyType        *enum.CancerType `json:"otherCancerFamilyType,omitempty"`
+	OtherCancerFamilyRelation    *string          `json:"otherCancerFamilyRelation,omitempty"`
+	OccupationalExposure         *string          `json:"occupationalExposure,omitempty"`
+	CurrentSmoking               bool             `json:"currentSmoking"`
+	SmokingStartAgeCurrent       *uint            `json:"smokingStartAgeCurrent,omitempty"`
+	SmokingTypesCurrent          *string          `json:"smokingTypesCurrent,omitempty"`
+	CigarettesPerDayCurrent      *uint            `json:"cigarettesPerDayCurrent,omitempty"`
+	CigarPerDayCurrent           *uint            `json:"cigarPerDayCurrent,omitempty"`
+	ECigPerDayCurrent            *uint            `json:"eCigPerDayCurrent,omitempty"`
+	PipePerDayCurrent            *uint            `json:"pipePerDayCurrent,omitempty"`
+	ChapoghPerDayCurrent         *uint            `json:"chapoghPerDayCurrent,omitempty"`
+	SmokedOpiumPerDayCurrent     *uint            `json:"smokedOpiumPerDayCurrent,omitempty"`
+	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
+	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
+	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
+	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
+	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
+	CigarettesPerDayPast         *uint            `json:"cigarettesPerDayPast,omitempty"`
+	CigarPerDayPast              *uint            `json:"cigarPerDayPast,omitempty"`
+	ECigPerDayPast               *uint            `json:"eCigPerDayPast,omitempty"`
+	PipePerDayPast               *uint            `json:"pipePerDayPast,omitempty"`
+	ChapoghPerDayPast            *uint            `json:"chapoghPerDayPast,omitempty"`
+	SmokedOpiumPerDayPast        *uint            `json:"smokedOpiumPerDayPast,omitempty"`
+	ChewedOpiumPerDayPast        *uint            `json:"chewedOpiumPerDayPast,omitempty"`
+	HookahPerWeekPast            *uint            `json:"hookahPerWeekPast,omitempty"`
+	SecondhandSmoke              bool             `json:"secondhandSmoke"`
+	SecondhandSmokeLocation      *string          `json:"secondhandSmokeLocation,omitempty"`
+	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
+}
+
+type GetNavidFormResponse struct {
 	ID                           uint             `json:"id"`
 	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
 	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`

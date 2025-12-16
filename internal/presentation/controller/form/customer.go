@@ -471,8 +471,8 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
 }
 
-func (formController *CustomerFormController) UpsertNavidQuestions(ctx *gin.Context) {
-	type UpsertNavidQuestionsParams struct {
+func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) {
+	type UpsertNavidFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
 		InsuranceStatus              *string `json:"insuranceStatus,omitempty"`
@@ -524,11 +524,11 @@ func (formController *CustomerFormController) UpsertNavidQuestions(ctx *gin.Cont
 		LungDiseaseHistory           *string `json:"lungDiseaseHistory,omitempty"`
 	}
 
-	params := controller.Validate[UpsertNavidQuestionsParams](ctx)
+	params := controller.Validate[UpsertNavidFormParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	req := formdto.UpsertNavidQuestionsRequest{
+	req := formdto.UpsertNavidFormRequest{
 		UserID:                       userID.(uint),
 		FormID:                       params.FormID,
 		SupplementaryInsuranceStatus: params.SupplementaryInsuranceStatus,
@@ -580,13 +580,13 @@ func (formController *CustomerFormController) UpsertNavidQuestions(ctx *gin.Cont
 		LungDiseaseHistory:           params.LungDiseaseHistory,
 	}
 
-	if err := formController.formService.UpsertNavidQuestions(req); err != nil {
+	if err := formController.formService.UpsertNavidForm(req); err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertNavidQuestionsResponse{})
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
 }
 
 func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context) {
@@ -958,6 +958,28 @@ func (formController *CustomerFormController) GetLungCancer(ctx *gin.Context) {
 	}
 
 	response, err := formController.formService.GetLungCancer(request)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
+func (formController *CustomerFormController) GetNavidForm(ctx *gin.Context) {
+	type GetNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetNavidForm(request)
 	if err != nil {
 		panic(err)
 	}

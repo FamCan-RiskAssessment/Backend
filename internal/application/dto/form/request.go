@@ -234,7 +234,7 @@ type UpsertContactRequest struct {
 	Phone3                *string
 }
 
-type UpsertNavidQuestionsRequest struct {
+type UpsertNavidFormRequest struct {
 	UserID uint
 	FormID uint
 
@@ -499,7 +499,7 @@ type UpdateLungCancerRequest struct {
 	// Attention question answer
 	AttentionCorrect *bool
 }
-type UpdateNavidQuestionsRequest struct {
+type UpdateNavidFormRequest struct {
 	UserID uint
 	FormID uint
 

@@ -1450,7 +1450,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	return nil
 }
 
-func (formService *FormService) UpsertNavidQuestions(request formdto.UpsertNavidQuestionsRequest) error {
+func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err
@@ -1954,6 +1954,80 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 	}
 
 	return formdto.GetLungCancerResponse{
+		ID:                           info.ID,
+		InsuranceStatus:              info.InsuranceStatus,
+		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
+		SupplementaryInsurances:      info.SupplementaryInsurances,
+		Hypertension:                 info.Hypertension,
+		HypertensionTreatment:        info.HypertensionTreatment,
+		HeartDisease:                 info.HeartDisease,
+		HeartDiseaseTreatment:        info.HeartDiseaseTreatment,
+		Diabetes:                     info.Diabetes,
+		DiabetesTreatment:            info.DiabetesTreatment,
+		ChronicLungDisease:           info.ChronicLungDisease,
+		ChronicLungDiseaseType:       info.ChronicLungDiseaseType,
+		LungCancerHistory:            info.LungCancerHistory,
+		OtherCancerHistory:           info.OtherCancerHistory,
+		OtherCancerType:              info.OtherCancerType,
+		LungCancerFamily:             info.LungCancerFamily,
+		LungCancerFamilyRelation:     info.LungCancerFamilyRelation,
+		OtherCancerFamily:            info.OtherCancerFamily,
+		OtherCancerFamilyType:        info.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    info.OtherCancerFamilyRelation,
+		OccupationalExposure:         info.OccupationalExposure,
+		CurrentSmoking:               info.CurrentSmoking,
+		SmokingStartAgeCurrent:       info.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          info.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      info.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           info.CigarPerDayCurrent,
+		ECigPerDayCurrent:            info.ECigPerDayCurrent,
+		PipePerDayCurrent:            info.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         info.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     info.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
+		PastSmoking:                  info.PastSmoking,
+		LeaveSmoke:                   info.LeaveSmoke,
+		SmokingStartAgePast:          info.SmokingStartAgePast,
+		SmokingTypesPast:             info.SmokingTypesPast,
+		CigarettesPerDayPast:         info.CigarettesPerDayPast,
+		CigarPerDayPast:              info.CigarPerDayPast,
+		ECigPerDayPast:               info.ECigPerDayPast,
+		PipePerDayPast:               info.PipePerDayPast,
+		ChapoghPerDayPast:            info.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        info.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        info.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            info.HookahPerWeekPast,
+		SecondhandSmoke:              info.SecondhandSmoke,
+		SecondhandSmokeLocation:      info.SecondhandSmokeLocation,
+		LungDiseaseHistory:           info.LungDiseaseHistory,
+	}, nil
+}
+
+func (formService *FormService) GetNavidForm(request formdto.GetPartialFormRequest) (formdto.GetNavidFormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetNavidFormResponse{}, notFoundError
+	}
+
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+
+	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetNavidFormResponse{}, notFoundError
+	}
+
+	return formdto.GetNavidFormResponse{
 		ID:                           info.ID,
 		InsuranceStatus:              info.InsuranceStatus,
 		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
@@ -2890,7 +2964,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	return nil
 }
 
-func (formService *FormService) UpdateNavidQuestions(request formdto.UpdateNavidQuestionsRequest) error {
+func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
 		return err

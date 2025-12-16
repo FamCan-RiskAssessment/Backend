@@ -539,11 +539,11 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
 }
 
-func (formController *AdminFormController) UpdateNavidQuestions(ctx *gin.Context) {
-	type UpdateNavidQuestionsParams struct {
+func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
+	type UpdateNavidFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
 		InsuranceStatus              *string `json:"insuranceStatus"`
@@ -595,11 +595,11 @@ func (formController *AdminFormController) UpdateNavidQuestions(ctx *gin.Context
 		LungDiseaseHistory           *string `json:"lungDiseaseHistory"`
 	}
 
-	params := controller.Validate[UpdateNavidQuestionsParams](ctx)
+	params := controller.Validate[UpdateNavidFormParams](ctx)
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
-	req := formdto.UpdateNavidQuestionsRequest{
+	req := formdto.UpdateNavidFormRequest{
 		UserID:                       userID.(uint),
 		FormID:                       params.FormID,
 		InsuranceStatus:              params.InsuranceStatus,
@@ -651,13 +651,13 @@ func (formController *AdminFormController) UpdateNavidQuestions(ctx *gin.Context
 		LungDiseaseHistory:           params.LungDiseaseHistory,
 	}
 
-	if err := formController.formService.UpdateNavidQuestions(req); err != nil {
+	if err := formController.formService.UpdateNavidForm(req); err != nil {
 		panic(err)
 	}
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
 }
 
 func (formController *AdminFormController) GetGeneralHealth(ctx *gin.Context) {
@@ -988,6 +988,28 @@ func (formController *AdminFormController) GetLungCancer(ctx *gin.Context) {
 	}
 
 	response, err := formController.formService.GetLungCancer(request)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
+func (formController *AdminFormController) GetNavidForm(ctx *gin.Context) {
+	type GetNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetNavidForm(request)
 	if err != nil {
 		panic(err)
 	}

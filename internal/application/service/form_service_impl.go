@@ -2918,3 +2918,15 @@ func (formService *FormService) GetAllRelativeTypes() ([]generaldto.EnumResponse
 	}
 	return response, nil
 }
+
+func (formService *FormService) GetAllFormTypes() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllFormTypes()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}

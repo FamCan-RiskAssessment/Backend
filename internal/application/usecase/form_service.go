@@ -34,6 +34,7 @@ type FormService interface {
 	UpdateMamography(request formdto.UpdateMamographyRequest) error
 	UpdateContact(request formdto.UpdateContactRequest) error
 	UpdateLungCancer(request formdto.UpdateLungCancerRequest) error
+	UpdateNavidQuestions(request formdto.UpdateNavidQuestionsRequest) error
 
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(request formdto.DeleteFormRequest) error

@@ -72,6 +72,9 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			operatorFormGroup.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			operatorFormGroup.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
 
+			// navid form
+			operatorFormGroup.PATCH("/navid", app.Controllers.Admin.FormController.UpdateNavidQuestions)
+
 			operatorFormGroup.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			operatorFormGroup.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			operatorFormGroup.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
@@ -121,6 +124,9 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			// formManagement.PATCH("/familycancer", app.Controllers.Admin.FormController.UpdateFamilyCancer)
 			formManagement.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			formManagement.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
+
+			// navid form
+			formManagement.PATCH("/navid", app.Controllers.Admin.FormController.UpdateNavidQuestions)
 
 			formManagement.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			formManagement.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)

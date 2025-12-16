@@ -28,6 +28,7 @@ type FormService interface {
 	DeleteFamilyCancer(request formdto.DeleteFamilyCancerRequest) error
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
+	UpsertNavidQuestions(request formdto.UpsertNavidQuestionsRequest) error
 
 	UpdateGeneralHealth(request formdto.UpdateGeneralHealthRequest) error
 	UpdateMamography(request formdto.UpdateMamographyRequest) error

@@ -20,6 +20,9 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.PUT("/lungcancer", app.Controllers.Customer.FormController.UpsertLungCancer)
 			formGroup.PUT("/status", app.Controllers.Customer.FormController.ChangeFormStatus)
 
+			// navid form
+			formGroup.PUT("/navid", app.Controllers.Customer.FormController.UpsertNavidQuestions)
+
 			formGroup.GET("/basic", app.Controllers.Customer.FormController.GetBasicForm)
 			formGroup.GET("/generalhealth", app.Controllers.Customer.FormController.GetGeneralHealth)
 			formGroup.GET("/mamography", app.Controllers.Customer.FormController.GetMamography)

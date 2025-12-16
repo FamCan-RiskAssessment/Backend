@@ -93,6 +93,10 @@ type UpsertLungCancerResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
+type UpsertNavidQuestionsResponse struct {
+	Form BasicFormResponse `json:"form"`
+}
+
 type GetBasicFormResponse struct {
 	ID                   uint        `json:"id"`
 	Gender               enum.Gender `json:"gender"`

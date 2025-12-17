@@ -297,6 +297,8 @@ type GetNavidFormResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	SmokePastAvg                 *uint            `json:"smokePastAvg,omitempty"`
+	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg,omitempty"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`

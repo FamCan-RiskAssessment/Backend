@@ -32,6 +32,7 @@ func main() {
 		&entity.FamilyCancerInfo{},
 		&entity.ContactInfo{},
 		&entity.LungCancerInfo{},
+		&entity.NavidInfo{},
 		&entity.ActionLog{},
 		&entity.Premm5Result{},
 		&entity.BCRAResult{},

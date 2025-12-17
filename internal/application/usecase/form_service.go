@@ -15,6 +15,7 @@ type FormService interface {
 	GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error)
 	GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error)
 	GetLungCancer(request formdto.GetPartialFormRequest) (formdto.GetLungCancerResponse, error)
+	GetNavidForm(request formdto.GetPartialFormRequest) (formdto.GetNavidFormResponse, error)
 	GetUserForms(request formdto.GetUserFormsRequest) ([]formdto.BasicFormResponse, int64, error)
 	UpdateForm(request formdto.UpdateBasicFormRequest) error
 	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
@@ -28,11 +29,13 @@ type FormService interface {
 	DeleteFamilyCancer(request formdto.DeleteFamilyCancerRequest) error
 	UpsertContact(request formdto.UpsertContactRequest) error
 	UpsertLungCancer(request formdto.UpsertLungCancerRequest) error
+	UpsertNavidForm(request formdto.UpsertNavidFormRequest) error
 
 	UpdateGeneralHealth(request formdto.UpdateGeneralHealthRequest) error
 	UpdateMamography(request formdto.UpdateMamographyRequest) error
 	UpdateContact(request formdto.UpdateContactRequest) error
 	UpdateLungCancer(request formdto.UpdateLungCancerRequest) error
+	UpdateNavidForm(request formdto.UpdateNavidFormRequest) error
 
 	ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error)
 	DeleteForm(request formdto.DeleteFormRequest) error
@@ -50,4 +53,5 @@ type FormService interface {
 	GetAllHyperplasiaInBiopsyStatuses() ([]generaldto.EnumResponse, error)
 	GetAllLifeStatuses() ([]generaldto.EnumResponse, error)
 	GetAllRelativeTypes() ([]generaldto.EnumResponse, error)
+	GetAllFormTypes() ([]generaldto.EnumResponse, error)
 }

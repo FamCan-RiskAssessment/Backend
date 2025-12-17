@@ -386,6 +386,26 @@ func (r *FormRepository) UpdateLungCancer(db database.Database, info *entity.Lun
 	return db.GetDB().Save(info).Error
 }
 
+func (r *FormRepository) FindNavidInfoByFormID(db database.Database, formID uint) (*entity.NavidInfo, error) {
+	var info entity.NavidInfo
+	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &info, nil
+}
+
+func (r *FormRepository) CreateNavidInfo(db database.Database, info *entity.NavidInfo) error {
+	return db.GetDB().Create(info).Error
+}
+
+func (r *FormRepository) UpdateNavidInfo(db database.Database, info *entity.NavidInfo) error {
+	return db.GetDB().Save(info).Error
+}
+
 func (r *FormRepository) FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error) {
 	var result entity.Premm5Result
 	err := db.GetDB().Where("form_id = ?", formID).First(&result).Error

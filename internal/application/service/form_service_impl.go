@@ -1450,6 +1450,140 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	return nil
 }
 
+func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	if err != nil {
+		return err
+	}
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
+		if err != nil {
+			return err
+		}
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		info = &entity.NavidInfo{FormID: request.FormID}
+	}
+
+	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	info.InsuranceStatus = request.InsuranceStatus
+	info.SupplementaryInsurances = request.SupplementaryInsurances
+	info.Hypertension = request.Hypertension
+	info.HypertensionTreatment = request.HypertensionTreatment
+	info.HeartDisease = request.HeartDisease
+	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
+	info.Diabetes = request.Diabetes
+	info.DiabetesTreatment = request.DiabetesTreatment
+	info.ChronicLungDisease = request.ChronicLungDisease
+	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
+	info.LungCancerHistory = request.LungCancerHistory
+	info.OtherCancerHistory = request.OtherCancerHistory
+	if request.OtherCancerType != nil {
+		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
+	}
+	info.LungCancerFamily = request.LungCancerFamily
+	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
+	info.OtherCancerFamily = request.OtherCancerFamily
+	if request.OtherCancerFamilyType != nil {
+		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
+	}
+	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
+	info.OccupationalExposure = request.OccupationalExposure
+	info.CurrentSmoking = request.CurrentSmoking
+	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
+	info.SmokingTypesCurrent = request.SmokingTypesCurrent
+	info.CigarettesPerDayCurrent = request.CigarettesPerDayCurrent
+	info.CigarPerDayCurrent = request.CigarPerDayCurrent
+	info.ECigPerDayCurrent = request.ECigPerDayCurrent
+	info.PipePerDayCurrent = request.PipePerDayCurrent
+	info.ChapoghPerDayCurrent = request.ChapoghPerDayCurrent
+	info.SmokedOpiumPerDayCurrent = request.SmokedOpiumPerDayCurrent
+	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
+	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
+	info.PastSmoking = request.PastSmoking
+	info.LeaveSmoke = request.LeaveSmoke
+	info.SmokingStartAgePast = request.SmokingStartAgePast
+	info.SmokingTypesPast = request.SmokingTypesPast
+	info.CigarettesPerDayPast = request.CigarettesPerDayPast
+	info.CigarPerDayPast = request.CigarPerDayPast
+	info.ECigPerDayPast = request.ECigPerDayPast
+	info.PipePerDayPast = request.PipePerDayPast
+	info.ChapoghPerDayPast = request.ChapoghPerDayPast
+	info.SmokedOpiumPerDayPast = request.SmokedOpiumPerDayPast
+	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
+	info.HookahPerWeekPast = request.HookahPerWeekPast
+	info.SecondhandSmoke = request.SecondhandSmoke
+	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	info.LungDiseaseHistory = request.LungDiseaseHistory
+
+	if info.ID == 0 {
+		err = formService.formRepository.CreateNavidInfo(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateNavidInfo(formService.db, info)
+	}
+	if err != nil {
+		return err
+	}
+
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:            request.FormID,
+				LungCancerCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.LungCancerCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات فرم نوید")
+	}
+
+	return nil
+}
+
 func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatusRequest) (formdto.ChangeFormStatusResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
@@ -1820,6 +1954,80 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 	}
 
 	return formdto.GetLungCancerResponse{
+		ID:                           info.ID,
+		InsuranceStatus:              info.InsuranceStatus,
+		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
+		SupplementaryInsurances:      info.SupplementaryInsurances,
+		Hypertension:                 info.Hypertension,
+		HypertensionTreatment:        info.HypertensionTreatment,
+		HeartDisease:                 info.HeartDisease,
+		HeartDiseaseTreatment:        info.HeartDiseaseTreatment,
+		Diabetes:                     info.Diabetes,
+		DiabetesTreatment:            info.DiabetesTreatment,
+		ChronicLungDisease:           info.ChronicLungDisease,
+		ChronicLungDiseaseType:       info.ChronicLungDiseaseType,
+		LungCancerHistory:            info.LungCancerHistory,
+		OtherCancerHistory:           info.OtherCancerHistory,
+		OtherCancerType:              info.OtherCancerType,
+		LungCancerFamily:             info.LungCancerFamily,
+		LungCancerFamilyRelation:     info.LungCancerFamilyRelation,
+		OtherCancerFamily:            info.OtherCancerFamily,
+		OtherCancerFamilyType:        info.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    info.OtherCancerFamilyRelation,
+		OccupationalExposure:         info.OccupationalExposure,
+		CurrentSmoking:               info.CurrentSmoking,
+		SmokingStartAgeCurrent:       info.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          info.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      info.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           info.CigarPerDayCurrent,
+		ECigPerDayCurrent:            info.ECigPerDayCurrent,
+		PipePerDayCurrent:            info.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         info.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     info.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
+		PastSmoking:                  info.PastSmoking,
+		LeaveSmoke:                   info.LeaveSmoke,
+		SmokingStartAgePast:          info.SmokingStartAgePast,
+		SmokingTypesPast:             info.SmokingTypesPast,
+		CigarettesPerDayPast:         info.CigarettesPerDayPast,
+		CigarPerDayPast:              info.CigarPerDayPast,
+		ECigPerDayPast:               info.ECigPerDayPast,
+		PipePerDayPast:               info.PipePerDayPast,
+		ChapoghPerDayPast:            info.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        info.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        info.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            info.HookahPerWeekPast,
+		SecondhandSmoke:              info.SecondhandSmoke,
+		SecondhandSmokeLocation:      info.SecondhandSmokeLocation,
+		LungDiseaseHistory:           info.LungDiseaseHistory,
+	}, nil
+}
+
+func (formService *FormService) GetNavidForm(request formdto.GetPartialFormRequest) (formdto.GetNavidFormResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetNavidFormResponse{}, notFoundError
+	}
+
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+
+	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetNavidFormResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetNavidFormResponse{}, notFoundError
+	}
+
+	return formdto.GetNavidFormResponse{
 		ID:                           info.ID,
 		InsuranceStatus:              info.InsuranceStatus,
 		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
@@ -2756,6 +2964,154 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	return nil
 }
 
+func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormRequest) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	if err != nil {
+		return err
+	}
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(request.UserID)
+		if err != nil {
+			return err
+		}
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != request.UserID {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		info = &entity.NavidInfo{FormID: request.FormID}
+	}
+
+	info.InsuranceStatus = request.InsuranceStatus
+	info.SupplementaryInsurances = request.SupplementaryInsurances
+	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	if request.Hypertension != nil {
+		info.Hypertension = *request.Hypertension
+	}
+	info.HypertensionTreatment = request.HypertensionTreatment
+	if request.HeartDisease != nil {
+		info.HeartDisease = *request.HeartDisease
+	}
+	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
+	if request.Diabetes != nil {
+		info.Diabetes = *request.Diabetes
+	}
+	info.DiabetesTreatment = request.DiabetesTreatment
+	info.ChronicLungDisease = request.ChronicLungDisease
+	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
+	if request.LungCancerHistory != nil {
+		info.LungCancerHistory = *request.LungCancerHistory
+	}
+	if request.OtherCancerHistory != nil {
+		info.OtherCancerHistory = *request.OtherCancerHistory
+	}
+	if request.OtherCancerType != nil {
+		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
+	}
+	info.LungCancerFamily = request.LungCancerFamily
+	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
+	info.OtherCancerFamily = request.OtherCancerFamily
+	if request.OtherCancerFamilyType != nil {
+		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
+	}
+	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
+	info.OccupationalExposure = request.OccupationalExposure
+	if request.CurrentSmoking != nil {
+		info.CurrentSmoking = *request.CurrentSmoking
+	}
+	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
+	info.SmokingTypesCurrent = request.SmokingTypesCurrent
+	info.CigarettesPerDayCurrent = request.CigarettesPerDayCurrent
+	info.CigarPerDayCurrent = request.CigarPerDayCurrent
+	info.ECigPerDayCurrent = request.ECigPerDayCurrent
+	info.PipePerDayCurrent = request.PipePerDayCurrent
+	info.ChapoghPerDayCurrent = request.ChapoghPerDayCurrent
+	info.SmokedOpiumPerDayCurrent = request.SmokedOpiumPerDayCurrent
+	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
+	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
+	info.PastSmoking = request.PastSmoking
+	info.LeaveSmoke = request.LeaveSmoke
+	info.SmokingStartAgePast = request.SmokingStartAgePast
+	info.SmokingTypesPast = request.SmokingTypesPast
+	info.CigarettesPerDayPast = request.CigarettesPerDayPast
+	info.CigarPerDayPast = request.CigarPerDayPast
+	info.ECigPerDayPast = request.ECigPerDayPast
+	info.PipePerDayPast = request.PipePerDayPast
+	info.ChapoghPerDayPast = request.ChapoghPerDayPast
+	info.SmokedOpiumPerDayPast = request.SmokedOpiumPerDayPast
+	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
+	info.HookahPerWeekPast = request.HookahPerWeekPast
+	if request.SecondhandSmoke != nil {
+		info.SecondhandSmoke = *request.SecondhandSmoke
+	}
+	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
+	info.LungDiseaseHistory = request.LungDiseaseHistory
+
+	if info.ID == 0 {
+		err = formService.formRepository.CreateNavidInfo(formService.db, info)
+	} else {
+		err = formService.formRepository.UpdateNavidInfo(formService.db, info)
+	}
+	if err != nil {
+		return err
+	}
+
+	// Handle attention question answer
+	if request.AttentionCorrect != nil {
+		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+		if err != nil {
+			return err
+		}
+
+		if attentionQ == nil {
+			attentionQ = &entity.AttentionQuestions{
+				FormID:            request.FormID,
+				LungCancerCorrect: request.AttentionCorrect,
+			}
+			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
+		} else {
+			attentionQ.LungCancerCorrect = request.AttentionCorrect
+			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	// Log operator action if performed by operator
+	if isOp {
+		formService.logOperatorFormUpdate(request.UserID, request.FormID, "اطلاعات فرم نوید")
+	}
+
+	return nil
+}
+
 func (formService *FormService) AssignOperator(request formdto.AssignOperatorRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
@@ -2909,6 +3265,18 @@ func (formService *FormService) GetAllLifeStatuses() ([]generaldto.EnumResponse,
 
 func (formService *FormService) GetAllRelativeTypes() ([]generaldto.EnumResponse, error) {
 	statuses := enum.GetAllRelatives()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}
+
+func (formService *FormService) GetAllFormTypes() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllFormTypes()
 	response := make([]generaldto.EnumResponse, len(statuses))
 	for i, status := range statuses {
 		response[i] = generaldto.EnumResponse{

@@ -39,6 +39,7 @@ type CreateBasicFormRequest struct {
 	IsAtba               bool
 	Height               float64
 	Weight               float64
+	FormType             *enum.FormType
 }
 
 type UpdateBasicFormRequest struct {
@@ -233,6 +234,61 @@ type UpsertContactRequest struct {
 	Phone3                *string
 }
 
+type UpsertNavidFormRequest struct {
+	UserID uint
+	FormID uint
+
+	InsuranceStatus              *string
+	SupplementaryInsurances      *string
+	SupplementaryInsuranceStatus *bool
+	Hypertension                 bool
+	HypertensionTreatment        *bool
+	HeartDisease                 bool
+	HeartDiseaseTreatment        *bool
+	Diabetes                     bool
+	DiabetesTreatment            *bool
+	ChronicLungDisease           *bool
+	ChronicLungDiseaseType       *string
+	LungCancerHistory            bool
+	OtherCancerHistory           bool
+	OtherCancerType              *uint
+	LungCancerFamily             *bool
+	LungCancerFamilyRelation     *string
+	OtherCancerFamily            *bool
+	OtherCancerFamilyType        *uint
+	OtherCancerFamilyRelation    *string
+	OccupationalExposure         *string
+	CurrentSmoking               bool
+	SmokingStartAgeCurrent       *uint
+	SmokingTypesCurrent          *string
+	CigarettesPerDayCurrent      *uint
+	CigarPerDayCurrent           *uint
+	ECigPerDayCurrent            *uint
+	PipePerDayCurrent            *uint
+	ChapoghPerDayCurrent         *uint
+	SmokedOpiumPerDayCurrent     *uint
+	ChewedOpiumPerDayCurrent     *uint
+	HookahPerWeekCurrent         *uint
+	PastSmoking                  *string
+	LeaveSmoke                   *uint
+	SmokingStartAgePast          *uint
+	SmokingTypesPast             *string
+	CigarettesPerDayPast         *uint
+	CigarPerDayPast              *uint
+	ECigPerDayPast               *uint
+	PipePerDayPast               *uint
+	ChapoghPerDayPast            *uint
+	SmokedOpiumPerDayPast        *uint
+	ChewedOpiumPerDayPast        *uint
+	HookahPerWeekPast            *uint
+	SecondhandSmoke              bool
+	SecondhandSmokeLocation      *string
+	LungDiseaseHistory           *string
+
+	// Attention question answer
+	AttentionCorrect *bool
+}
+
 type UpsertLungCancerRequest struct {
 	UserID uint
 	FormID uint
@@ -390,6 +446,60 @@ type UpdateContactRequest struct {
 	Phone3                *string
 }
 type UpdateLungCancerRequest struct {
+	UserID uint
+	FormID uint
+
+	InsuranceStatus              *string
+	SupplementaryInsuranceStatus *bool
+	SupplementaryInsurances      *string
+	Hypertension                 *bool
+	HypertensionTreatment        *bool
+	HeartDisease                 *bool
+	HeartDiseaseTreatment        *bool
+	Diabetes                     *bool
+	DiabetesTreatment            *bool
+	ChronicLungDisease           *bool
+	ChronicLungDiseaseType       *string
+	LungCancerHistory            *bool
+	OtherCancerHistory           *bool
+	OtherCancerType              *uint
+	LungCancerFamily             *bool
+	LungCancerFamilyRelation     *string
+	OtherCancerFamily            *bool
+	OtherCancerFamilyType        *uint
+	OtherCancerFamilyRelation    *string
+	OccupationalExposure         *string
+	CurrentSmoking               *bool
+	SmokingStartAgeCurrent       *uint
+	SmokingTypesCurrent          *string
+	CigarettesPerDayCurrent      *uint
+	CigarPerDayCurrent           *uint
+	ECigPerDayCurrent            *uint
+	PipePerDayCurrent            *uint
+	ChapoghPerDayCurrent         *uint
+	SmokedOpiumPerDayCurrent     *uint
+	ChewedOpiumPerDayCurrent     *uint
+	HookahPerWeekCurrent         *uint
+	PastSmoking                  *string
+	LeaveSmoke                   *uint
+	SmokingStartAgePast          *uint
+	SmokingTypesPast             *string
+	CigarettesPerDayPast         *uint
+	CigarPerDayPast              *uint
+	ECigPerDayPast               *uint
+	PipePerDayPast               *uint
+	ChapoghPerDayPast            *uint
+	SmokedOpiumPerDayPast        *uint
+	ChewedOpiumPerDayPast        *uint
+	HookahPerWeekPast            *uint
+	SecondhandSmoke              *bool
+	SecondhandSmokeLocation      *string
+	LungDiseaseHistory           *string
+
+	// Attention question answer
+	AttentionCorrect *bool
+}
+type UpdateNavidFormRequest struct {
 	UserID uint
 	FormID uint
 

@@ -2072,6 +2072,8 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
+		SmokePastAvg:                 info.SmokePastAvg,
+		SmokeCurrentAvg:              info.SmokeCurrentAvg,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,

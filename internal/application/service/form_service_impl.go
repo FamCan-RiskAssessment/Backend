@@ -304,10 +304,16 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		}
 	}
 
+	FormType := enum.Bahar
+	if request.FormType != nil {
+		FormType = *request.FormType
+	}
+
 	form := &entity.Form{
 		UserID:             request.UserID,
 		Status:             enum.FormStatusPending,
 		FilledByOperatorID: request.FilledByOperatorID,
+		FormType:           FormType,
 	}
 
 	if err = formService.formRepository.CreateForm(formService.db, form); err != nil {
@@ -343,6 +349,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	response := formdto.BasicFormResponse{
 		FormID:                    form.ID,
 		Status:                    form.Status.String(),
+		FormType:                  FormType,
 		UserID:                    form.UserID,
 		FilledByOperatorID:        form.FilledByOperatorID,
 		SocialSecurityNumber:      basic.SocialSecurityNumber,
@@ -1608,6 +1615,7 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	response := formdto.ChangeFormStatusResponse{
 		Form: formdto.BasicFormResponse{
 			FormID:     form.ID,
+			FormType:   form.FormType,
 			Status:     form.Status.String(),
 			OperatorID: form.OperatorID,
 			UserID:     form.UserID,
@@ -1644,6 +1652,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
+		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
 		BirthDate:            basic.BirthDate,
 		IsAtba:               basic.IsAtba,
@@ -2125,6 +2134,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
+			FormType:                  form.FormType,
 			Name:                      Name,
 			SocialSecurityNumber:      SocialSecurityNumber,
 			Status:                    form.Status.String(),
@@ -2262,6 +2272,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
+			FormType:                  form.FormType,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,
@@ -2314,6 +2325,7 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
+			FormType:                  form.FormType,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,

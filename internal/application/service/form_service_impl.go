@@ -2112,9 +2112,15 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		return nil, 0, nil
 	}
 
-	var SocialSecurityNumber string
-	var Name *string
-	for i := 0; i <= len(forms)-1; i++ {
+	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	formResponses := make([]formdto.BasicFormResponse, len(forms))
+	for i, form := range forms {
+		var SocialSecurityNumber string
+		var Name *string
 		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
 		if err != nil {
 			return nil, 0, err
@@ -2127,15 +2133,6 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		} else if contactInfo != nil {
 			Name = &contactInfo.Name
 		}
-	}
-
-	count, err := formService.formRepository.CountFormsByUserID(formService.db, request.UserID)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	formResponses := make([]formdto.BasicFormResponse, len(forms))
-	for i, form := range forms {
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,

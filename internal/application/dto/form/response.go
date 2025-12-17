@@ -7,13 +7,14 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID               uint    `json:"id"`
-	Status               string  `json:"status"`
-	UserID               uint    `json:"user_id"`
-	OperatorID           *uint   `json:"operatorId,omitempty"`
-	FilledByOperatorID   *uint   `json:"filledByOperatorId,omitempty"`
-	SocialSecurityNumber string  `json:"socialSecurityNumber"`
-	Name                 *string `json:"name,omitempty"`
+	FormID               uint          `json:"id"`
+	Status               string        `json:"status"`
+	FormType             enum.FormType `json:"formType"`
+	UserID               uint          `json:"user_id"`
+	OperatorID           *uint         `json:"operatorId,omitempty"`
+	FilledByOperatorID   *uint         `json:"filledByOperatorId,omitempty"`
+	SocialSecurityNumber string        `json:"socialSecurityNumber"`
+	Name                 *string       `json:"name,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -98,13 +99,14 @@ type UpsertNavidFormResponse struct {
 }
 
 type GetBasicFormResponse struct {
-	ID                   uint        `json:"id"`
-	Gender               enum.Gender `json:"gender"`
-	BirthDate            time.Time   `json:"birthDate"`
-	IsAtba               bool        `json:"isAtba"`
-	SocialSecurityNumber string      `json:"socialSecurityNumber"`
-	Height               float64     `json:"height"`
-	Weight               float64     `json:"weight"`
+	ID                   uint          `json:"id"`
+	FormType             enum.FormType `json:"formType"`
+	Gender               enum.Gender   `json:"gender"`
+	BirthDate            time.Time     `json:"birthDate"`
+	IsAtba               bool          `json:"isAtba"`
+	SocialSecurityNumber string        `json:"socialSecurityNumber"`
+	Height               float64       `json:"height"`
+	Weight               float64       `json:"weight"`
 }
 
 type GetGeneralHealthResponse struct {

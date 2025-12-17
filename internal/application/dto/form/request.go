@@ -241,11 +241,11 @@ type UpsertNavidFormRequest struct {
 	InsuranceStatus              *string
 	SupplementaryInsurances      *string
 	SupplementaryInsuranceStatus *bool
-	Hypertension                 bool
+	Hypertension                 string
 	HypertensionTreatment        *bool
-	HeartDisease                 bool
+	HeartDisease                 string
 	HeartDiseaseTreatment        *bool
-	Diabetes                     bool
+	Diabetes                     string
 	DiabetesTreatment            *bool
 	ChronicLungDisease           *bool
 	ChronicLungDiseaseType       *string
@@ -270,6 +270,8 @@ type UpsertNavidFormRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -506,11 +508,11 @@ type UpdateNavidFormRequest struct {
 	InsuranceStatus              *string
 	SupplementaryInsuranceStatus *bool
 	SupplementaryInsurances      *string
-	Hypertension                 *bool
+	Hypertension                 *string
 	HypertensionTreatment        *bool
-	HeartDisease                 *bool
+	HeartDisease                 *string
 	HeartDiseaseTreatment        *bool
-	Diabetes                     *bool
+	Diabetes                     *string
 	DiabetesTreatment            *bool
 	ChronicLungDisease           *bool
 	ChronicLungDiseaseType       *string
@@ -535,6 +537,8 @@ type UpdateNavidFormRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string

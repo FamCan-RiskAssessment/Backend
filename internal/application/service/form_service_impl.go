@@ -1537,6 +1537,8 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3068,6 +3070,8 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast

@@ -268,11 +268,11 @@ type GetNavidFormResponse struct {
 	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
 	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
 	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
-	Hypertension                 bool             `json:"hypertension"`
+	Hypertension                 string           `json:"hypertension"`
 	HypertensionTreatment        *bool            `json:"hypertensionTreatment,omitempty"`
-	HeartDisease                 bool             `json:"heartDisease"`
+	HeartDisease                 string           `json:"heartDisease"`
 	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment,omitempty"`
-	Diabetes                     bool             `json:"diabetes"`
+	Diabetes                     string           `json:"diabetes"`
 	DiabetesTreatment            *bool            `json:"diabetesTreatment,omitempty"`
 	ChronicLungDisease           *bool            `json:"chronicLungDisease,omitempty"`
 	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`

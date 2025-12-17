@@ -200,11 +200,11 @@ type NavidInfo struct {
 	InsuranceStatus              *string `gorm:"type:varchar(127)"`
 	SupplementaryInsuranceStatus *bool   `gorm:"type:boolean"`
 	SupplementaryInsurances      *string `gorm:"type:varchar(50)"`
-	Hypertension                 bool    `gorm:"not null;default:false"`
+	Hypertension                 string  `gorm:"type:varchar(127)"`
 	HypertensionTreatment        *bool   `gorm:"type:boolean"`
-	HeartDisease                 bool    `gorm:"not null;default:false"`
+	HeartDisease                 string  `gorm:"type:varchar(127)"`
 	HeartDiseaseTreatment        *bool   `gorm:"type:boolean"`
-	Diabetes                     bool    `gorm:"not null;default:false"`
+	Diabetes                     string  `gorm:"type:varchar(127)"`
 	DiabetesTreatment            *bool   `gorm:"type:boolean"`
 	ChronicLungDisease           *bool   `gorm:"type:boolean"`
 	ChronicLungDiseaseType       *string `gorm:"type:varchar(50)"`
@@ -229,6 +229,8 @@ type NavidInfo struct {
 	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
 	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	SmokePastAvg                 *uint   `gorm:"type:int"`
+	SmokeCurrentAvg              *uint   `gorm:"type:int"`
 	LeaveSmoke                   *uint   `gorm:"type:int"`
 	SmokingStartAgePast          *uint   `gorm:"type:int"`
 	SmokingTypesPast             *string `gorm:"type:varchar(50)"`

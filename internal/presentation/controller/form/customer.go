@@ -478,11 +478,11 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		InsuranceStatus              *string `json:"insuranceStatus,omitempty"`
 		SupplementaryInsuranceStatus *bool   `json:"takmilBime,omitempty"`
 		SupplementaryInsurances      *string `json:"supplementaryInsurances,omitempty"`
-		Hypertension                 bool    `json:"hypertension"`
+		Hypertension                 string  `json:"hypertension"`
 		HypertensionTreatment        *bool   `json:"hypertensionTreatment,omitempty"`
-		HeartDisease                 bool    `json:"heartDisease"`
+		HeartDisease                 string  `json:"heartDisease"`
 		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment,omitempty"`
-		Diabetes                     bool    `json:"diabetes"`
+		Diabetes                     string  `json:"diabetes"`
 		DiabetesTreatment            *bool   `json:"diabetesTreatment,omitempty"`
 		ChronicLungDisease           *bool   `json:"chronicLungDisease,omitempty"`
 		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType,omitempty"`
@@ -507,6 +507,8 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent,omitempty"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent,omitempty"`
 		PastSmoking                  *string `json:"pastSmoking,omitempty"`
+		SmokePastAvg                 *uint   `json:"smokePastAvg"`
+		SmokeCurrentAvg              *uint   `json:"smokeCurrentAvg"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast,omitempty"`
 		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingTypesPast             *string `json:"smokingTypesPast,omitempty"`
@@ -563,6 +565,8 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
+		SmokePastAvg:                 params.SmokePastAvg,
+		SmokeCurrentAvg:              params.SmokeCurrentAvg,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,

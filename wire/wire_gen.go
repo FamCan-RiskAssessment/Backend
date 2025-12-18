@@ -16,10 +16,12 @@ import (
 	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
@@ -30,6 +32,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/middleware"
 	"github.com/google/wire"
+	"time"
 )
 
 // Injectors from wire.go:
@@ -53,11 +56,15 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	jwtService := service.NewJWTService(keyManager, jwtKeysPath)
 	userRepository := postgres.NewUserRepository()
 	authMiddleware := middleware.NewAuthMiddleware(constants, jwtService, userRepository, postgresDatabase)
+	security := ProvideSecurityConfig(config)
+	rateLimiter := ProvideRateLimiter(redisDatabase, security)
+	rateLimitMiddleware := middleware.NewRateLimitMiddleware(constants, rateLimiter, security)
 	middlewares := &Middlewares{
 		Cors:         corsMiddleware,
 		Recovery:     recoveryMiddleware,
 		Localization: localizationMiddleware,
 		Auth:         authMiddleware,
+		RateLimit:    rateLimitMiddleware,
 	}
 	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
 	smsGateway := ProvideSMSGatewayConfig(config)
@@ -67,14 +74,19 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
 	actionLogRepository := postgres.NewActionLogRepository()
 	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
-	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, asanakSMSService, otpService, actionLogService, postgresDatabase)
+	passwordHasher := crypto.NewPasswordHasher()
+	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, asanakSMSService, otpService, actionLogService, postgresDatabase, passwordHasher)
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	formRepository := postgres.NewFormRepository()
 	s3 := ProvideStorageConfig(config)
 	s3Storage := storage.NewS3Storage(constants, s3)
 	verificationAPI := ProvideVerificationAPIConfig(config)
 	verificationClientImpl := external.NewVerificationClient(verificationAPI)
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl)
+	fieldEncryptor, err := crypto.NewFieldEncryptor(security)
+	if err != nil {
+		return nil, err
+	}
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl, fieldEncryptor)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -131,7 +143,11 @@ var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
 var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
 
-var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, wire.Struct(new(Middlewares), "*"))
+var RateLimitProviderSet = wire.NewSet(middleware.NewRateLimitMiddleware, ProvideRateLimiter)
+
+var CryptoProviderSet = wire.NewSet(crypto.NewPasswordHasher, crypto.NewFieldEncryptor, wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)))
+
+var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, RateLimitProviderSet, wire.Struct(new(Middlewares), "*"))
 
 var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, seed.NewDummySeeder, wire.Struct(new(Seeds), "*"))
 
@@ -183,6 +199,17 @@ func ProvideVerificationAPIConfig(container *bootstrap.Config) *bootstrap.Verifi
 	return &container.Env.VerificationAPI
 }
 
+func ProvideSecurityConfig(container *bootstrap.Config) *bootstrap.Security {
+	return &container.Env.Security
+}
+
+func ProvideRateLimiter(rdb database.Cache, security *bootstrap.Security) *ratelimit.RateLimiter {
+	return ratelimit.NewRateLimiter(
+		rdb.GetRDB(),
+		security.RateLimitPerMinute, time.Duration(security.RateLimitWindow)*time.Second,
+	)
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -193,6 +220,7 @@ var ProviderSet = wire.NewSet(
 	CustomerControllerProviderSet,
 	ControllerProviderSet,
 	AdapterProviderSet,
+	CryptoProviderSet,
 	ProvideDBConfig,
 	ProvideConstants,
 	ProvideRDBConfig,
@@ -205,6 +233,7 @@ var ProviderSet = wire.NewSet(
 	ProvidePagination,
 	ProvideCalcURL,
 	ProvideVerificationAPIConfig,
+	ProvideSecurityConfig,
 	SeedProviderSet,
 )
 
@@ -240,6 +269,7 @@ type Middlewares struct {
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
 	Auth         *middleware.AuthMiddleware
+	RateLimit    *middleware.RateLimitMiddleware
 }
 
 type Seeds struct {

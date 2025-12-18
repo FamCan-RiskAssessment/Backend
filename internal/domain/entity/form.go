@@ -10,10 +10,11 @@ import (
 type Form struct {
 	database.Model
 	Status             enum.FormStatus
-	UserID             uint  `gorm:"not null;index"`
-	User               User  `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	OperatorID         *uint `gorm:"type:int"`
-	FilledByOperatorID *uint `gorm:"type:int;index"`
+	UserID             uint          `gorm:"not null;index"`
+	User               User          `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+	FormType           enum.FormType `gorm:"not null;default:1"`
+	OperatorID         *uint         `gorm:"type:int"`
+	FilledByOperatorID *uint         `gorm:"type:int;index"`
 }
 
 type BasicInfo struct {
@@ -24,7 +25,7 @@ type BasicInfo struct {
 	Gender               enum.Gender `gorm:"not null"`
 	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
-	SocialSecurityNumber string      `gorm:"not null"`
+	SocialSecurityNumber string      `gorm:"type:varchar(500);not null"` // Encrypted, larger size needed
 	Height               float64     `gorm:"type:decimal(5,2);not null"`
 	Weight               float64     `gorm:"type:decimal(5,2);not null"`
 }
@@ -77,7 +78,7 @@ type MamoGraphyInfo struct {
 	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
 	MamoGraphy                   *bool                           `gorm:"type:boolean"`
 	MamoGraphyPicturePaths       []string                        `gorm:"type:jsonb;serializer:json"`
-	BreastDensity                *string                         `gorm:"type:varchar(50)"`
+	BreastDensity                *uint                           `gorm:"type:int"`
 	Falop                        *bool                           `gorm:"type:boolean"`
 	Andometrioz                  *bool                           `gorm:"type:boolean"`
 	LeavePestan                  bool                            `gorm:"not null;default:false"`
@@ -131,7 +132,7 @@ type ContactInfo struct {
 	Province                  *string  `gorm:"type:varchar(50)"`
 	City                      *string  `gorm:"type:varchar(50)"`
 	Country                   *string  `gorm:"type:varchar(50)"`
-	Address                   string   `gorm:"type:text;not null"`
+	Address                   string   `gorm:"type:text;not null"` // Encrypted, text type for variable length
 	PostalCode                string   `gorm:"not null"`
 	Education                 string   `gorm:"type:varchar(127)"`
 	Phone2                    *string  `gorm:"type:varchar(11)"`
@@ -175,6 +176,61 @@ type LungCancerInfo struct {
 	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
 	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	LeaveSmoke                   *uint   `gorm:"type:int"`
+	SmokingStartAgePast          *uint   `gorm:"type:int"`
+	SmokingTypesPast             *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayPast         *uint   `gorm:"type:int"`
+	CigarPerDayPast              *uint   `gorm:"type:int"`
+	ECigPerDayPast               *uint   `gorm:"type:int"`
+	PipePerDayPast               *uint   `gorm:"type:int"`
+	ChapoghPerDayPast            *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayPast        *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayPast        *uint   `gorm:"type:int"`
+	HookahPerWeekPast            *uint   `gorm:"type:int"`
+	SecondhandSmoke              bool    `gorm:"not null;default:false"`
+	SecondhandSmokeLocation      *string `gorm:"type:varchar(50)"`
+	LungDiseaseHistory           *string `gorm:"type:varchar(127)"`
+}
+
+type NavidInfo struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	// page 7
+	InsuranceStatus              *string `gorm:"type:varchar(127)"`
+	SupplementaryInsuranceStatus *bool   `gorm:"type:boolean"`
+	SupplementaryInsurances      *string `gorm:"type:varchar(50)"`
+	Hypertension                 string  `gorm:"type:varchar(127)"`
+	HypertensionTreatment        *bool   `gorm:"type:boolean"`
+	HeartDisease                 string  `gorm:"type:varchar(127)"`
+	HeartDiseaseTreatment        *bool   `gorm:"type:boolean"`
+	Diabetes                     string  `gorm:"type:varchar(127)"`
+	DiabetesTreatment            *bool   `gorm:"type:boolean"`
+	ChronicLungDisease           *bool   `gorm:"type:boolean"`
+	ChronicLungDiseaseType       *string `gorm:"type:varchar(50)"`
+	LungCancerHistory            bool    `gorm:"not null;default:false"`
+	OtherCancerHistory           bool    `gorm:"not null;default:false"`
+	OtherCancerType              *enum.CancerType
+	LungCancerFamily             *bool   `gorm:"type:boolean"`
+	LungCancerFamilyRelation     *string `gorm:"type:varchar(50)"`
+	OtherCancerFamily            *bool   `gorm:"type:boolean"`
+	OtherCancerFamilyType        *enum.CancerType
+	OtherCancerFamilyRelation    *string `gorm:"type:varchar(50)"`
+	OccupationalExposure         *string `gorm:"type:varchar(255)"`
+	CurrentSmoking               bool    `gorm:"not null;default:false"`
+	SmokingStartAgeCurrent       *uint   `gorm:"type:int"`
+	SmokingTypesCurrent          *string `gorm:"type:varchar(50)"`
+	CigarettesPerDayCurrent      *uint   `gorm:"type:int"`
+	CigarPerDayCurrent           *uint   `gorm:"type:int"`
+	ECigPerDayCurrent            *uint   `gorm:"type:int"`
+	PipePerDayCurrent            *uint   `gorm:"type:int"`
+	ChapoghPerDayCurrent         *uint   `gorm:"type:int"`
+	SmokedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
+	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
+	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
+	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	SmokePastAvg                 *uint   `gorm:"type:int"`
+	SmokeCurrentAvg              *uint   `gorm:"type:int"`
 	LeaveSmoke                   *uint   `gorm:"type:int"`
 	SmokingStartAgePast          *uint   `gorm:"type:int"`
 	SmokingTypesPast             *string `gorm:"type:varchar(50)"`

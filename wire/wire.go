@@ -4,6 +4,8 @@
 package wire
 
 import (
+	"time"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
@@ -13,8 +15,10 @@ import (
 	domainRedis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	domainS3 "github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	infraExternal "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
 	infraJWT "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	infraLocalization "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
@@ -97,11 +101,23 @@ var AdapterProviderSet = wire.NewSet(
 	wire.Bind(new(domainExternal.VerificationClient), new(*infraExternal.VerificationClientImpl)),
 )
 
+var RateLimitProviderSet = wire.NewSet(
+	middleware.NewRateLimitMiddleware,
+	ProvideRateLimiter,
+)
+
+var CryptoProviderSet = wire.NewSet(
+	crypto.NewPasswordHasher,
+	crypto.NewFieldEncryptor,
+	wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)),
+)
+
 var MiddlewareProviderSet = wire.NewSet(
 	middleware.NewCorsMiddleware,
 	middleware.NewRecoveryMiddleware,
 	middleware.NewLocalizationMiddleware,
 	middleware.NewAuthMiddleware,
+	RateLimitProviderSet,
 	wire.Struct(new(Middlewares), "*"),
 )
 
@@ -159,6 +175,18 @@ func ProvideVerificationAPIConfig(container *bootstrap.Config) *bootstrap.Verifi
 	return &container.Env.VerificationAPI
 }
 
+func ProvideSecurityConfig(container *bootstrap.Config) *bootstrap.Security {
+	return &container.Env.Security
+}
+
+func ProvideRateLimiter(rdb database.Cache, security *bootstrap.Security) *ratelimit.RateLimiter {
+	return ratelimit.NewRateLimiter(
+		rdb.GetRDB(),
+		security.RateLimitPerMinute,
+		time.Duration(security.RateLimitWindow)*time.Second,
+	)
+}
+
 var ProviderSet = wire.NewSet(
 	DatabaseProviderSet,
 	RepositoryProviderSet,
@@ -169,6 +197,7 @@ var ProviderSet = wire.NewSet(
 	CustomerControllerProviderSet,
 	ControllerProviderSet,
 	AdapterProviderSet,
+	CryptoProviderSet,
 	ProvideDBConfig,
 	ProvideConstants,
 	ProvideRDBConfig,
@@ -181,6 +210,7 @@ var ProviderSet = wire.NewSet(
 	ProvidePagination,
 	ProvideCalcURL,
 	ProvideVerificationAPIConfig,
+	ProvideSecurityConfig,
 	SeedProviderSet,
 )
 
@@ -216,6 +246,7 @@ type Middlewares struct {
 	Recovery     *middleware.RecoveryMiddleware
 	Localization *middleware.LocalizationMiddleware
 	Auth         *middleware.AuthMiddleware
+	RateLimit    *middleware.RateLimitMiddleware
 }
 
 type Seeds struct {

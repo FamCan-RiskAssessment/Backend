@@ -13,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	externalMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/external"
@@ -45,6 +46,12 @@ func (suite *FormServiceTestSuite) SetupTest() {
 	suite.db = databaseMocks.NewDatabaseMock()
 	suite.verificationClient = externalMocks.NewVerificationClientMock()
 
+	// Create field encryptor with test key
+	security := &bootstrap.Security{
+		EncryptionKey: "12345678901234567890123456789012", // 32 characters
+	}
+	fieldEncryptor, _ := crypto.NewFieldEncryptor(security)
+
 	suite.formService = NewFormService(
 		suite.constants,
 		suite.formRepository,
@@ -53,6 +60,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		suite.s3Storage,
 		suite.db,
 		suite.verificationClient,
+		fieldEncryptor,
 	)
 }
 
@@ -60,7 +68,8 @@ func (suite *FormServiceTestSuite) SetupTest() {
 func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	// Arrange
 	userID := uint(1)
-	birthDate, _ := time.Parse("2006-01-02", "1990-01-01")
+	var birthDate formdto.BirthDate
+	birthDate.UnmarshalJSON([]byte("1358-01-01"))
 	request := formdto.CreateBasicFormRequest{
 		UserID:               userID,
 		Gender:               1,
@@ -158,7 +167,8 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 	// Arrange
 	userID := uint(1)
 	operatorID := uint(2)
-	birthDate, _ := time.Parse("2006-01-02", "1990-01-01")
+	var birthDate formdto.BirthDate
+	birthDate.UnmarshalJSON([]byte("1358-01-01"))
 	request := formdto.CreateBasicFormRequest{
 		UserID:             userID,
 		FilledByOperatorID: &operatorID,

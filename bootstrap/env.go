@@ -8,16 +8,17 @@ import (
 )
 
 type Env struct {
-	Server            Server
-	Database          Database
-	Cache             Redis
-	SMSGateway        SMSGateway
-	Pagination        Pagination
-	OTP               OTP
-	SuperAdmin        SuperAdmin
-	S3                S3
-	CalcURL           CalcURL
-	VerificationAPI   VerificationAPI
+	Server          Server
+	Database        Database
+	Cache           Redis
+	SMSGateway      SMSGateway
+	Pagination      Pagination
+	OTP             OTP
+	SuperAdmin      SuperAdmin
+	S3              S3
+	CalcURL         CalcURL
+	VerificationAPI VerificationAPI
+	Security        Security
 }
 
 type Server struct {
@@ -91,6 +92,12 @@ type VerificationAPI struct {
 	APIKey  string
 }
 
+type Security struct {
+	EncryptionKey      string
+	RateLimitPerMinute int
+	RateLimitWindow    int
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -153,6 +160,11 @@ func NewEnv() *Env {
 		VerificationAPI: VerificationAPI{
 			BaseURL: os.Getenv("VERIFICATION_API_URL"),
 			APIKey:  os.Getenv("VERIFICATION_API_KEY"),
+		},
+		Security: Security{
+			EncryptionKey:      os.Getenv("ENCRYPTION_KEY"),
+			RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", 5),
+			RateLimitWindow:    getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 1),
 		},
 	}
 }

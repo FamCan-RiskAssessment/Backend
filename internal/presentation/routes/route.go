@@ -8,9 +8,10 @@ import (
 
 func Run(ginEngine *gin.Engine, app *wire.Application) {
 	ginEngine.Use(gin.Logger())
-	ginEngine.Use(app.Middlewares.Cors.CORS())
-	ginEngine.Use(app.Middlewares.Localization.Localization)
 	ginEngine.Use(app.Middlewares.Recovery.Recovery)
+	ginEngine.Use(app.Middlewares.Localization.Localization)
+	ginEngine.Use(app.Middlewares.Cors.CORS())
+	ginEngine.Use(app.Middlewares.RateLimit.RateLimit())
 	registerGeneralRoutes(ginEngine.Group("/"), app)
 	registerAdminRoutes(ginEngine.Group("/admin"), app)
 	registerCustomerRoutes(ginEngine.Group("/"), app)

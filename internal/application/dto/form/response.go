@@ -7,13 +7,14 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID               uint    `json:"id"`
-	Status               string  `json:"status"`
-	UserID               uint    `json:"user_id"`
-	OperatorID           *uint   `json:"operatorId,omitempty"`
-	FilledByOperatorID   *uint   `json:"filledByOperatorId,omitempty"`
-	SocialSecurityNumber string  `json:"socialSecurityNumber"`
-	Name                 *string `json:"name,omitempty"`
+	FormID               uint          `json:"id"`
+	Status               string        `json:"status"`
+	FormType             enum.FormType `json:"formType"`
+	UserID               uint          `json:"user_id"`
+	OperatorID           *uint         `json:"operatorId,omitempty"`
+	FilledByOperatorID   *uint         `json:"filledByOperatorId,omitempty"`
+	SocialSecurityNumber string        `json:"socialSecurityNumber"`
+	Name                 *string       `json:"name,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -93,14 +94,19 @@ type UpsertLungCancerResponse struct {
 	Form BasicFormResponse `json:"form"`
 }
 
+type UpsertNavidFormResponse struct {
+	Form BasicFormResponse `json:"form"`
+}
+
 type GetBasicFormResponse struct {
-	ID                   uint        `json:"id"`
-	Gender               enum.Gender `json:"gender"`
-	BirthDate            time.Time   `json:"birthDate"`
-	IsAtba               bool        `json:"isAtba"`
-	SocialSecurityNumber string      `json:"socialSecurityNumber"`
-	Height               float64     `json:"height"`
-	Weight               float64     `json:"weight"`
+	ID                   uint          `json:"id"`
+	FormType             enum.FormType `json:"formType"`
+	Gender               enum.Gender   `json:"gender"`
+	BirthDate            BirthDate     `json:"birthDate"`
+	IsAtba               bool          `json:"isAtba"`
+	SocialSecurityNumber string        `json:"socialSecurityNumber"`
+	Height               float64       `json:"height"`
+	Weight               float64       `json:"weight"`
 }
 
 type GetGeneralHealthResponse struct {
@@ -169,7 +175,7 @@ type GetMamographyResponse struct {
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
 	MamoGraphyPictures           []string              `json:"mamoGraphyPictures,omitempty"`
-	BreastDensity                *string               `json:"breastDensity,omitempty"`
+	BreastDensity                uint                  `json:"breastDensity"`
 	Falop                        *bool                 `json:"falop,omitempty"`
 	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
 	LeavePestan                  bool                  `json:"leavePestan"`
@@ -269,4 +275,56 @@ type PostalCodeInfoResponse struct {
 	SideFloor    *string `json:"sideFloor,omitempty"`
 	BuildingName *string `json:"buildingName,omitempty"`
 	Description  *string `json:"description,omitempty"`
+}
+
+type GetNavidFormResponse struct {
+	ID                           uint             `json:"id"`
+	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
+	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
+	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
+	Hypertension                 string           `json:"hypertension"`
+	HypertensionTreatment        *bool            `json:"hypertensionTreatment,omitempty"`
+	HeartDisease                 string           `json:"heartDisease"`
+	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment,omitempty"`
+	Diabetes                     string           `json:"diabetes"`
+	DiabetesTreatment            *bool            `json:"diabetesTreatment,omitempty"`
+	ChronicLungDisease           *bool            `json:"chronicLungDisease,omitempty"`
+	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`
+	LungCancerHistory            bool             `json:"lungCancerHistory"`
+	OtherCancerHistory           bool             `json:"otherCancerHistory"`
+	OtherCancerType              *enum.CancerType `json:"otherCancerType,omitempty"`
+	LungCancerFamily             *bool            `json:"lungCancerFamily,omitempty"`
+	LungCancerFamilyRelation     *string          `json:"lungCancerFamilyRelation,omitempty"`
+	OtherCancerFamily            *bool            `json:"otherCancerFamily,omitempty"`
+	OtherCancerFamilyType        *enum.CancerType `json:"otherCancerFamilyType,omitempty"`
+	OtherCancerFamilyRelation    *string          `json:"otherCancerFamilyRelation,omitempty"`
+	OccupationalExposure         *string          `json:"occupationalExposure,omitempty"`
+	CurrentSmoking               bool             `json:"currentSmoking"`
+	SmokingStartAgeCurrent       *uint            `json:"smokingStartAgeCurrent,omitempty"`
+	SmokingTypesCurrent          *string          `json:"smokingTypesCurrent,omitempty"`
+	CigarettesPerDayCurrent      *uint            `json:"cigarettesPerDayCurrent,omitempty"`
+	CigarPerDayCurrent           *uint            `json:"cigarPerDayCurrent,omitempty"`
+	ECigPerDayCurrent            *uint            `json:"eCigPerDayCurrent,omitempty"`
+	PipePerDayCurrent            *uint            `json:"pipePerDayCurrent,omitempty"`
+	ChapoghPerDayCurrent         *uint            `json:"chapoghPerDayCurrent,omitempty"`
+	SmokedOpiumPerDayCurrent     *uint            `json:"smokedOpiumPerDayCurrent,omitempty"`
+	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
+	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
+	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	SmokePastAvg                 *uint            `json:"smokePastAvg,omitempty"`
+	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg,omitempty"`
+	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
+	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
+	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
+	CigarettesPerDayPast         *uint            `json:"cigarettesPerDayPast,omitempty"`
+	CigarPerDayPast              *uint            `json:"cigarPerDayPast,omitempty"`
+	ECigPerDayPast               *uint            `json:"eCigPerDayPast,omitempty"`
+	PipePerDayPast               *uint            `json:"pipePerDayPast,omitempty"`
+	ChapoghPerDayPast            *uint            `json:"chapoghPerDayPast,omitempty"`
+	SmokedOpiumPerDayPast        *uint            `json:"smokedOpiumPerDayPast,omitempty"`
+	ChewedOpiumPerDayPast        *uint            `json:"chewedOpiumPerDayPast,omitempty"`
+	HookahPerWeekPast            *uint            `json:"hookahPerWeekPast,omitempty"`
+	SecondhandSmoke              bool             `json:"secondhandSmoke"`
+	SecondhandSmokeLocation      *string          `json:"secondhandSmokeLocation,omitempty"`
+	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
 }

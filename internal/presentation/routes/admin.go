@@ -72,12 +72,18 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			operatorFormGroup.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			operatorFormGroup.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
 
+			// navid form
+			operatorFormGroup.PATCH("/navid", app.Controllers.Admin.FormController.UpdateNavidForm)
+
 			operatorFormGroup.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			operatorFormGroup.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			operatorFormGroup.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
 			operatorFormGroup.GET("/familycancer", app.Controllers.Admin.FormController.GetFamilyCancer)
 			operatorFormGroup.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			operatorFormGroup.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
+
+			// navid form
+			operatorFormGroup.GET("/navid", app.Controllers.Admin.FormController.GetNavidForm)
 
 			// Single cancer operations (more specific routes first)
 			operatorFormGroup.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateCancer)
@@ -122,11 +128,17 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formManagement.PATCH("/contact", app.Controllers.Admin.FormController.UpdateContact)
 			formManagement.PATCH("/lungcancer", app.Controllers.Admin.FormController.UpdateLungCancer)
 
+			// navid form
+			formManagement.PATCH("/navid", app.Controllers.Admin.FormController.UpdateNavidForm)
+
 			formManagement.GET("/basic", app.Controllers.Admin.FormController.GetBasicForm)
 			formManagement.GET("/generalhealth", app.Controllers.Admin.FormController.GetGeneralHealth)
 			formManagement.GET("/mamography", app.Controllers.Admin.FormController.GetMamography)
 			formManagement.GET("/contact", app.Controllers.Admin.FormController.GetContact)
 			formManagement.GET("/lungcancer", app.Controllers.Admin.FormController.GetLungCancer)
+
+			// navid form
+			formManagement.GET("/navid", app.Controllers.Admin.FormController.GetNavidForm)
 
 			// Single cancer operations (more specific routes first)
 			formManagement.PATCH("/cancer/:cancerID", app.Controllers.Admin.FormController.UpdateCancer)

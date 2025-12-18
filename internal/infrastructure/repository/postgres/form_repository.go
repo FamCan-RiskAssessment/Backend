@@ -164,6 +164,9 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 		return query
 	}
 
+	if filters.FormType != nil {
+		query = query.Where("form_type = ?", *filters.FormType)
+	}
 	if filters.Status != nil {
 		query = query.Where("status = ?", *filters.Status)
 	}
@@ -194,6 +197,9 @@ func ApplyOperatorFormFilters(query *gorm.DB, filters *postgres.OperatorFormFilt
 	}
 
 	query = query.Where("operator_id = ?", filters.OperatorID)
+	if filters.FormType != nil {
+		query = query.Where("form_type = ?", *filters.FormType)
+	}
 	if filters.Status != nil {
 		query = query.Where("status = ?", *filters.Status)
 	}

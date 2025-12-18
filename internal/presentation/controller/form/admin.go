@@ -2,7 +2,6 @@ package form
 
 import (
 	"mime/multipart"
-	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -37,15 +36,16 @@ func NewAdminFormController(
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	type GetAllFormsParams struct {
-		Page               int     `form:"page"`
-		PageSize           int     `form:"pageSize"`
-		Status             *uint   `form:"status"`
-		Gender             *string `form:"gender"`
-		BirthYear          *uint   `form:"birthYear"`
-		DrinksAlcohol      *bool   `form:"drinksAlcohol"`
-		SmokingNow         *bool   `form:"smokingNow"`
-		Cancer             *bool   `form:"cancer"`
-		FilledByOperatorID *uint   `form:"filledByOperatorID"`
+		Page               int            `form:"page"`
+		PageSize           int            `form:"pageSize"`
+		FormType           *enum.FormType `form:"formType"`
+		Status             *uint          `form:"status"`
+		Gender             *string        `form:"gender"`
+		BirthYear          *uint          `form:"birthYear"`
+		DrinksAlcohol      *bool          `form:"drinksAlcohol"`
+		SmokingNow         *bool          `form:"smokingNow"`
+		Cancer             *bool          `form:"cancer"`
+		FilledByOperatorID *uint          `form:"filledByOperatorID"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
@@ -53,6 +53,7 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 
 	filters := &postgres.FormFilters{
 		Status:             params.Status,
+		FormType:           params.FormType,
 		Gender:             params.Gender,
 		BirthYear:          params.BirthYear,
 		DrinksAlcohol:      params.DrinksAlcohol,
@@ -73,14 +74,15 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 
 func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context) {
 	type GetAllOperatorFormsParams struct {
-		Page          int     `form:"page"`
-		PageSize      int     `form:"pageSize"`
-		Status        *uint   `form:"status"`
-		Gender        *string `form:"gender"`
-		BirthYear     *uint   `form:"birthYear"`
-		DrinksAlcohol *bool   `form:"drinksAlcohol"`
-		SmokingNow    *bool   `form:"smokingNow"`
-		Cancer        *bool   `form:"cancer"`
+		Page          int            `form:"page"`
+		PageSize      int            `form:"pageSize"`
+		FormType      *enum.FormType `form:"formType"`
+		Status        *uint          `form:"status"`
+		Gender        *string        `form:"gender"`
+		BirthYear     *uint          `form:"birthYear"`
+		DrinksAlcohol *bool          `form:"drinksAlcohol"`
+		SmokingNow    *bool          `form:"smokingNow"`
+		Cancer        *bool          `form:"cancer"`
 	}
 
 	params := controller.Validate[GetAllOperatorFormsParams](ctx)
@@ -91,6 +93,7 @@ func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context)
 	filters := &postgres.OperatorFormFilters{
 		OperatorID:    userID.(uint),
 		Status:        params.Status,
+		FormType:      params.FormType,
 		Gender:        params.Gender,
 		BirthYear:     params.BirthYear,
 		DrinksAlcohol: params.DrinksAlcohol,
@@ -205,7 +208,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		BirthDate:            (*time.Time)(params.BirthDate),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
@@ -1113,7 +1116,7 @@ func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	request := formdto.CreateBasicFormRequest{
 		UserID:               params.UserID,
 		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
-		BirthDate:            params.BirthDate.Time(),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,

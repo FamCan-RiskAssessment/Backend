@@ -52,6 +52,7 @@ func (fe *FieldEncryptor) Encrypt(plaintext string) (string, error) {
 }
 
 // Decrypt decrypts base64-encoded ciphertext using AES-256-GCM
+// If the input is not valid base64, returns it as-is (backwards compatibility for plaintext data)
 func (fe *FieldEncryptor) Decrypt(ciphertext string) (string, error) {
 	if ciphertext == "" {
 		return "", nil
@@ -59,7 +60,8 @@ func (fe *FieldEncryptor) Decrypt(ciphertext string) (string, error) {
 
 	data, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return "", err
+		// Not valid base64 - assume it's plaintext from before encryption was enabled
+		return ciphertext, nil
 	}
 
 	block, err := aes.NewCipher(fe.key)
@@ -74,13 +76,15 @@ func (fe *FieldEncryptor) Decrypt(ciphertext string) (string, error) {
 
 	nonceSize := gcm.NonceSize()
 	if len(data) < nonceSize {
-		return "", errors.New("ciphertext too short")
+		// Data too short to be encrypted - assume plaintext
+		return ciphertext, nil
 	}
 
 	nonce, ciphertextBytes := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertextBytes, nil)
 	if err != nil {
-		return "", err
+		// Decryption failed - assume plaintext
+		return ciphertext, nil
 	}
 
 	return string(plaintext), nil

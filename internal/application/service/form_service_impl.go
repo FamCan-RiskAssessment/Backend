@@ -1222,7 +1222,14 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Province = request.Province
 	info.City = request.City
 	info.Country = request.Country
-	info.Address = request.Address
+
+	// Encrypt Address before storing
+	encryptedAddress, err := formService.fieldEncryptor.Encrypt(request.Address)
+	if err != nil {
+		return err
+	}
+	info.Address = encryptedAddress
+
 	info.PostalCode = request.PostalCode
 	info.Education = request.Education
 	if request.Phone2 != nil && len(*request.Phone2) != 11 {

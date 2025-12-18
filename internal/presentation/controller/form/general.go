@@ -73,3 +73,11 @@ func (fc *GeneralFormController) GetAllRelativeTypes(ctx *gin.Context) {
 	}
 	controller.Response(ctx, 200, "", statuses)
 }
+
+func (fc *GeneralFormController) GetAllFormTypes(ctx *gin.Context) {
+	statuses, err := fc.formService.GetAllFormTypes()
+	if err != nil {
+		panic(err)
+	}
+	controller.Response(ctx, 200, "", statuses)
+}

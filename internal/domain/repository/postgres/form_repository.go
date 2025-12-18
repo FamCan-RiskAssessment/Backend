@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type FormFilters struct {
+	FormType           *enum.FormType
 	Status             *uint
 	Gender             *string
 	BirthYear          *uint
@@ -17,6 +19,7 @@ type FormFilters struct {
 
 type OperatorFormFilters struct {
 	OperatorID    uint
+	FormType      *enum.FormType
 	Status        *uint
 	Gender        *string
 	BirthYear     *uint
@@ -69,6 +72,10 @@ type FormRepository interface {
 	FindLungCancerByFormID(db database.Database, formID uint) (*entity.LungCancerInfo, error)
 	CreateLungCancer(db database.Database, info *entity.LungCancerInfo) error
 	UpdateLungCancer(db database.Database, info *entity.LungCancerInfo) error
+
+	FindNavidInfoByFormID(db database.Database, formID uint) (*entity.NavidInfo, error)
+	CreateNavidInfo(db database.Database, info *entity.NavidInfo) error
+	UpdateNavidInfo(db database.Database, info *entity.NavidInfo) error
 
 	FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error)
 	CreatePremm5Result(db database.Database, result *entity.Premm5Result) error

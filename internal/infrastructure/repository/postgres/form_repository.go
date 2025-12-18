@@ -164,6 +164,9 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 		return query
 	}
 
+	if filters.FormType != nil {
+		query = query.Where("form_type = ?", *filters.FormType)
+	}
 	if filters.Status != nil {
 		query = query.Where("status = ?", *filters.Status)
 	}
@@ -194,6 +197,9 @@ func ApplyOperatorFormFilters(query *gorm.DB, filters *postgres.OperatorFormFilt
 	}
 
 	query = query.Where("operator_id = ?", filters.OperatorID)
+	if filters.FormType != nil {
+		query = query.Where("form_type = ?", *filters.FormType)
+	}
 	if filters.Status != nil {
 		query = query.Where("status = ?", *filters.Status)
 	}
@@ -383,6 +389,26 @@ func (r *FormRepository) CreateLungCancer(db database.Database, info *entity.Lun
 }
 
 func (r *FormRepository) UpdateLungCancer(db database.Database, info *entity.LungCancerInfo) error {
+	return db.GetDB().Save(info).Error
+}
+
+func (r *FormRepository) FindNavidInfoByFormID(db database.Database, formID uint) (*entity.NavidInfo, error) {
+	var info entity.NavidInfo
+	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &info, nil
+}
+
+func (r *FormRepository) CreateNavidInfo(db database.Database, info *entity.NavidInfo) error {
+	return db.GetDB().Create(info).Error
+}
+
+func (r *FormRepository) UpdateNavidInfo(db database.Database, info *entity.NavidInfo) error {
 	return db.GetDB().Save(info).Error
 }
 

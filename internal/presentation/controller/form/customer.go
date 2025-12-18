@@ -2,7 +2,6 @@ package form
 
 import (
 	"mime/multipart"
-	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -35,6 +34,7 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 		BirthDate            formdto.BirthDate `json:"birthDate" validate:"required" time_format:"2006-01-02"`
 		SocialSecurityNumber string            `json:"socialSecurityNumber" validate:"required"`
 		Gender               uint              `json:"gender" validate:"required"`
+		FormType             *enum.FormType    `json:"formType"`
 		IsAtba               bool              `json:"isAtba"`
 		Height               float64           `json:"height" validate:"required"`
 		Weight               float64           `json:"weight" validate:"required"`
@@ -46,12 +46,13 @@ func (formController *CustomerFormController) CreateForm(ctx *gin.Context) {
 
 	request := formdto.CreateBasicFormRequest{
 		UserID:               userID.(uint),
-		BirthDate:            params.BirthDate.Time(),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
 		Height:               params.Height,
 		Weight:               params.Weight,
+		FormType:             params.FormType,
 	}
 
 	form, err := formController.formService.CreateBasicInfoForm(request)
@@ -107,7 +108,7 @@ func (formController *CustomerFormController) UpdateBasicInfo(ctx *gin.Context) 
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		BirthDate:            (*time.Time)(params.BirthDate),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
@@ -231,7 +232,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
 		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
 		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
-		BreastDensity                *string                 `form:"breastDensity,omitempty"`
+		BreastDensity                *uint                   `form:"breastDensity,omitempty"`
 		Falop                        *bool                   `form:"falop,omitempty"`
 		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
 		LeavePestan                  bool                    `form:"leavePestan"`
@@ -467,6 +468,128 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
 	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
+}
+
+func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) {
+	type UpsertNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+
+		InsuranceStatus              *string `json:"insuranceStatus,omitempty"`
+		SupplementaryInsuranceStatus *bool   `json:"takmilBime,omitempty"`
+		SupplementaryInsurances      *string `json:"supplementaryInsurances,omitempty"`
+		Hypertension                 string  `json:"hypertension"`
+		HypertensionTreatment        *bool   `json:"hypertensionTreatment,omitempty"`
+		HeartDisease                 string  `json:"heartDisease"`
+		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment,omitempty"`
+		Diabetes                     string  `json:"diabetes"`
+		DiabetesTreatment            *bool   `json:"diabetesTreatment,omitempty"`
+		ChronicLungDisease           *bool   `json:"chronicLungDisease,omitempty"`
+		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType,omitempty"`
+		LungCancerHistory            bool    `json:"lungCancerHistory"`
+		OtherCancerHistory           bool    `json:"otherCancerHistory"`
+		OtherCancerType              *uint   `json:"otherCancerType,omitempty"`
+		LungCancerFamily             *bool   `json:"lungCancerFamily,omitempty"`
+		LungCancerFamilyRelation     *string `json:"lungCancerFamilyRelation,omitempty"`
+		OtherCancerFamily            *bool   `json:"otherCancerFamily,omitempty"`
+		OtherCancerFamilyType        *uint   `json:"otherCancerFamilyType,omitempty"`
+		OtherCancerFamilyRelation    *string `json:"otherCancerFamilyRelation,omitempty"`
+		OccupationalExposure         *string `json:"occupationalExposure,omitempty"`
+		CurrentSmoking               bool    `json:"currentSmoking"`
+		SmokingStartAgeCurrent       *uint   `json:"smokingStartAgeCurrent,omitempty"`
+		SmokingTypesCurrent          *string `json:"smokingTypesCurrent,omitempty"`
+		CigarettesPerDayCurrent      *uint   `json:"cigarettesPerDayCurrent,omitempty"`
+		CigarPerDayCurrent           *uint   `json:"cigarPerDayCurrent,omitempty"`
+		ECigPerDayCurrent            *uint   `json:"eCigPerDayCurrent,omitempty"`
+		PipePerDayCurrent            *uint   `json:"pipePerDayCurrent,omitempty"`
+		ChapoghPerDayCurrent         *uint   `json:"chapoghPerDayCurrent,omitempty"`
+		SmokedOpiumPerDayCurrent     *uint   `json:"smokedOpiumPerDayCurrent,omitempty"`
+		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent,omitempty"`
+		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent,omitempty"`
+		PastSmoking                  *string `json:"pastSmoking,omitempty"`
+		SmokePastAvg                 *uint   `json:"smokePastAvg"`
+		SmokeCurrentAvg              *uint   `json:"smokeCurrentAvg"`
+		SmokingStartAgePast          *uint   `json:"smokingStartAgePast,omitempty"`
+		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
+		SmokingTypesPast             *string `json:"smokingTypesPast,omitempty"`
+		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast,omitempty"`
+		CigarPerDayPast              *uint   `json:"cigarPerDayPast,omitempty"`
+		ECigPerDayPast               *uint   `json:"eCigPerDayPast,omitempty"`
+		PipePerDayPast               *uint   `json:"pipePerDayPast,omitempty"`
+		ChapoghPerDayPast            *uint   `json:"chapoghPerDayPast,omitempty"`
+		SmokedOpiumPerDayPast        *uint   `json:"smokedOpiumPerDayPast,omitempty"`
+		ChewedOpiumPerDayPast        *uint   `json:"chewedOpiumPerDayPast,omitempty"`
+		HookahPerWeekPast            *uint   `json:"hookahPerWeekPast,omitempty"`
+		SecondhandSmoke              bool    `json:"secondhandSmoke"`
+		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation,omitempty"`
+		AttentionCorrect             *bool   `json:"attentionCorrect,omitempty"`
+		LungDiseaseHistory           *string `json:"lungDiseaseHistory,omitempty"`
+	}
+
+	params := controller.Validate[UpsertNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	req := formdto.UpsertNavidFormRequest{
+		UserID:                       userID.(uint),
+		FormID:                       params.FormID,
+		SupplementaryInsuranceStatus: params.SupplementaryInsuranceStatus,
+		InsuranceStatus:              params.InsuranceStatus,
+		SupplementaryInsurances:      params.SupplementaryInsurances,
+		Hypertension:                 params.Hypertension,
+		HypertensionTreatment:        params.HypertensionTreatment,
+		HeartDisease:                 params.HeartDisease,
+		HeartDiseaseTreatment:        params.HeartDiseaseTreatment,
+		Diabetes:                     params.Diabetes,
+		DiabetesTreatment:            params.DiabetesTreatment,
+		ChronicLungDisease:           params.ChronicLungDisease,
+		ChronicLungDiseaseType:       params.ChronicLungDiseaseType,
+		LungCancerHistory:            params.LungCancerHistory,
+		OtherCancerHistory:           params.OtherCancerHistory,
+		OtherCancerType:              params.OtherCancerType,
+		LungCancerFamily:             params.LungCancerFamily,
+		LungCancerFamilyRelation:     params.LungCancerFamilyRelation,
+		OtherCancerFamily:            params.OtherCancerFamily,
+		OtherCancerFamilyType:        params.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    params.OtherCancerFamilyRelation,
+		OccupationalExposure:         params.OccupationalExposure,
+		CurrentSmoking:               params.CurrentSmoking,
+		SmokingStartAgeCurrent:       params.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          params.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      params.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           params.CigarPerDayCurrent,
+		ECigPerDayCurrent:            params.ECigPerDayCurrent,
+		PipePerDayCurrent:            params.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         params.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     params.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
+		PastSmoking:                  params.PastSmoking,
+		SmokePastAvg:                 params.SmokePastAvg,
+		SmokeCurrentAvg:              params.SmokeCurrentAvg,
+		LeaveSmoke:                   params.LeaveSmoke,
+		SmokingStartAgePast:          params.SmokingStartAgePast,
+		SmokingTypesPast:             params.SmokingTypesPast,
+		CigarettesPerDayPast:         params.CigarettesPerDayPast,
+		CigarPerDayPast:              params.CigarPerDayPast,
+		ECigPerDayPast:               params.ECigPerDayPast,
+		PipePerDayPast:               params.PipePerDayPast,
+		ChapoghPerDayPast:            params.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        params.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        params.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            params.HookahPerWeekPast,
+		SecondhandSmoke:              params.SecondhandSmoke,
+		SecondhandSmokeLocation:      params.SecondhandSmokeLocation,
+		AttentionCorrect:             params.AttentionCorrect,
+		LungDiseaseHistory:           params.LungDiseaseHistory,
+	}
+
+	if err := formController.formService.UpsertNavidForm(req); err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
 }
 
 func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context) {
@@ -838,6 +961,28 @@ func (formController *CustomerFormController) GetLungCancer(ctx *gin.Context) {
 	}
 
 	response, err := formController.formService.GetLungCancer(request)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
+func (formController *CustomerFormController) GetNavidForm(ctx *gin.Context) {
+	type GetNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetNavidForm(request)
 	if err != nil {
 		panic(err)
 	}

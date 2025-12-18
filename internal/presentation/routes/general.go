@@ -25,6 +25,7 @@ func SetupGeneralRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		enums.GET("/hyperplasiaInBiopsy-statuses", app.Controllers.General.FormController.GetAllHyperplasiaInBiopsyStatuses)
 		enums.GET("/life-statuses", app.Controllers.General.FormController.GetAllLifeStatuses)
 		enums.GET("/relatives", app.Controllers.General.FormController.GetAllRelativeTypes)
+		enums.GET("/form-types", app.Controllers.General.FormController.GetAllFormTypes)
 
 	}
 }

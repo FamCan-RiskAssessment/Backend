@@ -239,6 +239,24 @@ func (f *FormRepositoryMock) UpdateLungCancer(db database.Database, info *entity
 	return args.Error(0)
 }
 
+func (f *FormRepositoryMock) FindNavidInfoByFormID(db database.Database, formID uint) (*entity.NavidInfo, error) {
+	args := f.Called(db, formID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.NavidInfo), args.Error(1)
+}
+
+func (f *FormRepositoryMock) CreateNavidInfo(db database.Database, info *entity.NavidInfo) error {
+	args := f.Called(db, info)
+	return args.Error(0)
+}
+
+func (f *FormRepositoryMock) UpdateNavidInfo(db database.Database, info *entity.NavidInfo) error {
+	args := f.Called(db, info)
+	return args.Error(0)
+}
+
 func (f *FormRepositoryMock) FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error) {
 	args := f.Called(db, formID)
 	if args.Get(0) == nil {

@@ -5,10 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jalaali/go-jalaali"
+
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 )
 
-type BirthDate time.Time
+type BirthDate jalaali.Jalaali
 
 func (d *BirthDate) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), `"`)
@@ -16,16 +18,12 @@ func (d *BirthDate) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*d = BirthDate(t)
+	*d = BirthDate(jalaali.From(t))
 	return nil
 }
 
-func (d BirthDate) Time() time.Time {
-	return time.Time(d)
-}
-
 func (d BirthDate) String() string {
-	return time.Time(d).Format("2006-01-02")
+	return d.Time.Format("2006-01-02")
 }
 
 type CreateBasicFormRequest struct {
@@ -33,12 +31,13 @@ type CreateBasicFormRequest struct {
 	FilledByOperatorID *uint
 
 	// page 1
-	BirthDate            time.Time
+	BirthDate            BirthDate
 	SocialSecurityNumber string
 	Gender               uint
 	IsAtba               bool
 	Height               float64
 	Weight               float64
+	FormType             *enum.FormType
 }
 
 type UpdateBasicFormRequest struct {
@@ -46,7 +45,7 @@ type UpdateBasicFormRequest struct {
 	FormID uint
 
 	// page 1
-	BirthDate            *time.Time
+	BirthDate            *BirthDate
 	SocialSecurityNumber *string
 	Gender               *uint
 	IsAtba               *bool
@@ -119,7 +118,7 @@ type UpsertMamographyRequest struct {
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
 	MamoGraphyPictures           []*multipart.FileHeader
-	BreastDensity                *string
+	BreastDensity                *uint
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  bool
@@ -231,6 +230,63 @@ type UpsertContactRequest struct {
 	Education             string
 	Phone2                *string
 	Phone3                *string
+}
+
+type UpsertNavidFormRequest struct {
+	UserID uint
+	FormID uint
+
+	InsuranceStatus              *string
+	SupplementaryInsurances      *string
+	SupplementaryInsuranceStatus *bool
+	Hypertension                 string
+	HypertensionTreatment        *bool
+	HeartDisease                 string
+	HeartDiseaseTreatment        *bool
+	Diabetes                     string
+	DiabetesTreatment            *bool
+	ChronicLungDisease           *bool
+	ChronicLungDiseaseType       *string
+	LungCancerHistory            bool
+	OtherCancerHistory           bool
+	OtherCancerType              *uint
+	LungCancerFamily             *bool
+	LungCancerFamilyRelation     *string
+	OtherCancerFamily            *bool
+	OtherCancerFamilyType        *uint
+	OtherCancerFamilyRelation    *string
+	OccupationalExposure         *string
+	CurrentSmoking               bool
+	SmokingStartAgeCurrent       *uint
+	SmokingTypesCurrent          *string
+	CigarettesPerDayCurrent      *uint
+	CigarPerDayCurrent           *uint
+	ECigPerDayCurrent            *uint
+	PipePerDayCurrent            *uint
+	ChapoghPerDayCurrent         *uint
+	SmokedOpiumPerDayCurrent     *uint
+	ChewedOpiumPerDayCurrent     *uint
+	HookahPerWeekCurrent         *uint
+	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
+	LeaveSmoke                   *uint
+	SmokingStartAgePast          *uint
+	SmokingTypesPast             *string
+	CigarettesPerDayPast         *uint
+	CigarPerDayPast              *uint
+	ECigPerDayPast               *uint
+	PipePerDayPast               *uint
+	ChapoghPerDayPast            *uint
+	SmokedOpiumPerDayPast        *uint
+	ChewedOpiumPerDayPast        *uint
+	HookahPerWeekPast            *uint
+	SecondhandSmoke              bool
+	SecondhandSmokeLocation      *string
+	LungDiseaseHistory           *string
+
+	// Attention question answer
+	AttentionCorrect *bool
 }
 
 type UpsertLungCancerRequest struct {
@@ -352,7 +408,7 @@ type UpdateMamographyRequest struct {
 	OralTwoLastYears             *bool
 	MamoGraphy                   *bool
 	MamoGraphyPictures           []*multipart.FileHeader
-	BreastDensity                *string
+	BreastDensity                *uint
 	Falop                        *bool
 	Andometrioz                  *bool
 	LeavePestan                  *bool
@@ -425,6 +481,62 @@ type UpdateLungCancerRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	LeaveSmoke                   *uint
+	SmokingStartAgePast          *uint
+	SmokingTypesPast             *string
+	CigarettesPerDayPast         *uint
+	CigarPerDayPast              *uint
+	ECigPerDayPast               *uint
+	PipePerDayPast               *uint
+	ChapoghPerDayPast            *uint
+	SmokedOpiumPerDayPast        *uint
+	ChewedOpiumPerDayPast        *uint
+	HookahPerWeekPast            *uint
+	SecondhandSmoke              *bool
+	SecondhandSmokeLocation      *string
+	LungDiseaseHistory           *string
+
+	// Attention question answer
+	AttentionCorrect *bool
+}
+type UpdateNavidFormRequest struct {
+	UserID uint
+	FormID uint
+
+	InsuranceStatus              *string
+	SupplementaryInsuranceStatus *bool
+	SupplementaryInsurances      *string
+	Hypertension                 *string
+	HypertensionTreatment        *bool
+	HeartDisease                 *string
+	HeartDiseaseTreatment        *bool
+	Diabetes                     *string
+	DiabetesTreatment            *bool
+	ChronicLungDisease           *bool
+	ChronicLungDiseaseType       *string
+	LungCancerHistory            *bool
+	OtherCancerHistory           *bool
+	OtherCancerType              *uint
+	LungCancerFamily             *bool
+	LungCancerFamilyRelation     *string
+	OtherCancerFamily            *bool
+	OtherCancerFamilyType        *uint
+	OtherCancerFamilyRelation    *string
+	OccupationalExposure         *string
+	CurrentSmoking               *bool
+	SmokingStartAgeCurrent       *uint
+	SmokingTypesCurrent          *string
+	CigarettesPerDayCurrent      *uint
+	CigarPerDayCurrent           *uint
+	ECigPerDayCurrent            *uint
+	PipePerDayCurrent            *uint
+	ChapoghPerDayCurrent         *uint
+	SmokedOpiumPerDayCurrent     *uint
+	ChewedOpiumPerDayCurrent     *uint
+	HookahPerWeekCurrent         *uint
+	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string

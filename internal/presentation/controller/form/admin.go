@@ -2,7 +2,6 @@ package form
 
 import (
 	"mime/multipart"
-	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -37,15 +36,16 @@ func NewAdminFormController(
 
 func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 	type GetAllFormsParams struct {
-		Page               int     `form:"page"`
-		PageSize           int     `form:"pageSize"`
-		Status             *uint   `form:"status"`
-		Gender             *string `form:"gender"`
-		BirthYear          *uint   `form:"birthYear"`
-		DrinksAlcohol      *bool   `form:"drinksAlcohol"`
-		SmokingNow         *bool   `form:"smokingNow"`
-		Cancer             *bool   `form:"cancer"`
-		FilledByOperatorID *uint   `form:"filledByOperatorID"`
+		Page               int            `form:"page"`
+		PageSize           int            `form:"pageSize"`
+		FormType           *enum.FormType `form:"formType"`
+		Status             *uint          `form:"status"`
+		Gender             *string        `form:"gender"`
+		BirthYear          *uint          `form:"birthYear"`
+		DrinksAlcohol      *bool          `form:"drinksAlcohol"`
+		SmokingNow         *bool          `form:"smokingNow"`
+		Cancer             *bool          `form:"cancer"`
+		FilledByOperatorID *uint          `form:"filledByOperatorID"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
@@ -53,6 +53,7 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 
 	filters := &postgres.FormFilters{
 		Status:             params.Status,
+		FormType:           params.FormType,
 		Gender:             params.Gender,
 		BirthYear:          params.BirthYear,
 		DrinksAlcohol:      params.DrinksAlcohol,
@@ -73,14 +74,15 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 
 func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context) {
 	type GetAllOperatorFormsParams struct {
-		Page          int     `form:"page"`
-		PageSize      int     `form:"pageSize"`
-		Status        *uint   `form:"status"`
-		Gender        *string `form:"gender"`
-		BirthYear     *uint   `form:"birthYear"`
-		DrinksAlcohol *bool   `form:"drinksAlcohol"`
-		SmokingNow    *bool   `form:"smokingNow"`
-		Cancer        *bool   `form:"cancer"`
+		Page          int            `form:"page"`
+		PageSize      int            `form:"pageSize"`
+		FormType      *enum.FormType `form:"formType"`
+		Status        *uint          `form:"status"`
+		Gender        *string        `form:"gender"`
+		BirthYear     *uint          `form:"birthYear"`
+		DrinksAlcohol *bool          `form:"drinksAlcohol"`
+		SmokingNow    *bool          `form:"smokingNow"`
+		Cancer        *bool          `form:"cancer"`
 	}
 
 	params := controller.Validate[GetAllOperatorFormsParams](ctx)
@@ -91,6 +93,7 @@ func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context)
 	filters := &postgres.OperatorFormFilters{
 		OperatorID:    userID.(uint),
 		Status:        params.Status,
+		FormType:      params.FormType,
 		Gender:        params.Gender,
 		BirthYear:     params.BirthYear,
 		DrinksAlcohol: params.DrinksAlcohol,
@@ -205,7 +208,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		BirthDate:            (*time.Time)(params.BirthDate),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
@@ -307,7 +310,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
 		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
 		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
-		BreastDensity                *string                 `form:"breastDensity,omitempty"`
+		BreastDensity                *uint                   `form:"breastDensity,omitempty"`
 		Falop                        *bool                   `form:"falop,omitempty"`
 		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
 		LeavePestan                  bool                    `form:"leavePestan"`
@@ -539,7 +542,129 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
+}
+
+func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
+	type UpdateNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+
+		InsuranceStatus              *string `json:"insuranceStatus"`
+		SupplementaryInsuranceStatus *bool   `json:"takmilBime"`
+		SupplementaryInsurances      *string `json:"supplementaryInsurances"`
+		Hypertension                 *string `json:"hypertension"`
+		HypertensionTreatment        *bool   `json:"hypertensionTreatment"`
+		HeartDisease                 *string `json:"heartDisease"`
+		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment"`
+		Diabetes                     *string `json:"diabetes"`
+		DiabetesTreatment            *bool   `json:"diabetesTreatment"`
+		ChronicLungDisease           *bool   `json:"chronicLungDisease"`
+		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType"`
+		LungCancerHistory            *bool   `json:"lungCancerHistory"`
+		OtherCancerHistory           *bool   `json:"otherCancerHistory"`
+		OtherCancerType              *uint   `json:"otherCancerType"`
+		LungCancerFamily             *bool   `json:"lungCancerFamily"`
+		LungCancerFamilyRelation     *string `json:"lungCancerFamilyRelation"`
+		OtherCancerFamily            *bool   `json:"otherCancerFamily"`
+		OtherCancerFamilyType        *uint   `json:"otherCancerFamilyType"`
+		OtherCancerFamilyRelation    *string `json:"otherCancerFamilyRelation"`
+		OccupationalExposure         *string `json:"occupationalExposure"`
+		CurrentSmoking               *bool   `json:"currentSmoking"`
+		SmokingStartAgeCurrent       *uint   `json:"smokingStartAgeCurrent"`
+		SmokingTypesCurrent          *string `json:"smokingTypesCurrent"`
+		CigarettesPerDayCurrent      *uint   `json:"cigarettesPerDayCurrent"`
+		CigarPerDayCurrent           *uint   `json:"cigarPerDayCurrent"`
+		ECigPerDayCurrent            *uint   `json:"eCigPerDayCurrent"`
+		PipePerDayCurrent            *uint   `json:"pipePerDayCurrent"`
+		ChapoghPerDayCurrent         *uint   `json:"chapoghPerDayCurrent"`
+		SmokedOpiumPerDayCurrent     *uint   `json:"smokedOpiumPerDayCurrent"`
+		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
+		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
+		PastSmoking                  *string `json:"pastSmoking"`
+		SmokePastAvg                 *uint   `json:"smokePastAvg"`
+		SmokeCurrentdAvg             *uint   `json:"smokeCurrentAvg"`
+		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
+		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
+		SmokingTypesPast             *string `json:"smokingTypesPast"`
+		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast"`
+		CigarPerDayPast              *uint   `json:"cigarPerDayPast"`
+		ECigPerDayPast               *uint   `json:"eCigPerDayPast"`
+		PipePerDayPast               *uint   `json:"pipePerDayPast"`
+		ChapoghPerDayPast            *uint   `json:"chapoghPerDayPast"`
+		SmokedOpiumPerDayPast        *uint   `json:"smokedOpiumPerDayPast"`
+		ChewedOpiumPerDayPast        *uint   `json:"chewedOpiumPerDayPast"`
+		HookahPerWeekPast            *uint   `json:"hookahPerWeekPast"`
+		SecondhandSmoke              *bool   `json:"secondhandSmoke"`
+		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation"`
+		AttentionCorrect             *bool   `json:"attentionCorrect"`
+		LungDiseaseHistory           *string `json:"lungDiseaseHistory"`
+	}
+
+	params := controller.Validate[UpdateNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	req := formdto.UpdateNavidFormRequest{
+		UserID:                       userID.(uint),
+		FormID:                       params.FormID,
+		InsuranceStatus:              params.InsuranceStatus,
+		SupplementaryInsuranceStatus: params.SupplementaryInsuranceStatus,
+		SupplementaryInsurances:      params.SupplementaryInsurances,
+		Hypertension:                 params.Hypertension,
+		HypertensionTreatment:        params.HypertensionTreatment,
+		HeartDisease:                 params.HeartDisease,
+		HeartDiseaseTreatment:        params.HeartDiseaseTreatment,
+		Diabetes:                     params.Diabetes,
+		DiabetesTreatment:            params.DiabetesTreatment,
+		ChronicLungDisease:           params.ChronicLungDisease,
+		ChronicLungDiseaseType:       params.ChronicLungDiseaseType,
+		LungCancerHistory:            params.LungCancerHistory,
+		OtherCancerHistory:           params.OtherCancerHistory,
+		OtherCancerType:              params.OtherCancerType,
+		LungCancerFamily:             params.LungCancerFamily,
+		LungCancerFamilyRelation:     params.LungCancerFamilyRelation,
+		OtherCancerFamily:            params.OtherCancerFamily,
+		OtherCancerFamilyType:        params.OtherCancerFamilyType,
+		OtherCancerFamilyRelation:    params.OtherCancerFamilyRelation,
+		OccupationalExposure:         params.OccupationalExposure,
+		CurrentSmoking:               params.CurrentSmoking,
+		SmokingStartAgeCurrent:       params.SmokingStartAgeCurrent,
+		SmokingTypesCurrent:          params.SmokingTypesCurrent,
+		CigarettesPerDayCurrent:      params.CigarettesPerDayCurrent,
+		CigarPerDayCurrent:           params.CigarPerDayCurrent,
+		ECigPerDayCurrent:            params.ECigPerDayCurrent,
+		PipePerDayCurrent:            params.PipePerDayCurrent,
+		ChapoghPerDayCurrent:         params.ChapoghPerDayCurrent,
+		SmokedOpiumPerDayCurrent:     params.SmokedOpiumPerDayCurrent,
+		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
+		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
+		PastSmoking:                  params.PastSmoking,
+		SmokePastAvg:                 params.SmokePastAvg,
+		SmokeCurrentAvg:              params.SmokeCurrentdAvg,
+		LeaveSmoke:                   params.LeaveSmoke,
+		SmokingStartAgePast:          params.SmokingStartAgePast,
+		SmokingTypesPast:             params.SmokingTypesPast,
+		CigarettesPerDayPast:         params.CigarettesPerDayPast,
+		CigarPerDayPast:              params.CigarPerDayPast,
+		ECigPerDayPast:               params.ECigPerDayPast,
+		PipePerDayPast:               params.PipePerDayPast,
+		ChapoghPerDayPast:            params.ChapoghPerDayPast,
+		SmokedOpiumPerDayPast:        params.SmokedOpiumPerDayPast,
+		ChewedOpiumPerDayPast:        params.ChewedOpiumPerDayPast,
+		HookahPerWeekPast:            params.HookahPerWeekPast,
+		SecondhandSmoke:              params.SecondhandSmoke,
+		SecondhandSmokeLocation:      params.SecondhandSmokeLocation,
+		AttentionCorrect:             params.AttentionCorrect,
+		LungDiseaseHistory:           params.LungDiseaseHistory,
+	}
+
+	if err := formController.formService.UpdateNavidForm(req); err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.updateForm")
+	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
 }
 
 func (formController *AdminFormController) GetGeneralHealth(ctx *gin.Context) {
@@ -877,6 +1002,28 @@ func (formController *AdminFormController) GetLungCancer(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", response)
 }
 
+func (formController *AdminFormController) GetNavidForm(ctx *gin.Context) {
+	type GetNavidFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetNavidFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetNavidForm(request)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
+
 func (formController *AdminFormController) GetUserForms(ctx *gin.Context) {
 	type GetUserFormsParams struct {
 		UserID   uint `form:"userId"`
@@ -969,7 +1116,7 @@ func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	request := formdto.CreateBasicFormRequest{
 		UserID:               params.UserID,
 		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
-		BirthDate:            params.BirthDate.Time(),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,

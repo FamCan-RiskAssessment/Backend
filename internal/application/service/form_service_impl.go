@@ -16,6 +16,7 @@ import (
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/validation"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"github.com/jalaali/go-jalaali"
 )
@@ -27,6 +28,7 @@ type FormService struct {
 	actionLogService usecase.ActionLogService
 	s3Storage        s3.S3Storage
 	db               database.Database
+	fieldEncryptor   *crypto.FieldEncryptor
 }
 
 func NewFormService(
@@ -36,6 +38,7 @@ func NewFormService(
 	actionLogService usecase.ActionLogService,
 	s3Storage s3.S3Storage,
 	db database.Database,
+	fieldEncryptor *crypto.FieldEncryptor,
 ) *FormService {
 	return &FormService{
 		constants:        constants,
@@ -44,6 +47,7 @@ func NewFormService(
 		actionLogService: actionLogService,
 		s3Storage:        s3Storage,
 		db:               db,
+		fieldEncryptor:   fieldEncryptor,
 	}
 }
 
@@ -321,12 +325,18 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, err
 	}
 
+	// Encrypt Social Security Number before storing
+	encryptedSSN, err := formService.fieldEncryptor.Encrypt(request.SocialSecurityNumber)
+	if err != nil {
+		return formdto.BasicFormResponse{}, err
+	}
+
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
 		BirthDate:            request.BirthDate.Time,
 		IsAtba:               request.IsAtba,
-		SocialSecurityNumber: request.SocialSecurityNumber,
+		SocialSecurityNumber: encryptedSSN,
 		Height:               request.Height,
 		Weight:               request.Weight,
 	}
@@ -1220,7 +1230,14 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	info.Province = request.Province
 	info.City = request.City
 	info.Country = request.Country
-	info.Address = request.Address
+
+	// Encrypt Address before storing
+	encryptedAddress, err := formService.fieldEncryptor.Encrypt(request.Address)
+	if err != nil {
+		return err
+	}
+	info.Address = encryptedAddress
+
 	info.PostalCode = request.PostalCode
 	info.Education = request.Education
 	if request.Phone2 != nil && len(*request.Phone2) != 11 {
@@ -1653,13 +1670,19 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		return formdto.GetBasicFormResponse{}, notFoundError
 	}
 
+	// Decrypt Social Security Number before returning
+	decryptedSSN, err := formService.fieldEncryptor.Decrypt(basic.SocialSecurityNumber)
+	if err != nil {
+		return formdto.GetBasicFormResponse{}, err
+	}
+
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
 		BirthDate:            formdto.BirthDate(jalaali.From(basic.BirthDate)),
 		IsAtba:               basic.IsAtba,
-		SocialSecurityNumber: basic.SocialSecurityNumber,
+		SocialSecurityNumber: decryptedSSN,
 		Height:               basic.Height,
 		Weight:               basic.Weight,
 	}, nil
@@ -1921,6 +1944,12 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		return formdto.GetContactResponse{}, err
 	}
 
+	// Decrypt Address before returning
+	decryptedAddress, err := formService.fieldEncryptor.Decrypt(info.Address)
+	if err != nil {
+		return formdto.GetContactResponse{}, err
+	}
+
 	return formdto.GetContactResponse{
 		ID:                    info.ID,
 		Name:                  info.Name,
@@ -1934,7 +1963,7 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		Province:              info.Province,
 		City:                  info.City,
 		Country:               info.Country,
-		Address:               info.Address,
+		Address:               decryptedAddress,
 		PostalCode:            info.PostalCode,
 		Education:             info.Education,
 		Phone2:                info.Phone2,
@@ -2208,7 +2237,12 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		info.BirthDate = (*request.BirthDate).Time
 	}
 	if request.SocialSecurityNumber != nil {
-		info.SocialSecurityNumber = *request.SocialSecurityNumber
+		// Encrypt Social Security Number before updating
+		encryptedSSN, err := formService.fieldEncryptor.Encrypt(*request.SocialSecurityNumber)
+		if err != nil {
+			return err
+		}
+		info.SocialSecurityNumber = encryptedSSN
 	}
 	if request.Gender != nil {
 		info.Gender = enum.Gender(uint(*request.Gender))
@@ -2721,7 +2755,12 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	info.City = request.City
 	info.Country = request.Country
 	if request.Address != nil {
-		info.Address = *request.Address
+		// Encrypt Address before storing
+		encryptedAddress, err := formService.fieldEncryptor.Encrypt(*request.Address)
+		if err != nil {
+			return err
+		}
+		info.Address = encryptedAddress
 	}
 	if request.PostalCode != nil {
 		info.PostalCode = *request.PostalCode

@@ -25,7 +25,7 @@ type BasicInfo struct {
 	Gender               enum.Gender `gorm:"not null"`
 	BirthDate            time.Time   `gorm:"not null;type:date"`
 	IsAtba               bool        `gorm:"not null;default:false"`
-	SocialSecurityNumber string      `gorm:"not null"`
+	SocialSecurityNumber string      `gorm:"type:varchar(500);not null"` // Encrypted, larger size needed
 	Height               float64     `gorm:"type:decimal(5,2);not null"`
 	Weight               float64     `gorm:"type:decimal(5,2);not null"`
 }
@@ -132,7 +132,7 @@ type ContactInfo struct {
 	Province                  *string  `gorm:"type:varchar(50)"`
 	City                      *string  `gorm:"type:varchar(50)"`
 	Country                   *string  `gorm:"type:varchar(50)"`
-	Address                   string   `gorm:"type:text;not null"`
+	Address                   string   `gorm:"type:text;not null"` // Encrypted, text type for variable length
 	PostalCode                string   `gorm:"not null"`
 	Education                 string   `gorm:"type:varchar(127)"`
 	Phone2                    *string  `gorm:"type:varchar(11)"`

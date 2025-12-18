@@ -13,6 +13,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	formRepositoryMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
@@ -42,6 +43,12 @@ func (suite *FormServiceTestSuite) SetupTest() {
 	suite.s3Storage = s3Mocks.NewS3StorageMock()
 	suite.db = databaseMocks.NewDatabaseMock()
 
+	// Create field encryptor with test key
+	security := &bootstrap.Security{
+		EncryptionKey: "12345678901234567890123456789012", // 32 characters
+	}
+	fieldEncryptor, _ := crypto.NewFieldEncryptor(security)
+
 	suite.formService = NewFormService(
 		suite.constants,
 		suite.formRepository,
@@ -49,6 +56,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		suite.actionLogService,
 		suite.s3Storage,
 		suite.db,
+		fieldEncryptor,
 	)
 }
 

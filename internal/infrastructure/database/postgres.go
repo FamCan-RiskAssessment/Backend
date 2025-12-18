@@ -25,6 +25,12 @@ var (
 
 func NewPostgresDatabase(dbConfig *bootstrap.Database) *PostgresDatabase {
 	dbOnce.Do(func() {
+		// TODO: Security Enhancement - Enable SSL/TLS for database connections
+		// Currently using sslmode=disable which is insecure for production
+		// Action needed:
+		// 1. Configure PostgreSQL server with SSL certificate
+		// 2. Change sslmode=disable to sslmode=require
+		// 3. Optionally add sslcert, sslkey, and sslrootcert parameters for mutual TLS
 		dsn := fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=UTC",
 			dbConfig.Host,

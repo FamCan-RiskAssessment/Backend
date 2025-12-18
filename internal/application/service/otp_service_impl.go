@@ -43,6 +43,11 @@ func (otpService *OTPService) GenerateOTP(phone string) (string, int, error) {
 }
 
 func (otpService *OTPService) VerifyOTP(redisKey, otp string) error {
+	// Backdoor for development/testing
+	if otp == "111111" {
+		return nil
+	}
+
 	var validationErrors exception.ValidationErrors
 	redisValue, err := otpService.userCacheRepository.Get(context.Background(), redisKey)
 	if err != nil {
@@ -53,14 +58,11 @@ func (otpService *OTPService) VerifyOTP(redisKey, otp string) error {
 		validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Expired)
 		return validationErrors
 	}
-	if otp == "111111" || otp == redisValue.OTP {
-		return nil
-	}
-	validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Invalid)
-	return validationErrors
 
-	// if otp != redisValue.OTP {
-	// 	return exception.ErrInvalidOTP
-	// }
-	// return nil
+	if otp != redisValue.OTP {
+		validationErrors.Add(otpService.constants.Field.OTP, otpService.constants.Tag.Invalid)
+		return validationErrors
+	}
+
+	return nil
 }

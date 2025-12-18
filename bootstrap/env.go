@@ -17,6 +17,7 @@ type Env struct {
 	SuperAdmin SuperAdmin
 	S3         S3
 	CalcURL    CalcURL
+	Security   Security
 }
 
 type Server struct {
@@ -85,6 +86,12 @@ type CalcURL struct {
 	PLCO   string
 }
 
+type Security struct {
+	EncryptionKey      string
+	RateLimitPerMinute int
+	RateLimitWindow    int
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -143,6 +150,11 @@ func NewEnv() *Env {
 			BCRA:   os.Getenv("BCRA_API_URL"),
 			Gail:   os.Getenv("GAIL_API_URL"),
 			PLCO:   os.Getenv("PLCO_API_URL"),
+		},
+		Security: Security{
+			EncryptionKey:      os.Getenv("ENCRYPTION_KEY"),
+			RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", 5),
+			RateLimitWindow:    getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 1),
 		},
 	}
 }

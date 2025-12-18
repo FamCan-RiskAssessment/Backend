@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
 type FormFilters struct {
+	FormType           *enum.FormType
 	Status             *uint
 	Gender             *string
 	BirthYear          *uint
@@ -17,6 +19,7 @@ type FormFilters struct {
 
 type OperatorFormFilters struct {
 	OperatorID    uint
+	FormType      *enum.FormType
 	Status        *uint
 	Gender        *string
 	BirthYear     *uint

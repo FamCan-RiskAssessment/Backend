@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
-	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	formRepositoryMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
 	s3Mocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/storage/s3"
 	databaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/database"
-	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -25,13 +25,13 @@ import (
 
 type FormServiceTestSuite struct {
 	suite.Suite
-	constants            *bootstrap.Constants
-	formRepository       *formRepositoryMocks.FormRepositoryMock
-	userService          *usecaseMocks.UserServiceMock
-	actionLogService     *usecaseMocks.ActionLogServiceMock
-	s3Storage            *s3Mocks.S3StorageMock
-	db                   *databaseMocks.DatabaseMock
-	formService          *FormService
+	constants        *bootstrap.Constants
+	formRepository   *formRepositoryMocks.FormRepositoryMock
+	userService      *usecaseMocks.UserServiceMock
+	actionLogService *usecaseMocks.ActionLogServiceMock
+	s3Storage        *s3Mocks.S3StorageMock
+	db               *databaseMocks.DatabaseMock
+	formService      *FormService
 }
 
 func (suite *FormServiceTestSuite) SetupTest() {
@@ -56,7 +56,8 @@ func (suite *FormServiceTestSuite) SetupTest() {
 func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	// Arrange
 	userID := uint(1)
-	birthDate, _ := time.Parse("2006-01-02", "1990-01-01")
+	var birthDate formdto.BirthDate
+	birthDate.UnmarshalJSON([]byte("1358-01-01"))
 	request := formdto.CreateBasicFormRequest{
 		UserID:               userID,
 		Gender:               1,
@@ -151,7 +152,8 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 	// Arrange
 	userID := uint(1)
 	operatorID := uint(2)
-	birthDate, _ := time.Parse("2006-01-02", "1990-01-01")
+	var birthDate formdto.BirthDate
+	birthDate.UnmarshalJSON([]byte("1358-01-01"))
 	request := formdto.CreateBasicFormRequest{
 		UserID:             userID,
 		FilledByOperatorID: &operatorID,
@@ -577,17 +579,17 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertGeneralHealthRequest{
-		UserID:                     userID,
-		FormID:                     formID,
-		DrinksAlcohol:              boolPtr(true),
-		CupsPerWeek:                strPtr("5"),
-		LastMonthSabzijatMeal:      "high",
-		LastMonthSabzijatWeight:    "2kg",
-		MediumActivityMonthInYear:  3,
-		MediumActivityHourInWeek:   "3",
-		HardActivityMonthInYear:    1,
-		HardActivityHourInWeek:     "1",
-		SmokingNow:                 true,
+		UserID:                    userID,
+		FormID:                    formID,
+		DrinksAlcohol:             boolPtr(true),
+		CupsPerWeek:               strPtr("5"),
+		LastMonthSabzijatMeal:     "high",
+		LastMonthSabzijatWeight:   "2kg",
+		MediumActivityMonthInYear: 3,
+		MediumActivityHourInWeek:  "3",
+		HardActivityMonthInYear:   1,
+		HardActivityHourInWeek:    "1",
+		SmokingNow:                true,
 	}
 
 	form := &entity.Form{}
@@ -1000,11 +1002,11 @@ func (suite *FormServiceTestSuite) TestUpsertMamography_Create() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertMamographyRequest{
-		UserID:               userID,
-		FormID:               formID,
-		GhaedeAge:            45,
-		HasChildren:          true,
-		MenopausalStatus:     uint(enum.MenopausalStatusPreMenopausal),
+		UserID:           userID,
+		FormID:           formID,
+		GhaedeAge:        45,
+		HasChildren:      true,
+		MenopausalStatus: uint(enum.MenopausalStatusPreMenopausal),
 	}
 
 	form := &entity.Form{}
@@ -1037,10 +1039,10 @@ func (suite *FormServiceTestSuite) TestCreateCancer_Success() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.CreateCancerRequest{
-		UserID:      userID,
-		FormID:      formID,
-		CancerAge:   35,
-		CancerType:  uint(enum.CancerTypeBreast),
+		UserID:     userID,
+		FormID:     formID,
+		CancerAge:  35,
+		CancerType: uint(enum.CancerTypeBreast),
 	}
 
 	form := &entity.Form{}
@@ -1073,10 +1075,10 @@ func (suite *FormServiceTestSuite) TestCreateCancer_FormNotFound() {
 	userID := uint(1)
 	formID := uint(999)
 	request := formdto.CreateCancerRequest{
-		UserID:      userID,
-		FormID:      formID,
-		CancerAge:   35,
-		CancerType:  uint(enum.CancerTypeBreast),
+		UserID:     userID,
+		FormID:     formID,
+		CancerAge:  35,
+		CancerType: uint(enum.CancerTypeBreast),
 	}
 
 	// Setup expectations
@@ -1547,9 +1549,9 @@ func (suite *FormServiceTestSuite) TestUpsertContact_Create() {
 	userID := uint(1)
 	formID := uint(1)
 	request := formdto.UpsertContactRequest{
-		UserID: userID,
-		FormID: formID,
-		Name:   "John Doe",
+		UserID:  userID,
+		FormID:  formID,
+		Name:    "John Doe",
 		Address: "123 Main St",
 	}
 
@@ -1722,7 +1724,7 @@ func (suite *FormServiceTestSuite) TestAssignOperator_Success() {
 	formID := uint(1)
 	operatorID := uint(2)
 	request := formdto.AssignOperatorRequest{
-		FormID:    formID,
+		FormID:     formID,
 		OperatorID: operatorID,
 	}
 

@@ -5,10 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jalaali/go-jalaali"
+
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 )
 
-type BirthDate time.Time
+type BirthDate jalaali.Jalaali
 
 func (d *BirthDate) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), `"`)
@@ -16,16 +18,12 @@ func (d *BirthDate) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*d = BirthDate(t)
+	*d = BirthDate(jalaali.From(t))
 	return nil
 }
 
-func (d BirthDate) Time() time.Time {
-	return time.Time(d)
-}
-
 func (d BirthDate) String() string {
-	return time.Time(d).Format("2006-01-02")
+	return d.Time.Format("2006-01-02")
 }
 
 type CreateBasicFormRequest struct {
@@ -33,7 +31,7 @@ type CreateBasicFormRequest struct {
 	FilledByOperatorID *uint
 
 	// page 1
-	BirthDate            time.Time
+	BirthDate            BirthDate
 	SocialSecurityNumber string
 	Gender               uint
 	IsAtba               bool
@@ -47,7 +45,7 @@ type UpdateBasicFormRequest struct {
 	FormID uint
 
 	// page 1
-	BirthDate            *time.Time
+	BirthDate            *BirthDate
 	SocialSecurityNumber *string
 	Gender               *uint
 	IsAtba               *bool

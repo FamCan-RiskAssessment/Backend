@@ -2,7 +2,6 @@ package form
 
 import (
 	"mime/multipart"
-	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -205,7 +204,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
-		BirthDate:            (*time.Time)(params.BirthDate),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,
@@ -1113,7 +1112,7 @@ func (formController *AdminFormController) CreateFormForUser(ctx *gin.Context) {
 	request := formdto.CreateBasicFormRequest{
 		UserID:               params.UserID,
 		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
-		BirthDate:            params.BirthDate.Time(),
+		BirthDate:            params.BirthDate,
 		SocialSecurityNumber: params.SocialSecurityNumber,
 		Gender:               params.Gender,
 		IsAtba:               params.IsAtba,

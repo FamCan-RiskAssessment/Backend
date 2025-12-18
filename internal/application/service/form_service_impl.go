@@ -17,6 +17,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/validation"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/jalaali/go-jalaali"
 )
 
 type FormService struct {
@@ -323,7 +324,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthDate:            request.BirthDate,
+		BirthDate:            request.BirthDate.Time,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: request.SocialSecurityNumber,
 		Height:               request.Height,
@@ -1656,7 +1657,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		ID:                   basic.ID,
 		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
-		BirthDate:            basic.BirthDate,
+		BirthDate:            formdto.BirthDate(jalaali.From(basic.BirthDate)),
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: basic.SocialSecurityNumber,
 		Height:               basic.Height,
@@ -2204,7 +2205,7 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 	}
 
 	if request.BirthDate != nil {
-		info.BirthDate = *request.BirthDate
+		info.BirthDate = (*request.BirthDate).Time
 	}
 	if request.SocialSecurityNumber != nil {
 		info.SocialSecurityNumber = *request.SocialSecurityNumber

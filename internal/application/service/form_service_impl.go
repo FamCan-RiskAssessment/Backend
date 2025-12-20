@@ -1571,6 +1571,18 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.SecondhandSmoke = request.SecondhandSmoke
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
+	info.CurrentCigaretteSmoking = request.CurrentCigaretteSmoking
+	info.CurrentRolledTobacco = request.CurrentRolledTobacco
+	info.CurrentPipeSmoking = request.CurrentPipeSmoking
+	info.CurrentHookahUse = request.CurrentHookahUse
+	info.CurrentChiboukSmoking = request.CurrentChiboukSmoking
+	info.CurrentOpiumUse = request.CurrentOpiumUse
+	info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
+	info.FormerHandRolledTobacco = request.FormerHandRolledTobacco
+	info.FormerPipeSmoking = request.FormerPipeSmoking
+	info.FormerHookahUse = request.FormerHookahUse
+	info.FormerChiboukSmoking = request.FormerChiboukSmoking
+	info.FormerOpiumUse = request.FormerOpiumUse
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)
@@ -2118,6 +2130,18 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		SecondhandSmoke:              info.SecondhandSmoke,
 		SecondhandSmokeLocation:      info.SecondhandSmokeLocation,
 		LungDiseaseHistory:           info.LungDiseaseHistory,
+		CurrentCigaretteSmoking:      info.CurrentCigaretteSmoking,
+		CurrentRolledTobacco:         info.CurrentRolledTobacco,
+		CurrentPipeSmoking:           info.CurrentPipeSmoking,
+		CurrentHookahUse:             info.CurrentHookahUse,
+		CurrentChiboukSmoking:        info.CurrentChiboukSmoking,
+		CurrentOpiumUse:              info.CurrentOpiumUse,
+		FormerCigaretteSmoking:       info.FormerCigaretteSmoking,
+		FormerHandRolledTobacco:      info.FormerHandRolledTobacco,
+		FormerPipeSmoking:            info.FormerPipeSmoking,
+		FormerHookahUse:              info.FormerHookahUse,
+		FormerChiboukSmoking:         info.FormerChiboukSmoking,
+		FormerOpiumUse:               info.FormerOpiumUse,
 	}, nil
 }
 
@@ -3127,6 +3151,43 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
+
+	if request.CurrentCigaretteSmoking != nil {
+		info.CurrentCigaretteSmoking = request.CurrentCigaretteSmoking
+	}
+	if request.CurrentRolledTobacco != nil {
+		info.CurrentRolledTobacco = request.CurrentRolledTobacco
+	}
+	if request.CurrentPipeSmoking != nil {
+		info.CurrentPipeSmoking = request.CurrentPipeSmoking
+	}
+	if request.CurrentHookahUse != nil {
+		info.CurrentHookahUse = request.CurrentHookahUse
+	}
+	if request.CurrentChiboukSmoking != nil {
+		info.CurrentChiboukSmoking = request.CurrentChiboukSmoking
+	}
+	if request.CurrentOpiumUse != nil {
+		info.CurrentOpiumUse = request.CurrentOpiumUse
+	}
+	if request.FormerCigaretteSmoking != nil {
+		info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
+	}
+	if request.FormerHandRolledTobacco != nil {
+		info.FormerHandRolledTobacco = request.FormerHandRolledTobacco
+	}
+	if request.FormerPipeSmoking != nil {
+		info.FormerPipeSmoking = request.FormerPipeSmoking
+	}
+	if request.FormerHookahUse != nil {
+		info.FormerHookahUse = request.FormerHookahUse
+	}
+	if request.FormerChiboukSmoking != nil {
+		info.FormerChiboukSmoking = request.FormerChiboukSmoking
+	}
+	if request.FormerOpiumUse != nil {
+		info.FormerOpiumUse = request.FormerOpiumUse
+	}
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)

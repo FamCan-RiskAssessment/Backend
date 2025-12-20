@@ -284,6 +284,18 @@ type UpsertNavidFormRequest struct {
 	SecondhandSmoke              bool
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
+	CurrentCigaretteSmoking      *bool
+	CurrentRolledTobacco         *bool
+	CurrentPipeSmoking           *bool
+	CurrentHookahUse             *bool
+	CurrentChiboukSmoking        *bool
+	CurrentOpiumUse              *bool
+	FormerCigaretteSmoking       *bool
+	FormerHandRolledTobacco      *bool
+	FormerPipeSmoking            *bool
+	FormerHookahUse              *bool
+	FormerChiboukSmoking         *bool
+	FormerOpiumUse               *bool
 
 	// Attention question answer
 	AttentionCorrect *bool
@@ -551,6 +563,18 @@ type UpdateNavidFormRequest struct {
 	SecondhandSmoke              *bool
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
+	CurrentCigaretteSmoking      *bool
+	CurrentRolledTobacco         *bool
+	CurrentPipeSmoking           *bool
+	CurrentHookahUse             *bool
+	CurrentChiboukSmoking        *bool
+	CurrentOpiumUse              *bool
+	FormerCigaretteSmoking       *bool
+	FormerHandRolledTobacco      *bool
+	FormerPipeSmoking            *bool
+	FormerHookahUse              *bool
+	FormerChiboukSmoking         *bool
+	FormerOpiumUse               *bool
 
 	// Attention question answer
 	AttentionCorrect *bool

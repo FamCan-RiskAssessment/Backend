@@ -523,6 +523,18 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation,omitempty"`
 		AttentionCorrect             *bool   `json:"attentionCorrect,omitempty"`
 		LungDiseaseHistory           *string `json:"lungDiseaseHistory,omitempty"`
+		CurrentCigaretteSmoking      *bool   `json:"Csig,omitempty"`
+		CurrentRolledTobacco         *bool   `json:"CsigBarg,omitempty"`
+		CurrentPipeSmoking           *bool   `json:"Cpip,omitempty"`
+		CurrentHookahUse             *bool   `json:"Cghel,omitempty"`
+		CurrentChiboukSmoking        *bool   `json:"Cchop,omitempty"`
+		CurrentOpiumUse              *bool   `json:"Cteryak,omitempty"`
+		FormerCigaretteSmoking       *bool   `json:"Psig,omitempty"`
+		FormerHandRolledTobacco      *bool   `json:"PsigBarg,omitempty"`
+		FormerPipeSmoking            *bool   `json:"Ppip,omitempty"`
+		FormerHookahUse              *bool   `json:"Pghel,omitempty"`
+		FormerChiboukSmoking         *bool   `json:"Pchop,omitempty"`
+		FormerOpiumUse               *bool   `json:"Pteryak,omitempty"`
 	}
 
 	params := controller.Validate[UpsertNavidFormParams](ctx)
@@ -581,6 +593,18 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		SecondhandSmokeLocation:      params.SecondhandSmokeLocation,
 		AttentionCorrect:             params.AttentionCorrect,
 		LungDiseaseHistory:           params.LungDiseaseHistory,
+		CurrentCigaretteSmoking:      params.CurrentCigaretteSmoking,
+		CurrentRolledTobacco:         params.CurrentRolledTobacco,
+		CurrentPipeSmoking:           params.CurrentPipeSmoking,
+		CurrentHookahUse:             params.CurrentHookahUse,
+		CurrentChiboukSmoking:        params.CurrentChiboukSmoking,
+		CurrentOpiumUse:              params.CurrentOpiumUse,
+		FormerCigaretteSmoking:       params.FormerCigaretteSmoking,
+		FormerHandRolledTobacco:      params.FormerHandRolledTobacco,
+		FormerPipeSmoking:            params.FormerPipeSmoking,
+		FormerHookahUse:              params.FormerHookahUse,
+		FormerChiboukSmoking:         params.FormerChiboukSmoking,
+		FormerOpiumUse:               params.FormerOpiumUse,
 	}
 
 	if err := formController.formService.UpsertNavidForm(req); err != nil {

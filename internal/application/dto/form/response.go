@@ -313,4 +313,16 @@ type GetNavidFormResponse struct {
 	SecondhandSmoke              bool             `json:"secondhandSmoke"`
 	SecondhandSmokeLocation      *string          `json:"secondhandSmokeLocation,omitempty"`
 	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
+	CurrentCigaretteSmoking      *bool            `json:"Csig"`
+	CurrentRolledTobacco         *bool            `json:"CsigBarg"`
+	CurrentPipeSmoking           *bool            `json:"Cpip"`
+	CurrentHookahUse             *bool            `json:"Cghel"`
+	CurrentChiboukSmoking        *bool            `json:"Cchop"`
+	CurrentOpiumUse              *bool            `json:"Cteryak"`
+	FormerCigaretteSmoking       *bool            `json:"Psig"`
+	FormerHandRolledTobacco      *bool            `json:"PsigBarg"`
+	FormerPipeSmoking            *bool            `json:"Ppip"`
+	FormerHookahUse              *bool            `json:"Pghel"`
+	FormerChiboukSmoking         *bool            `json:"Pchop"`
+	FormerOpiumUse               *bool            `json:"Pteryak"`
 }

@@ -245,6 +245,18 @@ type NavidInfo struct {
 	SecondhandSmoke              bool    `gorm:"not null;default:false"`
 	SecondhandSmokeLocation      *string `gorm:"type:varchar(50)"`
 	LungDiseaseHistory           *string `gorm:"type:varchar(127)"`
+	CurrentCigaretteSmoking      *bool   `gorm:"type:boolean"`
+	CurrentRolledTobacco         *bool   `gorm:"type:boolean"`
+	CurrentPipeSmoking           *bool   `gorm:"type:boolean"`
+	CurrentHookahUse             *bool   `gorm:"type:boolean"`
+	CurrentChiboukSmoking        *bool   `gorm:"type:boolean"`
+	CurrentOpiumUse              *bool   `gorm:"type:boolean"`
+	FormerCigaretteSmoking       *bool   `gorm:"type:boolean"`
+	FormerHandRolledTobacco      *bool   `gorm:"type:boolean"`
+	FormerPipeSmoking            *bool   `gorm:"type:boolean"`
+	FormerHookahUse              *bool   `gorm:"type:boolean"`
+	FormerChiboukSmoking         *bool   `gorm:"type:boolean"`
+	FormerOpiumUse               *bool   `gorm:"type:boolean"`
 }
 
 type Premm5Result struct {

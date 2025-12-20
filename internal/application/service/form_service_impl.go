@@ -363,7 +363,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		FormType:                  FormType,
 		UserID:                    form.UserID,
 		FilledByOperatorID:        form.FilledByOperatorID,
-		SocialSecurityNumber:      basic.SocialSecurityNumber,
+		SocialSecurityNumber:      request.SocialSecurityNumber,
 		CreatedAt:                 form.CreatedAt,
 		UpdatedAt:                 form.UpdatedAt,
 		AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),

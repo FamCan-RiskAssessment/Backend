@@ -268,8 +268,6 @@ type UpsertNavidFormRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
-	SmokePastAvg                 *uint
-	SmokeCurrentAvg              *uint
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -291,11 +289,13 @@ type UpsertNavidFormRequest struct {
 	CurrentChiboukSmoking        *bool
 	CurrentOpiumUse              *bool
 	FormerCigaretteSmoking       *bool
-	FormerHandRolledTobacco      *bool
+	FormerRolledTobacco          *bool
 	FormerPipeSmoking            *bool
 	FormerHookahUse              *bool
 	FormerChiboukSmoking         *bool
 	FormerOpiumUse               *bool
+	PelecSig                     *bool
+	CelecSig                     *bool
 
 	// Attention question answer
 	AttentionCorrect *bool
@@ -337,6 +337,11 @@ type UpsertLungCancerRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
+	Bronchitis                   bool
+	LungIll                      bool
+	Fibrosis                     bool
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -493,6 +498,11 @@ type UpdateLungCancerRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
+	SmokePastAvg                 *uint
+	SmokeCurrentAvg              *uint
+	Bronchitis                   bool
+	LungIll                      bool
+	Fibrosis                     bool
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -547,8 +557,6 @@ type UpdateNavidFormRequest struct {
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
 	PastSmoking                  *string
-	SmokePastAvg                 *uint
-	SmokeCurrentAvg              *uint
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -570,11 +578,13 @@ type UpdateNavidFormRequest struct {
 	CurrentChiboukSmoking        *bool
 	CurrentOpiumUse              *bool
 	FormerCigaretteSmoking       *bool
-	FormerHandRolledTobacco      *bool
+	FormerRolledTobacco          *bool
 	FormerPipeSmoking            *bool
 	FormerHookahUse              *bool
 	FormerChiboukSmoking         *bool
 	FormerOpiumUse               *bool
+	PelecSig                     *bool
+	CelecSig                     *bool
 
 	// Attention question answer
 	AttentionCorrect *bool

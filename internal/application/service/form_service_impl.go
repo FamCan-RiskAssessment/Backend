@@ -1421,6 +1421,11 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
+	info.Bronchitis = request.Bronchitis
+	info.Fibrosis = request.Fibrosis
+	info.LungIll = request.LungIll
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -1555,8 +1560,6 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
-	info.SmokePastAvg = request.SmokePastAvg
-	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -1578,11 +1581,13 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.CurrentChiboukSmoking = request.CurrentChiboukSmoking
 	info.CurrentOpiumUse = request.CurrentOpiumUse
 	info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
-	info.FormerHandRolledTobacco = request.FormerHandRolledTobacco
+	info.FormerRolledTobacco = request.FormerRolledTobacco
 	info.FormerPipeSmoking = request.FormerPipeSmoking
 	info.FormerHookahUse = request.FormerHookahUse
 	info.FormerChiboukSmoking = request.FormerChiboukSmoking
 	info.FormerOpiumUse = request.FormerOpiumUse
+	info.PelecSig = request.PelecSig
+	info.CelecSig = request.CelecSig
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)
@@ -2040,6 +2045,11 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
+		SmokePastAvg:                 info.SmokePastAvg,
+		SmokeCurrentAvg:              info.SmokeCurrentAvg,
+		Bronchitis:                   info.Bronchitis,
+		Fibrosis:                     info.Fibrosis,
+		LungIll:                      info.LungIll,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
@@ -2114,8 +2124,6 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
-		SmokePastAvg:                 info.SmokePastAvg,
-		SmokeCurrentAvg:              info.SmokeCurrentAvg,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
@@ -2137,11 +2145,13 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		CurrentChiboukSmoking:        info.CurrentChiboukSmoking,
 		CurrentOpiumUse:              info.CurrentOpiumUse,
 		FormerCigaretteSmoking:       info.FormerCigaretteSmoking,
-		FormerHandRolledTobacco:      info.FormerHandRolledTobacco,
+		FormerRolledTobacco:          info.FormerRolledTobacco,
 		FormerPipeSmoking:            info.FormerPipeSmoking,
 		FormerHookahUse:              info.FormerHookahUse,
 		FormerChiboukSmoking:         info.FormerChiboukSmoking,
 		FormerOpiumUse:               info.FormerOpiumUse,
+		PelecSig:                     info.PelecSig,
+		CelecSig:                     info.CelecSig,
 	}, nil
 }
 
@@ -2985,6 +2995,11 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
+	info.Bronchitis = request.Bronchitis
+	info.Fibrosis = request.Fibrosis
+	info.LungIll = request.LungIll
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3133,8 +3148,6 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
-	info.SmokePastAvg = request.SmokePastAvg
-	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3173,8 +3186,8 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	if request.FormerCigaretteSmoking != nil {
 		info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
 	}
-	if request.FormerHandRolledTobacco != nil {
-		info.FormerHandRolledTobacco = request.FormerHandRolledTobacco
+	if request.FormerRolledTobacco != nil {
+		info.FormerRolledTobacco = request.FormerRolledTobacco
 	}
 	if request.FormerPipeSmoking != nil {
 		info.FormerPipeSmoking = request.FormerPipeSmoking
@@ -3188,6 +3201,8 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	if request.FormerOpiumUse != nil {
 		info.FormerOpiumUse = request.FormerOpiumUse
 	}
+	info.PelecSig = request.PelecSig
+	info.CelecSig = request.CelecSig
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)

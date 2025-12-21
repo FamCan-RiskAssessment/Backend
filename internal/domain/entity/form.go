@@ -176,6 +176,11 @@ type LungCancerInfo struct {
 	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
 	PastSmoking                  *string `gorm:"type:varchar(127)"`
+	SmokePastAvg                 *uint   `gorm:"type:int"`
+	SmokeCurrentAvg              *uint   `gorm:"type:int"`
+	Bronchitis                   bool    `gorm:"not null;default:false"`
+	LungIll                      bool    `gorm:"not null;default:false"`
+	Fibrosis                     bool    `gorm:"not null;default:false"`
 	LeaveSmoke                   *uint   `gorm:"type:int"`
 	SmokingStartAgePast          *uint   `gorm:"type:int"`
 	SmokingTypesPast             *string `gorm:"type:varchar(50)"`
@@ -229,8 +234,6 @@ type NavidInfo struct {
 	ChewedOpiumPerDayCurrent     *uint   `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint   `gorm:"type:int"`
 	PastSmoking                  *string `gorm:"type:varchar(127)"`
-	SmokePastAvg                 *uint   `gorm:"type:int"`
-	SmokeCurrentAvg              *uint   `gorm:"type:int"`
 	LeaveSmoke                   *uint   `gorm:"type:int"`
 	SmokingStartAgePast          *uint   `gorm:"type:int"`
 	SmokingTypesPast             *string `gorm:"type:varchar(50)"`
@@ -252,11 +255,13 @@ type NavidInfo struct {
 	CurrentChiboukSmoking        *bool   `gorm:"type:boolean"`
 	CurrentOpiumUse              *bool   `gorm:"type:boolean"`
 	FormerCigaretteSmoking       *bool   `gorm:"type:boolean"`
-	FormerHandRolledTobacco      *bool   `gorm:"type:boolean"`
+	FormerRolledTobacco          *bool   `gorm:"type:boolean"`
 	FormerPipeSmoking            *bool   `gorm:"type:boolean"`
 	FormerHookahUse              *bool   `gorm:"type:boolean"`
 	FormerChiboukSmoking         *bool   `gorm:"type:boolean"`
 	FormerOpiumUse               *bool   `gorm:"type:boolean"`
+	PelecSig                     *bool   `gorm:"type:boolean"`
+	CelecSig                     *bool   `gorm:"type:boolean"`
 }
 
 type Premm5Result struct {

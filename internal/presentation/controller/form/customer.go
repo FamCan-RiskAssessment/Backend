@@ -388,6 +388,11 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent,omitempty"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent,omitempty"`
 		PastSmoking                  *string `json:"pastSmoking,omitempty"`
+		SmokePastAvg                 *uint   `json:"smokePastAvg"`
+		SmokeCurrentAvg              *uint   `json:"smokeCurrentAvg"`
+		Bronchitis                   bool    `json:"bronshit"`
+		LungIll                      bool    `json:"lungill"`
+		Fibrosis                     bool    `json:"fibroz"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast,omitempty"`
 		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingTypesPast             *string `json:"smokingTypesPast,omitempty"`
@@ -444,6 +449,11 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
+		SmokePastAvg:                 params.SmokePastAvg,
+		SmokeCurrentAvg:              params.SmokeCurrentAvg,
+		Bronchitis:                   params.Bronchitis,
+		LungIll:                      params.LungIll,
+		Fibrosis:                     params.Fibrosis,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
@@ -506,8 +516,6 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent,omitempty"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent,omitempty"`
 		PastSmoking                  *string `json:"pastSmoking,omitempty"`
-		SmokePastAvg                 *uint   `json:"smokePastAvg"`
-		SmokeCurrentAvg              *uint   `json:"smokeCurrentAvg"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast,omitempty"`
 		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingTypesPast             *string `json:"smokingTypesPast,omitempty"`
@@ -530,11 +538,13 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		CurrentChiboukSmoking        *bool   `json:"Cchop,omitempty"`
 		CurrentOpiumUse              *bool   `json:"Cteryak,omitempty"`
 		FormerCigaretteSmoking       *bool   `json:"Psig,omitempty"`
-		FormerHandRolledTobacco      *bool   `json:"PsigBarg,omitempty"`
+		FormerRolledTobacco          *bool   `json:"PsigBarg,omitempty"`
 		FormerPipeSmoking            *bool   `json:"Ppip,omitempty"`
 		FormerHookahUse              *bool   `json:"Pghel,omitempty"`
 		FormerChiboukSmoking         *bool   `json:"Pchop,omitempty"`
 		FormerOpiumUse               *bool   `json:"Pteryak,omitempty"`
+		PelecSig                     *bool   `json:"PelecSig,omitempty"`
+		CelecSig                     *bool   `json:"CelecSig,omitempty"`
 	}
 
 	params := controller.Validate[UpsertNavidFormParams](ctx)
@@ -576,8 +586,6 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
-		SmokePastAvg:                 params.SmokePastAvg,
-		SmokeCurrentAvg:              params.SmokeCurrentAvg,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
@@ -600,11 +608,13 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		CurrentChiboukSmoking:        params.CurrentChiboukSmoking,
 		CurrentOpiumUse:              params.CurrentOpiumUse,
 		FormerCigaretteSmoking:       params.FormerCigaretteSmoking,
-		FormerHandRolledTobacco:      params.FormerHandRolledTobacco,
+		FormerRolledTobacco:          params.FormerRolledTobacco,
 		FormerPipeSmoking:            params.FormerPipeSmoking,
 		FormerHookahUse:              params.FormerHookahUse,
 		FormerChiboukSmoking:         params.FormerChiboukSmoking,
 		FormerOpiumUse:               params.FormerOpiumUse,
+		PelecSig:                     params.PelecSig,
+		CelecSig:                     params.CelecSig,
 	}
 
 	if err := formController.formService.UpsertNavidForm(req); err != nil {

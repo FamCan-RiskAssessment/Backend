@@ -463,6 +463,11 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
 		PastSmoking                  *string `json:"pastSmoking"`
+		SmokePastAvg                 *uint   `json:"smokePastAvg"`
+		SmokeCurrentdAvg             *uint   `json:"smokeCurrentAvg"`
+		Bronchitis                   bool    `json:"bronshit"`
+		LungIll                      bool    `json:"lungill"`
+		Fibrosis                     bool    `json:"fibroz"`
 		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
 		SmokingTypesPast             *string `json:"smokingTypesPast"`
@@ -519,6 +524,11 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
+		SmokePastAvg:                 params.SmokePastAvg,
+		SmokeCurrentAvg:              params.SmokeCurrentdAvg,
+		Bronchitis:                   params.Bronchitis,
+		LungIll:                      params.LungIll,
+		Fibrosis:                     params.Fibrosis,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
@@ -542,7 +552,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.updateForm")
-	controller.Response(ctx, 201, message, formdto.UpsertNavidFormResponse{})
+	controller.Response(ctx, 201, message, formdto.UpsertLungCancerResponse{})
 }
 
 func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
@@ -581,8 +591,6 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
 		PastSmoking                  *string `json:"pastSmoking"`
-		SmokePastAvg                 *uint   `json:"smokePastAvg"`
-		SmokeCurrentdAvg             *uint   `json:"smokeCurrentAvg"`
 		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
 		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
 		SmokingTypesPast             *string `json:"smokingTypesPast"`
@@ -605,11 +613,13 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 		CurrentChiboukSmoking        *bool   `json:"Cchop,omitempty"`
 		CurrentOpiumUse              *bool   `json:"Cteryak,omitempty"`
 		FormerCigaretteSmoking       *bool   `json:"Psig,omitempty"`
-		FormerHandRolledTobacco      *bool   `json:"PsigBarg,omitempty"`
+		FormerRolledTobacco          *bool   `json:"PsigBarg,omitempty"`
 		FormerPipeSmoking            *bool   `json:"Ppip,omitempty"`
 		FormerHookahUse              *bool   `json:"Pghel,omitempty"`
 		FormerChiboukSmoking         *bool   `json:"Pchop,omitempty"`
 		FormerOpiumUse               *bool   `json:"Pteryak,omitempty"`
+		PelecSig                     *bool   `json:"PelecSig,omitempty"`
+		CelecSig                     *bool   `json:"CelecSig,omitempty"`
 	}
 
 	params := controller.Validate[UpdateNavidFormParams](ctx)
@@ -651,8 +661,6 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent:     params.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         params.HookahPerWeekCurrent,
 		PastSmoking:                  params.PastSmoking,
-		SmokePastAvg:                 params.SmokePastAvg,
-		SmokeCurrentAvg:              params.SmokeCurrentdAvg,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
@@ -675,11 +683,13 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 		CurrentChiboukSmoking:        params.CurrentChiboukSmoking,
 		CurrentOpiumUse:              params.CurrentOpiumUse,
 		FormerCigaretteSmoking:       params.FormerCigaretteSmoking,
-		FormerHandRolledTobacco:      params.FormerHandRolledTobacco,
+		FormerRolledTobacco:          params.FormerRolledTobacco,
 		FormerPipeSmoking:            params.FormerPipeSmoking,
 		FormerHookahUse:              params.FormerHookahUse,
 		FormerChiboukSmoking:         params.FormerChiboukSmoking,
 		FormerOpiumUse:               params.FormerOpiumUse,
+		PelecSig:                     params.PelecSig,
+		CelecSig:                     params.CelecSig,
 	}
 
 	if err := formController.formService.UpdateNavidForm(req); err != nil {

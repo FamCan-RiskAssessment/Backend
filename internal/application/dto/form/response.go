@@ -247,6 +247,11 @@ type GetLungCancerResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	SmokePastAvg                 *uint            `json:"smokePastAvg"`
+	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg"`
+	Bronchitis                   bool             `json:"bronshit"`
+	LungIll                      bool             `json:"fibroz"`
+	Fibrosis                     bool             `json:"lungill"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
@@ -297,8 +302,6 @@ type GetNavidFormResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
-	SmokePastAvg                 *uint            `json:"smokePastAvg,omitempty"`
-	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg,omitempty"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
@@ -320,9 +323,11 @@ type GetNavidFormResponse struct {
 	CurrentChiboukSmoking        *bool            `json:"Cchop"`
 	CurrentOpiumUse              *bool            `json:"Cteryak"`
 	FormerCigaretteSmoking       *bool            `json:"Psig"`
-	FormerHandRolledTobacco      *bool            `json:"PsigBarg"`
+	FormerRolledTobacco          *bool            `json:"PsigBarg"`
 	FormerPipeSmoking            *bool            `json:"Ppip"`
 	FormerHookahUse              *bool            `json:"Pghel"`
 	FormerChiboukSmoking         *bool            `json:"Pchop"`
 	FormerOpiumUse               *bool            `json:"Pteryak"`
+	PelecSig                     *bool            `json:"PelecSig"`
+	CelecSig                     *bool            `json:"CelecSig"`
 }

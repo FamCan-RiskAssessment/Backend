@@ -331,10 +331,14 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, err
 	}
 
+	y, m, d, _ := jalaali.ToGregorian(request.BirthDate.Year(), jalaali.Month(request.BirthDate.Month()), request.BirthDate.Day())
+
+	birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthDate:            request.BirthDate.Time,
+		BirthDate:            birthDate,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: encryptedSSN,
 		Height:               request.Height,
@@ -1693,11 +1697,15 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		return formdto.GetBasicFormResponse{}, err
 	}
 
+	y, m, d, _ := jalaali.ToJalaali(basic.BirthDate.Year(), basic.BirthDate.Month(), basic.BirthDate.Day())
+
+	birthDate := time.Date(y, time.Month(int(m)), d, 0, 0, 0, 0, time.UTC)
+
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
-		BirthDate:            formdto.BirthDate(jalaali.From(basic.BirthDate)),
+		BirthDate:            formdto.BirthDate(jalaali.From(birthDate)),
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: decryptedSSN,
 		Height:               basic.Height,
@@ -2269,6 +2277,10 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 
 	if request.BirthDate != nil {
 		info.BirthDate = (*request.BirthDate).Time
+		y, m, d, _ := jalaali.ToGregorian((*request.BirthDate).Year(), jalaali.Month((*request.BirthDate).Month()), (*request.BirthDate).Day())
+
+		birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		info.BirthDate = birthDate
 	}
 	if request.SocialSecurityNumber != nil {
 		// Encrypt Social Security Number before updating

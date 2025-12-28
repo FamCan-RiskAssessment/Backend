@@ -147,12 +147,6 @@ type LungCancerInfo struct {
 	InsuranceStatus              *string `gorm:"type:varchar(127)"`
 	SupplementaryInsuranceStatus *bool   `gorm:"type:boolean"`
 	SupplementaryInsurances      *string `gorm:"type:varchar(50)"`
-	Hypertension                 bool    `gorm:"not null;default:false"`
-	HypertensionTreatment        *bool   `gorm:"type:boolean"`
-	HeartDisease                 bool    `gorm:"not null;default:false"`
-	HeartDiseaseTreatment        *bool   `gorm:"type:boolean"`
-	Diabetes                     bool    `gorm:"not null;default:false"`
-	DiabetesTreatment            *bool   `gorm:"type:boolean"`
 	ChronicLungDisease           *bool   `gorm:"type:boolean"`
 	ChronicLungDiseaseType       *string `gorm:"type:varchar(50)"`
 	LungCancerHistory            bool    `gorm:"not null;default:false"`

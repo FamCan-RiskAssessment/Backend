@@ -358,9 +358,6 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 	drinksAlcohol := formIndex%4 == 0
 	insuranceStatus := insuranceStatuses[formIndex%len(insuranceStatuses)]
 	SupplementaryInsuranceStatus := formIndex%2 == 0
-	hasHypertension := formIndex%4 == 0
-	hasHeartDisease := formIndex%5 == 0
-	hasDiabetes := formIndex%6 == 0
 	hasLungCancerHistory := formIndex%7 == 0
 	hasOtherCancerHistory := formIndex%8 == 0
 	hasLungCancerFamily := formIndex%9 == 0
@@ -379,12 +376,6 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		InsuranceStatus:              &insuranceStatus,
 		SupplementaryInsuranceStatus: &SupplementaryInsuranceStatus,
 		SupplementaryInsurances:      stringPtr(fmt.Sprintf("بیمه %d", formIndex+1)),
-		Hypertension:                 hasHypertension,
-		HypertensionTreatment:        &hasHypertension,
-		HeartDisease:                 hasHeartDisease,
-		HeartDiseaseTreatment:        &hasHeartDisease,
-		Diabetes:                     hasDiabetes,
-		DiabetesTreatment:            &hasDiabetes,
 		ChronicLungDisease:           &drinksAlcohol,
 		ChronicLungDiseaseType:       &lungDiseaseType,
 		LungCancerHistory:            hasLungCancerHistory,

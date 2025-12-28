@@ -1648,6 +1648,7 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	}
 
 	FilledForms := formdto.FilledFormsResponse{}
+	FilledForms.Basic = boolPtr(true)
 	generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
 	if generalHealth != nil {
 		FilledForms.GeneralHealth = boolPtr(true)
@@ -2279,6 +2280,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			Name = &contactInfo.Name
 		}
 		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
 		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
 		if generalHealth != nil {
 			FilledForms.GeneralHealth = boolPtr(true)
@@ -2460,6 +2462,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
 		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
 		if generalHealth != nil {
 			FilledForms.GeneralHealth = boolPtr(true)
@@ -2547,6 +2550,7 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
 		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
 		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
 		if generalHealth != nil {
 			FilledForms.GeneralHealth = boolPtr(true)

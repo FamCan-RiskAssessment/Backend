@@ -7,14 +7,15 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID               uint          `json:"id"`
-	Status               string        `json:"status"`
-	FormType             enum.FormType `json:"formType"`
-	UserID               uint          `json:"user_id"`
-	OperatorID           *uint         `json:"operatorId,omitempty"`
-	FilledByOperatorID   *uint         `json:"filledByOperatorId,omitempty"`
-	SocialSecurityNumber string        `json:"socialSecurityNumber"`
-	Name                 *string       `json:"name,omitempty"`
+	FormID               uint                 `json:"id"`
+	Status               string               `json:"status"`
+	FormType             enum.FormType        `json:"formType"`
+	UserID               uint                 `json:"user_id"`
+	OperatorID           *uint                `json:"operatorId,omitempty"`
+	FilledByOperatorID   *uint                `json:"filledByOperatorId,omitempty"`
+	SocialSecurityNumber string               `json:"socialSecurityNumber"`
+	Name                 *string              `json:"name,omitempty"`
+	FilledForms          *FilledFormsResponse `json:"filledForms,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`

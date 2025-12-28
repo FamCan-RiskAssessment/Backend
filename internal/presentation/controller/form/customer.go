@@ -958,6 +958,27 @@ func (formController *CustomerFormController) GetFamilyCancer(ctx *gin.Context) 
 
 	controller.Response(ctx, 200, "", response)
 }
+func (formController *CustomerFormController) GetFamilyCancerList(ctx *gin.Context) {
+	type GetFamilyCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[GetFamilyCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	request := formdto.GetPartialFormRequest{
+		UserID: userID.(uint),
+		FormID: params.FormID,
+	}
+
+	response, err := formController.formService.GetFamilyCancerList(request)
+	if err != nil {
+		panic(err)
+	}
+
+	controller.Response(ctx, 200, "", response)
+}
 func (formController *CustomerFormController) GetContact(ctx *gin.Context) {
 	type GetContactParams struct {
 		FormID uint `uri:"formID" validate:"required"`

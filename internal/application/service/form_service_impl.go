@@ -1930,6 +1930,56 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 	return FamilyCancersResponse, nil
 }
 
+func (formService *FormService) GetFamilyCancerList(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerListResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+
+	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	FamilyCancersResponse := formdto.GetFamilyCancerListResponse{}
+	FamilyCancersResponse.AmeAmoCancer = false
+	FamilyCancersResponse.FatherCancer = false
+	FamilyCancersResponse.KhaleDaeiCancer = false
+	FamilyCancersResponse.MotherCancer = false
+	FamilyCancersResponse.SiblingCancer = false
+	if len(info) == 0 {
+		return FamilyCancersResponse, nil
+	}
+
+	for _, v := range info {
+		if v.Relative == enum.PaternalAunt || v.Relative == enum.PaternalUncle {
+			FamilyCancersResponse.AmeAmoCancer = true
+		} else if v.Relative == enum.MaternalAunt || v.Relative == enum.MaternalUncle {
+			FamilyCancersResponse.KhaleDaeiCancer = true
+		} else if v.Relative == enum.Mother {
+			FamilyCancersResponse.MotherCancer = true
+		} else if v.Relative == enum.Father {
+			FamilyCancersResponse.FatherCancer = true
+		} else if v.Relative == enum.Sister || v.Relative == enum.Brother {
+			FamilyCancersResponse.SiblingCancer = true
+		}
+	}
+
+	return FamilyCancersResponse, nil
+}
+
 func (formService *FormService) GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {

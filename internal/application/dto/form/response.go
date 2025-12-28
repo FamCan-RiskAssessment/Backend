@@ -164,6 +164,13 @@ type FamilyCancerResponse struct {
 type GetFamilyCancerResponse struct {
 	FamilyCancers []FamilyCancerResponse `json:"familyCancers"`
 }
+type GetFamilyCancerListResponse struct {
+	AmeAmoCancer    bool `json:"ameAmoCancer"`
+	FatherCancer    bool `json:"fatherCancer"`
+	KhaleDaeiCancer bool `json:"khaleDaeiCancer"`
+	MotherCancer    bool `json:"motherCancer"`
+	SiblingCancer   bool `json:"siblingCancer"`
+}
 
 type GetMamographyResponse struct {
 	ID                           uint                  `json:"id"`

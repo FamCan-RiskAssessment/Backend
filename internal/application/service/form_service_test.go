@@ -2298,15 +2298,6 @@ func (suite *FormServiceTestSuite) TestUpdateLungCancer_NotFound() {
 	assert.NoError(suite.T(), err)
 }
 
-// Helper functions for pointers
-func boolPtr(b bool) *bool {
-	return &b
-}
-
-func strPtr(s string) *string {
-	return &s
-}
-
 func TestFormServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(FormServiceTestSuite))
 }

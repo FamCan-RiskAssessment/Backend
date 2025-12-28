@@ -1653,15 +1653,50 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		return formdto.ChangeFormStatusResponse{}, err
 	}
 
+	FilledForms := formdto.FilledFormsResponse{}
+	generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
+	if generalHealth != nil {
+		FilledForms.GeneralHealth = boolPtr(true)
+	} else {
+		FilledForms.GeneralHealth = boolPtr(false)
+	}
+	mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
+	if mamography != nil {
+		FilledForms.Mamography = boolPtr(true)
+	} else {
+		FilledForms.Mamography = boolPtr(false)
+	}
+	cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+	if cancer != nil {
+		FilledForms.Cancer = boolPtr(true)
+	} else {
+		FilledForms.Cancer = boolPtr(false)
+	}
+	familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
+	if familyCancer != nil {
+		FilledForms.FamilyCancer = boolPtr(true)
+	} else {
+		FilledForms.FamilyCancer = boolPtr(false)
+	}
+	if form.FormType == enum.Navid {
+		navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+		if navidInfo != nil {
+			FilledForms.NavidForm = boolPtr(true)
+		} else {
+			FilledForms.NavidForm = boolPtr(false)
+		}
+	}
+
 	response := formdto.ChangeFormStatusResponse{
 		Form: formdto.BasicFormResponse{
-			FormID:     form.ID,
-			FormType:   form.FormType,
-			Status:     form.Status.String(),
-			OperatorID: form.OperatorID,
-			UserID:     form.UserID,
-			CreatedAt:  form.CreatedAt,
-			UpdatedAt:  form.UpdatedAt,
+			FormID:      form.ID,
+			FormType:    form.FormType,
+			Status:      form.Status.String(),
+			OperatorID:  form.OperatorID,
+			UserID:      form.UserID,
+			CreatedAt:   form.CreatedAt,
+			UpdatedAt:   form.UpdatedAt,
+			FilledForms: &FilledForms,
 		},
 	}
 
@@ -1925,6 +1960,56 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 			CancerAge:  v.CancerAge,
 			Pictures:   pictureURLs,
 		})
+	}
+
+	return FamilyCancersResponse, nil
+}
+
+func (formService *FormService) GetFamilyCancerList(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerListResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+
+	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	FamilyCancersResponse := formdto.GetFamilyCancerListResponse{}
+	FamilyCancersResponse.AmeAmoCancer = false
+	FamilyCancersResponse.FatherCancer = false
+	FamilyCancersResponse.KhaleDaeiCancer = false
+	FamilyCancersResponse.MotherCancer = false
+	FamilyCancersResponse.SiblingCancer = false
+	if len(info) == 0 {
+		return FamilyCancersResponse, nil
+	}
+
+	for _, v := range info {
+		if v.Relative == enum.PaternalAunt || v.Relative == enum.PaternalUncle {
+			FamilyCancersResponse.AmeAmoCancer = true
+		} else if v.Relative == enum.MaternalAunt || v.Relative == enum.MaternalUncle {
+			FamilyCancersResponse.KhaleDaeiCancer = true
+		} else if v.Relative == enum.Mother {
+			FamilyCancersResponse.MotherCancer = true
+		} else if v.Relative == enum.Father {
+			FamilyCancersResponse.FatherCancer = true
+		} else if v.Relative == enum.Sister || v.Relative == enum.Brother {
+			FamilyCancersResponse.SiblingCancer = true
+		}
 	}
 
 	return FamilyCancersResponse, nil
@@ -2205,6 +2290,39 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		} else if contactInfo != nil {
 			Name = &contactInfo.Name
 		}
+		FilledForms := formdto.FilledFormsResponse{}
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
@@ -2217,6 +2335,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -2352,6 +2471,39 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		FilledForms := formdto.FilledFormsResponse{}
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
@@ -2362,6 +2514,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -2405,6 +2558,39 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		FilledForms := formdto.FilledFormsResponse{}
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
@@ -2415,6 +2601,7 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -3428,4 +3615,13 @@ func (formService *FormService) GetAllFormTypes() ([]generaldto.EnumResponse, er
 		}
 	}
 	return response, nil
+}
+
+// Helper functions for pointers
+func strPtr(s string) *string {
+	return &s
+}
+
+func boolPtr(b bool) *bool {
+	return &b
 }

@@ -232,6 +232,17 @@ type UpsertContactRequest struct {
 	Phone3                *string
 }
 
+type UpsertFamilyCancerListRequest struct {
+	UserID uint
+	FormID uint
+
+	AmeAmoCancer    bool
+	FatherCancer    bool
+	KhaleDaeiCancer bool
+	MotherCancer    bool
+	SiblingCancer   bool
+}
+
 type UpsertNavidFormRequest struct {
 	UserID uint
 	FormID uint

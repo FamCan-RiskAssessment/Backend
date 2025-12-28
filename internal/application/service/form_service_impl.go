@@ -1392,12 +1392,6 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.Hypertension = request.Hypertension
-	info.HypertensionTreatment = request.HypertensionTreatment
-	info.HeartDisease = request.HeartDisease
-	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
-	info.Diabetes = request.Diabetes
-	info.DiabetesTreatment = request.DiabetesTreatment
 	info.ChronicLungDisease = request.ChronicLungDisease
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	info.LungCancerHistory = request.LungCancerHistory
@@ -2109,12 +2103,6 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		InsuranceStatus:              info.InsuranceStatus,
 		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
 		SupplementaryInsurances:      info.SupplementaryInsurances,
-		Hypertension:                 info.Hypertension,
-		HypertensionTreatment:        info.HypertensionTreatment,
-		HeartDisease:                 info.HeartDisease,
-		HeartDiseaseTreatment:        info.HeartDiseaseTreatment,
-		Diabetes:                     info.Diabetes,
-		DiabetesTreatment:            info.DiabetesTreatment,
 		ChronicLungDisease:           info.ChronicLungDisease,
 		ChronicLungDiseaseType:       info.ChronicLungDiseaseType,
 		LungCancerHistory:            info.LungCancerHistory,
@@ -3149,18 +3137,6 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
 	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
-	if request.Hypertension != nil {
-		info.Hypertension = *request.Hypertension
-	}
-	info.HypertensionTreatment = request.HypertensionTreatment
-	if request.HeartDisease != nil {
-		info.HeartDisease = *request.HeartDisease
-	}
-	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
-	if request.Diabetes != nil {
-		info.Diabetes = *request.Diabetes
-	}
-	info.DiabetesTreatment = request.DiabetesTreatment
 	info.ChronicLungDisease = request.ChronicLungDisease
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	if request.LungCancerHistory != nil {

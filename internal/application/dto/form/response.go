@@ -237,12 +237,6 @@ type GetLungCancerResponse struct {
 	SupplementaryInsuranceStatus *bool            `json:"takmilBime"`
 	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
 	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
-	Hypertension                 bool             `json:"hypertension"`
-	HypertensionTreatment        *bool            `json:"hypertensionTreatment"`
-	HeartDisease                 bool             `json:"heartDisease"`
-	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment"`
-	Diabetes                     bool             `json:"diabetes"`
-	DiabetesTreatment            *bool            `json:"diabetesTreatment"`
 	ChronicLungDisease           *bool            `json:"chronicLungDisease"`
 	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`
 	LungCancerHistory            bool             `json:"lungCancerHistory"`

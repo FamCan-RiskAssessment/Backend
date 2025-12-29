@@ -78,7 +78,7 @@ type MamoGraphyInfo struct {
 	OralTwoLastYears             *bool                           `gorm:"type:boolean"`
 	MamoGraphy                   *bool                           `gorm:"type:boolean"`
 	MamoGraphyPicturePaths       []string                        `gorm:"type:jsonb;serializer:json"`
-	BreastDensity                *uint                           `gorm:"type:int"`
+	BreastDensity                *string                         `gorm:"type:int"`
 	Falop                        *bool                           `gorm:"type:boolean"`
 	Andometrioz                  *bool                           `gorm:"type:boolean"`
 	LeavePestan                  bool                            `gorm:"not null;default:false"`

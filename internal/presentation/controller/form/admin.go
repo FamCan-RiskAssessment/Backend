@@ -310,7 +310,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
 		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
 		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
-		BreastDensity                *uint                   `form:"breastDensity,omitempty"`
+		BreastDensity                *string                 `form:"breastDensity,omitempty"`
 		Falop                        *bool                   `form:"falop,omitempty"`
 		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
 		LeavePestan                  bool                    `form:"leavePestan"`

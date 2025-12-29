@@ -194,7 +194,7 @@ type GetMamographyResponse struct {
 	OralTwoLastYears             *bool                 `json:"oralTwoLastYears"`
 	MamoGraphy                   *bool                 `json:"mamoGraphy"`
 	MamoGraphyPictures           []string              `json:"mamoGraphyPictures,omitempty"`
-	BreastDensity                uint                  `json:"breastDensity"`
+	BreastDensity                string                `json:"breastDensity"`
 	Falop                        *bool                 `json:"falop"`
 	Andometrioz                  *bool                 `json:"andometrioz"`
 	LeavePestan                  bool                  `json:"leavePestan"`

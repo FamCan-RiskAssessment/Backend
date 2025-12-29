@@ -2265,13 +2265,16 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
-		var SocialSecurityNumber string
+		var decryptedSSN string
 		var Name *string
 		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
 		if err != nil {
 			return nil, 0, err
 		} else if basicInfo != nil {
-			SocialSecurityNumber = basicInfo.SocialSecurityNumber
+			decryptedSSN, err = formService.fieldEncryptor.Decrypt(basicInfo.SocialSecurityNumber)
+			if err != nil {
+				return nil, 0, err
+			}
 		}
 		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
 		if err != nil {
@@ -2317,7 +2320,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
 			Name:                      Name,
-			SocialSecurityNumber:      SocialSecurityNumber,
+			SocialSecurityNumber:      decryptedSSN,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,

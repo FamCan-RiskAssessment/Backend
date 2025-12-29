@@ -146,8 +146,10 @@ func (s3StorageS3Storage *S3Storage) GetPresignedURL(bucketType enum.BucketType,
 	bucket := s3StorageS3Storage.buckets[bucketType]
 
 	req, _ := s3StorageS3Storage.clients.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(objectKey),
+		Bucket:                     aws.String(bucket),
+		Key:                        aws.String(objectKey),
+		ResponseContentType:        strPtr("image/jpeg"),
+		ResponseContentDisposition: strPtr("inline"),
 	})
 
 	url, err := req.Presign(expiration)
@@ -156,4 +158,9 @@ func (s3StorageS3Storage *S3Storage) GetPresignedURL(bucketType enum.BucketType,
 	}
 
 	return url, nil
+}
+
+// Helper function
+func strPtr(s string) *string {
+	return &s
 }

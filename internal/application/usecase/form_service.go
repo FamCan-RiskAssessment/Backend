@@ -44,6 +44,10 @@ type FormService interface {
 	GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint, userID uint) error
 	RejectForm(formID uint, userID uint) error
+	RequestPatientResponse(formID uint, userID uint) error
+	RequestDocuments(formID uint, userID uint) error
+	ResubmitRejectedForm(formID uint, userID uint) error
+	SubmitDocuments(formID uint, userID uint) error
 	AssignOperator(request formdto.AssignOperatorRequest) error
 	UnassignOperator(request formdto.UnassignOperatorRequest) error
 

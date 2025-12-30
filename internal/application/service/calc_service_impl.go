@@ -73,6 +73,15 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.Form}
 	}
 
+	// Validate form is in ReadyForCalculation status
+	if form.Status != enum.FormStatusReadyForCalculation {
+		log.Printf("[CALC] Form not ready for calculation - FormID: %d, CurrentStatus: %s, UserID: %d", request.FormID, form.Status.String(), request.UserID)
+		return calcdto.ModelResponse{}, &exception.CalcError{
+			Type:    exception.ErrorTypeInvalidData,
+			Message: fmt.Sprintf("form must be in ReadyForCalculation status, current status: %s", form.Status.String()),
+		}
+	}
+
 	// Validate calculation ID
 	validCalcID := false
 	var modelName string
@@ -123,8 +132,8 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		}
 	}
 
-	// Update form status to sent to calc
-	form.Status = enum.FormStatusSentToCalc
+	// Update form status to calculated
+	form.Status = enum.FormStatusCalculated
 	err = calcService.formRepository.UpdateForm(calcService.db, form)
 	if err != nil {
 		log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)

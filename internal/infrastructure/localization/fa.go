@@ -3,6 +3,7 @@ package localization
 var Persian = map[string]interface{}{
 	"OTP":                 "رمز یکبار مصرف",
 	"form":                "فرم",
+	"status":              "وضعیت",
 	"firstName":           "نام",
 	"lastName":            "نام خانوادگی",
 	"phone":               "شماره تماس",
@@ -29,6 +30,7 @@ var Persian = map[string]interface{}{
 	"record":              "رکورد",
 	"mamography_info":     "داده های ماموگرافی",
 	"family_cancer_info":  "داده های مرتبط با سرطان خانوادگی",
+	"lung cancer information": "داده های مرتبط با سرطان ریه",
 	"ticketComment":       "نظر در مورد درخواست پشتیبانی",
 	"report":              "گزارش",
 	"contactInformation":  "پل ارتباطی",
@@ -82,6 +84,7 @@ var Persian = map[string]interface{}{
 		"calcMissingData":        "داده های لازم برای محاسبه {0} موجود نیست.",
 		"calcInvalidData":        "داده های ارسالی برای محاسبه {0} نامعتبر است.",
 		"calcDatabaseError":      "خطایی در پایگاه داده رخ داد. لطفا با پشتیبانی تماس بگیرید.",
+		"invalid_transition":     "تغییر وضعیت {0} به وضعیت درخواستی مجاز نیست.",
 	},
 	"successMessage": map[string]interface{}{
 		"userRegister":              "ثبت نام موفق بود! لطفاً پیامک های خود را بررسی کنید تا حساب خود را تأیید کرده و فرآیند ثبت نام را تکمیل نمایید.",

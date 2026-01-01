@@ -1,8 +1,6 @@
 package validation
 
 import (
-	"fmt"
-
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 )
@@ -19,8 +17,8 @@ var validTransitions = map[FormStatusTransition]bool{
 
 	// Submitted can transition to:
 	{enum.FormStatusSubmitted, enum.FormStatusWaitingForPatientResponse}: true,
-	{enum.FormStatusSubmitted, enum.FormStatusReadyForCalculation}:        true,
-	{enum.FormStatusSubmitted, enum.FormStatusRejected}:                   true,
+	{enum.FormStatusSubmitted, enum.FormStatusReadyForCalculation}:       true,
+	{enum.FormStatusSubmitted, enum.FormStatusRejected}:                  true,
 
 	// WaitingForPatientResponse can transition to:
 	{enum.FormStatusWaitingForPatientResponse, enum.FormStatusWaitingForDocuments}: true,
@@ -41,9 +39,9 @@ func ValidateStatusTransition(from, to enum.FormStatus) error {
 	transition := FormStatusTransition{FromStatus: from, ToStatus: to}
 
 	if !validTransitions[transition] {
-		return &exception.FieldError{
+		return exception.FieldError{
 			Field: "status",
-			Tag:   fmt.Sprintf("invalid_transition_%s_to_%s", from.String(), to.String()),
+			Tag:   "invalid_transition",
 		}
 	}
 

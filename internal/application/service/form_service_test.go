@@ -82,7 +82,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	form := &entity.Form{}
 	form.ID = 1
 	form.UserID = userID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 	form.FilledByOperatorID = nil
 	form.CreatedAt = time.Now()
 	form.UpdatedAt = time.Now()
@@ -90,7 +90,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
-		return f.UserID == userID && f.Status == enum.FormStatusPending
+		return f.UserID == userID && f.Status == enum.FormStatusDraft
 	})).Run(func(args mock.Arguments) {
 		form := args.Get(1).(*entity.Form)
 		form.ID = 1
@@ -100,6 +100,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	suite.formRepository.On("CreateBasicInfo", suite.db, mock.MatchedBy(func(b *entity.BasicInfo) bool {
 		return b.FormID == form.ID
 	})).Return(nil)
+	suite.formRepository.On("FindAttentionQuestionsByFormID", suite.db, form.ID).Return(nil, nil)
 
 	// Act
 	response, err := suite.formService.CreateBasicInfoForm(request)
@@ -107,7 +108,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 	// Assert
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), userID, response.UserID)
-	assert.Equal(suite.T(), enum.FormStatusPending.String(), response.Status)
+	assert.Equal(suite.T(), enum.FormStatusDraft.String(), response.Status)
 	suite.userService.AssertExpectations(suite.T())
 	suite.formRepository.AssertExpectations(suite.T())
 }
@@ -179,7 +180,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 	form := &entity.Form{}
 	form.ID = 1
 	form.UserID = userID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 	form.FilledByOperatorID = &operatorID
 	form.CreatedAt = time.Now()
 	form.UpdatedAt = time.Now()
@@ -408,7 +409,7 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Create() {
 	form := &entity.Form{}
 	form.ID = formID
 	form.UserID = userID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 
 	// Setup expectations
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
@@ -603,7 +604,7 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 	form := &entity.Form{}
 	form.ID = formID
 	form.UserID = userID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 
 	existingHealth := &entity.GeneralHealthInfo{}
 	existingHealth.ID = 5
@@ -667,29 +668,35 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_OperatorLogsAction() 
 func (suite *FormServiceTestSuite) TestChangeFormStatus_Success() {
 	// Arrange
 	formID := uint(1)
+	userID := uint(1)
 	request := formdto.ChangeFormStatusRequest{
 		FormID: formID,
+		UserID: userID,
 	}
 
 	form := &entity.Form{}
 	form.ID = formID
-	form.UserID = 1
-	form.Status = enum.FormStatusPending
+	form.UserID = userID
+	form.Status = enum.FormStatusDraft
 	form.CreatedAt = time.Now()
 	form.UpdatedAt = time.Now()
 
 	// Setup expectations
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
 	suite.formRepository.On("UpdateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
-		return f.Status == enum.FormStatusReady
+		return f.Status == enum.FormStatusSubmitted
 	})).Return(nil)
+	suite.formRepository.On("FindGeneralHealthByFormID", suite.db, formID).Return(nil, nil)
+	suite.formRepository.On("FindMamographyByFormID", suite.db, formID).Return(nil, nil)
+	suite.formRepository.On("FindCancersByFormID", suite.db, formID).Return(nil, nil)
+	suite.formRepository.On("FindFamilyCancersByFormID", suite.db, formID).Return(nil, nil)
 
 	// Act
 	response, err := suite.formService.ChangeFormStatus(request)
 
 	// Assert
 	assert.NoError(suite.T(), err)
-	assert.Equal(suite.T(), enum.FormStatusReady.String(), response.Form.Status)
+	assert.Equal(suite.T(), enum.FormStatusSubmitted.String(), response.Form.Status)
 	assert.Equal(suite.T(), formID, response.Form.FormID)
 	suite.formRepository.AssertExpectations(suite.T())
 }
@@ -720,14 +727,16 @@ func (suite *FormServiceTestSuite) TestChangeFormStatus_FormNotFound() {
 func (suite *FormServiceTestSuite) TestChangeFormStatus_UpdateFails() {
 	// Arrange
 	formID := uint(1)
+	userID := uint(1)
 	request := formdto.ChangeFormStatusRequest{
 		FormID: formID,
+		UserID: userID,
 	}
 
 	form := &entity.Form{}
 	form.ID = formID
-	form.UserID = 1
-	form.Status = enum.FormStatusPending
+	form.UserID = userID
+	form.Status = enum.FormStatusDraft
 
 	updateError := errors.New("database update error")
 
@@ -1464,7 +1473,7 @@ func (suite *FormServiceTestSuite) TestGetUserForms_Success() {
 	forms := []*entity.Form{
 		{
 			UserID: userID,
-			Status: enum.FormStatusPending,
+			Status: enum.FormStatusDraft,
 		},
 	}
 
@@ -1614,7 +1623,7 @@ func (suite *FormServiceTestSuite) TestGetAllForms_Success() {
 	form := &entity.Form{}
 	form.ID = 1
 	form.UserID = 1
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 
 	forms := []*entity.Form{form}
 	filters := &postgres.FormFilters{}
@@ -1639,7 +1648,7 @@ func (suite *FormServiceTestSuite) TestGetAllOperatorForms_Success() {
 	form := &entity.Form{}
 	form.ID = 1
 	form.UserID = 1
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusDraft
 
 	forms := []*entity.Form{form}
 	filters := &postgres.OperatorFormFilters{OperatorID: operatorID}
@@ -1672,7 +1681,7 @@ func (suite *FormServiceTestSuite) TestAcceptForm_Success() {
 
 	form := &entity.Form{}
 	form.ID = formID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusSubmitted
 
 	// Setup expectations
 	suite.userService.On("GetUserRoles", userID).Return([]userdto.RoleResponse{
@@ -1685,7 +1694,7 @@ func (suite *FormServiceTestSuite) TestAcceptForm_Success() {
 	}, nil)
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
 	suite.formRepository.On("UpdateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
-		return f.Status == enum.FormStatusApproved
+		return f.Status == enum.FormStatusReadyForCalculation
 	})).Return(nil)
 
 	// Act
@@ -1703,7 +1712,7 @@ func (suite *FormServiceTestSuite) TestRejectForm_Success() {
 
 	form := &entity.Form{}
 	form.ID = formID
-	form.Status = enum.FormStatusPending
+	form.Status = enum.FormStatusSubmitted
 
 	// Setup expectations
 	suite.userService.On("GetUserRoles", userID).Return([]userdto.RoleResponse{

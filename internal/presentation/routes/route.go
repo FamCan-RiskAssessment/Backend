@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +18,6 @@ func Run(ginEngine *gin.Engine, app *wire.Application) {
 
 func registerAdminRoutes(ginEngine *gin.RouterGroup, app *wire.Application) {
 	ginEngine.Use(app.Middlewares.Auth.AuthRequired)
-	ginEngine.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionSetPassword}))
 	SetupAdminRoutes(ginEngine, app)
 }
 

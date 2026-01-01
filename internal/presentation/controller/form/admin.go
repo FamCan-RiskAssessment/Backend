@@ -170,6 +170,42 @@ func (formController *AdminFormController) RejectForm(ctx *gin.Context) {
 	controller.Response(ctx, 200, message, nil)
 }
 
+func (formController *AdminFormController) RequestPatientResponse(ctx *gin.Context) {
+	type RequestPatientResponseParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[RequestPatientResponseParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.RequestPatientResponse(params.FormID, userID.(uint))
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.requestPatientResponse")
+	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *AdminFormController) RequestDocuments(ctx *gin.Context) {
+	type RequestDocumentsParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[RequestDocumentsParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.RequestDocuments(params.FormID, userID.(uint))
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.requestDocuments")
+	controller.Response(ctx, 200, message, nil)
+}
+
 func (formController *AdminFormController) GetBasicForm(ctx *gin.Context) {
 	type GetBasicFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`

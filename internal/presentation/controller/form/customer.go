@@ -650,6 +650,42 @@ func (formController *CustomerFormController) ChangeFormStatus(ctx *gin.Context)
 	controller.Response(ctx, 200, message, response)
 }
 
+func (formController *CustomerFormController) ResubmitRejectedForm(ctx *gin.Context) {
+	type ResubmitRejectedFormParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[ResubmitRejectedFormParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.ResubmitRejectedForm(params.FormID, userID.(uint))
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.formResubmitted")
+	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *CustomerFormController) SubmitDocuments(ctx *gin.Context) {
+	type SubmitDocumentsParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+	params := controller.Validate[SubmitDocumentsParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.SubmitDocuments(params.FormID, userID.(uint))
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.documentsSubmitted")
+	controller.Response(ctx, 200, message, nil)
+}
+
 func (formController *CustomerFormController) GetBasicForm(ctx *gin.Context) {
 	type GetBasicFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`

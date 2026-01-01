@@ -189,6 +189,64 @@ func (formService *FormService) logOperatorFormUpdate(operatorID, formID uint, s
 	formService.actionLogService.LogAction(log)
 }
 
+// validateAndTransitionStatus validates and performs status transition with state machine validation
+func (formService *FormService) validateAndTransitionStatus(
+	form *entity.Form,
+	newStatus enum.FormStatus,
+) error {
+	// Import validation package for state machine
+	if err := validation.ValidateStatusTransition(form.Status, newStatus); err != nil {
+		return err
+	}
+
+	form.Status = newStatus
+	return formService.formRepository.UpdateForm(formService.db, form)
+}
+
+// canUserEditForm checks if user can edit form based on current status and user role
+func (formService *FormService) canUserEditForm(
+	form *entity.Form,
+	userID uint,
+) (bool, error) {
+	// Check if user is the form owner
+	if form.UserID == userID {
+		// Patients can only edit in Draft and WaitingForDocuments
+		return validation.CanUserEditFormInStatus(form.Status, true), nil
+	}
+
+	// Check if user is an operator
+	isOp, err := formService.isOperator(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if isOp {
+		// Check if operator can edit this specific form
+		canEdit, err := formService.canOperatorEditForm(form, userID)
+		if err != nil {
+			return false, err
+		}
+
+		if canEdit {
+			// Operators can edit in most statuses except Calculated
+			return validation.CanUserEditFormInStatus(form.Status, false), nil
+		}
+	}
+
+	// Check if user is a supervisor
+	isSup, err := formService.isSupervisor(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if isSup {
+		// Supervisors can edit in most statuses except Calculated
+		return validation.CanUserEditFormInStatus(form.Status, false), nil
+	}
+
+	return false, nil
+}
+
 // uploadMultiplePictures uploads multiple picture files to S3 and returns their paths
 func (formService *FormService) uploadMultiplePictures(
 	bucketType enum.BucketType,
@@ -316,7 +374,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	form := &entity.Form{
 		UserID:             request.UserID,
-		Status:             enum.FormStatusPending,
+		Status:             enum.FormStatusDraft,
 		FilledByOperatorID: request.FilledByOperatorID,
 		FormType:           FormType,
 	}
@@ -1636,13 +1694,14 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		return formdto.ChangeFormStatusResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.ChangeFormStatusResponse{}, ForbiddenError
-	// }
+	// Only form owner can submit
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.ChangeFormStatusResponse{}, forbiddenError
+	}
 
-	form.Status = enum.FormStatusReady
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Draft to Submitted
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusSubmitted)
 	if err != nil {
 		return formdto.ChangeFormStatusResponse{}, err
 	}
@@ -2363,19 +2422,23 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if !canEdit {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
@@ -2629,8 +2692,8 @@ func (formService *FormService) AcceptForm(formID uint, userID uint) error {
 		return forbiddenError
 	}
 
-	form.Status = enum.FormStatusApproved
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Submitted to ReadyForCalculation
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusReadyForCalculation)
 	if err != nil {
 		return err
 	}
@@ -2664,8 +2727,126 @@ func (formService *FormService) RejectForm(formID uint, userID uint) error {
 		return forbiddenError
 	}
 
-	form.Status = enum.FormStatusRejected
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Submitted to Rejected
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusRejected)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) RequestPatientResponse(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor or assigned operator can request patient response
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can request patient response"}
+		return forbiddenError
+	}
+
+	// Validate and transition from Submitted to WaitingForPatientResponse
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusWaitingForPatientResponse)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) RequestDocuments(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor or assigned operator can request documents
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can request documents"}
+		return forbiddenError
+	}
+
+	// Validate and transition from WaitingForPatientResponse to WaitingForDocuments
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusWaitingForDocuments)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) ResubmitRejectedForm(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Only form owner can resubmit
+	if form.UserID != userID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only form owner can resubmit"}
+		return forbiddenError
+	}
+
+	// Validate and transition from Rejected to Draft
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusDraft)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) SubmitDocuments(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Only form owner can submit documents
+	if form.UserID != userID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only form owner can submit documents"}
+		return forbiddenError
+	}
+
+	// Validate and transition from WaitingForDocuments to Submitted
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusSubmitted)
 	if err != nil {
 		return err
 	}
@@ -2683,30 +2864,23 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
@@ -2800,30 +2974,23 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -2931,30 +3098,23 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
@@ -3107,30 +3267,23 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
@@ -3248,30 +3401,23 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
@@ -3460,7 +3606,7 @@ func (formService *FormService) AssignOperator(request formdto.AssignOperatorReq
 	}
 
 	form.OperatorID = &request.OperatorID
-	form.Status = enum.FormStatusAssigned
+	// Note: Assignment does not change form status - status is independent of assignment
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
 		return err

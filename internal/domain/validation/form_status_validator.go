@@ -31,6 +31,9 @@ var validTransitions = map[FormStatusTransition]bool{
 
 	// ReadyForCalculation can transition to:
 	{enum.FormStatusReadyForCalculation, enum.FormStatusCalculated}: true,
+
+	// Calculated can transition to itself (for recalculation):
+	{enum.FormStatusCalculated, enum.FormStatusCalculated}: true,
 }
 
 // ValidateStatusTransition checks if a status transition is allowed

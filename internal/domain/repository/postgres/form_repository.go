@@ -96,4 +96,7 @@ type FormRepository interface {
 	FindAttentionQuestionsByFormID(db database.Database, formID uint) (*entity.AttentionQuestions, error)
 	CreateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error
 	UpdateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error
+
+	CreateCalculationHistory(db database.Database, history *entity.CalculationHistory) error
+	FindCalculationHistoryByFormID(db database.Database, formID uint) ([]*entity.CalculationHistory, error)
 }

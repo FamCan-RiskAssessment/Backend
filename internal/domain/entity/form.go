@@ -315,3 +315,15 @@ type AttentionQuestions struct {
 	MamographyCorrect    *bool
 	LungCancerCorrect    *bool
 }
+
+type CalculationHistory struct {
+	database.Model
+	FormID       uint       `gorm:"not null;index"`
+	Form         Form       `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+	CalcModel    enum.Calc  `gorm:"not null;index"`
+	ActorID      uint       `gorm:"not null"`
+	Actor        User       `gorm:"foreignKey:ActorID"`
+	Success      bool       `gorm:"not null;default:false"`
+	ErrorType    *string    `gorm:"type:varchar(50)"`
+	ErrorMessage *string    `gorm:"type:text"`
+}

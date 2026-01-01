@@ -346,3 +346,16 @@ func (f *FormRepositoryMock) UpdateAttentionQuestions(db database.Database, ques
 	args := f.Called(db, questions)
 	return args.Error(0)
 }
+
+func (f *FormRepositoryMock) CreateCalculationHistory(db database.Database, history *entity.CalculationHistory) error {
+	args := f.Called(db, history)
+	return args.Error(0)
+}
+
+func (f *FormRepositoryMock) FindCalculationHistoryByFormID(db database.Database, formID uint) ([]*entity.CalculationHistory, error) {
+	args := f.Called(db, formID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*entity.CalculationHistory), args.Error(1)
+}

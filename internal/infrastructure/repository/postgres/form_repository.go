@@ -511,3 +511,20 @@ func (r *FormRepository) CreateAttentionQuestions(db database.Database, question
 func (r *FormRepository) UpdateAttentionQuestions(db database.Database, questions *entity.AttentionQuestions) error {
 	return db.GetDB().Save(questions).Error
 }
+
+func (r *FormRepository) CreateCalculationHistory(db database.Database, history *entity.CalculationHistory) error {
+	return db.GetDB().Create(history).Error
+}
+
+func (r *FormRepository) FindCalculationHistoryByFormID(db database.Database, formID uint) ([]*entity.CalculationHistory, error) {
+	var history []*entity.CalculationHistory
+	err := db.GetDB().
+		Where("form_id = ?", formID).
+		Order("created_at DESC").
+		Preload("Actor").
+		Find(&history).Error
+	if err != nil {
+		return nil, err
+	}
+	return history, nil
+}

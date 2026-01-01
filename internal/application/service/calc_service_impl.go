@@ -73,12 +73,13 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		return calcdto.ModelResponse{}, exception.NotFoundError{Item: calcService.constants.Field.Form}
 	}
 
-	// Validate form is in ReadyForCalculation status
-	if form.Status != enum.FormStatusReadyForCalculation {
-		log.Printf("[CALC] Form not ready for calculation - FormID: %d, CurrentStatus: %s, UserID: %d", request.FormID, form.Status.String(), request.UserID)
+	// Validate form is in ReadyForCalculation or Calculated status
+	if form.Status != enum.FormStatusReadyForCalculation && form.Status != enum.FormStatusCalculated {
+		log.Printf("[CALC] Form not in valid status for calculation - FormID: %d, CurrentStatus: %s, UserID: %d",
+			request.FormID, form.Status.String(), request.UserID)
 		return calcdto.ModelResponse{}, &exception.CalcError{
 			Type:    exception.ErrorTypeInvalidData,
-			Message: fmt.Sprintf("form must be in ReadyForCalculation status, current status: %s", form.Status.String()),
+			Message: fmt.Sprintf("form must be in ReadyForCalculation or Calculated status, current status: %s", form.Status.String()),
 		}
 	}
 
@@ -113,40 +114,69 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	case enum.CalcPremm5:
 		response, err = calcService.sendFormToPremm5(form, request.UserID)
 		if err != nil {
+			_ = calcService.recordCalculationHistory(request.FormID, enum.CalcPremm5, request.UserID, false, err)
 			return calcdto.ModelResponse{}, err
 		}
 	case enum.CalcBCRA:
 		response, err = calcService.sendFormToBCRA(form, request.UserID)
 		if err != nil {
+			_ = calcService.recordCalculationHistory(request.FormID, enum.CalcBCRA, request.UserID, false, err)
 			return calcdto.ModelResponse{}, err
 		}
 	case enum.CalcGail:
 		response, err = calcService.sendFormToGail(form, request.UserID)
 		if err != nil {
+			_ = calcService.recordCalculationHistory(request.FormID, enum.CalcGail, request.UserID, false, err)
 			return calcdto.ModelResponse{}, err
 		}
 	case enum.CalcPLCO:
 		response, err = calcService.sendFormToPLCO(form, request.UserID)
 		if err != nil {
+			_ = calcService.recordCalculationHistory(request.FormID, enum.CalcPLCO, request.UserID, false, err)
 			return calcdto.ModelResponse{}, err
 		}
 	}
 
-	// Update form status to calculated
-	form.Status = enum.FormStatusCalculated
-	err = calcService.formRepository.UpdateForm(calcService.db, form)
-	if err != nil {
-		log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)
-		return calcdto.ModelResponse{}, &exception.CalcError{
-			Type:    exception.ErrorTypeDatabaseError,
-			Model:   modelName,
-			Message: "failed to update form status in database",
-			OrigErr: err,
+	// Update form status to calculated (if not already calculated)
+	if form.Status != enum.FormStatusCalculated {
+		form.Status = enum.FormStatusCalculated
+		err = calcService.formRepository.UpdateForm(calcService.db, form)
+		if err != nil {
+			log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v",
+				request.FormID, request.UserID, err)
+			return calcdto.ModelResponse{}, &exception.CalcError{
+				Type:    exception.ErrorTypeDatabaseError,
+				Model:   modelName,
+				Message: "failed to update form status in database",
+				OrigErr: err,
+			}
 		}
 	}
 
 	log.Printf("[CALC] Form successfully sent to %s - FormID: %d, UserID: %d", modelName, request.FormID, request.UserID)
 	return response, nil
+}
+
+func (calcService *CalcService) recordCalculationHistory(formID uint, calcModel enum.Calc, userID uint, success bool, err error) error {
+	history := &entity.CalculationHistory{
+		FormID:    formID,
+		CalcModel: calcModel,
+		ActorID:   userID,
+		Success:   success,
+	}
+
+	if err != nil {
+		if calcErr, ok := err.(*exception.CalcError); ok {
+			errType := string(calcErr.Type)
+			history.ErrorType = &errType
+			history.ErrorMessage = &calcErr.Message
+		} else {
+			errStr := err.Error()
+			history.ErrorMessage = &errStr
+		}
+	}
+
+	return calcService.formRepository.CreateCalculationHistory(calcService.db, history)
 }
 
 func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
@@ -252,6 +282,13 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 	}
 	calcService.actionLogService.LogAction(actionLog)
 
+	// Record calculation history
+	histErr := calcService.recordCalculationHistory(form.ID, enum.CalcPremm5, userID, true, nil)
+	if histErr != nil {
+		log.Printf("[CALC:PREMM5] Failed to record calculation history - FormID: %d, Error: %v", form.ID, histErr)
+		// Don't fail the calculation if history recording fails
+	}
+
 	log.Printf("[CALC:PREMM5] Calculation successful - FormID: %d, Probability: %.4f", form.ID, premm5Response.PAny)
 	return calcdto.ModelResponse{
 		Name:        "PREMM5",
@@ -339,6 +376,11 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 		Race:    1, // Default to White
 	}
 
+	// BCRA validation: if N_Biop is 0 or 99, HypPlas must be 99
+	if request.N_Biop == 0 || request.N_Biop == 99 {
+		request.HypPlas = 99
+	}
+
 	// Make API call
 	bcraResponse, err := calcService.callBCRAAPI(request)
 	if err != nil {
@@ -363,6 +405,13 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 		ResourceID: &form.ID,
 	}
 	calcService.actionLogService.LogAction(actionLog)
+
+	// Record calculation history
+	histErr := calcService.recordCalculationHistory(form.ID, enum.CalcBCRA, userID, true, nil)
+	if histErr != nil {
+		log.Printf("[CALC:BCRA] Failed to record calculation history - FormID: %d, Error: %v", form.ID, histErr)
+		// Don't fail the calculation if history recording fails
+	}
 
 	log.Printf("[CALC:BCRA] Calculation successful - FormID: %d, AbsRisk: %.4f", form.ID, bcraResponse.AbsRisk)
 	return calcdto.ModelResponse{
@@ -472,6 +521,13 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (
 		ResourceID: &form.ID,
 	}
 	calcService.actionLogService.LogAction(actionLog)
+
+	// Record calculation history
+	histErr := calcService.recordCalculationHistory(form.ID, enum.CalcGail, userID, true, nil)
+	if histErr != nil {
+		log.Printf("[CALC:Gail] Failed to record calculation history - FormID: %d, Error: %v", form.ID, histErr)
+		// Don't fail the calculation if history recording fails
+	}
 
 	log.Printf("[CALC:Gail] Calculation successful - FormID: %d, AbsoluteRisk: %.4f", form.ID, gailResponse.AbsoluteRisk)
 	return calcdto.ModelResponse{
@@ -1113,6 +1169,13 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 		ResourceID: &form.ID,
 	}
 	calcService.actionLogService.LogAction(actionLog)
+
+	// Record calculation history
+	histErr := calcService.recordCalculationHistory(form.ID, enum.CalcPLCO, userID, true, nil)
+	if histErr != nil {
+		log.Printf("[CALC:PLCO] Failed to record calculation history - FormID: %d, Error: %v", form.ID, histErr)
+		// Don't fail the calculation if history recording fails
+	}
 
 	log.Printf("[CALC:PLCO] Calculation successful - FormID: %d, RiskPercent: %.2f", form.ID, plcoResponse.PLCOM2012RiskPercent)
 	return calcdto.ModelResponse{

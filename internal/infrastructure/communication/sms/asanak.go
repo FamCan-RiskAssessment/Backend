@@ -2,6 +2,7 @@ package sms
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 )
 
 const (
@@ -94,7 +96,15 @@ func (c *AsanakClient) SendSMS(req SendSMSRequest) (SendSMSResponse, error) {
 	// Send request
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
-		println("failed to send req")
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			return nil, exception.NewServiceUnavailableError(
+				exception.ServiceSMS,
+				exception.ReasonNetwork,
+				"failed to reach sms provider",
+				err,
+			)
+		}
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
@@ -126,6 +136,15 @@ func (c *AsanakClient) SendSMS(req SendSMSRequest) (SendSMSResponse, error) {
 
 // handleErrorResponse handles API error responses
 func (c *AsanakClient) handleErrorResponse(statusCode int, body []byte) error {
+	if statusCode == http.StatusForbidden {
+		return exception.NewServiceUnavailableError(
+			exception.ServiceSMS,
+			exception.ReasonNetwork,
+			"sms provider blocked the request",
+			fmt.Errorf("API error (HTTP %d): %s", statusCode, string(body)),
+		)
+	}
+
 	// Try to parse as JSON error response
 	var errResp ErrorResponse
 	if err := json.Unmarshal(body, &errResp); err == nil {

@@ -52,6 +52,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleAuthError(ctx, *authError, recovery.constants.Context.Translator)
 	} else if calcError, ok := err.(*exception.CalcError); ok {
 		handleCalcError(ctx, *calcError, recovery.constants.Context.Translator)
+	} else if serviceUnavailableError, ok := err.(*exception.ServiceUnavailableError); ok {
+		handleServiceUnavailableError(ctx, *serviceUnavailableError, recovery.constants.Context.Translator)
 	} else if notFoundError, ok := err.(exception.NotFoundError); ok {
 		handleNotFoundError(ctx, notFoundError, recovery.constants.Context.Translator)
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
@@ -193,6 +195,25 @@ func handleCalcError(ctx *gin.Context, calcError exception.CalcError, transKey s
 	}
 
 	controller.Response(ctx, statusCode, errorMessage, responseData)
+}
+
+func handleServiceUnavailableError(ctx *gin.Context, serviceUnavailableError exception.ServiceUnavailableError, transKey string) {
+	trans := controller.GetTranslator(ctx, transKey)
+	errorMessage, _ := trans.Translate(genericError)
+
+	switch serviceUnavailableError.Service {
+	case exception.ServiceSMS:
+		switch serviceUnavailableError.Reason {
+		case exception.ReasonNetwork:
+			errorMessage, _ = trans.Translate("errors.smsUnavailableVPN")
+		default:
+			errorMessage, _ = trans.Translate("errors.serviceUnavailable")
+		}
+	default:
+		errorMessage, _ = trans.Translate("errors.serviceUnavailable")
+	}
+
+	controller.Response(ctx, 503, errorMessage, nil)
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {

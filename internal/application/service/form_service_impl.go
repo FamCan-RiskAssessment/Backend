@@ -379,10 +379,6 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		FormType:           FormType,
 	}
 
-	if err = formService.formRepository.CreateForm(formService.db, form); err != nil {
-		return formdto.BasicFormResponse{}, err
-	}
-
 	// Encrypt Social Security Number before storing
 	encryptedSSN, err := formService.fieldEncryptor.Encrypt(request.SocialSecurityNumber)
 	if err != nil {
@@ -394,7 +390,6 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 
 	basic := &entity.BasicInfo{
-		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
 		BirthDate:            birthDate,
 		IsAtba:               request.IsAtba,
@@ -403,7 +398,17 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		Weight:               request.Weight,
 	}
 
-	if err = formService.formRepository.CreateBasicInfo(formService.db, basic); err != nil {
+	err = formService.db.WithTransaction(func(tx database.Database) error {
+		if err := formService.formRepository.CreateForm(tx, form); err != nil {
+			return err
+		}
+		basic.FormID = form.ID
+		if err := formService.formRepository.CreateBasicInfo(tx, basic); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return formdto.BasicFormResponse{}, err
 	}
 
@@ -497,35 +502,42 @@ func (formService *FormService) UpsertGeneralHealth(request formdto.UpsertGenera
 	info.CountSmokingDailyPast = request.CountSmokingDailyPast
 	info.CountGheliandailyPast = request.CountGheliandailyPast
 
-	if info.ID == 0 {
-		err = formService.formRepository.CreateGeneralHealth(formService.db, info)
-	} else {
-		err = formService.formRepository.UpdateGeneralHealth(formService.db, info)
-	}
+	err = formService.db.WithTransaction(func(tx database.Database) error {
+		if info.ID == 0 {
+			err = formService.formRepository.CreateGeneralHealth(tx, info)
+		} else {
+			err = formService.formRepository.UpdateGeneralHealth(tx, info)
+		}
+		if err != nil {
+			return err
+		}
+
+		// Handle attention question answer
+		if request.AttentionCorrect != nil {
+			attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(tx, request.FormID)
+			if err != nil {
+				return err
+			}
+
+			if attentionQ == nil {
+				attentionQ = &entity.AttentionQuestions{
+					FormID:               request.FormID,
+					GeneralHealthCorrect: request.AttentionCorrect,
+				}
+				err = formService.formRepository.CreateAttentionQuestions(tx, attentionQ)
+			} else {
+				attentionQ.GeneralHealthCorrect = request.AttentionCorrect
+				err = formService.formRepository.UpdateAttentionQuestions(tx, attentionQ)
+			}
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	// Handle attention question answer
-	if request.AttentionCorrect != nil {
-		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
-		if err != nil {
-			return err
-		}
-
-		if attentionQ == nil {
-			attentionQ = &entity.AttentionQuestions{
-				FormID:               request.FormID,
-				GeneralHealthCorrect: request.AttentionCorrect,
-			}
-			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
-		} else {
-			attentionQ.GeneralHealthCorrect = request.AttentionCorrect
-			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
-		}
-		if err != nil {
-			return err
-		}
 	}
 
 	// Log operator action if performed by operator
@@ -635,51 +647,55 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 
 	if isCreate {
 		info.MamoGraphyPicturePaths = newPicturePaths
-		err = formService.db.WithTransaction(func(tx database.Database) error {
-			if err := formService.formRepository.CreateMamography(tx, info); err != nil {
-				// Cleanup uploaded pictures on error
-				formService.cleanupPictures(enum.BucketTypeMamography, newPicturePaths)
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
 	} else {
 		// Merge or replace paths based on whether new pictures are uploaded
 		info.MamoGraphyPicturePaths = formService.mergePicturePaths(oldPaths, newPicturePaths, validation.MaxImagesPerUpload)
-
-		if err := formService.formRepository.UpdateMamography(formService.db, info); err != nil {
-			// Cleanup newly uploaded pictures on error
-			formService.cleanupPictures(enum.BucketTypeMamography, newPicturePaths)
-			return err
-		}
-
-		// Delete old pictures that are no longer referenced
-		formService.deleteOldPictures(enum.BucketTypeMamography, oldPaths, info.MamoGraphyPicturePaths)
 	}
 
-	// Handle attention question answer
-	if request.AttentionCorrect != nil {
-		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
+	err = formService.db.WithTransaction(func(tx database.Database) error {
+		if isCreate {
+			err = formService.formRepository.CreateMamography(tx, info)
+		} else {
+			err = formService.formRepository.UpdateMamography(tx, info)
+		}
 		if err != nil {
 			return err
 		}
 
-		if attentionQ == nil {
-			attentionQ = &entity.AttentionQuestions{
-				FormID:            request.FormID,
-				MamographyCorrect: request.AttentionCorrect,
+		// Handle attention question answer
+		if request.AttentionCorrect != nil {
+			attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(tx, request.FormID)
+			if err != nil {
+				return err
 			}
-			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
-		} else {
-			attentionQ.MamographyCorrect = request.AttentionCorrect
-			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
+
+			if attentionQ == nil {
+				attentionQ = &entity.AttentionQuestions{
+					FormID:            request.FormID,
+					MamographyCorrect: request.AttentionCorrect,
+				}
+				err = formService.formRepository.CreateAttentionQuestions(tx, attentionQ)
+			} else {
+				attentionQ.MamographyCorrect = request.AttentionCorrect
+				err = formService.formRepository.UpdateAttentionQuestions(tx, attentionQ)
+			}
+			if err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			return err
+
+		return nil
+	})
+	if err != nil {
+		if len(newPicturePaths) > 0 {
+			formService.cleanupPictures(enum.BucketTypeMamography, newPicturePaths)
 		}
+		return err
+	}
+
+	if !isCreate {
+		// Delete old pictures that are no longer referenced
+		formService.deleteOldPictures(enum.BucketTypeMamography, oldPaths, info.MamoGraphyPicturePaths)
 	}
 
 	// Log operator action if performed by operator
@@ -1497,35 +1513,42 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
 
-	if info.ID == 0 {
-		err = formService.formRepository.CreateLungCancer(formService.db, info)
-	} else {
-		err = formService.formRepository.UpdateLungCancer(formService.db, info)
-	}
+	err = formService.db.WithTransaction(func(tx database.Database) error {
+		if info.ID == 0 {
+			err = formService.formRepository.CreateLungCancer(tx, info)
+		} else {
+			err = formService.formRepository.UpdateLungCancer(tx, info)
+		}
+		if err != nil {
+			return err
+		}
+
+		// Handle attention question answer
+		if request.AttentionCorrect != nil {
+			attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(tx, request.FormID)
+			if err != nil {
+				return err
+			}
+
+			if attentionQ == nil {
+				attentionQ = &entity.AttentionQuestions{
+					FormID:            request.FormID,
+					LungCancerCorrect: request.AttentionCorrect,
+				}
+				err = formService.formRepository.CreateAttentionQuestions(tx, attentionQ)
+			} else {
+				attentionQ.LungCancerCorrect = request.AttentionCorrect
+				err = formService.formRepository.UpdateAttentionQuestions(tx, attentionQ)
+			}
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	// Handle attention question answer
-	if request.AttentionCorrect != nil {
-		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
-		if err != nil {
-			return err
-		}
-
-		if attentionQ == nil {
-			attentionQ = &entity.AttentionQuestions{
-				FormID:            request.FormID,
-				LungCancerCorrect: request.AttentionCorrect,
-			}
-			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
-		} else {
-			attentionQ.LungCancerCorrect = request.AttentionCorrect
-			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
-		}
-		if err != nil {
-			return err
-		}
 	}
 
 	// Log operator action if performed by operator
@@ -1645,35 +1668,42 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.PelecSig = request.PelecSig
 	info.CelecSig = request.CelecSig
 
-	if info.ID == 0 {
-		err = formService.formRepository.CreateNavidInfo(formService.db, info)
-	} else {
-		err = formService.formRepository.UpdateNavidInfo(formService.db, info)
-	}
+	err = formService.db.WithTransaction(func(tx database.Database) error {
+		if info.ID == 0 {
+			err = formService.formRepository.CreateNavidInfo(tx, info)
+		} else {
+			err = formService.formRepository.UpdateNavidInfo(tx, info)
+		}
+		if err != nil {
+			return err
+		}
+
+		// Handle attention question answer
+		if request.AttentionCorrect != nil {
+			attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(tx, request.FormID)
+			if err != nil {
+				return err
+			}
+
+			if attentionQ == nil {
+				attentionQ = &entity.AttentionQuestions{
+					FormID:            request.FormID,
+					LungCancerCorrect: request.AttentionCorrect,
+				}
+				err = formService.formRepository.CreateAttentionQuestions(tx, attentionQ)
+			} else {
+				attentionQ.LungCancerCorrect = request.AttentionCorrect
+				err = formService.formRepository.UpdateAttentionQuestions(tx, attentionQ)
+			}
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
 		return err
-	}
-
-	// Handle attention question answer
-	if request.AttentionCorrect != nil {
-		attentionQ, err := formService.formRepository.FindAttentionQuestionsByFormID(formService.db, request.FormID)
-		if err != nil {
-			return err
-		}
-
-		if attentionQ == nil {
-			attentionQ = &entity.AttentionQuestions{
-				FormID:            request.FormID,
-				LungCancerCorrect: request.AttentionCorrect,
-			}
-			err = formService.formRepository.CreateAttentionQuestions(formService.db, attentionQ)
-		} else {
-			attentionQ.LungCancerCorrect = request.AttentionCorrect
-			err = formService.formRepository.UpdateAttentionQuestions(formService.db, attentionQ)
-		}
-		if err != nil {
-			return err
-		}
 	}
 
 	// Log operator action if performed by operator

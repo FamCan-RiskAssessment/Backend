@@ -132,19 +132,6 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 		}
 	}
 
-	// Update form status to calculated
-	form.Status = enum.FormStatusCalculated
-	err = calcService.formRepository.UpdateForm(calcService.db, form)
-	if err != nil {
-		log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)
-		return calcdto.ModelResponse{}, &exception.CalcError{
-			Type:    exception.ErrorTypeDatabaseError,
-			Model:   modelName,
-			Message: "failed to update form status in database",
-			OrigErr: err,
-		}
-	}
-
 	log.Printf("[CALC] Form successfully sent to %s - FormID: %d, UserID: %d", modelName, request.FormID, request.UserID)
 	return response, nil
 }
@@ -234,7 +221,16 @@ func (calcService *CalcService) sendFormToPremm5(form *entity.Form, userID uint)
 	}
 
 	// Save result to database
-	err = calcService.savePremm5Result(form.ID, premm5Response)
+	err = calcService.db.WithTransaction(func(tx database.Database) error {
+		if err := calcService.savePremm5Result(tx, form.ID, premm5Response); err != nil {
+			return err
+		}
+		form.Status = enum.FormStatusCalculated
+		if err := calcService.formRepository.UpdateForm(tx, form); err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		log.Printf("[CALC:PREMM5] Database error saving result - FormID: %d, Error: %v", form.ID, err)
 		return calcdto.ModelResponse{}, &exception.CalcError{
@@ -346,7 +342,16 @@ func (calcService *CalcService) sendFormToBCRA(form *entity.Form, userID uint) (
 	}
 
 	// Save result to database
-	err = calcService.saveBCRAResult(form.ID, bcraResponse)
+	err = calcService.db.WithTransaction(func(tx database.Database) error {
+		if err := calcService.saveBCRAResult(tx, form.ID, bcraResponse); err != nil {
+			return err
+		}
+		form.Status = enum.FormStatusCalculated
+		if err := calcService.formRepository.UpdateForm(tx, form); err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		log.Printf("[CALC:BCRA] Database error saving result - FormID: %d, Error: %v", form.ID, err)
 		return calcdto.ModelResponse{}, &exception.CalcError{
@@ -455,7 +460,16 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (
 	}
 
 	// Save result to database
-	err = calcService.saveGailResult(form.ID, gailResponse)
+	err = calcService.db.WithTransaction(func(tx database.Database) error {
+		if err := calcService.saveGailResult(tx, form.ID, gailResponse); err != nil {
+			return err
+		}
+		form.Status = enum.FormStatusCalculated
+		if err := calcService.formRepository.UpdateForm(tx, form); err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		log.Printf("[CALC:Gail] Database error saving result - FormID: %d, Error: %v", form.ID, err)
 		return calcdto.ModelResponse{}, &exception.CalcError{
@@ -844,8 +858,8 @@ func (calcService *CalcService) callGailAPI(request calcdto.SendFormToGailReques
 	return gailResponse, nil
 }
 
-func (calcService *CalcService) savePremm5Result(formID uint, premm5Response calcdto.Premm5Response) error {
-	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(calcService.db, formID)
+func (calcService *CalcService) savePremm5Result(db database.Database, formID uint, premm5Response calcdto.Premm5Response) error {
+	existingResult, err := calcService.formRepository.FindPremm5ResultByFormID(db, formID)
 	if err != nil {
 		return err
 	}
@@ -860,7 +874,7 @@ func (calcService *CalcService) savePremm5Result(formID uint, premm5Response cal
 			PAny:            premm5Response.PAny,
 			PNone:           premm5Response.PNone,
 		}
-		return calcService.formRepository.CreatePremm5Result(calcService.db, premm5Result)
+		return calcService.formRepository.CreatePremm5Result(db, premm5Result)
 	}
 
 	existingResult.MLH1Probability = premm5Response.GeneProbs["MLH1"]
@@ -870,11 +884,11 @@ func (calcService *CalcService) savePremm5Result(formID uint, premm5Response cal
 	existingResult.PAny = premm5Response.PAny
 	existingResult.PNone = premm5Response.PNone
 
-	return calcService.formRepository.UpdatePremm5Result(calcService.db, existingResult)
+	return calcService.formRepository.UpdatePremm5Result(db, existingResult)
 }
 
-func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto.BCRAResponse) error {
-	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(calcService.db, formID)
+func (calcService *CalcService) saveBCRAResult(db database.Database, formID uint, bcraResponse calcdto.BCRAResponse) error {
+	existingResult, err := calcService.formRepository.FindBCRAResultByFormID(db, formID)
 	if err != nil {
 		return err
 	}
@@ -888,7 +902,7 @@ func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto
 			RRStar2:    bcraResponse.RRStar2,
 			ProjIntvl:  bcraResponse.ProjIntvl,
 		}
-		return calcService.formRepository.CreateBCRAResult(calcService.db, bcraResult)
+		return calcService.formRepository.CreateBCRAResult(db, bcraResult)
 	}
 
 	existingResult.AbsRisk = bcraResponse.AbsRisk
@@ -897,11 +911,11 @@ func (calcService *CalcService) saveBCRAResult(formID uint, bcraResponse calcdto
 	existingResult.RRStar2 = bcraResponse.RRStar2
 	existingResult.ProjIntvl = bcraResponse.ProjIntvl
 
-	return calcService.formRepository.UpdateBCRAResult(calcService.db, existingResult)
+	return calcService.formRepository.UpdateBCRAResult(db, existingResult)
 }
 
-func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto.GailResponse) error {
-	existingResult, err := calcService.formRepository.FindGailResultByFormID(calcService.db, formID)
+func (calcService *CalcService) saveGailResult(db database.Database, formID uint, gailResponse calcdto.GailResponse) error {
+	existingResult, err := calcService.formRepository.FindGailResultByFormID(db, formID)
 	if err != nil {
 		return err
 	}
@@ -912,7 +926,7 @@ func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto
 			AbsoluteRisk: gailResponse.AbsoluteRisk,
 			RelativeRisk: gailResponse.RelativeRisk,
 		}
-		return calcService.formRepository.CreateGailResult(calcService.db, gailResult)
+		return calcService.formRepository.CreateGailResult(db, gailResult)
 	}
 
 	existingResult.AbsoluteRisk = gailResponse.AbsoluteRisk
@@ -920,7 +934,7 @@ func (calcService *CalcService) saveGailResult(formID uint, gailResponse calcdto
 		existingResult.RelativeRisk = gailResponse.RelativeRisk
 	}
 
-	return calcService.formRepository.UpdateGailResult(calcService.db, existingResult)
+	return calcService.formRepository.UpdateGailResult(db, existingResult)
 }
 
 func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (calcdto.ModelResponse, error) {
@@ -1096,7 +1110,16 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 	}
 
 	// Save result to database
-	err = calcService.savePLCOResult(form.ID, plcoResponse)
+	err = calcService.db.WithTransaction(func(tx database.Database) error {
+		if err := calcService.savePLCOResult(tx, form.ID, plcoResponse); err != nil {
+			return err
+		}
+		form.Status = enum.FormStatusCalculated
+		if err := calcService.formRepository.UpdateForm(tx, form); err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		log.Printf("[CALC:PLCO] Database error saving result - FormID: %d, Error: %v", form.ID, err)
 		return calcdto.ModelResponse{}, &exception.CalcError{
@@ -1199,8 +1222,8 @@ func (calcService *CalcService) callPLCOAPI(request calcdto.SendFormToPLCOReques
 	return plcoResponse, nil
 }
 
-func (calcService *CalcService) savePLCOResult(formID uint, plcoResponse calcdto.PLCOResponse) error {
-	existingResult, err := calcService.formRepository.FindPLCOResultByFormID(calcService.db, formID)
+func (calcService *CalcService) savePLCOResult(db database.Database, formID uint, plcoResponse calcdto.PLCOResponse) error {
+	existingResult, err := calcService.formRepository.FindPLCOResultByFormID(db, formID)
 	if err != nil {
 		return err
 	}
@@ -1222,7 +1245,7 @@ func (calcService *CalcService) savePLCOResult(formID uint, plcoResponse calcdto
 			}
 		}
 
-		return calcService.formRepository.CreatePLCOResult(calcService.db, plcoResult)
+		return calcService.formRepository.CreatePLCOResult(db, plcoResult)
 	}
 
 	existingResult.PLCOM20126YrRisk = plcoResponse.PLCOM20126YrRisk
@@ -1238,7 +1261,7 @@ func (calcService *CalcService) savePLCOResult(formID uint, plcoResponse calcdto
 		}
 	}
 
-	return calcService.formRepository.UpdatePLCOResult(calcService.db, existingResult)
+	return calcService.formRepository.UpdatePLCOResult(db, existingResult)
 }
 
 func mapHyperplasiaStatus(mamographyInfo *entity.MamoGraphyInfo) int {

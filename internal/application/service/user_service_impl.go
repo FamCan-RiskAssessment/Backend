@@ -73,22 +73,26 @@ func (userService *UserService) Login(loginInfo userdto.LoginRequest) error {
 	}
 
 	if user == nil {
-		user = &entity.User{
-			Phone: loginInfo.Phone,
-		}
-		err = userService.userRepository.CreateUser(userService.db, user)
-		if err != nil {
-			return err
-		}
-		patientRole, err := userService.userRepository.FindRoleByName(userService.db, enum.Patient.String())
-		if err != nil {
-			return err
-		}
-		if patientRole != nil {
-			err = userService.userRepository.AssignRoleToUser(userService.db, user, patientRole)
+		err = userService.db.WithTransaction(func(tx database.Database) error {
+			user = &entity.User{
+				Phone: loginInfo.Phone,
+			}
+			if err := userService.userRepository.CreateUser(tx, user); err != nil {
+				return err
+			}
+			patientRole, err := userService.userRepository.FindRoleByName(tx, enum.Patient.String())
 			if err != nil {
 				return err
 			}
+			if patientRole != nil {
+				if err := userService.userRepository.AssignRoleToUser(tx, user, patientRole); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 
@@ -561,22 +565,26 @@ func (userService *UserService) RequestUserValidationOTP(operatorID uint, reques
 	}
 	if user == nil {
 		// Create user if doesn't exist
-		user = &entity.User{
-			Phone: request.Phone,
-		}
-		err = userService.userRepository.CreateUser(userService.db, user)
-		if err != nil {
-			return err
-		}
-		patientRole, err := userService.userRepository.FindRoleByName(userService.db, enum.Patient.String())
-		if err != nil {
-			return err
-		}
-		if patientRole != nil {
-			err = userService.userRepository.AssignRoleToUser(userService.db, user, patientRole)
+		err = userService.db.WithTransaction(func(tx database.Database) error {
+			user = &entity.User{
+				Phone: request.Phone,
+			}
+			if err := userService.userRepository.CreateUser(tx, user); err != nil {
+				return err
+			}
+			patientRole, err := userService.userRepository.FindRoleByName(tx, enum.Patient.String())
 			if err != nil {
 				return err
 			}
+			if patientRole != nil {
+				if err := userService.userRepository.AssignRoleToUser(tx, user, patientRole); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 

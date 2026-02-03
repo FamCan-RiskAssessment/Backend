@@ -18,7 +18,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
-	"github.com/yaa110/go-persian-calendar"
+	ptime "github.com/yaa110/go-persian-calendar"
 )
 
 type CalcService struct {
@@ -1009,7 +1009,7 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 
 	// Map COPD from ChronicLungDisease
 	copd := 0
-	if lungCancerInfo.ChronicLungDisease != nil && *lungCancerInfo.ChronicLungDisease {
+	if answeredYes(lungCancerInfo.ChronicLungDisease) {
 		copd = 1
 	}
 
@@ -1034,7 +1034,7 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 	smokingDuration := 0
 	yearsQuit := 0
 
-	if lungCancerInfo.CurrentSmoking {
+	if answeredYes(lungCancerInfo.CurrentSmoking) {
 		smokingStatus = 1 // 1 = Current smoker
 		if lungCancerInfo.CigarettesPerDayCurrent != nil {
 			cigarettesPerDay = float64(*lungCancerInfo.CigarettesPerDayCurrent)
@@ -1675,4 +1675,12 @@ func mapPersonalLsOther(cancerInfo []*entity.CancerInfo) int {
 		}
 	}
 	return 0
+}
+
+// Return true if answered Yes, false otherwise
+func answeredYes(answer *enum.Answer) bool {
+	if answer != nil && *answer == enum.AnswerYes {
+		return true
+	}
+	return false
 }

@@ -267,24 +267,24 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 	type UpdateGeneralHealthParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		DrinksAlcohol             *bool   `json:"drinksAlcohol"`
-		CupsPerWeek               *string `json:"cupsPerWeek"`
-		LastMonthSabzijatMeal     *string `json:"lastMonthSabzijatMeal"`
-		LastMonthSabzijatWeight   *string `json:"lastMonthSabzijatWeight"`
-		MediumActivityMonthInYear *uint   `json:"mediumActivityMonthInYear"`
-		MediumActivityHourInWeek  *string `json:"mediumActivityHourInWeek"`
-		HardActivityMonthInYear   *uint   `json:"hardActivityMonthInYear"`
-		HardActivityHourInWeek    *string `json:"hardActivityHourInWeek"`
-		SmokeAtLeast100           *bool   `json:"smokeAtLeast100"`
-		SmokingAge                *uint   `json:"smokingAge"`
-		SmokingNow                *bool   `json:"smokingNow"`
-		YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
-		LeaveSmokingAge           *uint   `json:"leaveSmokingAge"`
-		CountSmokingDaily         *string `json:"countSmokingDaily"`
-		CountGheliandaily         *string `json:"countGheliandaily"`
-		CountSmokingDailyPast     *string `json:"countSmokingDailyPast"`
-		CountGheliandailyPast     *string `json:"countGheliandailyPast"`
-		AttentionCorrect          *bool   `json:"attentionCorrect"`
+		DrinksAlcohol             *enum.Answer `json:"drinksAlcohol"`
+		CupsPerWeek               *string      `json:"cupsPerWeek"`
+		LastMonthSabzijatMeal     *string      `json:"lastMonthSabzijatMeal"`
+		LastMonthSabzijatWeight   *string      `json:"lastMonthSabzijatWeight"`
+		MediumActivityMonthInYear *uint        `json:"mediumActivityMonthInYear"`
+		MediumActivityHourInWeek  *string      `json:"mediumActivityHourInWeek"`
+		HardActivityMonthInYear   *uint        `json:"hardActivityMonthInYear"`
+		HardActivityHourInWeek    *string      `json:"hardActivityHourInWeek"`
+		SmokeAtLeast100           *enum.Answer `json:"smokeAtLeast100"`
+		SmokingAge                *uint        `json:"smokingAge"`
+		SmokingNow                *enum.Answer `json:"smokingNow"`
+		YearSmoke                 *uint        `json:"yearSmoke,omitempty"`
+		LeaveSmokingAge           *uint        `json:"leaveSmokingAge"`
+		CountSmokingDaily         *string      `json:"countSmokingDaily"`
+		CountGheliandaily         *string      `json:"countGheliandaily"`
+		CountSmokingDailyPast     *string      `json:"countSmokingDailyPast"`
+		CountGheliandailyPast     *string      `json:"countGheliandailyPast"`
+		AttentionCorrect          *bool        `json:"attentionCorrect"`
 	}
 
 	params := controller.Validate[UpdateGeneralHealthParams](ctx)
@@ -335,27 +335,27 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
 		MenopausalStatus             uint                    `form:"menopausalStatus"`
 		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
-		HRT                          *bool                   `form:"hrt,omitempty"`
+		HRT                          *enum.Answer            `form:"hrt,omitempty"`
 		HRTUseLength                 *uint                   `form:"hrtUseLength,omitempty"`
-		LastFiveYearsHRTUse          bool                    `form:"lastFiveYearsHrtUse"`
-		CurrentHRTUse                *bool                   `form:"currentHrtUse,omitempty"`
+		LastFiveYearsHRTUse          *enum.Answer            `form:"lastFiveYearsHrtUse"`
+		CurrentHRTUse                *enum.Answer            `form:"currentHrtUse,omitempty"`
 		IntendedHRTUse               *uint                   `form:"intendedHrtUse,omitempty"`
 		HRTType                      *string                 `form:"hrtType,omitempty"`
-		Oral                         *bool                   `form:"oral,omitempty"`
+		Oral                         *enum.Answer            `form:"oral,omitempty"`
 		OralDuration                 *string                 `form:"oralDuration,omitempty"`
-		OralTwoLastYears             *bool                   `form:"oralTwoLastYears,omitempty"`
-		MamoGraphy                   *bool                   `form:"mamoGraphy,omitempty"`
+		OralTwoLastYears             *enum.Answer            `form:"oralTwoLastYears,omitempty"`
+		MamoGraphy                   *enum.Answer            `form:"mamoGraphy,omitempty"`
 		MamoGraphyPictures           []*multipart.FileHeader `form:"mamoGraphyPictures"`
 		BreastDensity                *string                 `form:"breastDensity,omitempty"`
-		Falop                        *bool                   `form:"falop,omitempty"`
-		Andometrioz                  *bool                   `form:"andometrioz,omitempty"`
+		Falop                        *enum.Answer            `form:"falop,omitempty"`
+		Andometrioz                  *enum.Answer            `form:"andometrioz,omitempty"`
 		LeavePestan                  bool                    `form:"leavePestan"`
 		LeaveTokhmdan                bool                    `form:"leaveTokhmdan"`
-		LaDeColon                    *bool                   `form:"laDeColon,omitempty"`
-		LaDePol                      *bool                   `form:"laDePol,omitempty"`
-		AspLaMo                      *bool                   `form:"aspLaMo,omitempty"`
-		NsaiDLaMo                    *bool                   `form:"nsaiDLaMo,omitempty"`
-		LastFiveYearBloodTestInStool *bool                   `form:"lastFiveYearBloodTestInStool,omitempty"`
+		LaDeColon                    *enum.Answer            `form:"laDeColon,omitempty"`
+		LaDePol                      *enum.Answer            `form:"laDePol,omitempty"`
+		AspLaMo                      *enum.Answer            `form:"aspLaMo,omitempty"`
+		NsaiDLaMo                    *enum.Answer            `form:"nsaiDLaMo,omitempty"`
+		LastFiveYearBloodTestInStool *enum.Answer            `form:"lastFiveYearBloodTestInStool,omitempty"`
 		AttentionCorrect             *bool                   `form:"attentionCorrect,omitempty"`
 	}
 
@@ -376,7 +376,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		MenopauseAge:                 params.MenopauseAge,
 		HRT:                          params.HRT,
 		HRTUseLength:                 params.HRTUseLength,
-		LastFiveYearsHRTUse:          &params.LastFiveYearsHRTUse,
+		LastFiveYearsHRTUse:          params.LastFiveYearsHRTUse,
 		CurrentHRTUse:                params.CurrentHRTUse,
 		IntendedHRTUse:               params.IntendedHRTUse,
 		HRTType:                      params.HRTType,
@@ -412,9 +412,9 @@ func (formController *AdminFormController) UpdateContact(ctx *gin.Context) {
 		FormID uint `uri:"formID" validate:"required"`
 
 		Name                  *string                 `form:"name"`
-		TestGen               *bool                   `form:"testGen"`
+		TestGen               *enum.Answer            `form:"testGen"`
 		TestGenPictures       []*multipart.FileHeader `form:"testGenPictures,omitempty"`
-		FmTestGen             *bool                   `form:"fmTestGen"`
+		FmTestGen             *enum.Answer            `form:"fmTestGen"`
 		FatherTestGenPictures []*multipart.FileHeader `form:"fatherTestGenPictures,omitempty"`
 		MotherTestGenPictures []*multipart.FileHeader `form:"motherTestGenPictures,omitempty"`
 		CallExpert            *bool                   `form:"callExpert"`
@@ -467,58 +467,58 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 	type UpdateLungCancerParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		InsuranceStatus              *string `json:"insuranceStatus"`
-		SupplementaryInsuranceStatus *bool   `json:"takmilBime"`
-		SupplementaryInsurances      *string `json:"supplementaryInsurances"`
-		Hypertension                 *bool   `json:"hypertension"`
-		HypertensionTreatment        *bool   `json:"hypertensionTreatment"`
-		HeartDisease                 *bool   `json:"heartDisease"`
-		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment"`
-		Diabetes                     *bool   `json:"diabetes"`
-		DiabetesTreatment            *bool   `json:"diabetesTreatment"`
-		ChronicLungDisease           *bool   `json:"chronicLungDisease"`
-		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType"`
-		LungCancerHistory            *bool   `json:"lungCancerHistory"`
-		OtherCancerHistory           *bool   `json:"otherCancerHistory"`
-		OtherCancerType              *uint   `json:"otherCancerType"`
-		LungCancerFamily             *bool   `json:"lungCancerFamily"`
-		LungCancerFamilyRelation     *string `json:"lungCancerFamilyRelation"`
-		OtherCancerFamily            *bool   `json:"otherCancerFamily"`
-		OtherCancerFamilyType        *uint   `json:"otherCancerFamilyType"`
-		OtherCancerFamilyRelation    *string `json:"otherCancerFamilyRelation"`
-		OccupationalExposure         *string `json:"occupationalExposure"`
-		CurrentSmoking               *bool   `json:"currentSmoking"`
-		SmokingStartAgeCurrent       *uint   `json:"smokingStartAgeCurrent"`
-		SmokingTypesCurrent          *string `json:"smokingTypesCurrent"`
-		CigarettesPerDayCurrent      *uint   `json:"cigarettesPerDayCurrent"`
-		CigarPerDayCurrent           *uint   `json:"cigarPerDayCurrent"`
-		ECigPerDayCurrent            *uint   `json:"eCigPerDayCurrent"`
-		PipePerDayCurrent            *uint   `json:"pipePerDayCurrent"`
-		ChapoghPerDayCurrent         *uint   `json:"chapoghPerDayCurrent"`
-		SmokedOpiumPerDayCurrent     *uint   `json:"smokedOpiumPerDayCurrent"`
-		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
-		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
-		PastSmoking                  *string `json:"pastSmoking"`
-		SmokePastAvg                 *uint   `json:"smokePastAvg"`
-		SmokeCurrentdAvg             *uint   `json:"smokeCurrentAvg"`
-		Bronchitis                   bool    `json:"bronshit"`
-		LungIll                      bool    `json:"lungill"`
-		Fibrosis                     bool    `json:"fibroz"`
-		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
-		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
-		SmokingTypesPast             *string `json:"smokingTypesPast"`
-		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast"`
-		CigarPerDayPast              *uint   `json:"cigarPerDayPast"`
-		ECigPerDayPast               *uint   `json:"eCigPerDayPast"`
-		PipePerDayPast               *uint   `json:"pipePerDayPast"`
-		ChapoghPerDayPast            *uint   `json:"chapoghPerDayPast"`
-		SmokedOpiumPerDayPast        *uint   `json:"smokedOpiumPerDayPast"`
-		ChewedOpiumPerDayPast        *uint   `json:"chewedOpiumPerDayPast"`
-		HookahPerWeekPast            *uint   `json:"hookahPerWeekPast"`
-		SecondhandSmoke              *bool   `json:"secondhandSmoke"`
-		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation"`
-		AttentionCorrect             *bool   `json:"attentionCorrect"`
-		LungDiseaseHistory           *string `json:"lungDiseaseHistory"`
+		InsuranceStatus              *string      `json:"insuranceStatus"`
+		SupplementaryInsuranceStatus *enum.Answer `json:"takmilBime"`
+		SupplementaryInsurances      *string      `json:"supplementaryInsurances"`
+		Hypertension                 *enum.Answer `json:"hypertension"`
+		HypertensionTreatment        *enum.Answer `json:"hypertensionTreatment"`
+		HeartDisease                 *enum.Answer `json:"heartDisease"`
+		HeartDiseaseTreatment        *enum.Answer `json:"heartDiseaseTreatment"`
+		Diabetes                     *enum.Answer `json:"diabetes"`
+		DiabetesTreatment            *enum.Answer `json:"diabetesTreatment"`
+		ChronicLungDisease           *enum.Answer `json:"chronicLungDisease"`
+		ChronicLungDiseaseType       *string      `json:"chronicLungDiseaseType"`
+		LungCancerHistory            *enum.Answer `json:"lungCancerHistory"`
+		OtherCancerHistory           *enum.Answer `json:"otherCancerHistory"`
+		OtherCancerType              *uint        `json:"otherCancerType"`
+		LungCancerFamily             *enum.Answer `json:"lungCancerFamily"`
+		LungCancerFamilyRelation     *string      `json:"lungCancerFamilyRelation"`
+		OtherCancerFamily            *enum.Answer `json:"otherCancerFamily"`
+		OtherCancerFamilyType        *uint        `json:"otherCancerFamilyType"`
+		OtherCancerFamilyRelation    *string      `json:"otherCancerFamilyRelation"`
+		OccupationalExposure         *string      `json:"occupationalExposure"`
+		CurrentSmoking               *enum.Answer `json:"currentSmoking"`
+		SmokingStartAgeCurrent       *uint        `json:"smokingStartAgeCurrent"`
+		SmokingTypesCurrent          *string      `json:"smokingTypesCurrent"`
+		CigarettesPerDayCurrent      *uint        `json:"cigarettesPerDayCurrent"`
+		CigarPerDayCurrent           *uint        `json:"cigarPerDayCurrent"`
+		ECigPerDayCurrent            *uint        `json:"eCigPerDayCurrent"`
+		PipePerDayCurrent            *uint        `json:"pipePerDayCurrent"`
+		ChapoghPerDayCurrent         *uint        `json:"chapoghPerDayCurrent"`
+		SmokedOpiumPerDayCurrent     *uint        `json:"smokedOpiumPerDayCurrent"`
+		ChewedOpiumPerDayCurrent     *uint        `json:"chewedOpiumPerDayCurrent"`
+		HookahPerWeekCurrent         *uint        `json:"hookahPerWeekCurrent"`
+		PastSmoking                  *string      `json:"pastSmoking"`
+		SmokePastAvg                 *uint        `json:"smokePastAvg"`
+		SmokeCurrentdAvg             *uint        `json:"smokeCurrentAvg"`
+		Bronchitis                   *enum.Answer `json:"bronshit"`
+		LungIll                      *enum.Answer `json:"lungill"`
+		Fibrosis                     *enum.Answer `json:"fibroz"`
+		LeaveSmoke                   *uint        `json:"leaveSmoke,omitempty"`
+		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
+		SmokingTypesPast             *string      `json:"smokingTypesPast"`
+		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
+		CigarPerDayPast              *uint        `json:"cigarPerDayPast"`
+		ECigPerDayPast               *uint        `json:"eCigPerDayPast"`
+		PipePerDayPast               *uint        `json:"pipePerDayPast"`
+		ChapoghPerDayPast            *uint        `json:"chapoghPerDayPast"`
+		SmokedOpiumPerDayPast        *uint        `json:"smokedOpiumPerDayPast"`
+		ChewedOpiumPerDayPast        *uint        `json:"chewedOpiumPerDayPast"`
+		HookahPerWeekPast            *uint        `json:"hookahPerWeekPast"`
+		SecondhandSmoke              *enum.Answer `json:"secondhandSmoke"`
+		SecondhandSmokeLocation      *string      `json:"secondhandSmokeLocation"`
+		AttentionCorrect             *bool        `json:"attentionCorrect"`
+		LungDiseaseHistory           *string      `json:"lungDiseaseHistory"`
 	}
 
 	params := controller.Validate[UpdateLungCancerParams](ctx)
@@ -595,67 +595,67 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 	type UpdateNavidFormParams struct {
 		FormID uint `uri:"formID" validate:"required"`
 
-		InsuranceStatus              *string `json:"insuranceStatus"`
-		SupplementaryInsuranceStatus *bool   `json:"takmilBime"`
-		SupplementaryInsurances      *string `json:"supplementaryInsurances"`
-		Hypertension                 *string `json:"hypertension"`
-		HypertensionTreatment        *bool   `json:"hypertensionTreatment"`
-		HeartDisease                 *string `json:"heartDisease"`
-		HeartDiseaseTreatment        *bool   `json:"heartDiseaseTreatment"`
-		Diabetes                     *string `json:"diabetes"`
-		DiabetesTreatment            *bool   `json:"diabetesTreatment"`
-		ChronicLungDisease           *bool   `json:"chronicLungDisease"`
-		ChronicLungDiseaseType       *string `json:"chronicLungDiseaseType"`
-		LungCancerHistory            *bool   `json:"lungCancerHistory"`
-		OtherCancerHistory           *bool   `json:"otherCancerHistory"`
-		OtherCancerType              *uint   `json:"otherCancerType"`
-		LungCancerFamily             *bool   `json:"lungCancerFamily"`
-		LungCancerFamilyRelation     *string `json:"lungCancerFamilyRelation"`
-		OtherCancerFamily            *bool   `json:"otherCancerFamily"`
-		OtherCancerFamilyType        *uint   `json:"otherCancerFamilyType"`
-		OtherCancerFamilyRelation    *string `json:"otherCancerFamilyRelation"`
-		OccupationalExposure         *string `json:"occupationalExposure"`
-		CurrentSmoking               *bool   `json:"currentSmoking"`
-		SmokingStartAgeCurrent       *uint   `json:"smokingStartAgeCurrent"`
-		SmokingTypesCurrent          *string `json:"smokingTypesCurrent"`
-		CigarettesPerDayCurrent      *uint   `json:"cigarettesPerDayCurrent"`
-		CigarPerDayCurrent           *uint   `json:"cigarPerDayCurrent"`
-		ECigPerDayCurrent            *uint   `json:"eCigPerDayCurrent"`
-		PipePerDayCurrent            *uint   `json:"pipePerDayCurrent"`
-		ChapoghPerDayCurrent         *uint   `json:"chapoghPerDayCurrent"`
-		SmokedOpiumPerDayCurrent     *uint   `json:"smokedOpiumPerDayCurrent"`
-		ChewedOpiumPerDayCurrent     *uint   `json:"chewedOpiumPerDayCurrent"`
-		HookahPerWeekCurrent         *uint   `json:"hookahPerWeekCurrent"`
-		PastSmoking                  *string `json:"pastSmoking"`
-		LeaveSmoke                   *uint   `json:"leaveSmoke,omitempty"`
-		SmokingStartAgePast          *uint   `json:"smokingStartAgePast"`
-		SmokingTypesPast             *string `json:"smokingTypesPast"`
-		CigarettesPerDayPast         *uint   `json:"cigarettesPerDayPast"`
-		CigarPerDayPast              *uint   `json:"cigarPerDayPast"`
-		ECigPerDayPast               *uint   `json:"eCigPerDayPast"`
-		PipePerDayPast               *uint   `json:"pipePerDayPast"`
-		ChapoghPerDayPast            *uint   `json:"chapoghPerDayPast"`
-		SmokedOpiumPerDayPast        *uint   `json:"smokedOpiumPerDayPast"`
-		ChewedOpiumPerDayPast        *uint   `json:"chewedOpiumPerDayPast"`
-		HookahPerWeekPast            *uint   `json:"hookahPerWeekPast"`
-		SecondhandSmoke              *bool   `json:"secondhandSmoke"`
-		SecondhandSmokeLocation      *string `json:"secondhandSmokeLocation"`
-		AttentionCorrect             *bool   `json:"attentionCorrect"`
-		LungDiseaseHistory           *string `json:"lungDiseaseHistory"`
-		CurrentCigaretteSmoking      *bool   `json:"Csig,omitempty"`
-		CurrentRolledTobacco         *bool   `json:"CsigBarg,omitempty"`
-		CurrentPipeSmoking           *bool   `json:"Cpip,omitempty"`
-		CurrentHookahUse             *bool   `json:"Cghel,omitempty"`
-		CurrentChiboukSmoking        *bool   `json:"Cchop,omitempty"`
-		CurrentOpiumUse              *bool   `json:"Cteryak,omitempty"`
-		FormerCigaretteSmoking       *bool   `json:"Psig,omitempty"`
-		FormerRolledTobacco          *bool   `json:"PsigBarg,omitempty"`
-		FormerPipeSmoking            *bool   `json:"Ppip,omitempty"`
-		FormerHookahUse              *bool   `json:"Pghel,omitempty"`
-		FormerChiboukSmoking         *bool   `json:"Pchop,omitempty"`
-		FormerOpiumUse               *bool   `json:"Pteryak,omitempty"`
-		PelecSig                     *bool   `json:"PelecSig,omitempty"`
-		CelecSig                     *bool   `json:"CelecSig,omitempty"`
+		InsuranceStatus              *string      `json:"insuranceStatus"`
+		SupplementaryInsuranceStatus *enum.Answer `json:"takmilBime"`
+		SupplementaryInsurances      *string      `json:"supplementaryInsurances"`
+		Hypertension                 *string      `json:"hypertension"`
+		HypertensionTreatment        *enum.Answer `json:"hypertensionTreatment"`
+		HeartDisease                 *string      `json:"heartDisease"`
+		HeartDiseaseTreatment        *enum.Answer `json:"heartDiseaseTreatment"`
+		Diabetes                     *string      `json:"diabetes"`
+		DiabetesTreatment            *enum.Answer `json:"diabetesTreatment"`
+		ChronicLungDisease           *enum.Answer `json:"chronicLungDisease"`
+		ChronicLungDiseaseType       *string      `json:"chronicLungDiseaseType"`
+		LungCancerHistory            *enum.Answer `json:"lungCancerHistory"`
+		OtherCancerHistory           *enum.Answer `json:"otherCancerHistory"`
+		OtherCancerType              *uint        `json:"otherCancerType"`
+		LungCancerFamily             *enum.Answer `json:"lungCancerFamily"`
+		LungCancerFamilyRelation     *string      `json:"lungCancerFamilyRelation"`
+		OtherCancerFamily            *enum.Answer `json:"otherCancerFamily"`
+		OtherCancerFamilyType        *uint        `json:"otherCancerFamilyType"`
+		OtherCancerFamilyRelation    *string      `json:"otherCancerFamilyRelation"`
+		OccupationalExposure         *string      `json:"occupationalExposure"`
+		CurrentSmoking               *enum.Answer `json:"currentSmoking"`
+		SmokingStartAgeCurrent       *uint        `json:"smokingStartAgeCurrent"`
+		SmokingTypesCurrent          *string      `json:"smokingTypesCurrent"`
+		CigarettesPerDayCurrent      *uint        `json:"cigarettesPerDayCurrent"`
+		CigarPerDayCurrent           *uint        `json:"cigarPerDayCurrent"`
+		ECigPerDayCurrent            *uint        `json:"eCigPerDayCurrent"`
+		PipePerDayCurrent            *uint        `json:"pipePerDayCurrent"`
+		ChapoghPerDayCurrent         *uint        `json:"chapoghPerDayCurrent"`
+		SmokedOpiumPerDayCurrent     *uint        `json:"smokedOpiumPerDayCurrent"`
+		ChewedOpiumPerDayCurrent     *uint        `json:"chewedOpiumPerDayCurrent"`
+		HookahPerWeekCurrent         *uint        `json:"hookahPerWeekCurrent"`
+		PastSmoking                  *string      `json:"pastSmoking"`
+		LeaveSmoke                   *uint        `json:"leaveSmoke,omitempty"`
+		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
+		SmokingTypesPast             *string      `json:"smokingTypesPast"`
+		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
+		CigarPerDayPast              *uint        `json:"cigarPerDayPast"`
+		ECigPerDayPast               *uint        `json:"eCigPerDayPast"`
+		PipePerDayPast               *uint        `json:"pipePerDayPast"`
+		ChapoghPerDayPast            *uint        `json:"chapoghPerDayPast"`
+		SmokedOpiumPerDayPast        *uint        `json:"smokedOpiumPerDayPast"`
+		ChewedOpiumPerDayPast        *uint        `json:"chewedOpiumPerDayPast"`
+		HookahPerWeekPast            *uint        `json:"hookahPerWeekPast"`
+		SecondhandSmoke              *enum.Answer `json:"secondhandSmoke"`
+		SecondhandSmokeLocation      *string      `json:"secondhandSmokeLocation"`
+		AttentionCorrect             *bool        `json:"attentionCorrect"`
+		LungDiseaseHistory           *string      `json:"lungDiseaseHistory"`
+		CurrentCigaretteSmoking      *enum.Answer `json:"Csig,omitempty"`
+		CurrentRolledTobacco         *enum.Answer `json:"CsigBarg,omitempty"`
+		CurrentPipeSmoking           *enum.Answer `json:"Cpip,omitempty"`
+		CurrentHookahUse             *enum.Answer `json:"Cghel,omitempty"`
+		CurrentChiboukSmoking        *enum.Answer `json:"Cchop,omitempty"`
+		CurrentOpiumUse              *enum.Answer `json:"Cteryak,omitempty"`
+		FormerCigaretteSmoking       *enum.Answer `json:"Psig,omitempty"`
+		FormerRolledTobacco          *enum.Answer `json:"PsigBarg,omitempty"`
+		FormerPipeSmoking            *enum.Answer `json:"Ppip,omitempty"`
+		FormerHookahUse              *enum.Answer `json:"Pghel,omitempty"`
+		FormerChiboukSmoking         *enum.Answer `json:"Pchop,omitempty"`
+		FormerOpiumUse               *enum.Answer `json:"Pteryak,omitempty"`
+		PelecSig                     *enum.Answer `json:"PelecSig,omitempty"`
+		CelecSig                     *enum.Answer `json:"CelecSig,omitempty"`
 	}
 
 	params := controller.Validate[UpdateNavidFormParams](ctx)

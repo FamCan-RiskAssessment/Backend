@@ -226,8 +226,14 @@ func (d *DummySeeder) createDummyBasicInfo(formID uint, formIndex int, months []
 	return basicInfo
 }
 func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *entity.GeneralHealthInfo {
-	smokingNow := formIndex%3 == 0
-	drinksAlcohol := formIndex%4 == 0
+	var smokingNow = enum.AnswerNo
+	if formIndex%3 == 0 {
+		smokingNow = enum.AnswerYes
+	}
+	var drinksAlcohol = enum.AnswerNo
+	if formIndex%4 == 0 {
+		drinksAlcohol = enum.AnswerYes
+	}
 
 	generalHealth := &entity.GeneralHealthInfo{
 		FormID:                  formID,
@@ -243,7 +249,7 @@ func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *enti
 
 		SmokeAtLeast100:       &smokingNow,
 		SmokingAge:            uintPtr(uint(15 + (formIndex % 20))),
-		SmokingNow:            smokingNow,
+		SmokingNow:            &smokingNow,
 		YearSmoke:             uintPtr(uint(15 + (formIndex % 20))),
 		LeaveSmokingAge:       uintPtr(uint(20 + (formIndex % 30))),
 		CountSmokingDaily:     stringPtr(fmt.Sprintf("%d", (formIndex%20)+1)),
@@ -254,12 +260,19 @@ func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *enti
 	return generalHealth
 }
 func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopausalStatuses []enum.MenopausalStatus, hrtTypes []string) *entity.MamoGraphyInfo {
-	drinksAlcohol := formIndex%4 == 0
 	hasChildren := formIndex%3 == 0
 	hrtType := hrtTypes[formIndex%len(hrtTypes)]
 	menopausalStatus := menopausalStatuses[formIndex%len(menopausalStatuses)]
 	SonCount := uint((formIndex % 3) + 1)
 	DaughterCount := uint((formIndex % 3) + 1)
+	var drinksAlcohol = enum.AnswerNo
+	if formIndex%4 == 0 {
+		drinksAlcohol = enum.AnswerYes
+	}
+	var lastFiveYearsHRTUse = enum.AnswerNo
+	if formIndex%3 == 0 {
+		lastFiveYearsHRTUse = enum.AnswerYes
+	}
 
 	mamoGraphyInfo := &entity.MamoGraphyInfo{
 		FormID:                       formID,
@@ -273,7 +286,7 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 		MenopauseAge:                 stringPtr(fmt.Sprintf("%d", 45+(formIndex%15))),
 		HRT:                          &drinksAlcohol,
 		HRTUseLength:                 uintPtr(uint((formIndex % 10) + 1)),
-		LastFiveYearsHRTUse:          formIndex%3 == 0,
+		LastFiveYearsHRTUse:          &lastFiveYearsHRTUse,
 		CurrentHRTUse:                &drinksAlcohol,
 		IntendedHRTUse:               uintPtr(uint((formIndex % 5) + 1)),
 		HRTType:                      &hrtType,
@@ -331,8 +344,14 @@ func (d *DummySeeder) createDummyFamilyCancer(formID uint, formIndex int, cancer
 func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []string, addresses []string, provinces []string, cities []string, countries []string, degrees []string) *entity.ContactInfo {
 	name := names[formIndex%len(names)]
 	address := addresses[formIndex%len(addresses)]
-	hasTestGen := formIndex%5 == 0
-	hasFmTestGen := formIndex%6 == 0
+	var hasTestGen = enum.AnswerNo
+	if formIndex%5 == 0 {
+		hasTestGen = enum.AnswerYes
+	}
+	var hasFmTestGen = enum.AnswerNo
+	if formIndex%6 == 0 {
+		hasFmTestGen = enum.AnswerYes
+	}
 	province := provinces[formIndex%len(provinces)]
 	city := cities[formIndex%len(cities)]
 	country := countries[formIndex%len(countries)]
@@ -355,15 +374,39 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 	return contactInfo
 }
 func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []string, secondhandSmokeLocations []string, cancerTypes []enum.CancerType, relations []string, lungDiseases []string) *entity.LungCancerInfo {
-	drinksAlcohol := formIndex%4 == 0
+	var drinksAlcohol = enum.AnswerNo
+	if formIndex%4 == 0 {
+		drinksAlcohol = enum.AnswerYes
+	}
+	var SupplementaryInsuranceStatus = enum.AnswerNo
+	if formIndex%2 == 0 {
+		SupplementaryInsuranceStatus = enum.AnswerYes
+	}
+	var hasOtherCancerHistory = enum.AnswerNo
+	if formIndex%8 == 0 {
+		hasOtherCancerHistory = enum.AnswerYes
+	}
+	var hasLungCancerHistory = enum.AnswerNo
+	if formIndex%8 == 0 {
+		hasLungCancerHistory = enum.AnswerYes
+	}
+	var secondhandSmoke = enum.AnswerNo
+	if formIndex%3 == 0 {
+		secondhandSmoke = enum.AnswerYes
+	}
+	var currentSmoking = enum.AnswerNo
+	if formIndex%4 == 0 {
+		currentSmoking = enum.AnswerYes
+	}
+	var hasOtherCancerFamily = enum.AnswerNo
+	if formIndex%10 == 0 {
+		hasOtherCancerFamily = enum.AnswerYes
+	}
+	var hasLungCancerFamily = enum.AnswerNo
+	if formIndex%9 == 0 {
+		hasLungCancerFamily = enum.AnswerYes
+	}
 	insuranceStatus := insuranceStatuses[formIndex%len(insuranceStatuses)]
-	SupplementaryInsuranceStatus := formIndex%2 == 0
-	hasLungCancerHistory := formIndex%7 == 0
-	hasOtherCancerHistory := formIndex%8 == 0
-	hasLungCancerFamily := formIndex%9 == 0
-	hasOtherCancerFamily := formIndex%10 == 0
-	currentSmoking := formIndex%4 == 0
-	secondhandSmoke := formIndex%3 == 0
 	occupationalExposure := occupationalExposures[formIndex%len(occupationalExposures)]
 	lungDiseaseType := lungDiseaseTypes[formIndex%len(lungDiseaseTypes)]
 	smokingType := smokingTypes[formIndex%len(smokingTypes)]
@@ -378,8 +421,8 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		SupplementaryInsurances:      stringPtr(fmt.Sprintf("بیمه %d", formIndex+1)),
 		ChronicLungDisease:           &drinksAlcohol,
 		ChronicLungDiseaseType:       &lungDiseaseType,
-		LungCancerHistory:            hasLungCancerHistory,
-		OtherCancerHistory:           hasOtherCancerHistory,
+		LungCancerHistory:            &hasLungCancerHistory,
+		OtherCancerHistory:           &hasOtherCancerHistory,
 		OtherCancerType:              &cancerTypes[formIndex%len(cancerTypes)],
 		LungCancerFamily:             &hasLungCancerFamily,
 		LungCancerFamilyRelation:     stringPtr(relations[formIndex%len(relations)]),
@@ -387,7 +430,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		OtherCancerFamilyType:        &cancerTypes[formIndex%len(cancerTypes)],
 		OtherCancerFamilyRelation:    stringPtr(relations[formIndex%len(relations)]),
 		OccupationalExposure:         &occupationalExposure,
-		CurrentSmoking:               currentSmoking,
+		CurrentSmoking:               &currentSmoking,
 		SmokingStartAgeCurrent:       uintPtr(uint(15 + (formIndex % 20))),
 		SmokingTypesCurrent:          &smokingType,
 		CigarettesPerDayCurrent:      uintPtr(uint((formIndex % 40) + 1)),
@@ -410,7 +453,7 @@ func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranc
 		SmokedOpiumPerDayPast:        uintPtr(uint((formIndex % 4) + 1)),
 		ChewedOpiumPerDayPast:        uintPtr(uint((formIndex % 2) + 1)),
 		HookahPerWeekPast:            uintPtr(uint((formIndex % 5) + 1)),
-		SecondhandSmoke:              secondhandSmoke,
+		SecondhandSmoke:              &secondhandSmoke,
 		SecondhandSmokeLocation:      &secondhandSmokeLocation,
 		LungDiseaseHistory:           stringPtr(lungDiseaseHistory),
 	}

@@ -73,7 +73,7 @@ type UpsertGeneralHealthRequest struct {
 	UserID uint
 	FormID uint
 
-	DrinksAlcohol             *bool
+	DrinksAlcohol             *enum.Answer
 	CupsPerWeek               *string
 	LastMonthSabzijatMeal     string
 	LastMonthSabzijatWeight   string
@@ -81,9 +81,9 @@ type UpsertGeneralHealthRequest struct {
 	MediumActivityHourInWeek  string
 	HardActivityMonthInYear   uint
 	HardActivityHourInWeek    string
-	SmokeAtLeast100           *bool
+	SmokeAtLeast100           *enum.Answer
 	SmokingAge                *uint
-	SmokingNow                bool
+	SmokingNow                *enum.Answer
 	YearSmoke                 *uint
 	LeaveSmokingAge           *uint
 	CountSmokingDaily         *string
@@ -107,27 +107,27 @@ type UpsertMamographyRequest struct {
 	AgeOfFirstBirth              *uint
 	MenopausalStatus             uint
 	MenopauseAge                 *string
-	HRT                          *bool
+	HRT                          *enum.Answer
 	HRTUseLength                 *uint
-	LastFiveYearsHRTUse          bool
-	CurrentHRTUse                *bool
+	LastFiveYearsHRTUse          *enum.Answer
+	CurrentHRTUse                *enum.Answer
 	IntendedHRTUse               *uint
 	HRTType                      *string
-	Oral                         *bool
+	Oral                         *enum.Answer
 	OralDuration                 *string
-	OralTwoLastYears             *bool
-	MamoGraphy                   *bool
+	OralTwoLastYears             *enum.Answer
+	MamoGraphy                   *enum.Answer
 	MamoGraphyPictures           []*multipart.FileHeader
 	BreastDensity                *string
-	Falop                        *bool
-	Andometrioz                  *bool
+	Falop                        *enum.Answer
+	Andometrioz                  *enum.Answer
 	LeavePestan                  bool
 	LeaveTokhmdan                bool
-	LaDeColon                    *bool
-	LaDePol                      *bool
-	AspLaMo                      *bool
-	NsaiDLaMo                    *bool
-	LastFiveYearBloodTestInStool *bool
+	LaDeColon                    *enum.Answer
+	LaDePol                      *enum.Answer
+	AspLaMo                      *enum.Answer
+	NsaiDLaMo                    *enum.Answer
+	LastFiveYearBloodTestInStool *enum.Answer
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
 
@@ -215,9 +215,9 @@ type UpsertContactRequest struct {
 	FormID uint
 
 	Name                  string
-	TestGen               *bool
+	TestGen               *enum.Answer
 	TestGenPictures       []*multipart.FileHeader
-	FmTestGen             *bool
+	FmTestGen             *enum.Answer
 	FatherTestGenPictures []*multipart.FileHeader
 	MotherTestGenPictures []*multipart.FileHeader
 	CallExpert            bool
@@ -232,42 +232,31 @@ type UpsertContactRequest struct {
 	Phone3                *string
 }
 
-type UpsertFamilyCancerListRequest struct {
-	UserID uint
-	FormID uint
-
-	AmeAmoCancer    bool
-	FatherCancer    bool
-	KhaleDaeiCancer bool
-	MotherCancer    bool
-	SiblingCancer   bool
-}
-
 type UpsertNavidFormRequest struct {
 	UserID uint
 	FormID uint
 
 	InsuranceStatus              *string
 	SupplementaryInsurances      *string
-	SupplementaryInsuranceStatus *bool
+	SupplementaryInsuranceStatus *enum.Answer
 	Hypertension                 string
-	HypertensionTreatment        *bool
+	HypertensionTreatment        *enum.Answer
 	HeartDisease                 string
-	HeartDiseaseTreatment        *bool
+	HeartDiseaseTreatment        *enum.Answer
 	Diabetes                     string
-	DiabetesTreatment            *bool
-	ChronicLungDisease           *bool
+	DiabetesTreatment            *enum.Answer
+	ChronicLungDisease           *enum.Answer
 	ChronicLungDiseaseType       *string
-	LungCancerHistory            bool
-	OtherCancerHistory           bool
+	LungCancerHistory            *enum.Answer
+	OtherCancerHistory           *enum.Answer
 	OtherCancerType              *uint
-	LungCancerFamily             *bool
+	LungCancerFamily             *enum.Answer
 	LungCancerFamilyRelation     *string
-	OtherCancerFamily            *bool
+	OtherCancerFamily            *enum.Answer
 	OtherCancerFamilyType        *uint
 	OtherCancerFamilyRelation    *string
 	OccupationalExposure         *string
-	CurrentSmoking               bool
+	CurrentSmoking               *enum.Answer
 	SmokingStartAgeCurrent       *uint
 	SmokingTypesCurrent          *string
 	CigarettesPerDayCurrent      *uint
@@ -290,23 +279,23 @@ type UpsertNavidFormRequest struct {
 	SmokedOpiumPerDayPast        *uint
 	ChewedOpiumPerDayPast        *uint
 	HookahPerWeekPast            *uint
-	SecondhandSmoke              bool
+	SecondhandSmoke              *enum.Answer
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
-	CurrentCigaretteSmoking      *bool
-	CurrentRolledTobacco         *bool
-	CurrentPipeSmoking           *bool
-	CurrentHookahUse             *bool
-	CurrentChiboukSmoking        *bool
-	CurrentOpiumUse              *bool
-	FormerCigaretteSmoking       *bool
-	FormerRolledTobacco          *bool
-	FormerPipeSmoking            *bool
-	FormerHookahUse              *bool
-	FormerChiboukSmoking         *bool
-	FormerOpiumUse               *bool
-	PelecSig                     *bool
-	CelecSig                     *bool
+	CurrentCigaretteSmoking      *enum.Answer
+	CurrentRolledTobacco         *enum.Answer
+	CurrentPipeSmoking           *enum.Answer
+	CurrentHookahUse             *enum.Answer
+	CurrentChiboukSmoking        *enum.Answer
+	CurrentOpiumUse              *enum.Answer
+	FormerCigaretteSmoking       *enum.Answer
+	FormerRolledTobacco          *enum.Answer
+	FormerPipeSmoking            *enum.Answer
+	FormerHookahUse              *enum.Answer
+	FormerChiboukSmoking         *enum.Answer
+	FormerOpiumUse               *enum.Answer
+	PelecSig                     *enum.Answer
+	CelecSig                     *enum.Answer
 
 	// Attention question answer
 	AttentionCorrect *bool
@@ -318,25 +307,25 @@ type UpsertLungCancerRequest struct {
 
 	InsuranceStatus              *string
 	SupplementaryInsurances      *string
-	SupplementaryInsuranceStatus *bool
-	Hypertension                 bool
-	HypertensionTreatment        *bool
-	HeartDisease                 bool
-	HeartDiseaseTreatment        *bool
-	Diabetes                     bool
-	DiabetesTreatment            *bool
-	ChronicLungDisease           *bool
+	SupplementaryInsuranceStatus *enum.Answer
+	Hypertension                 *enum.Answer
+	HypertensionTreatment        *enum.Answer
+	HeartDisease                 *enum.Answer
+	HeartDiseaseTreatment        *enum.Answer
+	Diabetes                     *enum.Answer
+	DiabetesTreatment            *enum.Answer
+	ChronicLungDisease           *enum.Answer
 	ChronicLungDiseaseType       *string
-	LungCancerHistory            bool
-	OtherCancerHistory           bool
+	LungCancerHistory            *enum.Answer
+	OtherCancerHistory           *enum.Answer
 	OtherCancerType              *uint
-	LungCancerFamily             *bool
+	LungCancerFamily             *enum.Answer
 	LungCancerFamilyRelation     *string
-	OtherCancerFamily            *bool
+	OtherCancerFamily            *enum.Answer
 	OtherCancerFamilyType        *uint
 	OtherCancerFamilyRelation    *string
 	OccupationalExposure         *string
-	CurrentSmoking               bool
+	CurrentSmoking               *enum.Answer
 	SmokingStartAgeCurrent       *uint
 	SmokingTypesCurrent          *string
 	CigarettesPerDayCurrent      *uint
@@ -350,9 +339,9 @@ type UpsertLungCancerRequest struct {
 	PastSmoking                  *string
 	SmokePastAvg                 *uint
 	SmokeCurrentAvg              *uint
-	Bronchitis                   bool
-	LungIll                      bool
-	Fibrosis                     bool
+	Bronchitis                   *enum.Answer
+	LungIll                      *enum.Answer
+	Fibrosis                     *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -364,7 +353,7 @@ type UpsertLungCancerRequest struct {
 	SmokedOpiumPerDayPast        *uint
 	ChewedOpiumPerDayPast        *uint
 	HookahPerWeekPast            *uint
-	SecondhandSmoke              bool
+	SecondhandSmoke              *enum.Answer
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
 
@@ -392,7 +381,7 @@ type UpdateGeneralHealthRequest struct {
 	UserID uint
 	FormID uint
 
-	DrinksAlcohol             *bool
+	DrinksAlcohol             *enum.Answer
 	CupsPerWeek               *string
 	LastMonthSabzijatMeal     *string
 	LastMonthSabzijatWeight   *string
@@ -400,9 +389,9 @@ type UpdateGeneralHealthRequest struct {
 	MediumActivityHourInWeek  *string
 	HardActivityMonthInYear   *uint
 	HardActivityHourInWeek    *string
-	SmokeAtLeast100           *bool
+	SmokeAtLeast100           *enum.Answer
 	SmokingAge                *uint
-	SmokingNow                *bool
+	SmokingNow                *enum.Answer
 	YearSmoke                 *uint
 	LeaveSmokingAge           *uint
 	CountSmokingDaily         *string
@@ -425,27 +414,27 @@ type UpdateMamographyRequest struct {
 	AgeOfFirstBirth              *uint
 	MenopausalStatus             *uint
 	MenopauseAge                 *string
-	HRT                          *bool
+	HRT                          *enum.Answer
 	HRTUseLength                 *uint
-	LastFiveYearsHRTUse          *bool
-	CurrentHRTUse                *bool
+	LastFiveYearsHRTUse          *enum.Answer
+	CurrentHRTUse                *enum.Answer
 	IntendedHRTUse               *uint
 	HRTType                      *string
-	Oral                         *bool
+	Oral                         *enum.Answer
 	OralDuration                 *string
-	OralTwoLastYears             *bool
-	MamoGraphy                   *bool
+	OralTwoLastYears             *enum.Answer
+	MamoGraphy                   *enum.Answer
 	MamoGraphyPictures           []*multipart.FileHeader
 	BreastDensity                *string
-	Falop                        *bool
-	Andometrioz                  *bool
+	Falop                        *enum.Answer
+	Andometrioz                  *enum.Answer
 	LeavePestan                  *bool
 	LeaveTokhmdan                *bool
-	LaDeColon                    *bool
-	LaDePol                      *bool
-	AspLaMo                      *bool
-	NsaiDLaMo                    *bool
-	LastFiveYearBloodTestInStool *bool
+	LaDeColon                    *enum.Answer
+	LaDePol                      *enum.Answer
+	AspLaMo                      *enum.Answer
+	NsaiDLaMo                    *enum.Answer
+	LastFiveYearBloodTestInStool *enum.Answer
 	NumberOfBreastBiopsies       *uint
 	HyperplasiaInBiopsy          *uint
 
@@ -457,9 +446,9 @@ type UpdateContactRequest struct {
 	FormID uint
 
 	Name                  *string
-	TestGen               *bool
+	TestGen               *enum.Answer
 	TestGenPictures       []*multipart.FileHeader
-	FmTestGen             *bool
+	FmTestGen             *enum.Answer
 	FatherTestGenPictures []*multipart.FileHeader
 	MotherTestGenPictures []*multipart.FileHeader
 	CallExpert            *bool
@@ -478,26 +467,26 @@ type UpdateLungCancerRequest struct {
 	FormID uint
 
 	InsuranceStatus              *string
-	SupplementaryInsuranceStatus *bool
+	SupplementaryInsuranceStatus *enum.Answer
 	SupplementaryInsurances      *string
-	Hypertension                 *bool
-	HypertensionTreatment        *bool
-	HeartDisease                 *bool
-	HeartDiseaseTreatment        *bool
-	Diabetes                     *bool
-	DiabetesTreatment            *bool
-	ChronicLungDisease           *bool
+	Hypertension                 *enum.Answer
+	HypertensionTreatment        *enum.Answer
+	HeartDisease                 *enum.Answer
+	HeartDiseaseTreatment        *enum.Answer
+	Diabetes                     *enum.Answer
+	DiabetesTreatment            *enum.Answer
+	ChronicLungDisease           *enum.Answer
 	ChronicLungDiseaseType       *string
-	LungCancerHistory            *bool
-	OtherCancerHistory           *bool
+	LungCancerHistory            *enum.Answer
+	OtherCancerHistory           *enum.Answer
 	OtherCancerType              *uint
-	LungCancerFamily             *bool
+	LungCancerFamily             *enum.Answer
 	LungCancerFamilyRelation     *string
-	OtherCancerFamily            *bool
+	OtherCancerFamily            *enum.Answer
 	OtherCancerFamilyType        *uint
 	OtherCancerFamilyRelation    *string
 	OccupationalExposure         *string
-	CurrentSmoking               *bool
+	CurrentSmoking               *enum.Answer
 	SmokingStartAgeCurrent       *uint
 	SmokingTypesCurrent          *string
 	CigarettesPerDayCurrent      *uint
@@ -511,9 +500,9 @@ type UpdateLungCancerRequest struct {
 	PastSmoking                  *string
 	SmokePastAvg                 *uint
 	SmokeCurrentAvg              *uint
-	Bronchitis                   bool
-	LungIll                      bool
-	Fibrosis                     bool
+	Bronchitis                   *enum.Answer
+	LungIll                      *enum.Answer
+	Fibrosis                     *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -525,7 +514,7 @@ type UpdateLungCancerRequest struct {
 	SmokedOpiumPerDayPast        *uint
 	ChewedOpiumPerDayPast        *uint
 	HookahPerWeekPast            *uint
-	SecondhandSmoke              *bool
+	SecondhandSmoke              *enum.Answer
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
 
@@ -537,26 +526,26 @@ type UpdateNavidFormRequest struct {
 	FormID uint
 
 	InsuranceStatus              *string
-	SupplementaryInsuranceStatus *bool
+	SupplementaryInsuranceStatus *enum.Answer
 	SupplementaryInsurances      *string
 	Hypertension                 *string
-	HypertensionTreatment        *bool
+	HypertensionTreatment        *enum.Answer
 	HeartDisease                 *string
-	HeartDiseaseTreatment        *bool
+	HeartDiseaseTreatment        *enum.Answer
 	Diabetes                     *string
-	DiabetesTreatment            *bool
-	ChronicLungDisease           *bool
+	DiabetesTreatment            *enum.Answer
+	ChronicLungDisease           *enum.Answer
 	ChronicLungDiseaseType       *string
-	LungCancerHistory            *bool
-	OtherCancerHistory           *bool
+	LungCancerHistory            *enum.Answer
+	OtherCancerHistory           *enum.Answer
 	OtherCancerType              *uint
-	LungCancerFamily             *bool
+	LungCancerFamily             *enum.Answer
 	LungCancerFamilyRelation     *string
-	OtherCancerFamily            *bool
+	OtherCancerFamily            *enum.Answer
 	OtherCancerFamilyType        *uint
 	OtherCancerFamilyRelation    *string
 	OccupationalExposure         *string
-	CurrentSmoking               *bool
+	CurrentSmoking               *enum.Answer
 	SmokingStartAgeCurrent       *uint
 	SmokingTypesCurrent          *string
 	CigarettesPerDayCurrent      *uint
@@ -579,23 +568,23 @@ type UpdateNavidFormRequest struct {
 	SmokedOpiumPerDayPast        *uint
 	ChewedOpiumPerDayPast        *uint
 	HookahPerWeekPast            *uint
-	SecondhandSmoke              *bool
+	SecondhandSmoke              *enum.Answer
 	SecondhandSmokeLocation      *string
 	LungDiseaseHistory           *string
-	CurrentCigaretteSmoking      *bool
-	CurrentRolledTobacco         *bool
-	CurrentPipeSmoking           *bool
-	CurrentHookahUse             *bool
-	CurrentChiboukSmoking        *bool
-	CurrentOpiumUse              *bool
-	FormerCigaretteSmoking       *bool
-	FormerRolledTobacco          *bool
-	FormerPipeSmoking            *bool
-	FormerHookahUse              *bool
-	FormerChiboukSmoking         *bool
-	FormerOpiumUse               *bool
-	PelecSig                     *bool
-	CelecSig                     *bool
+	CurrentCigaretteSmoking      *enum.Answer
+	CurrentRolledTobacco         *enum.Answer
+	CurrentPipeSmoking           *enum.Answer
+	CurrentHookahUse             *enum.Answer
+	CurrentChiboukSmoking        *enum.Answer
+	CurrentOpiumUse              *enum.Answer
+	FormerCigaretteSmoking       *enum.Answer
+	FormerRolledTobacco          *enum.Answer
+	FormerPipeSmoking            *enum.Answer
+	FormerHookahUse              *enum.Answer
+	FormerChiboukSmoking         *enum.Answer
+	FormerOpiumUse               *enum.Answer
+	PelecSig                     *enum.Answer
+	CelecSig                     *enum.Answer
 
 	// Attention question answer
 	AttentionCorrect *bool

@@ -613,7 +613,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 
 	// Handle multiple picture uploads
 	var newPicturePaths []string
-	if request.MamoGraphy != nil && *request.MamoGraphy && len(request.MamoGraphyPictures) > 0 {
+	if request.MamoGraphy != nil && *request.MamoGraphy == enum.AnswerYes && len(request.MamoGraphyPictures) > 0 {
 		// Upload new pictures
 		newPaths, err := formService.uploadMultiplePictures(
 			enum.BucketTypeMamography,
@@ -2893,7 +2893,9 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return ForbiddenError
 	}
 
-	info.DrinksAlcohol = request.DrinksAlcohol
+	if request.DrinksAlcohol != nil {
+		info.DrinksAlcohol = request.DrinksAlcohol
+	}
 	info.CupsPerWeek = request.CupsPerWeek
 	if request.LastMonthSabzijatMeal != nil {
 		info.LastMonthSabzijatMeal = *request.LastMonthSabzijatMeal
@@ -2913,11 +2915,13 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 	if request.HardActivityHourInWeek != nil {
 		info.HardActivityHourInWeek = *request.HardActivityHourInWeek
 	}
-	info.SmokeAtLeast100 = request.SmokeAtLeast100
+	if request.SmokeAtLeast100 != nil {
+		info.SmokeAtLeast100 = request.SmokeAtLeast100
+	}
 	info.SmokingAge = request.SmokingAge
 	info.YearSmoke = request.YearSmoke
 	if request.SmokingNow != nil {
-		info.SmokingNow = *request.SmokingNow
+		info.SmokingNow = request.SmokingNow
 	}
 	info.LeaveSmokingAge = request.LeaveSmokingAge
 	info.CountSmokingDaily = request.CountSmokingDaily
@@ -3016,32 +3020,60 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		info.MenopausalStatus = enum.MenopausalStatus(uint(*request.MenopausalStatus))
 	}
 	info.MenopauseAge = request.MenopauseAge
-	info.HRT = request.HRT
+	if request.HRT != nil {
+		info.HRT = request.HRT
+	}
 	info.HRTUseLength = request.HRTUseLength
 	if request.LastFiveYearsHRTUse != nil {
-		info.LastFiveYearsHRTUse = *request.LastFiveYearsHRTUse
+		info.LastFiveYearsHRTUse = request.LastFiveYearsHRTUse
 	}
-	info.CurrentHRTUse = request.CurrentHRTUse
+	if request.CurrentHRTUse != nil {
+		info.CurrentHRTUse = request.CurrentHRTUse
+	}
+
 	info.IntendedHRTUse = request.IntendedHRTUse
 	info.HRTType = request.HRTType
-	info.Oral = request.Oral
+	if request.Oral != nil {
+		info.Oral = request.Oral
+	}
+
 	info.OralDuration = request.OralDuration
-	info.OralTwoLastYears = request.OralTwoLastYears
-	info.MamoGraphy = request.MamoGraphy
+	if request.OralTwoLastYears != nil {
+		info.OralTwoLastYears = request.OralTwoLastYears
+	}
+	if request.MamoGraphy != nil {
+		info.MamoGraphy = request.MamoGraphy
+	}
+
 	info.BreastDensity = request.BreastDensity
-	info.Falop = request.Falop
-	info.Andometrioz = request.Andometrioz
+	if request.Falop != nil {
+		info.Falop = request.Falop
+	}
+	if request.Andometrioz != nil {
+		info.Andometrioz = request.Andometrioz
+	}
+
 	if request.LeavePestan != nil {
 		info.LeavePestan = *request.LeavePestan
 	}
 	if request.LeaveTokhmdan != nil {
 		info.LeaveTokhmdan = *request.LeaveTokhmdan
 	}
-	info.LaDeColon = request.LaDeColon
-	info.LaDePol = request.LaDePol
-	info.AspLaMo = request.AspLaMo
-	info.NsaiDLaMo = request.NsaiDLaMo
-	info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	if request.LaDeColon != nil {
+		info.LaDeColon = request.LaDeColon
+	}
+	if request.LaDePol != nil {
+		info.LaDePol = request.LaDePol
+	}
+	if request.AspLaMo != nil {
+		info.AspLaMo = request.AspLaMo
+	}
+	if request.NsaiDLaMo != nil {
+		info.NsaiDLaMo = request.NsaiDLaMo
+	}
+	if request.LastFiveYearBloodTestInStool != nil {
+		info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	}
 	if request.NumberOfBreastBiopsies != nil {
 		info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
 	}
@@ -3133,8 +3165,13 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	if request.Name != nil {
 		info.Name = *request.Name
 	}
-	info.TestGen = request.TestGen
-	info.FmTestGen = request.FmTestGen
+	if request.TestGen != nil {
+		info.TestGen = request.TestGen
+	}
+	if request.FmTestGen != nil {
+		info.FmTestGen = request.FmTestGen
+	}
+
 	if request.CallExpert != nil {
 		info.CallExpert = *request.CallExpert
 	}
@@ -3296,28 +3333,39 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
-	info.ChronicLungDisease = request.ChronicLungDisease
+	if request.SupplementaryInsuranceStatus != nil {
+		info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	}
+	if request.ChronicLungDisease != nil {
+		info.ChronicLungDisease = request.ChronicLungDisease
+	}
+
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	if request.LungCancerHistory != nil {
-		info.LungCancerHistory = *request.LungCancerHistory
+		info.LungCancerHistory = request.LungCancerHistory
 	}
 	if request.OtherCancerHistory != nil {
-		info.OtherCancerHistory = *request.OtherCancerHistory
+		info.OtherCancerHistory = request.OtherCancerHistory
 	}
 	if request.OtherCancerType != nil {
 		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
 	}
-	info.LungCancerFamily = request.LungCancerFamily
+	if request.LungCancerFamily != nil {
+		info.LungCancerFamily = request.LungCancerFamily
+	}
+	if request.OtherCancerFamily != nil {
+		info.OtherCancerFamily = request.OtherCancerFamily
+	}
+
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
-	info.OtherCancerFamily = request.OtherCancerFamily
+
 	if request.OtherCancerFamilyType != nil {
 		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
 	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	if request.CurrentSmoking != nil {
-		info.CurrentSmoking = *request.CurrentSmoking
+		info.CurrentSmoking = request.CurrentSmoking
 	}
 	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
 	info.SmokingTypesCurrent = request.SmokingTypesCurrent
@@ -3332,9 +3380,16 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.PastSmoking = request.PastSmoking
 	info.SmokePastAvg = request.SmokePastAvg
 	info.SmokeCurrentAvg = request.SmokeCurrentAvg
-	info.Bronchitis = request.Bronchitis
-	info.Fibrosis = request.Fibrosis
-	info.LungIll = request.LungIll
+	if request.Bronchitis != nil {
+		info.Bronchitis = request.Bronchitis
+	}
+	if request.Fibrosis != nil {
+		info.Fibrosis = request.Fibrosis
+	}
+	if request.LungIll != nil {
+		info.LungIll = request.LungIll
+	}
+
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3347,7 +3402,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	if request.SecondhandSmoke != nil {
-		info.SecondhandSmoke = *request.SecondhandSmoke
+		info.SecondhandSmoke = request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
@@ -3430,11 +3485,17 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	if request.SupplementaryInsuranceStatus != nil {
+		info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	}
+
 	if request.Hypertension != nil {
 		info.Hypertension = *request.Hypertension
 	}
-	info.HypertensionTreatment = request.HypertensionTreatment
+	if request.HypertensionTreatment != nil {
+		info.HypertensionTreatment = request.HypertensionTreatment
+	}
+
 	if request.HeartDisease != nil {
 		info.HeartDisease = *request.HeartDisease
 	}
@@ -3442,28 +3503,38 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	if request.Diabetes != nil {
 		info.Diabetes = *request.Diabetes
 	}
-	info.DiabetesTreatment = request.DiabetesTreatment
-	info.ChronicLungDisease = request.ChronicLungDisease
+	if request.DiabetesTreatment != nil {
+		info.DiabetesTreatment = request.DiabetesTreatment
+	}
+	if request.ChronicLungDisease != nil {
+		info.ChronicLungDisease = request.ChronicLungDisease
+	}
+
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	if request.LungCancerHistory != nil {
-		info.LungCancerHistory = *request.LungCancerHistory
+		info.LungCancerHistory = request.LungCancerHistory
 	}
 	if request.OtherCancerHistory != nil {
-		info.OtherCancerHistory = *request.OtherCancerHistory
+		info.OtherCancerHistory = request.OtherCancerHistory
 	}
 	if request.OtherCancerType != nil {
 		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
 	}
-	info.LungCancerFamily = request.LungCancerFamily
+	if request.LungCancerFamily != nil {
+		info.LungCancerFamily = request.LungCancerFamily
+	}
+
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
-	info.OtherCancerFamily = request.OtherCancerFamily
+	if request.OtherCancerFamily != nil {
+		info.OtherCancerFamily = request.OtherCancerFamily
+	}
 	if request.OtherCancerFamilyType != nil {
 		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
 	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	if request.CurrentSmoking != nil {
-		info.CurrentSmoking = *request.CurrentSmoking
+		info.CurrentSmoking = request.CurrentSmoking
 	}
 	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
 	info.SmokingTypesCurrent = request.SmokingTypesCurrent
@@ -3488,7 +3559,7 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	if request.SecondhandSmoke != nil {
-		info.SecondhandSmoke = *request.SecondhandSmoke
+		info.SecondhandSmoke = request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
@@ -3529,8 +3600,12 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	if request.FormerOpiumUse != nil {
 		info.FormerOpiumUse = request.FormerOpiumUse
 	}
-	info.PelecSig = request.PelecSig
-	info.CelecSig = request.CelecSig
+	if request.PelecSig != nil {
+		info.PelecSig = request.PelecSig
+	}
+	if request.CelecSig != nil {
+		info.CelecSig = request.CelecSig
+	}
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)
@@ -3753,4 +3828,8 @@ func strPtr(s string) *string {
 
 func boolPtr(b bool) *bool {
 	return &b
+}
+
+func answerPtr(a enum.Answer) *enum.Answer {
+	return &a
 }

@@ -590,7 +590,7 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 	request := formdto.UpsertGeneralHealthRequest{
 		UserID:                    userID,
 		FormID:                    formID,
-		DrinksAlcohol:             boolPtr(true),
+		DrinksAlcohol:             answerPtr(enum.AnswerYes),
 		CupsPerWeek:               strPtr("5"),
 		LastMonthSabzijatMeal:     "high",
 		LastMonthSabzijatWeight:   "2kg",
@@ -598,7 +598,7 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 		MediumActivityHourInWeek:  "3",
 		HardActivityMonthInYear:   1,
 		HardActivityHourInWeek:    "1",
-		SmokingNow:                true,
+		SmokingNow:                answerPtr(enum.AnswerYes),
 	}
 
 	form := &entity.Form{}
@@ -615,7 +615,7 @@ func (suite *FormServiceTestSuite) TestUpsertGeneralHealth_Update() {
 	suite.userService.On("GetUserRoles", userID).Return([]userdto.RoleResponse{}, nil)
 	suite.formRepository.On("FindGeneralHealthByFormID", suite.db, formID).Return(existingHealth, nil)
 	suite.formRepository.On("UpdateGeneralHealth", suite.db, mock.MatchedBy(func(g *entity.GeneralHealthInfo) bool {
-		return g.ID == 5 && g.SmokingNow == true
+		return g.ID == 5 && answeredYes(g.SmokingNow)
 	})).Return(nil)
 
 	// Act
@@ -798,8 +798,8 @@ func (suite *FormServiceTestSuite) TestGetGeneralHealth_Success() {
 	healthInfo := &entity.GeneralHealthInfo{}
 	healthInfo.ID = 5
 	healthInfo.FormID = formID
-	healthInfo.DrinksAlcohol = boolPtr(true)
-	healthInfo.SmokingNow = true
+	healthInfo.DrinksAlcohol = answerPtr(enum.AnswerYes)
+	healthInfo.SmokingNow = answerPtr(enum.AnswerYes)
 
 	// Setup expectations
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
@@ -1442,7 +1442,7 @@ func (suite *FormServiceTestSuite) TestGetLungCancer_Success() {
 
 	lungCancer := &entity.LungCancerInfo{
 		FormID:         formID,
-		CurrentSmoking: true,
+		CurrentSmoking: answerPtr(enum.AnswerYes),
 	}
 
 	// Setup expectations
@@ -1597,7 +1597,7 @@ func (suite *FormServiceTestSuite) TestUpsertLungCancer_Create() {
 	request := formdto.UpsertLungCancerRequest{
 		UserID:         userID,
 		FormID:         formID,
-		CurrentSmoking: true,
+		CurrentSmoking: answerPtr(enum.AnswerYes),
 	}
 
 	form := &entity.Form{}

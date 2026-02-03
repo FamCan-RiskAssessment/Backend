@@ -59,4 +59,5 @@ type FormService interface {
 	GetAllLifeStatuses() ([]generaldto.EnumResponse, error)
 	GetAllRelativeTypes() ([]generaldto.EnumResponse, error)
 	GetAllFormTypes() ([]generaldto.EnumResponse, error)
+	GetAllAnswers() ([]generaldto.EnumResponse, error)
 }

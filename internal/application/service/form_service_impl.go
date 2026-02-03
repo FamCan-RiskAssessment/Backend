@@ -3821,6 +3821,18 @@ func (formService *FormService) GetAllFormTypes() ([]generaldto.EnumResponse, er
 	return response, nil
 }
 
+func (formService *FormService) GetAllAnswers() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllAnswers()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}
+
 // Helper functions for pointers
 func strPtr(s string) *string {
 	return &s

@@ -6,7 +6,11 @@ const (
 	AnswerYes Answer = iota + 1
 	AnswerNo
 	AnswerDontKnow
-	LongAgo
+	AnswerUncertain
+	AnswerNoInfo
+	AnswerPossible
+	AnswerAgo
+	AnswerLongAgo
 )
 
 func (g Answer) String() string {
@@ -17,10 +21,18 @@ func (g Answer) String() string {
 		return "خیر"
 	case AnswerDontKnow:
 		return "نمی دانم"
-	case LongAgo:
-		return "بیشتر از ۱۵ سال است که مصرف نکردم"
+	case AnswerUncertain:
+		return "نامعین"
+	case AnswerNoInfo:
+		return "اطلاع ندارم"
+	case AnswerPossible:
+		return "احتمال دارد اما دقیق اطلاع ندارم"
+	case AnswerAgo:
+		return "سابقاً مصرف می کرده ام اما کمتر از ۱۵ سال است که ترک کرده ام"
+	case AnswerLongAgo:
+		return "سابقاً مصرف می کردم اما بیش از ۱۵ سال است که ترک کرده ام"
 	}
-	return "نامشخص"
+	return "وارد نشده"
 }
 
 func GetAllAnswers() []Answer {
@@ -28,6 +40,10 @@ func GetAllAnswers() []Answer {
 		AnswerYes,
 		AnswerNo,
 		AnswerDontKnow,
-		LongAgo,
+		AnswerUncertain,
+		AnswerNoInfo,
+		AnswerPossible,
+		AnswerAgo,
+		AnswerLongAgo,
 	}
 }

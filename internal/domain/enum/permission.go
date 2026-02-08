@@ -89,10 +89,10 @@ var permissionNames = map[PermissionType]string{
 	PermissionUpdateOwnData: "ویرایش داده خود",
 	PermissionDeleteOwnData: "حذف داده خود",
 
-	PermissionViewPatients:   "مشاهده بیماران",
-	PermissionCreatePatients: "ایجاد بیمار",
-	PermissionUpdatePatients: "ویرایش بیمار",
-	PermissionDeletePatients: "حذف بیمار",
+	PermissionViewPatients:   "مشاهده مراجعه کنندگان",
+	PermissionCreatePatients: "ایجاد مراجعه کننده",
+	PermissionUpdatePatients: "ویرایش مراجعه کننده",
+	PermissionDeletePatients: "حذف مراجعه کننده",
 
 	PermissionViewUsers:   "مشاهده کاربران",
 	PermissionCreateUsers: "ایجاد کاربر",
@@ -122,7 +122,7 @@ var CategoryNames = map[PermissionCategory]string{
 	CategoryGeneral:            "عمومی",
 	CategoryDataEntry:          "درج داده",
 	CategoryUserManagement:     "مدیریت کاربران",
-	CategoryPatientManagement:  "مدیریت بیماران",
+	CategoryPatientManagement:  "مدیریت مراجعه کنندگان",
 	CategoryAccessManagement:   "مدیریت دسترسی",
 	CategoryFormManagement:     "مدیریت فرم ها",
 	CategoryOperatorManagement: "مدیریت اپراتور ها",

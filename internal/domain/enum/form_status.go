@@ -19,7 +19,7 @@ func (fs FormStatus) String() string {
 	case FormStatusSubmitted:
 		return "ارسال شده"
 	case FormStatusWaitingForPatientResponse:
-		return "در انتظار پاسخ بیمار"
+		return "در انتظار پاسخ مراجعه کننده"
 	case FormStatusWaitingForDocuments:
 		return "در انتظار مدارک"
 	case FormStatusRejected:

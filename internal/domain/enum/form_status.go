@@ -3,39 +3,43 @@ package enum
 type FormStatus uint
 
 const (
-	FormStatusPending FormStatus = iota + 1
-	FormStatusAssigned
-	FormStatusApproved
+	FormStatusDraft FormStatus = iota + 1
+	FormStatusSubmitted
+	FormStatusWaitingForPatientResponse
+	FormStatusWaitingForDocuments
 	FormStatusRejected
-	FormStatusReady
-	FormStatusSentToCalc
+	FormStatusReadyForCalculation
+	FormStatusCalculated
 )
 
 func (fs FormStatus) String() string {
 	switch fs {
-	case FormStatusPending:
-		return "در حال برسی"
-	case FormStatusAssigned:
-		return "تخصیص شده"
-	case FormStatusApproved:
-		return "قبول شده"
+	case FormStatusDraft:
+		return "پیش‌نویس"
+	case FormStatusSubmitted:
+		return "ارسال شده"
+	case FormStatusWaitingForPatientResponse:
+		return "در انتظار پاسخ مراجعه کننده"
+	case FormStatusWaitingForDocuments:
+		return "در انتظار مدارک"
 	case FormStatusRejected:
 		return "رد شده"
-	case FormStatusReady:
-		return "ارسال شده"
-	case FormStatusSentToCalc:
-		return "ارسال شده به مدل"
+	case FormStatusReadyForCalculation:
+		return "آماده محاسبه"
+	case FormStatusCalculated:
+		return "محاسبه شده"
 	}
 	return "unknown"
 }
 
 func GetAllFormStatuses() []FormStatus {
 	return []FormStatus{
-		FormStatusPending,
-		FormStatusAssigned,
-		FormStatusApproved,
+		FormStatusDraft,
+		FormStatusSubmitted,
+		FormStatusWaitingForPatientResponse,
+		FormStatusWaitingForDocuments,
 		FormStatusRejected,
-		FormStatusReady,
-		FormStatusSentToCalc,
+		FormStatusReadyForCalculation,
+		FormStatusCalculated,
 	}
 }

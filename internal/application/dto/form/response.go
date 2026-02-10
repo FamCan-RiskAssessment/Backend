@@ -7,19 +7,31 @@ import (
 )
 
 type BasicFormResponse struct {
-	FormID               uint          `json:"id"`
-	Status               string        `json:"status"`
-	FormType             enum.FormType `json:"formType"`
-	UserID               uint          `json:"user_id"`
-	OperatorID           *uint         `json:"operatorId,omitempty"`
-	FilledByOperatorID   *uint         `json:"filledByOperatorId,omitempty"`
-	SocialSecurityNumber string        `json:"socialSecurityNumber"`
-	Name                 *string       `json:"name,omitempty"`
+	FormID               uint                 `json:"id"`
+	Status               string               `json:"status"`
+	FormType             enum.FormType        `json:"formType"`
+	UserID               uint                 `json:"user_id"`
+	OperatorID           *uint                `json:"operatorId,omitempty"`
+	FilledByOperatorID   *uint                `json:"filledByOperatorId,omitempty"`
+	SocialSecurityNumber string               `json:"socialSecurityNumber"`
+	Name                 *string              `json:"name,omitempty"`
+	FilledForms          *FilledFormsResponse `json:"filledForms,omitempty"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 
 	AttentionQuestionsCorrect *int `json:"attentionQuestionsCorrect"`
+}
+
+type FilledFormsResponse struct {
+	Basic         *bool `json:"basic"`
+	GeneralHealth *bool `json:"generalhealth"`
+	Mamography    *bool `json:"mamography"`
+	Cancer        *bool `json:"cancer"`
+	FamilyCancer  *bool `json:"familycancer"`
+	Contact       *bool `json:"contact"`
+	LungCancer    *bool `json:"lungcancer"`
+	NavidForm     *bool `json:"navid"`
 }
 
 type CreateFormResponse struct {
@@ -110,24 +122,24 @@ type GetBasicFormResponse struct {
 }
 
 type GetGeneralHealthResponse struct {
-	ID                        uint    `json:"id"`
-	DrinksAlcohol             *bool   `json:"drinksAlcohol,omitempty"`
-	CupsPerWeek               *string `json:"cupsPerWeek,omitempty"`
-	LastMonthSabzijatMeal     string  `json:"lastMonthSabzijatMeal"`
-	LastMonthSabzijatWeight   string  `json:"lastMonthSabzijatWeight"`
-	MediumActivityMonthInYear uint    `json:"mediumActivityMonthInYear"`
-	MediumActivityHourInWeek  string  `json:"mediumActivityHourInWeek"`
-	HardActivityMonthInYear   uint    `json:"hardActivityMonthInYear"`
-	HardActivityHourInWeek    string  `json:"hardActivityHourInWeek"`
-	SmokeAtLeast100           *bool   `json:"smokeAtLeast100,omitempty"`
-	SmokingAge                *uint   `json:"smokingAge,omitempty"`
-	SmokingNow                bool    `json:"smokingNow"`
-	YearSmoke                 *uint   `json:"yearSmoke,omitempty"`
-	LeaveSmokingAge           *uint   `json:"leaveSmokingAge,omitempty"`
-	CountSmokingDaily         *string `json:"countSmokingDaily,omitempty"`
-	CountGheliandaily         *string `json:"countGheliandaily,omitempty"`
-	CountSmokingDailyPast     *string `json:"countSmokingDailyPast,omitempty"`
-	CountGheliandailyPast     *string `json:"countGheliandailyPast,omitempty"`
+	ID                        uint         `json:"id"`
+	DrinksAlcohol             *enum.Answer `json:"drinksAlcohol"`
+	CupsPerWeek               *string      `json:"cupsPerWeek"`
+	LastMonthSabzijatMeal     string       `json:"lastMonthSabzijatMeal"`
+	LastMonthSabzijatWeight   string       `json:"lastMonthSabzijatWeight"`
+	MediumActivityMonthInYear uint         `json:"mediumActivityMonthInYear"`
+	MediumActivityHourInWeek  string       `json:"mediumActivityHourInWeek"`
+	HardActivityMonthInYear   uint         `json:"hardActivityMonthInYear"`
+	HardActivityHourInWeek    string       `json:"hardActivityHourInWeek"`
+	SmokeAtLeast100           *enum.Answer `json:"smokeAtLeast100"`
+	SmokingAge                *uint        `json:"smokingAge"`
+	SmokingNow                *enum.Answer `json:"smokingNow"`
+	YearSmoke                 *uint        `json:"yearSmoke"`
+	LeaveSmokingAge           *uint        `json:"leaveSmokingAge"`
+	CountSmokingDaily         *string      `json:"countSmokingDaily"`
+	CountGheliandaily         *string      `json:"countGheliandaily"`
+	CountSmokingDailyPast     *string      `json:"countSmokingDailyPast"`
+	CountGheliandailyPast     *string      `json:"countGheliandailyPast"`
 }
 
 type CancerResponse struct {
@@ -153,6 +165,13 @@ type FamilyCancerResponse struct {
 type GetFamilyCancerResponse struct {
 	FamilyCancers []FamilyCancerResponse `json:"familyCancers"`
 }
+type GetFamilyCancerListResponse struct {
+	AmeAmoCancer    bool `json:"ameAmoCancer"`
+	FatherCancer    bool `json:"fatherCancer"`
+	KhaleDaeiCancer bool `json:"khaleDaeiCancer"`
+	MotherCancer    bool `json:"motherCancer"`
+	SiblingCancer   bool `json:"siblingCancer"`
+}
 
 type GetMamographyResponse struct {
 	ID                           uint                  `json:"id"`
@@ -164,27 +183,27 @@ type GetMamographyResponse struct {
 	AgeOfFirstBirth              *uint                 `json:"ageOfFirstBirth,omitempty"`
 	MenopausalStatus             enum.MenopausalStatus `json:"menopausalStatus"`
 	MenopauseAge                 *string               `json:"menopauseAge,omitempty"`
-	HRT                          *bool                 `json:"hrt,omitempty"`
+	HRT                          *enum.Answer          `json:"hrt"`
 	HRTUseLength                 *uint                 `json:"hrtUseLength,omitempty"`
-	LastFiveYearsHRTUse          bool                  `json:"lastFiveYearsHrtUse"`
-	CurrentHRTUse                *bool                 `json:"currentHrtUse,omitempty"`
+	LastFiveYearsHRTUse          *enum.Answer          `json:"lastFiveYearsHrtUse"`
+	CurrentHRTUse                *enum.Answer          `json:"currentHrtUse"`
 	IntendedHRTUse               *uint                 `json:"intendedHrtUse,omitempty"`
 	HRTType                      *string               `json:"hrtType,omitempty"`
-	Oral                         *bool                 `json:"oral,omitempty"`
+	Oral                         *enum.Answer          `json:"oral"`
 	OralDuration                 *string               `json:"oralDuration,omitempty"`
-	OralTwoLastYears             *bool                 `json:"oralTwoLastYears,omitempty"`
-	MamoGraphy                   *bool                 `json:"mamoGraphy,omitempty"`
+	OralTwoLastYears             *enum.Answer          `json:"oralTwoLastYears"`
+	MamoGraphy                   *enum.Answer          `json:"mamoGraphy"`
 	MamoGraphyPictures           []string              `json:"mamoGraphyPictures,omitempty"`
-	BreastDensity                uint                  `json:"breastDensity"`
-	Falop                        *bool                 `json:"falop,omitempty"`
-	Andometrioz                  *bool                 `json:"andometrioz,omitempty"`
+	BreastDensity                string                `json:"breastDensity"`
+	Falop                        *enum.Answer          `json:"falop"`
+	Andometrioz                  *enum.Answer          `json:"andometrioz"`
 	LeavePestan                  bool                  `json:"leavePestan"`
 	LeaveTokhmdan                bool                  `json:"leaveTokhmdan"`
-	LaDeColon                    *bool                 `json:"laDeColon,omitempty"`
-	LaDePol                      *bool                 `json:"laDePol,omitempty"`
-	AspLaMo                      *bool                 `json:"aspLaMo,omitempty"`
-	NsaiDLaMo                    *bool                 `json:"nsaiDLaMo,omitempty"`
-	LastFiveYearBloodTestInStool *bool                 `json:"lastFiveYearBloodTestInStool,omitempty"`
+	LaDeColon                    *enum.Answer          `json:"laDeColon"`
+	LaDePol                      *enum.Answer          `json:"laDePol"`
+	AspLaMo                      *enum.Answer          `json:"aspLaMo"`
+	NsaiDLaMo                    *enum.Answer          `json:"nsaiDLaMo"`
+	LastFiveYearBloodTestInStool *enum.Answer          `json:"lastFiveYearBloodTestInStool"`
 	NumberOfBreastBiopsies       *uint                 `json:"numberOfBreastBiopsies,omitempty"`
 	HyperplasiaInBiopsy          *uint                 `json:"hyperplasiaInBiopsy,omitempty"`
 }
@@ -194,48 +213,42 @@ type ChangeFormStatusResponse struct {
 }
 
 type GetContactResponse struct {
-	ID                    uint     `json:"id"`
-	TestGen               *bool    `json:"testGen,omitempty"`
-	TestGenPictures       []string `json:"testGenPictures,omitempty"`
-	Name                  string   `json:"name"`
-	FmTestGen             *bool    `json:"fmTestGen,omitempty"`
-	FatherTestGenPictures []string `json:"fatherTestGenPictures,omitempty"`
-	MotherTestGenPictures []string `json:"motherTestGenPictures,omitempty"`
-	CallExpert            bool     `json:"callExpert"`
-	BirthCountry          *string  `json:"birthCountry,omitempty"`
-	Province              *string  `json:"province,omitempty"`
-	City                  *string  `json:"city,omitempty"`
-	Country               *string  `json:"country,omitempty"`
-	Address               string   `json:"address"`
-	PostalCode            string   `json:"postalCode"`
-	Education             string   `json:"education"`
-	Phone2                *string  `json:"phone2,omitempty"`
-	Phone3                *string  `json:"phone3,omitempty"`
+	ID                    uint         `json:"id"`
+	TestGen               *enum.Answer `json:"testGen"`
+	TestGenPictures       []string     `json:"testGenPictures,omitempty"`
+	Name                  string       `json:"name"`
+	FmTestGen             *enum.Answer `json:"fmTestGen"`
+	FatherTestGenPictures []string     `json:"fatherTestGenPictures,omitempty"`
+	MotherTestGenPictures []string     `json:"motherTestGenPictures,omitempty"`
+	CallExpert            bool         `json:"callExpert"`
+	BirthCountry          *string      `json:"birthCountry,omitempty"`
+	Province              *string      `json:"province,omitempty"`
+	City                  *string      `json:"city,omitempty"`
+	Country               *string      `json:"country,omitempty"`
+	Address               string       `json:"address"`
+	PostalCode            string       `json:"postalCode"`
+	Education             string       `json:"education"`
+	Phone2                *string      `json:"phone2,omitempty"`
+	Phone3                *string      `json:"phone3,omitempty"`
 }
 
 type GetLungCancerResponse struct {
 	ID                           uint             `json:"id"`
-	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
+	SupplementaryInsuranceStatus *enum.Answer     `json:"takmilBime"`
 	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
 	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
-	Hypertension                 bool             `json:"hypertension"`
-	HypertensionTreatment        *bool            `json:"hypertensionTreatment,omitempty"`
-	HeartDisease                 bool             `json:"heartDisease"`
-	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment,omitempty"`
-	Diabetes                     bool             `json:"diabetes"`
-	DiabetesTreatment            *bool            `json:"diabetesTreatment,omitempty"`
-	ChronicLungDisease           *bool            `json:"chronicLungDisease,omitempty"`
+	ChronicLungDisease           *enum.Answer     `json:"chronicLungDisease"`
 	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`
-	LungCancerHistory            bool             `json:"lungCancerHistory"`
-	OtherCancerHistory           bool             `json:"otherCancerHistory"`
+	LungCancerHistory            *enum.Answer     `json:"lungCancerHistory"`
+	OtherCancerHistory           *enum.Answer     `json:"otherCancerHistory"`
 	OtherCancerType              *enum.CancerType `json:"otherCancerType,omitempty"`
-	LungCancerFamily             *bool            `json:"lungCancerFamily,omitempty"`
+	LungCancerFamily             *enum.Answer     `json:"lungCancerFamily"`
 	LungCancerFamilyRelation     *string          `json:"lungCancerFamilyRelation,omitempty"`
-	OtherCancerFamily            *bool            `json:"otherCancerFamily,omitempty"`
+	OtherCancerFamily            *enum.Answer     `json:"otherCancerFamily"`
 	OtherCancerFamilyType        *enum.CancerType `json:"otherCancerFamilyType,omitempty"`
 	OtherCancerFamilyRelation    *string          `json:"otherCancerFamilyRelation,omitempty"`
 	OccupationalExposure         *string          `json:"occupationalExposure,omitempty"`
-	CurrentSmoking               bool             `json:"currentSmoking"`
+	CurrentSmoking               *enum.Answer     `json:"currentSmoking"`
 	SmokingStartAgeCurrent       *uint            `json:"smokingStartAgeCurrent,omitempty"`
 	SmokingTypesCurrent          *string          `json:"smokingTypesCurrent,omitempty"`
 	CigarettesPerDayCurrent      *uint            `json:"cigarettesPerDayCurrent,omitempty"`
@@ -247,6 +260,11 @@ type GetLungCancerResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	SmokePastAvg                 *uint            `json:"smokePastAvg"`
+	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg"`
+	Bronchitis                   *enum.Answer     `json:"bronshit"`
+	LungIll                      *enum.Answer     `json:"fibroz"`
+	Fibrosis                     *enum.Answer     `json:"lungill"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
@@ -258,7 +276,7 @@ type GetLungCancerResponse struct {
 	SmokedOpiumPerDayPast        *uint            `json:"smokedOpiumPerDayPast,omitempty"`
 	ChewedOpiumPerDayPast        *uint            `json:"chewedOpiumPerDayPast,omitempty"`
 	HookahPerWeekPast            *uint            `json:"hookahPerWeekPast,omitempty"`
-	SecondhandSmoke              bool             `json:"secondhandSmoke"`
+	SecondhandSmoke              *enum.Answer     `json:"secondhandSmoke"`
 	SecondhandSmokeLocation      *string          `json:"secondhandSmokeLocation,omitempty"`
 	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
 }
@@ -279,27 +297,27 @@ type PostalCodeInfoResponse struct {
 
 type GetNavidFormResponse struct {
 	ID                           uint             `json:"id"`
-	SupplementaryInsuranceStatus *bool            `json:"takmilBime,omitempty"`
+	SupplementaryInsuranceStatus *enum.Answer     `json:"takmilBime"`
 	InsuranceStatus              *string          `json:"insuranceStatus,omitempty"`
 	SupplementaryInsurances      *string          `json:"supplementaryInsurances,omitempty"`
 	Hypertension                 string           `json:"hypertension"`
-	HypertensionTreatment        *bool            `json:"hypertensionTreatment,omitempty"`
+	HypertensionTreatment        *enum.Answer     `json:"hypertensionTreatment"`
 	HeartDisease                 string           `json:"heartDisease"`
-	HeartDiseaseTreatment        *bool            `json:"heartDiseaseTreatment,omitempty"`
+	HeartDiseaseTreatment        *enum.Answer     `json:"heartDiseaseTreatment"`
 	Diabetes                     string           `json:"diabetes"`
-	DiabetesTreatment            *bool            `json:"diabetesTreatment,omitempty"`
-	ChronicLungDisease           *bool            `json:"chronicLungDisease,omitempty"`
+	DiabetesTreatment            *enum.Answer     `json:"diabetesTreatment"`
+	ChronicLungDisease           *enum.Answer     `json:"chronicLungDisease"`
 	ChronicLungDiseaseType       *string          `json:"chronicLungDiseaseType,omitempty"`
-	LungCancerHistory            bool             `json:"lungCancerHistory"`
-	OtherCancerHistory           bool             `json:"otherCancerHistory"`
+	LungCancerHistory            *enum.Answer     `json:"lungCancerHistory"`
+	OtherCancerHistory           *enum.Answer     `json:"otherCancerHistory"`
 	OtherCancerType              *enum.CancerType `json:"otherCancerType,omitempty"`
-	LungCancerFamily             *bool            `json:"lungCancerFamily,omitempty"`
+	LungCancerFamily             *enum.Answer     `json:"lungCancerFamily"`
 	LungCancerFamilyRelation     *string          `json:"lungCancerFamilyRelation,omitempty"`
-	OtherCancerFamily            *bool            `json:"otherCancerFamily,omitempty"`
+	OtherCancerFamily            *enum.Answer     `json:"otherCancerFamily"`
 	OtherCancerFamilyType        *enum.CancerType `json:"otherCancerFamilyType,omitempty"`
 	OtherCancerFamilyRelation    *string          `json:"otherCancerFamilyRelation,omitempty"`
 	OccupationalExposure         *string          `json:"occupationalExposure,omitempty"`
-	CurrentSmoking               bool             `json:"currentSmoking"`
+	CurrentSmoking               *enum.Answer     `json:"currentSmoking"`
 	SmokingStartAgeCurrent       *uint            `json:"smokingStartAgeCurrent,omitempty"`
 	SmokingTypesCurrent          *string          `json:"smokingTypesCurrent,omitempty"`
 	CigarettesPerDayCurrent      *uint            `json:"cigarettesPerDayCurrent,omitempty"`
@@ -311,8 +329,6 @@ type GetNavidFormResponse struct {
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
 	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
-	SmokePastAvg                 *uint            `json:"smokePastAvg,omitempty"`
-	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg,omitempty"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
@@ -324,7 +340,21 @@ type GetNavidFormResponse struct {
 	SmokedOpiumPerDayPast        *uint            `json:"smokedOpiumPerDayPast,omitempty"`
 	ChewedOpiumPerDayPast        *uint            `json:"chewedOpiumPerDayPast,omitempty"`
 	HookahPerWeekPast            *uint            `json:"hookahPerWeekPast,omitempty"`
-	SecondhandSmoke              bool             `json:"secondhandSmoke"`
+	SecondhandSmoke              *enum.Answer     `json:"secondhandSmoke"`
 	SecondhandSmokeLocation      *string          `json:"secondhandSmokeLocation,omitempty"`
 	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
+	CurrentCigaretteSmoking      *enum.Answer     `json:"Csig"`
+	CurrentRolledTobacco         *enum.Answer     `json:"CsigBarg"`
+	CurrentPipeSmoking           *enum.Answer     `json:"Cpip"`
+	CurrentHookahUse             *enum.Answer     `json:"Cghel"`
+	CurrentChiboukSmoking        *enum.Answer     `json:"Cchop"`
+	CurrentOpiumUse              *enum.Answer     `json:"Cteryak"`
+	FormerCigaretteSmoking       *enum.Answer     `json:"Psig"`
+	FormerRolledTobacco          *enum.Answer     `json:"PsigBarg"`
+	FormerPipeSmoking            *enum.Answer     `json:"Ppip"`
+	FormerHookahUse              *enum.Answer     `json:"Pghel"`
+	FormerChiboukSmoking         *enum.Answer     `json:"Pchop"`
+	FormerOpiumUse               *enum.Answer     `json:"Pteryak"`
+	PelecSig                     *enum.Answer     `json:"PelecSig"`
+	CelecSig                     *enum.Answer     `json:"CelecSig"`
 }

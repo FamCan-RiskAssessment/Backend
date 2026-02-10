@@ -69,7 +69,7 @@ func (role RoleName) String() string {
 	case Operator:
 		return "اپراتور"
 	case Patient:
-		return "بیمار"
+		return "مراجعه کننده"
 	}
 	return "unknown"
 }

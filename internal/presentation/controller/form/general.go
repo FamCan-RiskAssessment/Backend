@@ -81,3 +81,11 @@ func (fc *GeneralFormController) GetAllFormTypes(ctx *gin.Context) {
 	}
 	controller.Response(ctx, 200, "", statuses)
 }
+
+func (fc *GeneralFormController) GetAllAnswers(ctx *gin.Context) {
+	statuses, err := fc.formService.GetAllAnswers()
+	if err != nil {
+		panic(err)
+	}
+	controller.Response(ctx, 200, "", statuses)
+}

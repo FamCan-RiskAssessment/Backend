@@ -193,6 +193,64 @@ func (formService *FormService) logOperatorFormUpdate(operatorID, formID uint, s
 	formService.actionLogService.LogAction(log)
 }
 
+// validateAndTransitionStatus validates and performs status transition with state machine validation
+func (formService *FormService) validateAndTransitionStatus(
+	form *entity.Form,
+	newStatus enum.FormStatus,
+) error {
+	// Import validation package for state machine
+	if err := validation.ValidateStatusTransition(form.Status, newStatus); err != nil {
+		return err
+	}
+
+	form.Status = newStatus
+	return formService.formRepository.UpdateForm(formService.db, form)
+}
+
+// canUserEditForm checks if user can edit form based on current status and user role
+func (formService *FormService) canUserEditForm(
+	form *entity.Form,
+	userID uint,
+) (bool, error) {
+	// Check if user is the form owner
+	if form.UserID == userID {
+		// Patients can only edit in Draft and WaitingForDocuments
+		return validation.CanUserEditFormInStatus(form.Status, true), nil
+	}
+
+	// Check if user is an operator
+	isOp, err := formService.isOperator(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if isOp {
+		// Check if operator can edit this specific form
+		canEdit, err := formService.canOperatorEditForm(form, userID)
+		if err != nil {
+			return false, err
+		}
+
+		if canEdit {
+			// Operators can edit in most statuses except Calculated
+			return validation.CanUserEditFormInStatus(form.Status, false), nil
+		}
+	}
+
+	// Check if user is a supervisor
+	isSup, err := formService.isSupervisor(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if isSup {
+		// Supervisors can edit in most statuses except Calculated
+		return validation.CanUserEditFormInStatus(form.Status, false), nil
+	}
+
+	return false, nil
+}
+
 // uploadMultiplePictures uploads multiple picture files to S3 and returns their paths
 func (formService *FormService) uploadMultiplePictures(
 	bucketType enum.BucketType,
@@ -332,7 +390,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	form := &entity.Form{
 		UserID:             request.UserID,
-		Status:             enum.FormStatusPending,
+		Status:             enum.FormStatusDraft,
 		FilledByOperatorID: request.FilledByOperatorID,
 		FormType:           FormType,
 	}
@@ -347,10 +405,14 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, err
 	}
 
+	y, m, d, _ := jalaali.ToGregorian(request.BirthDate.Year(), jalaali.Month(request.BirthDate.Month()), request.BirthDate.Day())
+
+	birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+
 	basic := &entity.BasicInfo{
 		FormID:               form.ID,
 		Gender:               enum.Gender(uint(request.Gender)),
-		BirthDate:            request.BirthDate.Time,
+		BirthDate:            birthDate,
 		IsAtba:               request.IsAtba,
 		SocialSecurityNumber: encryptedSSN,
 		Height:               request.Height,
@@ -379,7 +441,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		FormType:                  FormType,
 		UserID:                    form.UserID,
 		FilledByOperatorID:        form.FilledByOperatorID,
-		SocialSecurityNumber:      basic.SocialSecurityNumber,
+		SocialSecurityNumber:      request.SocialSecurityNumber,
 		CreatedAt:                 form.CreatedAt,
 		UpdatedAt:                 form.UpdatedAt,
 		AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
@@ -567,7 +629,7 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 
 	// Handle multiple picture uploads
 	var newPicturePaths []string
-	if request.MamoGraphy != nil && *request.MamoGraphy && len(request.MamoGraphyPictures) > 0 {
+	if request.MamoGraphy != nil && *request.MamoGraphy == enum.AnswerYes && len(request.MamoGraphyPictures) > 0 {
 		// Upload new pictures
 		newPaths, err := formService.uploadMultiplePictures(
 			enum.BucketTypeMamography,
@@ -1404,12 +1466,6 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.Hypertension = request.Hypertension
-	info.HypertensionTreatment = request.HypertensionTreatment
-	info.HeartDisease = request.HeartDisease
-	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
-	info.Diabetes = request.Diabetes
-	info.DiabetesTreatment = request.DiabetesTreatment
 	info.ChronicLungDisease = request.ChronicLungDisease
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	info.LungCancerHistory = request.LungCancerHistory
@@ -1437,6 +1493,11 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
+	info.Bronchitis = request.Bronchitis
+	info.Fibrosis = request.Fibrosis
+	info.LungIll = request.LungIll
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -1571,8 +1632,6 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
-	info.SmokePastAvg = request.SmokePastAvg
-	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -1587,6 +1646,20 @@ func (formService *FormService) UpsertNavidForm(request formdto.UpsertNavidFormR
 	info.SecondhandSmoke = request.SecondhandSmoke
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
+	info.CurrentCigaretteSmoking = request.CurrentCigaretteSmoking
+	info.CurrentRolledTobacco = request.CurrentRolledTobacco
+	info.CurrentPipeSmoking = request.CurrentPipeSmoking
+	info.CurrentHookahUse = request.CurrentHookahUse
+	info.CurrentChiboukSmoking = request.CurrentChiboukSmoking
+	info.CurrentOpiumUse = request.CurrentOpiumUse
+	info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
+	info.FormerRolledTobacco = request.FormerRolledTobacco
+	info.FormerPipeSmoking = request.FormerPipeSmoking
+	info.FormerHookahUse = request.FormerHookahUse
+	info.FormerChiboukSmoking = request.FormerChiboukSmoking
+	info.FormerOpiumUse = request.FormerOpiumUse
+	info.PelecSig = request.PelecSig
+	info.CelecSig = request.CelecSig
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)
@@ -1637,26 +1710,63 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		return formdto.ChangeFormStatusResponse{}, notFoundError
 	}
 
-	// if form.UserID != request.UserID {
-	// 	ForbiddenError := exception.ForbiddenError{Message: formService.constants.Field.Form}
-	// 	return formdto.ChangeFormStatusResponse{}, ForbiddenError
-	// }
+	// Only form owner can submit
+	if form.UserID != request.UserID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+		return formdto.ChangeFormStatusResponse{}, forbiddenError
+	}
 
-	form.Status = enum.FormStatusReady
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Draft to Submitted
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusSubmitted)
 	if err != nil {
 		return formdto.ChangeFormStatusResponse{}, err
 	}
 
+	FilledForms := formdto.FilledFormsResponse{}
+	FilledForms.Basic = boolPtr(true)
+	generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
+	if generalHealth != nil {
+		FilledForms.GeneralHealth = boolPtr(true)
+	} else {
+		FilledForms.GeneralHealth = boolPtr(false)
+	}
+	mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
+	if mamography != nil {
+		FilledForms.Mamography = boolPtr(true)
+	} else {
+		FilledForms.Mamography = boolPtr(false)
+	}
+	cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
+	if cancer != nil {
+		FilledForms.Cancer = boolPtr(true)
+	} else {
+		FilledForms.Cancer = boolPtr(false)
+	}
+	familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
+	if familyCancer != nil {
+		FilledForms.FamilyCancer = boolPtr(true)
+	} else {
+		FilledForms.FamilyCancer = boolPtr(false)
+	}
+	if form.FormType == enum.Navid {
+		navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
+		if navidInfo != nil {
+			FilledForms.NavidForm = boolPtr(true)
+		} else {
+			FilledForms.NavidForm = boolPtr(false)
+		}
+	}
+
 	response := formdto.ChangeFormStatusResponse{
 		Form: formdto.BasicFormResponse{
-			FormID:     form.ID,
-			FormType:   form.FormType,
-			Status:     form.Status.String(),
-			OperatorID: form.OperatorID,
-			UserID:     form.UserID,
-			CreatedAt:  form.CreatedAt,
-			UpdatedAt:  form.UpdatedAt,
+			FormID:      form.ID,
+			FormType:    form.FormType,
+			Status:      form.Status.String(),
+			OperatorID:  form.OperatorID,
+			UserID:      form.UserID,
+			CreatedAt:   form.CreatedAt,
+			UpdatedAt:   form.UpdatedAt,
+			FilledForms: &FilledForms,
 		},
 	}
 
@@ -1692,11 +1802,15 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 		return formdto.GetBasicFormResponse{}, err
 	}
 
+	y, m, d, _ := jalaali.ToJalaali(basic.BirthDate.Year(), basic.BirthDate.Month(), basic.BirthDate.Day())
+
+	birthDate := time.Date(y, time.Month(int(m)), d, 0, 0, 0, 0, time.UTC)
+
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
-		BirthDate:            formdto.BirthDate(jalaali.From(basic.BirthDate)),
+		BirthDate:            formdto.BirthDate(jalaali.From(birthDate)),
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: decryptedSSN,
 		Height:               basic.Height,
@@ -1785,7 +1899,7 @@ func (formService *FormService) GetMamography(request formdto.GetPartialFormRequ
 		hyperplasiaInBiopsy = &val
 	}
 
-	var BreastDensity uint
+	var BreastDensity string
 	if info.BreastDensity != nil {
 		BreastDensity = *info.BreastDensity
 	}
@@ -1921,6 +2035,56 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 	return FamilyCancersResponse, nil
 }
 
+func (formService *FormService) GetFamilyCancerList(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerListResponse, error) {
+	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	if err := formService.canUserAccessForm(form, request.UserID); err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+
+	info, err := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
+	if err != nil {
+		return formdto.GetFamilyCancerListResponse{}, err
+	}
+	if info == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return formdto.GetFamilyCancerListResponse{}, notFoundError
+	}
+
+	FamilyCancersResponse := formdto.GetFamilyCancerListResponse{}
+	FamilyCancersResponse.AmeAmoCancer = false
+	FamilyCancersResponse.FatherCancer = false
+	FamilyCancersResponse.KhaleDaeiCancer = false
+	FamilyCancersResponse.MotherCancer = false
+	FamilyCancersResponse.SiblingCancer = false
+	if len(info) == 0 {
+		return FamilyCancersResponse, nil
+	}
+
+	for _, v := range info {
+		if v.Relative == enum.PaternalAunt || v.Relative == enum.PaternalUncle {
+			FamilyCancersResponse.AmeAmoCancer = true
+		} else if v.Relative == enum.MaternalAunt || v.Relative == enum.MaternalUncle {
+			FamilyCancersResponse.KhaleDaeiCancer = true
+		} else if v.Relative == enum.Mother {
+			FamilyCancersResponse.MotherCancer = true
+		} else if v.Relative == enum.Father {
+			FamilyCancersResponse.FatherCancer = true
+		} else if v.Relative == enum.Sister || v.Relative == enum.Brother {
+			FamilyCancersResponse.SiblingCancer = true
+		}
+	}
+
+	return FamilyCancersResponse, nil
+}
+
 func (formService *FormService) GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error) {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
@@ -2015,12 +2179,6 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		InsuranceStatus:              info.InsuranceStatus,
 		SupplementaryInsuranceStatus: info.SupplementaryInsuranceStatus,
 		SupplementaryInsurances:      info.SupplementaryInsurances,
-		Hypertension:                 info.Hypertension,
-		HypertensionTreatment:        info.HypertensionTreatment,
-		HeartDisease:                 info.HeartDisease,
-		HeartDiseaseTreatment:        info.HeartDiseaseTreatment,
-		Diabetes:                     info.Diabetes,
-		DiabetesTreatment:            info.DiabetesTreatment,
 		ChronicLungDisease:           info.ChronicLungDisease,
 		ChronicLungDiseaseType:       info.ChronicLungDiseaseType,
 		LungCancerHistory:            info.LungCancerHistory,
@@ -2044,6 +2202,11 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
+		SmokePastAvg:                 info.SmokePastAvg,
+		SmokeCurrentAvg:              info.SmokeCurrentAvg,
+		Bronchitis:                   info.Bronchitis,
+		Fibrosis:                     info.Fibrosis,
+		LungIll:                      info.LungIll,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
@@ -2118,8 +2281,6 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		ChewedOpiumPerDayCurrent:     info.ChewedOpiumPerDayCurrent,
 		HookahPerWeekCurrent:         info.HookahPerWeekCurrent,
 		PastSmoking:                  info.PastSmoking,
-		SmokePastAvg:                 info.SmokePastAvg,
-		SmokeCurrentAvg:              info.SmokeCurrentAvg,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
@@ -2134,6 +2295,20 @@ func (formService *FormService) GetNavidForm(request formdto.GetPartialFormReque
 		SecondhandSmoke:              info.SecondhandSmoke,
 		SecondhandSmokeLocation:      info.SecondhandSmokeLocation,
 		LungDiseaseHistory:           info.LungDiseaseHistory,
+		CurrentCigaretteSmoking:      info.CurrentCigaretteSmoking,
+		CurrentRolledTobacco:         info.CurrentRolledTobacco,
+		CurrentPipeSmoking:           info.CurrentPipeSmoking,
+		CurrentHookahUse:             info.CurrentHookahUse,
+		CurrentChiboukSmoking:        info.CurrentChiboukSmoking,
+		CurrentOpiumUse:              info.CurrentOpiumUse,
+		FormerCigaretteSmoking:       info.FormerCigaretteSmoking,
+		FormerRolledTobacco:          info.FormerRolledTobacco,
+		FormerPipeSmoking:            info.FormerPipeSmoking,
+		FormerHookahUse:              info.FormerHookahUse,
+		FormerChiboukSmoking:         info.FormerChiboukSmoking,
+		FormerOpiumUse:               info.FormerOpiumUse,
+		PelecSig:                     info.PelecSig,
+		CelecSig:                     info.CelecSig,
 	}, nil
 }
 
@@ -2165,13 +2340,16 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
-		var SocialSecurityNumber string
+		var decryptedSSN string
 		var Name *string
 		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
 		if err != nil {
 			return nil, 0, err
 		} else if basicInfo != nil {
-			SocialSecurityNumber = basicInfo.SocialSecurityNumber
+			decryptedSSN, err = formService.fieldEncryptor.Decrypt(basicInfo.SocialSecurityNumber)
+			if err != nil {
+				return nil, 0, err
+			}
 		}
 		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
 		if err != nil {
@@ -2179,11 +2357,45 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		} else if contactInfo != nil {
 			Name = &contactInfo.Name
 		}
+		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
 			Name:                      Name,
-			SocialSecurityNumber:      SocialSecurityNumber,
+			SocialSecurityNumber:      decryptedSSN,
 			Status:                    form.Status.String(),
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,
@@ -2191,6 +2403,7 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -2225,19 +2438,23 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		return notFoundError
 	}
 
-	isOp, err := formService.isOperator(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if !canEdit {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindBasicInfoByFormID(formService.db, request.FormID)
@@ -2276,6 +2493,10 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 
 	if request.BirthDate != nil {
 		info.BirthDate = (*request.BirthDate).Time
+		y, m, d, _ := jalaali.ToGregorian((*request.BirthDate).Year(), jalaali.Month((*request.BirthDate).Month()), (*request.BirthDate).Day())
+
+		birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
+		info.BirthDate = birthDate
 	}
 	if request.SocialSecurityNumber != nil {
 		// Encrypt Social Security Number before updating
@@ -2347,6 +2568,40 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
@@ -2357,6 +2612,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -2400,6 +2656,40 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		FilledForms := formdto.FilledFormsResponse{}
+		FilledForms.Basic = boolPtr(true)
+		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
+		if generalHealth != nil {
+			FilledForms.GeneralHealth = boolPtr(true)
+		} else {
+			FilledForms.GeneralHealth = boolPtr(false)
+		}
+		mamography, _ := formService.formRepository.FindMamographyByFormID(formService.db, form.ID)
+		if mamography != nil {
+			FilledForms.Mamography = boolPtr(true)
+		} else {
+			FilledForms.Mamography = boolPtr(false)
+		}
+		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
+		if cancer != nil {
+			FilledForms.Cancer = boolPtr(true)
+		} else {
+			FilledForms.Cancer = boolPtr(false)
+		}
+		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
+		if familyCancer != nil {
+			FilledForms.FamilyCancer = boolPtr(true)
+		} else {
+			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if form.FormType == enum.Navid {
+			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
+			if navidInfo != nil {
+				FilledForms.NavidForm = boolPtr(true)
+			} else {
+				FilledForms.NavidForm = boolPtr(false)
+			}
+		}
 		formResponses[i] = formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
@@ -2410,6 +2700,7 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
+			FilledForms:               &FilledForms,
 		}
 	}
 
@@ -2442,8 +2733,8 @@ func (formService *FormService) AcceptForm(formID uint, userID uint) error {
 		return forbiddenError
 	}
 
-	form.Status = enum.FormStatusApproved
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Submitted to ReadyForCalculation
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusReadyForCalculation)
 	if err != nil {
 		return err
 	}
@@ -2477,8 +2768,126 @@ func (formService *FormService) RejectForm(formID uint, userID uint) error {
 		return forbiddenError
 	}
 
-	form.Status = enum.FormStatusRejected
-	err = formService.formRepository.UpdateForm(formService.db, form)
+	// Validate and transition from Submitted to Rejected
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusRejected)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) RequestPatientResponse(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor or assigned operator can request patient response
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can request patient response"}
+		return forbiddenError
+	}
+
+	// Validate and transition from Submitted to WaitingForPatientResponse
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusWaitingForPatientResponse)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) RequestDocuments(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Check if user has PermissionHandleOperators (supervisor)
+	hasSupervisorPermission, err := formService.hasPermission(userID, enum.PermissionHandleOperators)
+	if err != nil {
+		return err
+	}
+
+	// Check if user is the assigned operator
+	isAssignedOperator := form.OperatorID != nil && *form.OperatorID == userID
+
+	// Authorization: Supervisor or assigned operator can request documents
+	if !hasSupervisorPermission && !isAssignedOperator {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only supervisor or assigned operator can request documents"}
+		return forbiddenError
+	}
+
+	// Validate and transition from WaitingForPatientResponse to WaitingForDocuments
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusWaitingForDocuments)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) ResubmitRejectedForm(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Only form owner can resubmit
+	if form.UserID != userID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only form owner can resubmit"}
+		return forbiddenError
+	}
+
+	// Validate and transition from Rejected to Draft
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusDraft)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (formService *FormService) SubmitDocuments(formID uint, userID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Only form owner can submit documents
+	if form.UserID != userID {
+		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form, Message: "Only form owner can submit documents"}
+		return forbiddenError
+	}
+
+	// Validate and transition from WaitingForDocuments to Submitted
+	err = formService.validateAndTransitionStatus(form, enum.FormStatusSubmitted)
 	if err != nil {
 		return err
 	}
@@ -2496,30 +2905,23 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindGeneralHealthByFormID(formService.db, request.FormID)
@@ -2532,7 +2934,9 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 		return ForbiddenError
 	}
 
-	info.DrinksAlcohol = request.DrinksAlcohol
+	if request.DrinksAlcohol != nil {
+		info.DrinksAlcohol = request.DrinksAlcohol
+	}
 	info.CupsPerWeek = request.CupsPerWeek
 	if request.LastMonthSabzijatMeal != nil {
 		info.LastMonthSabzijatMeal = *request.LastMonthSabzijatMeal
@@ -2552,11 +2956,13 @@ func (formService *FormService) UpdateGeneralHealth(request formdto.UpdateGenera
 	if request.HardActivityHourInWeek != nil {
 		info.HardActivityHourInWeek = *request.HardActivityHourInWeek
 	}
-	info.SmokeAtLeast100 = request.SmokeAtLeast100
+	if request.SmokeAtLeast100 != nil {
+		info.SmokeAtLeast100 = request.SmokeAtLeast100
+	}
 	info.SmokingAge = request.SmokingAge
 	info.YearSmoke = request.YearSmoke
 	if request.SmokingNow != nil {
-		info.SmokingNow = *request.SmokingNow
+		info.SmokingNow = request.SmokingNow
 	}
 	info.LeaveSmokingAge = request.LeaveSmokingAge
 	info.CountSmokingDaily = request.CountSmokingDaily
@@ -2613,30 +3019,23 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindMamographyByFormID(formService.db, request.FormID)
@@ -2662,32 +3061,60 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		info.MenopausalStatus = enum.MenopausalStatus(uint(*request.MenopausalStatus))
 	}
 	info.MenopauseAge = request.MenopauseAge
-	info.HRT = request.HRT
+	if request.HRT != nil {
+		info.HRT = request.HRT
+	}
 	info.HRTUseLength = request.HRTUseLength
 	if request.LastFiveYearsHRTUse != nil {
-		info.LastFiveYearsHRTUse = *request.LastFiveYearsHRTUse
+		info.LastFiveYearsHRTUse = request.LastFiveYearsHRTUse
 	}
-	info.CurrentHRTUse = request.CurrentHRTUse
+	if request.CurrentHRTUse != nil {
+		info.CurrentHRTUse = request.CurrentHRTUse
+	}
+
 	info.IntendedHRTUse = request.IntendedHRTUse
 	info.HRTType = request.HRTType
-	info.Oral = request.Oral
+	if request.Oral != nil {
+		info.Oral = request.Oral
+	}
+
 	info.OralDuration = request.OralDuration
-	info.OralTwoLastYears = request.OralTwoLastYears
-	info.MamoGraphy = request.MamoGraphy
+	if request.OralTwoLastYears != nil {
+		info.OralTwoLastYears = request.OralTwoLastYears
+	}
+	if request.MamoGraphy != nil {
+		info.MamoGraphy = request.MamoGraphy
+	}
+
 	info.BreastDensity = request.BreastDensity
-	info.Falop = request.Falop
-	info.Andometrioz = request.Andometrioz
+	if request.Falop != nil {
+		info.Falop = request.Falop
+	}
+	if request.Andometrioz != nil {
+		info.Andometrioz = request.Andometrioz
+	}
+
 	if request.LeavePestan != nil {
 		info.LeavePestan = *request.LeavePestan
 	}
 	if request.LeaveTokhmdan != nil {
 		info.LeaveTokhmdan = *request.LeaveTokhmdan
 	}
-	info.LaDeColon = request.LaDeColon
-	info.LaDePol = request.LaDePol
-	info.AspLaMo = request.AspLaMo
-	info.NsaiDLaMo = request.NsaiDLaMo
-	info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	if request.LaDeColon != nil {
+		info.LaDeColon = request.LaDeColon
+	}
+	if request.LaDePol != nil {
+		info.LaDePol = request.LaDePol
+	}
+	if request.AspLaMo != nil {
+		info.AspLaMo = request.AspLaMo
+	}
+	if request.NsaiDLaMo != nil {
+		info.NsaiDLaMo = request.NsaiDLaMo
+	}
+	if request.LastFiveYearBloodTestInStool != nil {
+		info.LastFiveYearBloodTestInStool = request.LastFiveYearBloodTestInStool
+	}
 	if request.NumberOfBreastBiopsies != nil {
 		info.NumberOfBreastBiopsies = request.NumberOfBreastBiopsies
 	}
@@ -2744,30 +3171,23 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
@@ -2786,8 +3206,13 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	if request.Name != nil {
 		info.Name = *request.Name
 	}
-	info.TestGen = request.TestGen
-	info.FmTestGen = request.FmTestGen
+	if request.TestGen != nil {
+		info.TestGen = request.TestGen
+	}
+	if request.FmTestGen != nil {
+		info.FmTestGen = request.FmTestGen
+	}
+
 	if request.CallExpert != nil {
 		info.CallExpert = *request.CallExpert
 	}
@@ -2920,30 +3345,23 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindLungCancerByFormID(formService.db, request.FormID)
@@ -2956,40 +3374,39 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
-	if request.Hypertension != nil {
-		info.Hypertension = *request.Hypertension
+	if request.SupplementaryInsuranceStatus != nil {
+		info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
 	}
-	info.HypertensionTreatment = request.HypertensionTreatment
-	if request.HeartDisease != nil {
-		info.HeartDisease = *request.HeartDisease
+	if request.ChronicLungDisease != nil {
+		info.ChronicLungDisease = request.ChronicLungDisease
 	}
-	info.HeartDiseaseTreatment = request.HeartDiseaseTreatment
-	if request.Diabetes != nil {
-		info.Diabetes = *request.Diabetes
-	}
-	info.DiabetesTreatment = request.DiabetesTreatment
-	info.ChronicLungDisease = request.ChronicLungDisease
+
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	if request.LungCancerHistory != nil {
-		info.LungCancerHistory = *request.LungCancerHistory
+		info.LungCancerHistory = request.LungCancerHistory
 	}
 	if request.OtherCancerHistory != nil {
-		info.OtherCancerHistory = *request.OtherCancerHistory
+		info.OtherCancerHistory = request.OtherCancerHistory
 	}
 	if request.OtherCancerType != nil {
 		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
 	}
-	info.LungCancerFamily = request.LungCancerFamily
+	if request.LungCancerFamily != nil {
+		info.LungCancerFamily = request.LungCancerFamily
+	}
+	if request.OtherCancerFamily != nil {
+		info.OtherCancerFamily = request.OtherCancerFamily
+	}
+
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
-	info.OtherCancerFamily = request.OtherCancerFamily
+
 	if request.OtherCancerFamilyType != nil {
 		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
 	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	if request.CurrentSmoking != nil {
-		info.CurrentSmoking = *request.CurrentSmoking
+		info.CurrentSmoking = request.CurrentSmoking
 	}
 	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
 	info.SmokingTypesCurrent = request.SmokingTypesCurrent
@@ -3002,6 +3419,18 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
+	info.SmokePastAvg = request.SmokePastAvg
+	info.SmokeCurrentAvg = request.SmokeCurrentAvg
+	if request.Bronchitis != nil {
+		info.Bronchitis = request.Bronchitis
+	}
+	if request.Fibrosis != nil {
+		info.Fibrosis = request.Fibrosis
+	}
+	if request.LungIll != nil {
+		info.LungIll = request.LungIll
+	}
+
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3014,7 +3443,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	if request.SecondhandSmoke != nil {
-		info.SecondhandSmoke = *request.SecondhandSmoke
+		info.SecondhandSmoke = request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
@@ -3068,30 +3497,23 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 		return notFoundError
 	}
 
-	// Allow SuperAdmin to update any form
-	isSuperAdminUser, err := formService.isSuperAdmin(request.UserID)
+	// Check if user can edit form based on status and role
+	canEdit, err := formService.canUserEditForm(form, request.UserID)
 	if err != nil {
 		return err
 	}
-	var isOp bool
-	if !isSuperAdminUser {
-		isOp, err = formService.isOperator(request.UserID)
-		if err != nil {
-			return err
+	if !canEdit {
+		forbiddenError := exception.ForbiddenError{
+			Resource: formService.constants.Field.Form,
+			Message:  "Cannot edit form in current status",
 		}
-		if isOp {
-			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-			if err != nil {
-				return err
-			}
-			if !canEdit {
-				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-				return forbiddenError
-			}
-		} else if form.UserID != request.UserID {
-			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-			return forbiddenError
-		}
+		return forbiddenError
+	}
+
+	// Check if user is operator for logging purposes
+	isOp, err := formService.isOperator(request.UserID)
+	if err != nil {
+		return err
 	}
 
 	info, err := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
@@ -3104,11 +3526,17 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 
 	info.InsuranceStatus = request.InsuranceStatus
 	info.SupplementaryInsurances = request.SupplementaryInsurances
-	info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	if request.SupplementaryInsuranceStatus != nil {
+		info.SupplementaryInsuranceStatus = request.SupplementaryInsuranceStatus
+	}
+
 	if request.Hypertension != nil {
 		info.Hypertension = *request.Hypertension
 	}
-	info.HypertensionTreatment = request.HypertensionTreatment
+	if request.HypertensionTreatment != nil {
+		info.HypertensionTreatment = request.HypertensionTreatment
+	}
+
 	if request.HeartDisease != nil {
 		info.HeartDisease = *request.HeartDisease
 	}
@@ -3116,28 +3544,38 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	if request.Diabetes != nil {
 		info.Diabetes = *request.Diabetes
 	}
-	info.DiabetesTreatment = request.DiabetesTreatment
-	info.ChronicLungDisease = request.ChronicLungDisease
+	if request.DiabetesTreatment != nil {
+		info.DiabetesTreatment = request.DiabetesTreatment
+	}
+	if request.ChronicLungDisease != nil {
+		info.ChronicLungDisease = request.ChronicLungDisease
+	}
+
 	info.ChronicLungDiseaseType = request.ChronicLungDiseaseType
 	if request.LungCancerHistory != nil {
-		info.LungCancerHistory = *request.LungCancerHistory
+		info.LungCancerHistory = request.LungCancerHistory
 	}
 	if request.OtherCancerHistory != nil {
-		info.OtherCancerHistory = *request.OtherCancerHistory
+		info.OtherCancerHistory = request.OtherCancerHistory
 	}
 	if request.OtherCancerType != nil {
 		info.OtherCancerType = (*enum.CancerType)(request.OtherCancerType)
 	}
-	info.LungCancerFamily = request.LungCancerFamily
+	if request.LungCancerFamily != nil {
+		info.LungCancerFamily = request.LungCancerFamily
+	}
+
 	info.LungCancerFamilyRelation = request.LungCancerFamilyRelation
-	info.OtherCancerFamily = request.OtherCancerFamily
+	if request.OtherCancerFamily != nil {
+		info.OtherCancerFamily = request.OtherCancerFamily
+	}
 	if request.OtherCancerFamilyType != nil {
 		info.OtherCancerFamilyType = (*enum.CancerType)(request.OtherCancerFamilyType)
 	}
 	info.OtherCancerFamilyRelation = request.OtherCancerFamilyRelation
 	info.OccupationalExposure = request.OccupationalExposure
 	if request.CurrentSmoking != nil {
-		info.CurrentSmoking = *request.CurrentSmoking
+		info.CurrentSmoking = request.CurrentSmoking
 	}
 	info.SmokingStartAgeCurrent = request.SmokingStartAgeCurrent
 	info.SmokingTypesCurrent = request.SmokingTypesCurrent
@@ -3150,8 +3588,6 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	info.ChewedOpiumPerDayCurrent = request.ChewedOpiumPerDayCurrent
 	info.HookahPerWeekCurrent = request.HookahPerWeekCurrent
 	info.PastSmoking = request.PastSmoking
-	info.SmokePastAvg = request.SmokePastAvg
-	info.SmokeCurrentAvg = request.SmokeCurrentAvg
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
 	info.SmokingTypesPast = request.SmokingTypesPast
@@ -3164,10 +3600,53 @@ func (formService *FormService) UpdateNavidForm(request formdto.UpdateNavidFormR
 	info.ChewedOpiumPerDayPast = request.ChewedOpiumPerDayPast
 	info.HookahPerWeekPast = request.HookahPerWeekPast
 	if request.SecondhandSmoke != nil {
-		info.SecondhandSmoke = *request.SecondhandSmoke
+		info.SecondhandSmoke = request.SecondhandSmoke
 	}
 	info.SecondhandSmokeLocation = request.SecondhandSmokeLocation
 	info.LungDiseaseHistory = request.LungDiseaseHistory
+
+	if request.CurrentCigaretteSmoking != nil {
+		info.CurrentCigaretteSmoking = request.CurrentCigaretteSmoking
+	}
+	if request.CurrentRolledTobacco != nil {
+		info.CurrentRolledTobacco = request.CurrentRolledTobacco
+	}
+	if request.CurrentPipeSmoking != nil {
+		info.CurrentPipeSmoking = request.CurrentPipeSmoking
+	}
+	if request.CurrentHookahUse != nil {
+		info.CurrentHookahUse = request.CurrentHookahUse
+	}
+	if request.CurrentChiboukSmoking != nil {
+		info.CurrentChiboukSmoking = request.CurrentChiboukSmoking
+	}
+	if request.CurrentOpiumUse != nil {
+		info.CurrentOpiumUse = request.CurrentOpiumUse
+	}
+	if request.FormerCigaretteSmoking != nil {
+		info.FormerCigaretteSmoking = request.FormerCigaretteSmoking
+	}
+	if request.FormerRolledTobacco != nil {
+		info.FormerRolledTobacco = request.FormerRolledTobacco
+	}
+	if request.FormerPipeSmoking != nil {
+		info.FormerPipeSmoking = request.FormerPipeSmoking
+	}
+	if request.FormerHookahUse != nil {
+		info.FormerHookahUse = request.FormerHookahUse
+	}
+	if request.FormerChiboukSmoking != nil {
+		info.FormerChiboukSmoking = request.FormerChiboukSmoking
+	}
+	if request.FormerOpiumUse != nil {
+		info.FormerOpiumUse = request.FormerOpiumUse
+	}
+	if request.PelecSig != nil {
+		info.PelecSig = request.PelecSig
+	}
+	if request.CelecSig != nil {
+		info.CelecSig = request.CelecSig
+	}
 
 	if info.ID == 0 {
 		err = formService.formRepository.CreateNavidInfo(formService.db, info)
@@ -3243,7 +3722,7 @@ func (formService *FormService) AssignOperator(request formdto.AssignOperatorReq
 	}
 
 	form.OperatorID = &request.OperatorID
-	form.Status = enum.FormStatusAssigned
+	// Note: Assignment does not change form status - status is independent of assignment
 	err = formService.formRepository.UpdateForm(formService.db, form)
 	if err != nil {
 		return err
@@ -3385,4 +3864,29 @@ func (formService *FormService) GetAllFormTypes() ([]generaldto.EnumResponse, er
 		}
 	}
 	return response, nil
+}
+
+func (formService *FormService) GetAllAnswers() ([]generaldto.EnumResponse, error) {
+	statuses := enum.GetAllAnswers()
+	response := make([]generaldto.EnumResponse, len(statuses))
+	for i, status := range statuses {
+		response[i] = generaldto.EnumResponse{
+			ID:   uint(status),
+			Name: status.String(),
+		}
+	}
+	return response, nil
+}
+
+// Helper functions for pointers
+func strPtr(s string) *string {
+	return &s
+}
+
+func boolPtr(b bool) *bool {
+	return &b
+}
+
+func answerPtr(a enum.Answer) *enum.Answer {
+	return &a
 }

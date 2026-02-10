@@ -13,6 +13,7 @@ type FormService interface {
 	GetMamography(request formdto.GetPartialFormRequest) (formdto.GetMamographyResponse, error)
 	GetCancers(request formdto.GetPartialFormRequest) (formdto.GetCancersResponse, error)
 	GetFamilyCancer(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerResponse, error)
+	GetFamilyCancerList(request formdto.GetPartialFormRequest) (formdto.GetFamilyCancerListResponse, error)
 	GetContact(request formdto.GetPartialFormRequest) (formdto.GetContactResponse, error)
 	GetLungCancer(request formdto.GetPartialFormRequest) (formdto.GetLungCancerResponse, error)
 	GetNavidForm(request formdto.GetPartialFormRequest) (formdto.GetNavidFormResponse, error)
@@ -43,6 +44,10 @@ type FormService interface {
 	GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error)
 	AcceptForm(formID uint, userID uint) error
 	RejectForm(formID uint, userID uint) error
+	RequestPatientResponse(formID uint, userID uint) error
+	RequestDocuments(formID uint, userID uint) error
+	ResubmitRejectedForm(formID uint, userID uint) error
+	SubmitDocuments(formID uint, userID uint) error
 	AssignOperator(request formdto.AssignOperatorRequest) error
 	UnassignOperator(request formdto.UnassignOperatorRequest) error
 
@@ -55,4 +60,5 @@ type FormService interface {
 	GetAllRelativeTypes() ([]generaldto.EnumResponse, error)
 	GetAddressByPostalCode(postalCode string) (*formdto.PostalCodeInfoResponse, error)
 	GetAllFormTypes() ([]generaldto.EnumResponse, error)
+	GetAllAnswers() ([]generaldto.EnumResponse, error)
 }

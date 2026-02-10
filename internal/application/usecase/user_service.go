@@ -25,4 +25,6 @@ type UserService interface {
 	RequestUserValidationOTP(operatorID uint, request userdto.RequestUserValidationOTPRequest) error
 	VerifyUserValidationOTP(operatorID uint, request userdto.VerifyUserValidationOTPRequest) (userdto.UserValidationResponse, error)
 	ValidateUserForFormCreation(operatorID, userID uint) error
+	GetUserProfile(operatorID uint) (userdto.UserProfileResponse, error)
+	SubmitUserProfile(userdto.SubmitUserProfileRequest) (userdto.UserProfileResponse, error)
 }

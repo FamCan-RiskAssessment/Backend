@@ -22,6 +22,7 @@ func main() {
 
 	app.Database.DB.GetDB().AutoMigrate(
 		&entity.User{},
+		&entity.UserProfile{},
 		&entity.Role{},
 		&entity.Permission{},
 		&entity.Form{},

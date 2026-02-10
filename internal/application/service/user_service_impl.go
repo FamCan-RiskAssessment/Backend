@@ -666,3 +666,66 @@ func (userService *UserService) ValidateUserForFormCreation(operatorID, userID u
 	}
 	return nil
 }
+
+func (userService *UserService) GetUserProfile(operatorID uint) (userdto.UserProfileResponse, error) {
+	user, err := userService.userRepository.FindProfileByUserID(userService.db, operatorID)
+	if err != nil {
+		return userdto.UserProfileResponse{}, err
+	}
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	if user.UserProfile == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.Profile}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	return userdto.UserProfileResponse{
+		Name:                 user.UserProfile.Name,
+		LastName:             user.UserProfile.LastName,
+		Phone:                user.Phone,
+		HealthCenter:         user.UserProfile.HealthCenter,
+		SocialSecurityNumber: user.UserProfile.SocialSecurityNumber,
+	}, nil
+}
+
+func (userService *UserService) SubmitUserProfile(request userdto.SubmitUserProfileRequest) (userdto.UserProfileResponse, error) {
+	user, err := userService.userRepository.FindProfileByUserID(userService.db, request.UserID)
+	if err != nil {
+		return userdto.UserProfileResponse{}, err
+	}
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	profile := &entity.UserProfile{
+		UserID:               user.ID,
+		Name:                 request.Name,
+		LastName:             request.LastName,
+		HealthCenter:         request.HealthCenter,
+		SocialSecurityNumber: request.SocialSecurityNumber,
+	}
+	if user.UserProfile != nil {
+		// If the UserProfile Exists, then update the current one
+		if err := userService.userRepository.UpdateProfile(userService.db, profile); err != nil {
+			return userdto.UserProfileResponse{}, nil
+		}
+		return userdto.UserProfileResponse{
+			Name:                 request.Name,
+			Phone:                user.Phone,
+			LastName:             request.LastName,
+			HealthCenter:         request.HealthCenter,
+			SocialSecurityNumber: request.SocialSecurityNumber,
+		}, nil
+	}
+	if err := userService.userRepository.CreateProfile(userService.db, profile); err != nil {
+		return userdto.UserProfileResponse{}, nil
+	}
+	return userdto.UserProfileResponse{
+		Name:                 request.Name,
+		Phone:                user.Phone,
+		LastName:             request.LastName,
+		HealthCenter:         request.HealthCenter,
+		SocialSecurityNumber: request.SocialSecurityNumber,
+	}, nil
+}

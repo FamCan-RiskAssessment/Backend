@@ -181,3 +181,23 @@ func (u *UserRepositoryMock) FindUsers(db database.Database, options *postgres.Q
 	}
 	return args.Get(0).([]*entity.User), args.Get(1).(int64), args.Error(2)
 }
+
+func (u *UserRepositoryMock) FindProfileByUserID(db database.Database, userID uint) (*entity.User, error) {
+	args := u.Called(db, userID)
+
+	var user *entity.User
+	if u := args.Get(0); u != nil {
+		user = u.(*entity.User)
+	}
+
+	return user, args.Error(1)
+}
+
+func (u *UserRepositoryMock) CreateProfile(db database.Database, profile *entity.UserProfile) error {
+	args := u.Called(db, profile)
+	return args.Error(0)
+}
+func (u *UserRepositoryMock) UpdateProfile(db database.Database, profile *entity.UserProfile) error {
+	args := u.Called(db, profile)
+	return args.Error(0)
+}

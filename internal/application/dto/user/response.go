@@ -35,3 +35,11 @@ type RoleResponse struct {
 	Name        string               `json:"name"`
 	Permissions []PermissionResponse `json:"permissions"`
 }
+
+type UserProfileResponse struct {
+	Name                 string `json:"name"`
+	LastName             string `json:"lastName"`
+	Phone                string `json:"phone"`
+	HealthCenter         string `json:"healthCenter"`
+	SocialSecurityNumber string `json:"socialSecurityNumber"`
+}

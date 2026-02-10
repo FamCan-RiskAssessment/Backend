@@ -2367,6 +2367,17 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
 		}
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(true)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(true)
+		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
 			if navidInfo != nil {
@@ -2527,6 +2538,23 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		var decryptedSSN string
+		var Name *string
+		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if basicInfo != nil {
+			decryptedSSN, err = formService.fieldEncryptor.Decrypt(basicInfo.SocialSecurityNumber)
+			if err != nil {
+				return nil, 0, err
+			}
+		}
+		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if contactInfo != nil {
+			Name = &contactInfo.Name
+		}
 		FilledForms := formdto.FilledFormsResponse{}
 		FilledForms.Basic = boolPtr(true)
 		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
@@ -2553,6 +2581,17 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
 		}
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(true)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(true)
+		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
 			if navidInfo != nil {
@@ -2568,6 +2607,8 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,
 			FilledByOperatorID:        form.FilledByOperatorID,
+			SocialSecurityNumber:      decryptedSSN,
+			Name:                      Name,
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),

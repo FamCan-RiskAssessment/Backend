@@ -227,3 +227,28 @@ func (repo *UserRepository) FindUsers(db database.Database, options *postgres.Qu
 	}
 	return users, result.RowsAffected, nil
 }
+
+func (repo *UserRepository) FindProfileByUserID(db database.Database, userID uint) (*entity.User, error) {
+	var user entity.User
+
+	err := db.GetDB().
+		Preload("UserProfile").
+		First(&user, userID).
+		Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (repo *UserRepository) CreateProfile(db database.Database, profile *entity.UserProfile) error {
+	return db.GetDB().Create(profile).Error
+}
+func (repo *UserRepository) UpdateProfile(db database.Database, profile *entity.UserProfile) error {
+	return db.GetDB().Save(profile).Error
+}

@@ -100,6 +100,14 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 		}
 	}
 
+	operatorData := routerGroup.Group("/operator/profile")
+	operatorData.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.CategoryDataEntry)}))
+	{
+		operatorData.GET("", app.Controllers.Admin.UserController.GetUserProfile)
+		operatorData.POST("/submit", app.Controllers.Admin.UserController.SubmitUserProfile)
+		// operatorData.PATCH("/edit", app.Controllers.Admin.UserController.EditUserProfile)
+	}
+
 	supervisor := routerGroup.Group("/supervisor/operator/")
 	supervisor.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.PermissionHandleOperators)}))
 	{

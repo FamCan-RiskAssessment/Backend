@@ -51,3 +51,11 @@ type VerifyUserValidationOTPRequest struct {
 	Phone string `json:"phone" validate:"required,min=11,max=11"`
 	OTP   string `json:"otp" validate:"required,min=6,max=6"`
 }
+
+type SubmitUserProfileRequest struct {
+	UserID               uint
+	Name                 string
+	LastName             string
+	HealthCenter         string
+	SocialSecurityNumber string
+}

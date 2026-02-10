@@ -705,27 +705,22 @@ func (userService *UserService) SubmitUserProfile(request userdto.SubmitUserProf
 		HealthCenter:         request.HealthCenter,
 		SocialSecurityNumber: request.SocialSecurityNumber,
 	}
+	userProfileResponse := userdto.UserProfileResponse{
+		Name:                 profile.Name,
+		Phone:                user.Phone,
+		LastName:             profile.LastName,
+		HealthCenter:         profile.HealthCenter,
+		SocialSecurityNumber: profile.SocialSecurityNumber,
+	}
 	if user.UserProfile != nil {
 		// If the UserProfile Exists, then update the current one
 		if err := userService.userRepository.UpdateProfile(userService.db, profile); err != nil {
-			return userdto.UserProfileResponse{}, nil
+			return userProfileResponse, nil
 		}
-		return userdto.UserProfileResponse{
-			Name:                 request.Name,
-			Phone:                user.Phone,
-			LastName:             request.LastName,
-			HealthCenter:         request.HealthCenter,
-			SocialSecurityNumber: request.SocialSecurityNumber,
-		}, nil
+		return userProfileResponse, nil
 	}
 	if err := userService.userRepository.CreateProfile(userService.db, profile); err != nil {
 		return userdto.UserProfileResponse{}, nil
 	}
-	return userdto.UserProfileResponse{
-		Name:                 request.Name,
-		Phone:                user.Phone,
-		LastName:             request.LastName,
-		HealthCenter:         request.HealthCenter,
-		SocialSecurityNumber: request.SocialSecurityNumber,
-	}, nil
+	return userProfileResponse, nil
 }

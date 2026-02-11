@@ -68,16 +68,39 @@ func (als *ActionLogService) LogAction(request actionlogdto.LogAction) error {
 	return nil
 }
 
-func (als *ActionLogService) GetAllActionLogs(offset, limit int) ([]actionlogdto.LogResponse, int64, error) {
-	options := postgres.NewQueryOptions().
-		WithPagination(limit, offset)
+var actionLogAllowedSortColumns = []string{"id", "created_at", "action"}
 
-	actionLogs, err := als.actionLogRepository.FindAllActionLogs(als.db, options)
+func (als *ActionLogService) GetAllActionLogs(request actionlogdto.GetAllActionLogsRequest) ([]actionlogdto.LogResponse, int64, error) {
+	options := postgres.NewQueryOptions().
+		WithPagination(request.Limit, request.Offset)
+
+	sortCol := "created_at"
+	if request.SortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*request.SortBy, actionLogAllowedSortColumns, "created_at")
+	}
+	asc := false
+	if request.SortOrder != nil && *request.SortOrder == "asc" {
+		asc = true
+	}
+	options.WithSorting(sortCol, asc)
+
+	if request.Search != nil && *request.Search != "" {
+		options.WithSearch(*request.Search, []string{"details", "resource"})
+	}
+
+	filters := &postgres.ActionLogFilters{
+		Action:   request.Action,
+		ActorID:  request.ActorID,
+		DateFrom: request.DateFrom,
+		DateTo:   request.DateTo,
+	}
+
+	actionLogs, err := als.actionLogRepository.FindAllActionLogs(als.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := als.actionLogRepository.CountAllActionLogs(als.db, options)
+	count, err := als.actionLogRepository.CountAllActionLogs(als.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}

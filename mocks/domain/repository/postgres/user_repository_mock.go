@@ -174,8 +174,8 @@ func (u *UserRepositoryMock) FindRolesByPermission(db database.Database, permiss
 	return args.Get(0).([]*entity.Role), args.Error(1)
 }
 
-func (u *UserRepositoryMock) FindUsers(db database.Database, options *postgres.QueryOptions) ([]*entity.User, int64, error) {
-	args := u.Called(db, options)
+func (u *UserRepositoryMock) FindUsers(db database.Database, options *postgres.QueryOptions, filters *postgres.UserFilters) ([]*entity.User, int64, error) {
+	args := u.Called(db, options, filters)
 	if args.Get(0) == nil {
 		return nil, args.Get(1).(int64), args.Error(2)
 	}

@@ -107,54 +107,62 @@ func (r *FormRepository) DeleteForm(db database.Database, id uint) error {
 	})
 }
 
-func (r *FormRepository) FindAllForms(db database.Database, offset, limit int, filters *postgres.FormFilters) ([]*entity.Form, error) {
+func (r *FormRepository) FindAllForms(db database.Database, options *postgres.QueryOptions, filters *postgres.FormFilters) ([]*entity.Form, error) {
 	var forms []*entity.Form
 	query := db.GetDB().Preload("User")
+
+	if options != nil && options.HasSearch() {
+		query = query.Joins("JOIN users ON users.id = forms.user_id")
+	}
+
 	query = ApplyFormFilters(query, filters)
-
-	query = query.Order("id ASC")
-
-	if offset > 0 {
-		query = query.Offset(offset)
-	}
-	if limit > 0 {
-		query = query.Limit(limit)
-	}
+	query = applyQueryOptions(query, options)
 
 	err := query.Find(&forms).Error
 	return forms, err
 }
 
-func (r *FormRepository) CountAllForms(db database.Database, filters *postgres.FormFilters) (int64, error) {
+func (r *FormRepository) CountAllForms(db database.Database, options *postgres.QueryOptions, filters *postgres.FormFilters) (int64, error) {
 	var count int64
 	query := db.GetDB().Model(&entity.Form{})
+
+	if options != nil && options.HasSearch() {
+		query = query.Joins("JOIN users ON users.id = forms.user_id")
+	}
+
 	query = ApplyFormFilters(query, filters)
+	query = applySearchOnly(query, options)
+
 	err := query.Count(&count).Error
 	return count, err
 }
 
-func (r *FormRepository) FindAllOperatorForms(db database.Database, offset, limit int, filters *postgres.OperatorFormFilters) ([]*entity.Form, error) {
+func (r *FormRepository) FindAllOperatorForms(db database.Database, options *postgres.QueryOptions, filters *postgres.OperatorFormFilters) ([]*entity.Form, error) {
 	var forms []*entity.Form
 	query := db.GetDB().Preload("User")
+
+	if options != nil && options.HasSearch() {
+		query = query.Joins("JOIN users ON users.id = forms.user_id")
+	}
+
 	query = ApplyOperatorFormFilters(query, filters)
-
-	query = query.Order("id ASC")
-
-	if offset > 0 {
-		query = query.Offset(offset)
-	}
-	if limit > 0 {
-		query = query.Limit(limit)
-	}
+	query = applyQueryOptions(query, options)
 
 	err := query.Find(&forms).Error
 	return forms, err
 }
 
-func (r *FormRepository) CountAllOperatorForms(db database.Database, filters *postgres.OperatorFormFilters) (int64, error) {
+func (r *FormRepository) CountAllOperatorForms(db database.Database, options *postgres.QueryOptions, filters *postgres.OperatorFormFilters) (int64, error) {
 	var count int64
 	query := db.GetDB().Model(&entity.Form{})
+
+	if options != nil && options.HasSearch() {
+		query = query.Joins("JOIN users ON users.id = forms.user_id")
+	}
+
 	query = ApplyOperatorFormFilters(query, filters)
+	query = applySearchOnly(query, options)
+
 	err := query.Count(&count).Error
 	return count, err
 }

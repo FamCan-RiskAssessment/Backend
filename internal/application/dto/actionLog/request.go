@@ -10,3 +10,15 @@ type LogAction struct {
 	ResourceID *uint
 	Details    string
 }
+
+type GetAllActionLogsRequest struct {
+	Offset    int
+	Limit     int
+	SortBy    *string
+	SortOrder *string
+	Search    *string
+	Action    *enum.ActionType
+	ActorID   *uint
+	DateFrom  *string
+	DateTo    *string
+}

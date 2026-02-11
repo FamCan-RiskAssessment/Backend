@@ -2,7 +2,9 @@ package actionlog
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
 	"github.com/gin-gonic/gin"
 )
@@ -30,15 +32,34 @@ func NewActionLogController(
 }
 
 func (alc *ActionLogController) GetAllActionLogs(ctx *gin.Context) {
-	type GetAllActionLogs struct {
-		Page     int `form:"page"`
-		PageSize int `form:"pageSize"`
+	type GetAllActionLogsParams struct {
+		Page      int              `form:"page"`
+		PageSize  int              `form:"pageSize"`
+		SortBy    *string          `form:"sortBy"`
+		SortOrder *string          `form:"sortOrder"`
+		Search    *string          `form:"search"`
+		Action    *enum.ActionType `form:"action"`
+		ActorID   *uint            `form:"actorId"`
+		DateFrom  *string          `form:"dateFrom"`
+		DateTo    *string          `form:"dateTo"`
 	}
 
-	params := controller.Validate[GetAllActionLogs](ctx)
+	params := controller.Validate[GetAllActionLogsParams](ctx)
 	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, alc.pagination.DefaultPage, alc.pagination.DefaultPageSize)
 
-	actionLogs, count, err := alc.actionLogService.GetAllActionLogs(offset, limit)
+	request := actionlogdto.GetAllActionLogsRequest{
+		Offset:    offset,
+		Limit:     limit,
+		SortBy:    params.SortBy,
+		SortOrder: params.SortOrder,
+		Search:    params.Search,
+		Action:    params.Action,
+		ActorID:   params.ActorID,
+		DateFrom:  params.DateFrom,
+		DateTo:    params.DateTo,
+	}
+
+	actionLogs, count, err := alc.actionLogService.GetAllActionLogs(request)
 	if err != nil {
 		panic(err)
 	}

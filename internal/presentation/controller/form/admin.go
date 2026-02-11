@@ -278,7 +278,7 @@ func (formController *AdminFormController) UpdateGeneralHealth(ctx *gin.Context)
 		SmokeAtLeast100           *enum.Answer `json:"smokeAtLeast100"`
 		SmokingAge                *uint        `json:"smokingAge"`
 		SmokingNow                *enum.Answer `json:"smokingNow"`
-		YearSmoke                 *uint        `json:"yearSmoke,omitempty"`
+		YearSmoke                 *uint        `json:"yearSmoke"`
 		LeaveSmokingAge           *uint        `json:"leaveSmokingAge"`
 		CountSmokingDaily         *string      `json:"countSmokingDaily"`
 		CountGheliandaily         *string      `json:"countGheliandaily"`
@@ -329,19 +329,19 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 
 		GhaedeAge                    uint                    `form:"ghaedeAge"`
 		HasChildren                  bool                    `form:"hasChildren"`
-		NumberOfChildren             *uint                   `form:"numberOfChildren,omitempty"`
-		SonCount                     *uint                   `form:"sonCount,omitempty"`
-		DaughterCount                *uint                   `form:"daughterCount,omitempty"`
-		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth,omitempty"`
+		NumberOfChildren             *uint                   `form:"numberOfChildren"`
+		SonCount                     *uint                   `form:"sonCount"`
+		DaughterCount                *uint                   `form:"daughterCount"`
+		AgeOfFirstBirth              *uint                   `form:"ageOfFirstBirth"`
 		MenopausalStatus             uint                    `form:"menopausalStatus"`
 		MenopauseAge                 *string                 `form:"menopauseAge,omitempty"`
 		HRT                          *enum.Answer            `form:"hrt,omitempty"`
-		HRTUseLength                 *uint                   `form:"hrtUseLength,omitempty"`
+		HRTUseLength                 *uint                   `form:"hrtUseLength"`
 		LastFiveYearsHRTUse          *enum.Answer            `form:"lastFiveYearsHrtUse"`
 		CurrentHRTUse                *enum.Answer            `form:"currentHrtUse,omitempty"`
-		IntendedHRTUse               *uint                   `form:"intendedHrtUse,omitempty"`
+		IntendedHRTUse               *uint                   `form:"intendedHrtUse"`
 		HRTType                      *string                 `form:"hrtType,omitempty"`
-		Oral                         *enum.Answer            `form:"oral,omitempty"`
+		Oral                         *enum.Answer            `form:"oral"`
 		OralDuration                 *string                 `form:"oralDuration,omitempty"`
 		OralTwoLastYears             *enum.Answer            `form:"oralTwoLastYears,omitempty"`
 		MamoGraphy                   *enum.Answer            `form:"mamoGraphy,omitempty"`
@@ -356,7 +356,7 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		AspLaMo                      *enum.Answer            `form:"aspLaMo,omitempty"`
 		NsaiDLaMo                    *enum.Answer            `form:"nsaiDLaMo,omitempty"`
 		LastFiveYearBloodTestInStool *enum.Answer            `form:"lastFiveYearBloodTestInStool,omitempty"`
-		AttentionCorrect             *bool                   `form:"attentionCorrect,omitempty"`
+		AttentionCorrect             *bool                   `form:"attentionCorrect"`
 	}
 
 	params := controller.Validate[UpdateMamographyParams](ctx)
@@ -504,7 +504,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		Bronchitis                   *enum.Answer `json:"bronshit"`
 		LungIll                      *enum.Answer `json:"lungill"`
 		Fibrosis                     *enum.Answer `json:"fibroz"`
-		LeaveSmoke                   *uint        `json:"leaveSmoke,omitempty"`
+		LeaveSmoke                   *uint        `json:"leaveSmoke"`
 		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
 		SmokingTypesPast             *string      `json:"smokingTypesPast"`
 		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
@@ -627,7 +627,7 @@ func (formController *AdminFormController) UpdateNavidForm(ctx *gin.Context) {
 		ChewedOpiumPerDayCurrent     *uint        `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint        `json:"hookahPerWeekCurrent"`
 		PastSmoking                  *string      `json:"pastSmoking"`
-		LeaveSmoke                   *uint        `json:"leaveSmoke,omitempty"`
+		LeaveSmoke                   *uint        `json:"leaveSmoke"`
 		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
 		SmokingTypesPast             *string      `json:"smokingTypesPast"`
 		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
@@ -896,7 +896,7 @@ func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) 
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
-		LifeStatus       *uint                   `form:"lifeStatus,omitempty"`
+		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
 		CancerAge        uint                    `form:"cancerAge" validate:"required,gte=0"`
 		Pictures         []*multipart.FileHeader `form:"pictures,omitempty"`
@@ -941,7 +941,7 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
-		LifeStatus       *uint                   `form:"lifeStatus,omitempty"`
+		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
 		CancerAge        uint                    `form:"cancerAge" validate:"required,gte=0"`
 		Pictures         []*multipart.FileHeader `form:"pictures,omitempty"`

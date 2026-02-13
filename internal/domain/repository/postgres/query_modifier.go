@@ -14,9 +14,15 @@ type SortingOptions struct {
 	Asc    bool
 }
 
+type SearchOptions struct {
+	Query   string
+	Columns []string
+}
+
 type QueryOptions struct {
 	Pagination *PaginationOptions
 	Sorting    *SortingOptions
+	Search     *SearchOptions
 }
 
 func NewQueryOptions() *QueryOptions {
@@ -45,4 +51,27 @@ func (q *QueryOptions) HasPagination() bool {
 
 func (q *QueryOptions) HasSorting() bool {
 	return q.Sorting != nil
+}
+
+func (q *QueryOptions) WithSearch(query string, columns []string) *QueryOptions {
+	if query != "" && len(columns) > 0 {
+		q.Search = &SearchOptions{
+			Query:   query,
+			Columns: columns,
+		}
+	}
+	return q
+}
+
+func (q *QueryOptions) HasSearch() bool {
+	return q.Search != nil && q.Search.Query != ""
+}
+
+func ValidateSortColumn(column string, allowed []string, defaultColumn string) string {
+	for _, a := range allowed {
+		if column == a {
+			return column
+		}
+	}
+	return defaultColumn
 }

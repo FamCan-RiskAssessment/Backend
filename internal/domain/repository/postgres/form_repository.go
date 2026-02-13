@@ -38,10 +38,10 @@ type FormRepository interface {
 	UpdateForm(db database.Database, form *entity.Form) error
 	UpdateBasicInfo(db database.Database, basicInfo *entity.BasicInfo) error
 	DeleteForm(db database.Database, id uint) error
-	FindAllForms(db database.Database, offset, limit int, filters *FormFilters) ([]*entity.Form, error)
-	CountAllForms(db database.Database, filters *FormFilters) (int64, error)
-	FindAllOperatorForms(db database.Database, offset, limit int, filters *OperatorFormFilters) ([]*entity.Form, error)
-	CountAllOperatorForms(db database.Database, filters *OperatorFormFilters) (int64, error)
+	FindAllForms(db database.Database, options *QueryOptions, filters *FormFilters) ([]*entity.Form, error)
+	CountAllForms(db database.Database, options *QueryOptions, filters *FormFilters) (int64, error)
+	FindAllOperatorForms(db database.Database, options *QueryOptions, filters *OperatorFormFilters) ([]*entity.Form, error)
+	CountAllOperatorForms(db database.Database, options *QueryOptions, filters *OperatorFormFilters) (int64, error)
 
 	FindGeneralHealthByFormID(db database.Database, formID uint) (*entity.GeneralHealthInfo, error)
 	CreateGeneralHealth(db database.Database, info *entity.GeneralHealthInfo) error

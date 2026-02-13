@@ -19,8 +19,8 @@ func (a *ActionLogServiceMock) LogAction(request actionlogdto.LogAction) error {
 	return args.Error(0)
 }
 
-func (a *ActionLogServiceMock) GetAllActionLogs(offset, limit int) ([]actionlogdto.LogResponse, int64, error) {
-	args := a.Called(offset, limit)
+func (a *ActionLogServiceMock) GetAllActionLogs(request actionlogdto.GetAllActionLogsRequest) ([]actionlogdto.LogResponse, int64, error) {
+	args := a.Called(request)
 	if args.Get(0) == nil {
 		return nil, args.Get(1).(int64), args.Error(2)
 	}

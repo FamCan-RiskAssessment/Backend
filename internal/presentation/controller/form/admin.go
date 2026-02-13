@@ -46,6 +46,9 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 		SmokingNow         *bool          `form:"smokingNow"`
 		Cancer             *bool          `form:"cancer"`
 		FilledByOperatorID *uint          `form:"filledByOperatorID"`
+		SortBy             *string        `form:"sortBy"`
+		SortOrder          *string        `form:"sortOrder"`
+		Search             *string        `form:"search"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
@@ -62,7 +65,7 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 		FilledByOperatorID: params.FilledByOperatorID,
 	}
 
-	forms, count, err := formController.formService.GetAllForms(offset, limit, filters)
+	forms, count, err := formController.formService.GetAllForms(offset, limit, filters, params.SortBy, params.SortOrder, params.Search)
 	if err != nil {
 		panic(err)
 	}
@@ -83,6 +86,9 @@ func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context)
 		DrinksAlcohol *bool          `form:"drinksAlcohol"`
 		SmokingNow    *bool          `form:"smokingNow"`
 		Cancer        *bool          `form:"cancer"`
+		SortBy        *string        `form:"sortBy"`
+		SortOrder     *string        `form:"sortOrder"`
+		Search        *string        `form:"search"`
 	}
 
 	params := controller.Validate[GetAllOperatorFormsParams](ctx)
@@ -101,7 +107,7 @@ func (formController *AdminFormController) GetAllOperatorForms(ctx *gin.Context)
 		Cancer:        params.Cancer,
 	}
 
-	forms, count, err := formController.formService.GetAllOperatorForms(offset, limit, filters)
+	forms, count, err := formController.formService.GetAllOperatorForms(offset, limit, filters, params.SortBy, params.SortOrder, params.Search)
 	if err != nil {
 		panic(err)
 	}

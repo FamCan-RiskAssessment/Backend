@@ -28,16 +28,24 @@ func NewAdminUserController(
 
 func (userController *AdminUserController) GetUsers(ctx *gin.Context) {
 	type usersParams struct {
-		Page     int `form:"page"`
-		PageSize int `form:"pageSize"`
+		Page      int     `form:"page"`
+		PageSize  int     `form:"pageSize"`
+		SortBy    *string `form:"sortBy"`
+		SortOrder *string `form:"sortOrder"`
+		Search    *string `form:"search"`
+		RoleID    *uint   `form:"roleId"`
 	}
 	params := controller.Validate[usersParams](ctx)
 
 	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, userController.pagination.DefaultPage, userController.pagination.DefaultPageSize)
 
 	request := userdto.GetUsersListRequest{
-		Offset: offset,
-		Limit:  limit,
+		Offset:    offset,
+		Limit:     limit,
+		SortBy:    params.SortBy,
+		SortOrder: params.SortOrder,
+		Search:    params.Search,
+		RoleID:    params.RoleID,
 	}
 
 	users, count, err := userController.userService.GetUsers(request)

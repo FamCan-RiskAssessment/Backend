@@ -494,11 +494,31 @@ func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateU
 	return nil
 }
 
+var userAllowedSortColumns = []string{"id", "phone", "created_at"}
+
 func (userService *UserService) GetUsers(request userdto.GetUsersListRequest) ([]userdto.UserResponse, int64, error) {
 	options := postgres.NewQueryOptions().
 		WithPagination(request.Limit, request.Offset)
 
-	users, count, err := userService.userRepository.FindUsers(userService.db, options)
+	sortCol := "id"
+	if request.SortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*request.SortBy, userAllowedSortColumns, "id")
+	}
+	asc := true
+	if request.SortOrder != nil && *request.SortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if request.Search != nil && *request.Search != "" {
+		options.WithSearch(*request.Search, []string{"phone"})
+	}
+
+	filters := &postgres.UserFilters{
+		RoleID: request.RoleID,
+	}
+
+	users, count, err := userService.userRepository.FindUsers(userService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -2525,13 +2525,32 @@ func (formService *FormService) DeleteForm(request formdto.DeleteFormRequest) er
 	return nil
 }
 
-func (formService *FormService) GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error) {
-	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit, filters)
+var formAllowedSortColumns = []string{"id", "created_at", "updated_at", "status"}
+
+func (formService *FormService) GetAllForms(offset, limit int, filters *postgres.FormFilters, sortBy, sortOrder, search *string) ([]formdto.BasicFormResponse, int64, error) {
+	options := postgres.NewQueryOptions().
+		WithPagination(limit, offset)
+
+	sortCol := "id"
+	if sortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*sortBy, formAllowedSortColumns, "id")
+	}
+	asc := true
+	if sortOrder != nil && *sortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if search != nil && *search != "" {
+		options.WithSearch(*search, []string{"users.phone"})
+	}
+
+	forms, err := formService.formRepository.FindAllForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllForms(formService.db, filters)
+	count, err := formService.formRepository.CountAllForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -2619,7 +2638,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	return formResponses, count, nil
 }
 
-func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error) {
+func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters, sortBy, sortOrder, search *string) ([]formdto.BasicFormResponse, int64, error) {
 	operator, err := formService.userService.GetUserByID(filters.OperatorID)
 	if err != nil {
 		return nil, 0, err
@@ -2644,12 +2663,29 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 		return nil, 0, forbiddenError
 	}
 
-	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, offset, limit, filters)
+	options := postgres.NewQueryOptions().
+		WithPagination(limit, offset)
+
+	sortCol := "id"
+	if sortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*sortBy, formAllowedSortColumns, "id")
+	}
+	asc := true
+	if sortOrder != nil && *sortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if search != nil && *search != "" {
+		options.WithSearch(*search, []string{"users.phone"})
+	}
+
+	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllOperatorForms(formService.db, filters)
+	count, err := formService.formRepository.CountAllOperatorForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}

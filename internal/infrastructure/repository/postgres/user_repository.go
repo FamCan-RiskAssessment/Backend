@@ -217,15 +217,35 @@ func (repo *UserRepository) FindRolesByPermission(db database.Database, permissi
 	return roles, nil
 }
 
-func (repo *UserRepository) FindUsers(db database.Database, options *postgres.QueryOptions) ([]*entity.User, int64, error) {
-	var users []*entity.User
-	query := db.GetDB()
-	query = applyQueryOptions(query, options)
-	result := query.Find(&users)
-	if result.Error != nil {
-		return nil, 0, result.Error
+func ApplyUserFilters(query *gorm.DB, filters *postgres.UserFilters) *gorm.DB {
+	if filters == nil {
+		return query
 	}
-	return users, result.RowsAffected, nil
+	if filters.RoleID != nil {
+		query = query.Joins("JOIN user_roles ON user_roles.user_id = users.id").
+			Where("user_roles.role_id = ?", *filters.RoleID)
+	}
+	return query
+}
+
+func (repo *UserRepository) FindUsers(db database.Database, options *postgres.QueryOptions, filters *postgres.UserFilters) ([]*entity.User, int64, error) {
+	var users []*entity.User
+	var count int64
+
+	countQuery := db.GetDB().Model(&entity.User{})
+	countQuery = ApplyUserFilters(countQuery, filters)
+	countQuery = applySearchOnly(countQuery, options)
+	if err := countQuery.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	query := db.GetDB()
+	query = ApplyUserFilters(query, filters)
+	query = applyQueryOptions(query, options)
+	if err := query.Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+	return users, count, nil
 }
 
 func (repo *UserRepository) FindProfileByUserID(db database.Database, userID uint) (*entity.User, error) {

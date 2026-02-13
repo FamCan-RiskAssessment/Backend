@@ -114,8 +114,6 @@ func (suite *ActionLogServiceTestSuite) TestLogAction_WithTargetID() {
 // Test: GetAllActionLogs should return paginated results
 func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_Success() {
 	// Arrange
-	offset := 0
-	limit := 10
 	now := time.Now()
 	actionLogs := []*entity.ActionLog{
 		{
@@ -132,16 +130,16 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_Success() {
 		},
 	}
 
-	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.MatchedBy(func(opts interface{}) bool {
-		return true
-	})).Return(actionLogs, nil)
+	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(actionLogs, nil)
+	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(int64(2), nil)
 
-	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.MatchedBy(func(opts interface{}) bool {
-		return true
-	})).Return(int64(2), nil)
+	request := actionlogdto.GetAllActionLogsRequest{
+		Offset: 0,
+		Limit:  10,
+	}
 
 	// Act
-	response, count, err := suite.actionLogService.GetAllActionLogs(offset, limit)
+	response, count, err := suite.actionLogService.GetAllActionLogs(request)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -154,14 +152,17 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_Success() {
 // Test: GetAllActionLogs should handle repository errors
 func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_FindError() {
 	// Arrange
-	offset := 0
-	limit := 10
 	findError := errors.New("database error")
 
-	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything).Return(nil, findError)
+	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(nil, findError)
+
+	request := actionlogdto.GetAllActionLogsRequest{
+		Offset: 0,
+		Limit:  10,
+	}
 
 	// Act
-	response, count, err := suite.actionLogService.GetAllActionLogs(offset, limit)
+	response, count, err := suite.actionLogService.GetAllActionLogs(request)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -173,8 +174,6 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_FindError() {
 // Test: GetAllActionLogs should handle count errors
 func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_CountError() {
 	// Arrange
-	offset := 0
-	limit := 10
 	now := time.Now()
 	actionLogs := []*entity.ActionLog{
 		{
@@ -185,11 +184,16 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_CountError() {
 	}
 	countError := errors.New("count error")
 
-	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything).Return(actionLogs, nil)
-	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.Anything).Return(int64(0), countError)
+	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(actionLogs, nil)
+	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(int64(0), countError)
+
+	request := actionlogdto.GetAllActionLogsRequest{
+		Offset: 0,
+		Limit:  10,
+	}
 
 	// Act
-	response, count, err := suite.actionLogService.GetAllActionLogs(offset, limit)
+	response, count, err := suite.actionLogService.GetAllActionLogs(request)
 
 	// Assert
 	assert.Error(suite.T(), err)
@@ -201,15 +205,18 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_CountError() {
 // Test: GetAllActionLogs should return empty list when no logs exist
 func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_Empty() {
 	// Arrange
-	offset := 0
-	limit := 10
 	emptyLogs := []*entity.ActionLog{}
 
-	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything).Return(emptyLogs, nil)
-	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.Anything).Return(int64(0), nil)
+	suite.actionLogRepository.On("FindAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(emptyLogs, nil)
+	suite.actionLogRepository.On("CountAllActionLogs", suite.db, mock.Anything, mock.Anything).Return(int64(0), nil)
+
+	request := actionlogdto.GetAllActionLogsRequest{
+		Offset: 0,
+		Limit:  10,
+	}
 
 	// Act
-	response, count, err := suite.actionLogService.GetAllActionLogs(offset, limit)
+	response, count, err := suite.actionLogService.GetAllActionLogs(request)
 
 	// Assert
 	assert.NoError(suite.T(), err)

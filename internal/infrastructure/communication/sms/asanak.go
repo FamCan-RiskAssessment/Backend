@@ -177,15 +177,15 @@ func NewAsanakSMSService(
 // SendOTP sends an OTP SMS using Asanak API
 func (s *AsanakSMSService) SendOTP(receptor, token string) error {
 	// Create OTP message - you can customize this format
-	// message := fmt.Sprintf("به فمکن خوش آمدید\n\nکد تایید شما: %s", token)
+	message := fmt.Sprintf("به فمکن خوش آمدید\n\nکد تایید شما: %s", token)
 
-	// req := SendSMSRequest{
-	// 	Source:          s.client.Source,
-	// 	Destination:     receptor,
-	// 	Message:         message,
-	// 	SendToBlacklist: 1,
-	// }
+	req := SendSMSRequest{
+		Source:          s.client.Source,
+		Destination:     receptor,
+		Message:         message,
+		SendToBlacklist: 1,
+	}
 
-	// _, err := s.client.SendSMS(req)
-	return nil
+	_, err := s.client.SendSMS(req)
+	return err
 }

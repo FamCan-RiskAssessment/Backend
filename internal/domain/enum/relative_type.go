@@ -7,6 +7,8 @@ const (
 	Mother
 	Brother
 	Sister
+	HalfBrother
+	HalfSister
 	PaternalGrandFather
 	PaternalGrandMother
 	MaternalGrandFather
@@ -15,7 +17,8 @@ const (
 	PaternalAunt
 	MaternalUncle
 	MaternalAunt
-	Child
+	Daughter
+	Son
 	DistantRelative
 )
 
@@ -29,6 +32,10 @@ func (g Relative) String() string {
 		return "برادر"
 	case Sister:
 		return "خواهر"
+	case HalfBrother:
+		return "برادر ناتنی"
+	case HalfSister:
+		return "خواهر ناتنی"
 	case PaternalGrandFather:
 		return "پدربزرگ پدری"
 	case PaternalGrandMother:
@@ -45,8 +52,10 @@ func (g Relative) String() string {
 		return "دایی"
 	case MaternalAunt:
 		return "خاله"
-	case Child:
-		return "فرزند"
+	case Daughter:
+		return "فرزند دختر"
+	case Son:
+		return "فرزند پسر"
 	case DistantRelative:
 		return "فامیل دور"
 	}
@@ -59,6 +68,8 @@ func GetAllRelatives() []Relative {
 		Mother,
 		Brother,
 		Sister,
+		HalfBrother,
+		HalfSister,
 		PaternalGrandFather,
 		PaternalGrandMother,
 		MaternalGrandFather,
@@ -67,7 +78,8 @@ func GetAllRelatives() []Relative {
 		PaternalAunt,
 		MaternalUncle,
 		MaternalAunt,
-		Child,
+		Daughter,
+		Son,
 		DistantRelative,
 	}
 }

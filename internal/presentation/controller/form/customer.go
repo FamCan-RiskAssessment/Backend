@@ -214,7 +214,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		FormID uint `uri:"formID" validate:"required"`
 
 		GhaedeAge                    uint                    `form:"ghaedeAge"`
-		HasChildren                  bool                    `form:"hasChildren"`
+		HasChildren                  *bool                    `form:"hasChildren"`
 		NumberOfChildren             *uint                   `form:"numberOfChildren"`
 		SonCount                     *uint                   `form:"sonCount"`
 		DaughterCount                *uint                   `form:"daughterCount"`
@@ -255,7 +255,7 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		UserID:                       userID.(uint),
 		FormID:                       params.FormID,
 		GhaedeAge:                    params.GhaedeAge,
-		HasChildren:                  params.HasChildren,
+		HasChildren:                  *params.HasChildren,
 		NumberOfChildren:             params.NumberOfChildren,
 		SonCount:                     params.SonCount,
 		DaughterCount:                params.DaughterCount,

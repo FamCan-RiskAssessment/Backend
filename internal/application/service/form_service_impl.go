@@ -1733,14 +1733,20 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	} else {
 		FilledForms.Mamography = boolPtr(false)
 	}
+	contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
+	if contactInfo != nil {
+		FilledForms.Contact = boolPtr(true)
+	} else {
+		FilledForms.Contact = boolPtr(false)
+	}
 	cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
-	if cancer != nil {
+	if len(cancer) > 0 {
 		FilledForms.Cancer = boolPtr(true)
 	} else {
 		FilledForms.Cancer = boolPtr(false)
 	}
 	familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
-	if familyCancer != nil {
+	if len(familyCancer) > 0 {
 		FilledForms.FamilyCancer = boolPtr(true)
 	} else {
 		FilledForms.FamilyCancer = boolPtr(false)
@@ -1749,7 +1755,7 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	if lungCancer != nil {
 		FilledForms.LungCancer = boolPtr(true)
 	} else {
-		FilledForms.LungCancer = boolPtr(true)
+		FilledForms.LungCancer = boolPtr(false)
 	}
 	if form.FormType == enum.Navid {
 		navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
@@ -2375,13 +2381,13 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2389,13 +2395,13 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		if contactInfo != nil {
 			FilledForms.Contact = boolPtr(true)
 		} else {
-			FilledForms.Contact = boolPtr(true)
+			FilledForms.Contact = boolPtr(false)
 		}
 		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
 		if lungCancer != nil {
 			FilledForms.LungCancer = boolPtr(true)
 		} else {
-			FilledForms.LungCancer = boolPtr(true)
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
@@ -2608,13 +2614,13 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2622,13 +2628,13 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 		if contactInfo != nil {
 			FilledForms.Contact = boolPtr(true)
 		} else {
-			FilledForms.Contact = boolPtr(true)
+			FilledForms.Contact = boolPtr(false)
 		}
 		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
 		if lungCancer != nil {
 			FilledForms.LungCancer = boolPtr(true)
 		} else {
-			FilledForms.LungCancer = boolPtr(true)
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
@@ -2726,16 +2732,28 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		contactInfo, _ := formService.formRepository.FindContactByFormID(formService.db, form.ID)
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(false)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)

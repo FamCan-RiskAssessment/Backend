@@ -9,8 +9,12 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
-	ID    uint   `json:"id"`
-	Phone string `json:"phone"`
+	ID                   uint    `json:"id"`
+	Phone                string  `json:"phone"`
+	Name                 *string `json:"name"`
+	LastName             *string `json:"lastName"`
+	HealthCenter         *string `json:"healthCenter"`
+	SocialSecurityNumber *string `json:"socialSecurityNumber"`
 }
 
 type OTPData struct {

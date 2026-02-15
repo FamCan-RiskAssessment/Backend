@@ -138,6 +138,14 @@ func (u *UserRepositoryMock) FindUsersByRoleID(db database.Database, roleID uint
 	return args.Get(0).([]*entity.User), args.Error(1)
 }
 
+func (u *UserRepositoryMock) FindProfilesByRoleID(db database.Database, roleID uint) ([]*entity.User, error) {
+	args := u.Called(db, roleID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*entity.User), args.Error(1)
+}
+
 func (u *UserRepositoryMock) FindUsersByPermission(db database.Database, permissionTypes []enum.PermissionType) ([]*entity.User, error) {
 	args := u.Called(db, permissionTypes)
 	if args.Get(0) == nil {

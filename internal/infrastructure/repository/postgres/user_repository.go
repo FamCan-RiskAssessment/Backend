@@ -167,6 +167,20 @@ func (repo *UserRepository) FindUsersByRoleID(db database.Database, roleID uint)
 	return users, nil
 }
 
+func (repo *UserRepository) FindProfilesByRoleID(db database.Database, roleID uint) ([]*entity.User, error) {
+	var users []*entity.User
+	result := db.GetDB().
+		Joins("JOIN user_roles ON user_roles.user_id = users.id").
+		Where("user_roles.role_id = ?", roleID).
+		Preload("UserProfile").
+		Find(&users)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
 func (repo *UserRepository) FindUsersByPermission(db database.Database, permissionTypes []enum.PermissionType) ([]*entity.User, error) {
 	var users []*entity.User
 

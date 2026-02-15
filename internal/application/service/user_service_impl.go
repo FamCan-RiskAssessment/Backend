@@ -365,16 +365,27 @@ func (userService *UserService) GetRoleOwners(roleID uint) ([]userdto.UserRespon
 		return nil, err
 	}
 
-	users, err := userService.userRepository.FindUsersByRoleID(userService.db, roleID)
+	users, err := userService.userRepository.FindProfilesByRoleID(userService.db, roleID)
 	if err != nil {
 		return nil, err
 	}
 
 	userCreds := make([]userdto.UserResponse, len(users))
 	for i, user := range users {
+		var Name, LastName, HealthCenter, SocialSecurityNumber string = "-", "-", "-", "-"
+		if user.UserProfile != nil {
+			Name = user.UserProfile.Name
+			LastName = user.UserProfile.LastName
+			HealthCenter = user.UserProfile.HealthCenter
+			SocialSecurityNumber = user.UserProfile.SocialSecurityNumber
+		}
 		userCreds[i] = userdto.UserResponse{
-			ID:    user.ID,
-			Phone: user.Phone,
+			ID:                   user.ID,
+			Phone:                user.Phone,
+			Name:                 &Name,
+			LastName:             &LastName,
+			HealthCenter:         &HealthCenter,
+			SocialSecurityNumber: &SocialSecurityNumber,
 		}
 	}
 	return userCreds, nil

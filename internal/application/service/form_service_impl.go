@@ -246,8 +246,13 @@ func (formService *FormService) canUserEditForm(
 	if err != nil {
 		return false, err
 	}
+	// Allow access if user is SuperAdmin
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return false, err
+	}
 
-	if isSup {
+	if isSup || isSuperAdminUser {
 		// Supervisors can edit in most statuses except Calculated
 		return validation.CanUserEditFormInStatus(form.Status, false), nil
 	}

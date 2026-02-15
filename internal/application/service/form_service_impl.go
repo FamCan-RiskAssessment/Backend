@@ -133,6 +133,14 @@ func (formService *FormService) canUserAccessForm(form *entity.Form, userID uint
 		return nil
 	}
 
+	isSupervisorAdminUser, err := formService.isSupervisor(userID)
+	if err != nil {
+		return err
+	}
+	if isSupervisorAdminUser {
+		return nil
+	}
+
 	// Deny access otherwise
 	forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 	return forbiddenError
@@ -1731,6 +1739,12 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		FilledForms.FamilyCancer = boolPtr(true)
 	} else {
 		FilledForms.FamilyCancer = boolPtr(false)
+	}
+	lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+	if lungCancer != nil {
+		FilledForms.LungCancer = boolPtr(true)
+	} else {
+		FilledForms.LungCancer = boolPtr(true)
 	}
 	if form.FormType == enum.Navid {
 		navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)

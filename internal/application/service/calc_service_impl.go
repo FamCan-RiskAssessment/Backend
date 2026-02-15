@@ -74,7 +74,7 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	}
 
 	// Validate form is in ReadyForCalculation status
-	if form.Status != enum.FormStatusReadyForCalculation {
+	if form.Status != enum.FormStatusReadyForCalculation && form.Status != enum.FormStatusCalculated {
 		log.Printf("[CALC] Form not ready for calculation - FormID: %d, CurrentStatus: %s, UserID: %d", request.FormID, form.Status.String(), request.UserID)
 		return calcdto.ModelResponse{}, &exception.CalcError{
 			Type:    exception.ErrorTypeInvalidData,
@@ -133,15 +133,17 @@ func (calcService *CalcService) SendFormToCalc(request calcdto.SendFormToCalcReq
 	}
 
 	// Update form status to calculated
-	form.Status = enum.FormStatusCalculated
-	err = calcService.formRepository.UpdateForm(calcService.db, form)
-	if err != nil {
-		log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)
-		return calcdto.ModelResponse{}, &exception.CalcError{
-			Type:    exception.ErrorTypeDatabaseError,
-			Model:   modelName,
-			Message: "failed to update form status in database",
-			OrigErr: err,
+	if form.Status != enum.FormStatusCalculated {
+		form.Status = enum.FormStatusCalculated
+		err = calcService.formRepository.UpdateForm(calcService.db, form)
+		if err != nil {
+			log.Printf("[CALC] Database error updating form status - FormID: %d, UserID: %d, Error: %v", request.FormID, request.UserID, err)
+			return calcdto.ModelResponse{}, &exception.CalcError{
+				Type:    exception.ErrorTypeDatabaseError,
+				Model:   modelName,
+				Message: "failed to update form status in database",
+				OrigErr: err,
+			}
 		}
 	}
 

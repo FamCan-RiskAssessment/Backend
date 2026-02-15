@@ -260,7 +260,7 @@ func (d *DummySeeder) createDummyGeneralHealth(formID uint, formIndex int) *enti
 	return generalHealth
 }
 func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopausalStatuses []enum.MenopausalStatus, hrtTypes []string) *entity.MamoGraphyInfo {
-	hasChildren := formIndex%3 == 0
+	hasChildren := enum.AnswerNo
 	hrtType := hrtTypes[formIndex%len(hrtTypes)]
 	menopausalStatus := menopausalStatuses[formIndex%len(menopausalStatuses)]
 	SonCount := uint((formIndex % 3) + 1)
@@ -273,11 +273,14 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 	if formIndex%3 == 0 {
 		lastFiveYearsHRTUse = enum.AnswerYes
 	}
+	if formIndex%3 == 0 {
+		hasChildren = enum.AnswerYes
+	}
 
 	mamoGraphyInfo := &entity.MamoGraphyInfo{
 		FormID:                       formID,
 		GhaedeAge:                    uint(12 + (formIndex % 10)),
-		HasChildren:                  hasChildren,
+		HasChildren:                  &hasChildren,
 		NumberOfChildren:             uintPtr(uint(SonCount + DaughterCount)),
 		SonCount:                     &SonCount,
 		DaughterCount:                &DaughterCount,

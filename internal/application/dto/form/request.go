@@ -100,7 +100,7 @@ type UpsertMamographyRequest struct {
 	FormID uint
 
 	GhaedeAge                    uint
-	HasChildren                  bool
+	HasChildren                  *enum.Answer
 	NumberOfChildren             *uint
 	DaughterCount                *uint
 	SonCount                     *uint
@@ -407,7 +407,7 @@ type UpdateMamographyRequest struct {
 	FormID uint
 
 	GhaedeAge                    *uint
-	HasChildren                  *bool
+	HasChildren                  *enum.Answer
 	NumberOfChildren             *uint
 	DaughterCount                *uint
 	SonCount                     *uint

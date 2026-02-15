@@ -880,7 +880,7 @@ func (suite *FormServiceTestSuite) TestGetMamography_Success() {
 	mamoInfo.ID = 10
 	mamoInfo.FormID = formID
 	mamoInfo.GhaedeAge = 45
-	mamoInfo.HasChildren = true
+	mamoInfo.HasChildren = answerPtr(enum.AnswerYes)
 
 	// Setup expectations
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
@@ -1022,7 +1022,7 @@ func (suite *FormServiceTestSuite) TestUpsertMamography_Create() {
 		UserID:           userID,
 		FormID:           formID,
 		GhaedeAge:        45,
-		HasChildren:      true,
+		HasChildren:      answerPtr(enum.AnswerYes),
 		MenopausalStatus: uint(enum.MenopausalStatusPreMenopausal),
 	}
 

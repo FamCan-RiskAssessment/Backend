@@ -176,7 +176,7 @@ type GetFamilyCancerListResponse struct {
 type GetMamographyResponse struct {
 	ID                           uint                  `json:"id"`
 	GhaedeAge                    uint                  `json:"ghaedeAge"`
-	HasChildren                  bool                  `json:"hasChildren"`
+	HasChildren                  *enum.Answer          `json:"hasChildren"`
 	NumberOfChildren             *uint                 `json:"numberOfChildren,omitempty"`
 	DaughterCount                *uint                 `json:"daughterCount,omitempty"`
 	SonCount                     *uint                 `json:"sonCount,omitempty"`

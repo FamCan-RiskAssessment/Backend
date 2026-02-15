@@ -1281,7 +1281,7 @@ func mapAgeAtMenarche(mamographyInfo *entity.MamoGraphyInfo) int {
 
 func mapAgeAtFirstBirth(mamographyInfo *entity.MamoGraphyInfo) int {
 	// First check if patient has children
-	if !mamographyInfo.HasChildren {
+	if !answeredYes(mamographyInfo.HasChildren) {
 		return 98 // Nulliparous
 	}
 

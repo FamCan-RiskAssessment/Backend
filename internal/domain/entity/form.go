@@ -60,7 +60,7 @@ type MamoGraphyInfo struct {
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 3
 	GhaedeAge                    uint                            `gorm:"not null"`
-	HasChildren                  bool                            `gorm:"not null;default:false"`
+	HasChildren                  *enum.Answer                    `gorm:"type:int"`
 	NumberOfChildren             *uint                           `gorm:"type:int"`
 	SonCount                     *uint                           `gorm:"type:int"`
 	DaughterCount                *uint                           `gorm:"type:int"`

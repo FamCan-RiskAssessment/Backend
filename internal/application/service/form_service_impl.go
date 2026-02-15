@@ -3087,7 +3087,7 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		info.GhaedeAge = *request.GhaedeAge
 	}
 	if request.HasChildren != nil {
-		info.HasChildren = *request.HasChildren
+		info.HasChildren = request.HasChildren
 	}
 	info.NumberOfChildren = request.NumberOfChildren
 	info.SonCount = request.SonCount

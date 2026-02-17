@@ -1011,6 +1011,7 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 		FormID:           request.FormID,
 		Relative:         request.Relative,
 		RelativeRelation: request.RelativeRelation,
+		NumberRelative:   request.NumberRelative,
 		Name:             request.Name,
 		LifeStatus:       request.LifeStatus,
 		CancerAge:        request.CancerAge,
@@ -1058,6 +1059,7 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 			ID:               info.ID,
 			Relative:         info.Relative,
 			RelativeRelation: info.RelativeRelation,
+			NumberRelative:   info.NumberRelative,
 			Name:             info.Name,
 			LifeStatus:       info.LifeStatus,
 			CancerType:       info.CancerType,
@@ -1116,9 +1118,18 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	oldPaths := familyCancer.PicturePaths
 
 	familyCancer.Relative = request.Relative
-	familyCancer.RelativeRelation = request.RelativeRelation
-	familyCancer.Name = request.Name
-	familyCancer.LifeStatus = request.LifeStatus
+	if request.RelativeRelation != nil {
+		familyCancer.RelativeRelation = request.RelativeRelation
+	}
+	if request.Name != nil {
+		familyCancer.Name = request.Name
+	}
+	if request.LifeStatus != nil {
+		familyCancer.LifeStatus = request.LifeStatus
+	}
+	if request.NumberRelative != nil {
+		familyCancer.NumberRelative = request.NumberRelative
+	}
 	familyCancer.CancerType = enum.CancerType(request.CancerType)
 	familyCancer.CancerAge = request.CancerAge
 
@@ -2025,7 +2036,7 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 		if i == 0 || FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Relative != v.Relative ||
 			!((v.Name != nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name != nil && *v.Name == *FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name) || (v.Name == nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name == nil)) ||
 			!((v.RelativeRelation != nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation != nil && *v.RelativeRelation == *FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation) || (v.RelativeRelation == nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation == nil)) {
-			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus}
+			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, NumberRelative: v.NumberRelative, Name: v.Name, LifeStatus: v.LifeStatus}
 			FamilyCancersResponse.FamilyCancers = append(FamilyCancersResponse.FamilyCancers, familyInfo)
 		}
 		// Generate presigned URLs for family cancer pictures

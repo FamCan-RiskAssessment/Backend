@@ -75,6 +75,7 @@ type FamilyCancerItemResponse struct {
 	ID               uint             `json:"id"`
 	Relative         enum.Relative    `json:"relative"`
 	RelativeRelation *string          `json:"relation,omitempty"`
+	NumberRelative   *uint            `json:"numberRelative,omitempty"`
 	Name             *string          `json:"name,omitempty"`
 	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
 	CancerType       enum.CancerType  `json:"cancerType"`
@@ -158,6 +159,7 @@ type FamilyCancerResponse struct {
 	Relative         enum.Relative    `json:"relative"`
 	RelativeRelation *string          `json:"relation,omitempty"`
 	Name             *string          `json:"name,omitempty"`
+	NumberRelative   *uint            `json:"numberRelative,omitempty"`
 	LifeStatus       *enum.LifeStatus `json:"lifeStatus,omitempty"`
 	Cancers          []CancerResponse `json:"cancers,omitempty"`
 }

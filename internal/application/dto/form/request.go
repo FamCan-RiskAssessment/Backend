@@ -173,6 +173,7 @@ type CreateFamilyCancerRequest struct {
 	Relative         enum.Relative
 	RelativeRelation *string
 	Name             *string
+	NumberRelative   *uint
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint
@@ -186,6 +187,7 @@ type UpdateFamilyCancerRequest struct {
 	Relative         enum.Relative
 	RelativeRelation *string
 	Name             *string
+	NumberRelative   *uint
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint

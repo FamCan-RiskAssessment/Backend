@@ -901,6 +901,7 @@ func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) 
 		FormID           uint                    `uri:"formID" validate:"required"`
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
+		NumberRelative   *uint                   `form:"numberRelative,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
 		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
@@ -923,6 +924,7 @@ func (formController *AdminFormController) CreateFamilyCancer(ctx *gin.Context) 
 		FormID:           params.FormID,
 		Relative:         enum.Relative(params.Relative),
 		RelativeRelation: params.RelativeRelation,
+		NumberRelative:   params.NumberRelative,
 		Name:             params.Name,
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,
@@ -947,6 +949,7 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
+		NumberRelative   *uint                   `form:"numberRelative,omitempty"`
 		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
 		CancerAge        uint                    `form:"cancerAge" validate:"required,gte=0"`
@@ -970,6 +973,7 @@ func (formController *AdminFormController) UpdateFamilyCancer(ctx *gin.Context) 
 		Relative:         enum.Relative(params.Relative),
 		RelativeRelation: params.RelativeRelation,
 		Name:             params.Name,
+		NumberRelative:   params.NumberRelative,
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,
 		CancerAge:        params.CancerAge,

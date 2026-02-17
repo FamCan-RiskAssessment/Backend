@@ -864,6 +864,7 @@ func (formController *CustomerFormController) CreateFamilyCancer(ctx *gin.Contex
 		FormID           uint                    `uri:"formID" validate:"required"`
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
+		NumberRelative   *uint                   `form:"numberRelative,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
 		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
@@ -886,6 +887,7 @@ func (formController *CustomerFormController) CreateFamilyCancer(ctx *gin.Contex
 		FormID:           params.FormID,
 		Relative:         enum.Relative(params.Relative),
 		RelativeRelation: params.RelativeRelation,
+		NumberRelative:   params.NumberRelative,
 		Name:             params.Name,
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,
@@ -909,6 +911,7 @@ func (formController *CustomerFormController) UpdateFamilyCancer(ctx *gin.Contex
 		FamilyCancerID   uint                    `uri:"familyCancerID" validate:"required"`
 		Relative         uint                    `form:"relative" validate:"required,gt=0"`
 		RelativeRelation *string                 `form:"relativeRelation,omitempty"`
+		NumberRelative   *uint                   `form:"numberRelative,omitempty"`
 		Name             *string                 `form:"name,omitempty"`
 		LifeStatus       *uint                   `form:"lifeStatus"`
 		CancerType       uint                    `form:"cancerType" validate:"required,gt=0"`
@@ -932,6 +935,7 @@ func (formController *CustomerFormController) UpdateFamilyCancer(ctx *gin.Contex
 		FamilyCancerID:   params.FamilyCancerID,
 		Relative:         enum.Relative(params.Relative),
 		RelativeRelation: params.RelativeRelation,
+		NumberRelative:   params.NumberRelative,
 		Name:             params.Name,
 		LifeStatus:       lifeStatus,
 		CancerType:       params.CancerType,

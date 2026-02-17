@@ -110,6 +110,7 @@ type FamilyCancerInfo struct {
 	Relative         enum.Relative
 	RelativeRelation *string `gorm:"type:varchar(127)"`
 	Name             *string `gorm:"type:varchar(127)"`
+	NumberRelative   *uint
 	LifeStatus       *enum.LifeStatus
 	CancerAge        uint
 	CancerType       enum.CancerType

@@ -28,16 +28,24 @@ func NewAdminUserController(
 
 func (userController *AdminUserController) GetUsers(ctx *gin.Context) {
 	type usersParams struct {
-		Page     int `form:"page"`
-		PageSize int `form:"pageSize"`
+		Page      int     `form:"page"`
+		PageSize  int     `form:"pageSize"`
+		SortBy    *string `form:"sortBy"`
+		SortOrder *string `form:"sortOrder"`
+		Search    *string `form:"search"`
+		RoleID    *uint   `form:"roleId"`
 	}
 	params := controller.Validate[usersParams](ctx)
 
 	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, userController.pagination.DefaultPage, userController.pagination.DefaultPageSize)
 
 	request := userdto.GetUsersListRequest{
-		Offset: offset,
-		Limit:  limit,
+		Offset:    offset,
+		Limit:     limit,
+		SortBy:    params.SortBy,
+		SortOrder: params.SortOrder,
+		Search:    params.Search,
+		RoleID:    params.RoleID,
 	}
 
 	users, count, err := userController.userService.GetUsers(request)
@@ -242,5 +250,46 @@ func (userController *AdminUserController) LoginWithPassword(ctx *gin.Context) {
 }
 
 func (userController *AdminUserController) GetOperators(ctx *gin.Context) {
+
+}
+
+func (userController *AdminUserController) GetUserProfile(ctx *gin.Context) {
+	operatorID, _ := ctx.Get(userController.constants.Context.ID)
+
+	response, err := userController.userService.GetUserProfile(operatorID.(uint))
+	if err != nil {
+		panic(err)
+	}
+	controller.Response(ctx, 200, "", response)
+}
+
+func (userController *AdminUserController) SubmitUserProfile(ctx *gin.Context) {
+	type SubmitUserProfileParams struct {
+		Name                 string `json:"name"`
+		LastName             string `json:"lastName"`
+		HealthCenter         string `json:"healthCenter"`
+		SocialSecurityNumber string `json:"socialSecurityNumber"`
+	}
+	params := controller.Validate[SubmitUserProfileParams](ctx)
+	operatorID, _ := ctx.Get(userController.constants.Context.ID)
+	operatorProfile := userdto.SubmitUserProfileRequest{
+		UserID:               operatorID.(uint),
+		Name:                 params.Name,
+		LastName:             params.LastName,
+		HealthCenter:         params.HealthCenter,
+		SocialSecurityNumber: params.SocialSecurityNumber,
+	}
+
+	response, err := userController.userService.SubmitUserProfile(operatorProfile)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, userController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.submitProfile")
+	controller.Response(ctx, 200, message, response)
+}
+
+func (userController *AdminUserController) EditUserProfile(ctx *gin.Context) {
 
 }

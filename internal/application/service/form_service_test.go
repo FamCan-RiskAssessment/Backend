@@ -891,7 +891,7 @@ func (suite *FormServiceTestSuite) TestGetMamography_Success() {
 	mamoInfo.ID = 10
 	mamoInfo.FormID = formID
 	mamoInfo.GhaedeAge = 45
-	mamoInfo.HasChildren = true
+	mamoInfo.HasChildren = answerPtr(enum.AnswerYes)
 
 	// Setup expectations
 	suite.formRepository.On("FindFormByID", suite.db, formID).Return(form, nil)
@@ -1033,7 +1033,7 @@ func (suite *FormServiceTestSuite) TestUpsertMamography_Create() {
 		UserID:           userID,
 		FormID:           formID,
 		GhaedeAge:        45,
-		HasChildren:      true,
+		HasChildren:      answerPtr(enum.AnswerYes),
 		MenopausalStatus: uint(enum.MenopausalStatusPreMenopausal),
 	}
 
@@ -1640,11 +1640,11 @@ func (suite *FormServiceTestSuite) TestGetAllForms_Success() {
 	filters := &postgres.FormFilters{}
 
 	// Setup expectations
-	suite.formRepository.On("FindAllForms", suite.db, 0, 10, filters).Return(forms, nil)
-	suite.formRepository.On("CountAllForms", suite.db, filters).Return(int64(1), nil)
+	suite.formRepository.On("FindAllForms", suite.db, mock.Anything, filters).Return(forms, nil)
+	suite.formRepository.On("CountAllForms", suite.db, mock.Anything, filters).Return(int64(1), nil)
 
 	// Act
-	responses, count, err := suite.formService.GetAllForms(0, 10, filters)
+	responses, count, err := suite.formService.GetAllForms(0, 10, filters, nil, nil, nil)
 
 	// Assert
 	assert.NoError(suite.T(), err)
@@ -1672,11 +1672,11 @@ func (suite *FormServiceTestSuite) TestGetAllOperatorForms_Success() {
 	suite.userService.On("GetUserRoles", operatorID).Return([]userdto.RoleResponse{
 		{Name: enum.Operator.String()},
 	}, nil)
-	suite.formRepository.On("FindAllOperatorForms", suite.db, 0, 10, filters).Return(forms, nil)
-	suite.formRepository.On("CountAllOperatorForms", suite.db, filters).Return(int64(1), nil)
+	suite.formRepository.On("FindAllOperatorForms", suite.db, mock.Anything, filters).Return(forms, nil)
+	suite.formRepository.On("CountAllOperatorForms", suite.db, mock.Anything, filters).Return(int64(1), nil)
 
 	// Act
-	responses, count, err := suite.formService.GetAllOperatorForms(0, 10, filters)
+	responses, count, err := suite.formService.GetAllOperatorForms(0, 10, filters, nil, nil, nil)
 
 	// Assert
 	assert.NoError(suite.T(), err)

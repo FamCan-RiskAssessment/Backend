@@ -6,6 +6,10 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 )
 
+type UserFilters struct {
+	RoleID *uint
+}
+
 type UserRepository interface {
 	FindUserByPhone(db database.Database, phone string) (*entity.User, error)
 	CreateUser(db database.Database, user *entity.User) error
@@ -26,11 +30,15 @@ type UserRepository interface {
 	FindRoleByID(db database.Database, id uint) (*entity.Role, error)
 	FindPermissionByID(db database.Database, id uint) (*entity.Permission, error)
 	FindUsersByRoleID(db database.Database, roleID uint) ([]*entity.User, error)
+	FindProfilesByRoleID(db database.Database, roleID uint) ([]*entity.User, error)
 	FindUsersByPermission(db database.Database, permissionTypes []enum.PermissionType) ([]*entity.User, error)
 	UpdateRole(db database.Database, role *entity.Role) error
 	ReplaceRolePermissions(db database.Database, role *entity.Role, permissions []entity.Permission) error
 	ReplaceUserRoles(db database.Database, user *entity.User, roles []entity.Role) error
 	DeleteRole(db database.Database, id uint) error
 	FindRolesByPermission(db database.Database, permissionID uint) ([]*entity.Role, error)
-	FindUsers(db database.Database, options *QueryOptions) ([]*entity.User, int64, error)
+	FindUsers(db database.Database, options *QueryOptions, filters *UserFilters) ([]*entity.User, int64, error)
+	FindProfileByUserID(db database.Database, userID uint) (*entity.User, error)
+	CreateProfile(db database.Database, profile *entity.UserProfile) error
+	UpdateProfile(db database.Database, profile *entity.UserProfile) error
 }

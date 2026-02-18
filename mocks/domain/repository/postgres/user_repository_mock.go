@@ -138,6 +138,14 @@ func (u *UserRepositoryMock) FindUsersByRoleID(db database.Database, roleID uint
 	return args.Get(0).([]*entity.User), args.Error(1)
 }
 
+func (u *UserRepositoryMock) FindProfilesByRoleID(db database.Database, roleID uint) ([]*entity.User, error) {
+	args := u.Called(db, roleID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]*entity.User), args.Error(1)
+}
+
 func (u *UserRepositoryMock) FindUsersByPermission(db database.Database, permissionTypes []enum.PermissionType) ([]*entity.User, error) {
 	args := u.Called(db, permissionTypes)
 	if args.Get(0) == nil {
@@ -174,10 +182,30 @@ func (u *UserRepositoryMock) FindRolesByPermission(db database.Database, permiss
 	return args.Get(0).([]*entity.Role), args.Error(1)
 }
 
-func (u *UserRepositoryMock) FindUsers(db database.Database, options *postgres.QueryOptions) ([]*entity.User, int64, error) {
-	args := u.Called(db, options)
+func (u *UserRepositoryMock) FindUsers(db database.Database, options *postgres.QueryOptions, filters *postgres.UserFilters) ([]*entity.User, int64, error) {
+	args := u.Called(db, options, filters)
 	if args.Get(0) == nil {
 		return nil, args.Get(1).(int64), args.Error(2)
 	}
 	return args.Get(0).([]*entity.User), args.Get(1).(int64), args.Error(2)
+}
+
+func (u *UserRepositoryMock) FindProfileByUserID(db database.Database, userID uint) (*entity.User, error) {
+	args := u.Called(db, userID)
+
+	var user *entity.User
+	if u := args.Get(0); u != nil {
+		user = u.(*entity.User)
+	}
+
+	return user, args.Error(1)
+}
+
+func (u *UserRepositoryMock) CreateProfile(db database.Database, profile *entity.UserProfile) error {
+	args := u.Called(db, profile)
+	return args.Error(0)
+}
+func (u *UserRepositoryMock) UpdateProfile(db database.Database, profile *entity.UserProfile) error {
+	args := u.Called(db, profile)
+	return args.Error(0)
 }

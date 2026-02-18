@@ -100,7 +100,7 @@ type UpsertMamographyRequest struct {
 	FormID uint
 
 	GhaedeAge                    uint
-	HasChildren                  bool
+	HasChildren                  *enum.Answer
 	NumberOfChildren             *uint
 	DaughterCount                *uint
 	SonCount                     *uint
@@ -173,6 +173,7 @@ type CreateFamilyCancerRequest struct {
 	Relative         enum.Relative
 	RelativeRelation *string
 	Name             *string
+	NumberRelative   *uint
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint
@@ -186,6 +187,7 @@ type UpdateFamilyCancerRequest struct {
 	Relative         enum.Relative
 	RelativeRelation *string
 	Name             *string
+	NumberRelative   *uint
 	LifeStatus       *enum.LifeStatus
 	CancerType       uint
 	CancerAge        uint
@@ -407,7 +409,7 @@ type UpdateMamographyRequest struct {
 	FormID uint
 
 	GhaedeAge                    *uint
-	HasChildren                  *bool
+	HasChildren                  *enum.Answer
 	NumberOfChildren             *uint
 	DaughterCount                *uint
 	SonCount                     *uint

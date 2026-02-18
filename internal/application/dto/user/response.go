@@ -9,8 +9,12 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
-	ID    uint   `json:"id"`
-	Phone string `json:"phone"`
+	ID                   uint    `json:"id"`
+	Phone                string  `json:"phone"`
+	Name                 *string `json:"name"`
+	LastName             *string `json:"lastName"`
+	HealthCenter         *string `json:"healthCenter"`
+	SocialSecurityNumber *string `json:"socialSecurityNumber"`
 }
 
 type OTPData struct {
@@ -34,4 +38,12 @@ type RoleResponse struct {
 	ID          uint                 `json:"id"`
 	Name        string               `json:"name"`
 	Permissions []PermissionResponse `json:"permissions"`
+}
+
+type UserProfileResponse struct {
+	Name                 string `json:"name"`
+	LastName             string `json:"lastName"`
+	Phone                string `json:"phone"`
+	HealthCenter         string `json:"healthCenter"`
+	SocialSecurityNumber string `json:"socialSecurityNumber"`
 }

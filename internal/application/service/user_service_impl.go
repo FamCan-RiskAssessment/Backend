@@ -365,16 +365,27 @@ func (userService *UserService) GetRoleOwners(roleID uint) ([]userdto.UserRespon
 		return nil, err
 	}
 
-	users, err := userService.userRepository.FindUsersByRoleID(userService.db, roleID)
+	users, err := userService.userRepository.FindProfilesByRoleID(userService.db, roleID)
 	if err != nil {
 		return nil, err
 	}
 
 	userCreds := make([]userdto.UserResponse, len(users))
 	for i, user := range users {
+		var Name, LastName, HealthCenter, SocialSecurityNumber string = "-", "-", "-", "-"
+		if user.UserProfile != nil {
+			Name = user.UserProfile.Name
+			LastName = user.UserProfile.LastName
+			HealthCenter = user.UserProfile.HealthCenter
+			SocialSecurityNumber = user.UserProfile.SocialSecurityNumber
+		}
 		userCreds[i] = userdto.UserResponse{
-			ID:    user.ID,
-			Phone: user.Phone,
+			ID:                   user.ID,
+			Phone:                user.Phone,
+			Name:                 &Name,
+			LastName:             &LastName,
+			HealthCenter:         &HealthCenter,
+			SocialSecurityNumber: &SocialSecurityNumber,
 		}
 	}
 	return userCreds, nil
@@ -494,11 +505,31 @@ func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateU
 	return nil
 }
 
+var userAllowedSortColumns = []string{"id", "phone", "created_at"}
+
 func (userService *UserService) GetUsers(request userdto.GetUsersListRequest) ([]userdto.UserResponse, int64, error) {
 	options := postgres.NewQueryOptions().
 		WithPagination(request.Limit, request.Offset)
 
-	users, count, err := userService.userRepository.FindUsers(userService.db, options)
+	sortCol := "id"
+	if request.SortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*request.SortBy, userAllowedSortColumns, "id")
+	}
+	asc := true
+	if request.SortOrder != nil && *request.SortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if request.Search != nil && *request.Search != "" {
+		options.WithSearch(*request.Search, []string{"phone"})
+	}
+
+	filters := &postgres.UserFilters{
+		RoleID: request.RoleID,
+	}
+
+	users, count, err := userService.userRepository.FindUsers(userService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -665,4 +696,62 @@ func (userService *UserService) ValidateUserForFormCreation(operatorID, userID u
 		return exception.ForbiddenError{Resource: userService.constants.Field.User}
 	}
 	return nil
+}
+
+func (userService *UserService) GetUserProfile(operatorID uint) (userdto.UserProfileResponse, error) {
+	user, err := userService.userRepository.FindProfileByUserID(userService.db, operatorID)
+	if err != nil {
+		return userdto.UserProfileResponse{}, err
+	}
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	if user.UserProfile == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.Profile}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	return userdto.UserProfileResponse{
+		Name:                 user.UserProfile.Name,
+		LastName:             user.UserProfile.LastName,
+		Phone:                user.Phone,
+		HealthCenter:         user.UserProfile.HealthCenter,
+		SocialSecurityNumber: user.UserProfile.SocialSecurityNumber,
+	}, nil
+}
+
+func (userService *UserService) SubmitUserProfile(request userdto.SubmitUserProfileRequest) (userdto.UserProfileResponse, error) {
+	user, err := userService.userRepository.FindProfileByUserID(userService.db, request.UserID)
+	if err != nil {
+		return userdto.UserProfileResponse{}, err
+	}
+	if user == nil {
+		notFoundError := exception.NotFoundError{Item: userService.constants.Field.User}
+		return userdto.UserProfileResponse{}, notFoundError
+	}
+	profile := &entity.UserProfile{
+		UserID:               user.ID,
+		Name:                 request.Name,
+		LastName:             request.LastName,
+		HealthCenter:         request.HealthCenter,
+		SocialSecurityNumber: request.SocialSecurityNumber,
+	}
+	userProfileResponse := userdto.UserProfileResponse{
+		Name:                 profile.Name,
+		Phone:                user.Phone,
+		LastName:             profile.LastName,
+		HealthCenter:         profile.HealthCenter,
+		SocialSecurityNumber: profile.SocialSecurityNumber,
+	}
+	if user.UserProfile != nil {
+		// If the UserProfile Exists, then update the current one
+		if err := userService.userRepository.UpdateProfile(userService.db, profile); err != nil {
+			return userProfileResponse, nil
+		}
+		return userProfileResponse, nil
+	}
+	if err := userService.userRepository.CreateProfile(userService.db, profile); err != nil {
+		return userdto.UserProfileResponse{}, nil
+	}
+	return userProfileResponse, nil
 }

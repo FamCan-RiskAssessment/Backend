@@ -28,8 +28,12 @@ type UpdateUserRolesRequest struct {
 }
 
 type GetUsersListRequest struct {
-	Offset int
-	Limit  int
+	Offset    int
+	Limit     int
+	SortBy    *string
+	SortOrder *string
+	Search    *string
+	RoleID    *uint
 }
 
 type GetPermissionRolesRequest struct {
@@ -50,4 +54,12 @@ type RequestUserValidationOTPRequest struct {
 type VerifyUserValidationOTPRequest struct {
 	Phone string `json:"phone" validate:"required,min=11,max=11"`
 	OTP   string `json:"otp" validate:"required,min=6,max=6"`
+}
+
+type SubmitUserProfileRequest struct {
+	UserID               uint
+	Name                 string
+	LastName             string
+	HealthCenter         string
+	SocialSecurityNumber string
 }

@@ -7,6 +7,6 @@ import (
 
 type ActionLogService interface {
 	LogAction(request actionlogdto.LogAction) error
-	GetAllActionLogs(offset, limit int) ([]actionlogdto.LogResponse, int64, error)
+	GetAllActionLogs(request actionlogdto.GetAllActionLogsRequest) ([]actionlogdto.LogResponse, int64, error)
 	GetAllActionTypes() ([]generaldto.EnumResponse, error)
 }

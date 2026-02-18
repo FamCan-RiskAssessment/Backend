@@ -514,7 +514,7 @@ func (suite *UserServiceTestSuite) TestGetUsers_Success() {
 	users[0].ID = 1
 	users[1].ID = 2
 
-	suite.userRepository.On("FindUsers", suite.db, mock.Anything).Return(users, int64(2), nil)
+	suite.userRepository.On("FindUsers", suite.db, mock.Anything, mock.Anything).Return(users, int64(2), nil)
 
 	// Act
 	response, count, err := suite.userService.GetUsers(request)

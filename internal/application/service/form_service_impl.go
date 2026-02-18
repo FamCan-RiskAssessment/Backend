@@ -137,6 +137,14 @@ func (formService *FormService) canUserAccessForm(form *entity.Form, userID uint
 		return nil
 	}
 
+	isSupervisorAdminUser, err := formService.isSupervisor(userID)
+	if err != nil {
+		return err
+	}
+	if isSupervisorAdminUser {
+		return nil
+	}
+
 	// Deny access otherwise
 	forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 	return forbiddenError
@@ -242,8 +250,13 @@ func (formService *FormService) canUserEditForm(
 	if err != nil {
 		return false, err
 	}
+	// Allow access if user is SuperAdmin
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return false, err
+	}
 
-	if isSup {
+	if isSup || isSuperAdminUser {
 		// Supervisors can edit in most statuses except Calculated
 		return validation.CanUserEditFormInStatus(form.Status, false), nil
 	}
@@ -1014,6 +1027,7 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 		FormID:           request.FormID,
 		Relative:         request.Relative,
 		RelativeRelation: request.RelativeRelation,
+		NumberRelative:   request.NumberRelative,
 		Name:             request.Name,
 		LifeStatus:       request.LifeStatus,
 		CancerAge:        request.CancerAge,
@@ -1061,6 +1075,7 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 			ID:               info.ID,
 			Relative:         info.Relative,
 			RelativeRelation: info.RelativeRelation,
+			NumberRelative:   info.NumberRelative,
 			Name:             info.Name,
 			LifeStatus:       info.LifeStatus,
 			CancerType:       info.CancerType,
@@ -1119,9 +1134,18 @@ func (formService *FormService) UpdateFamilyCancer(request formdto.UpdateFamilyC
 	oldPaths := familyCancer.PicturePaths
 
 	familyCancer.Relative = request.Relative
-	familyCancer.RelativeRelation = request.RelativeRelation
-	familyCancer.Name = request.Name
-	familyCancer.LifeStatus = request.LifeStatus
+	if request.RelativeRelation != nil {
+		familyCancer.RelativeRelation = request.RelativeRelation
+	}
+	if request.Name != nil {
+		familyCancer.Name = request.Name
+	}
+	if request.LifeStatus != nil {
+		familyCancer.LifeStatus = request.LifeStatus
+	}
+	if request.NumberRelative != nil {
+		familyCancer.NumberRelative = request.NumberRelative
+	}
 	familyCancer.CancerType = enum.CancerType(request.CancerType)
 	familyCancer.CancerAge = request.CancerAge
 
@@ -1736,17 +1760,29 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	} else {
 		FilledForms.Mamography = boolPtr(false)
 	}
+	contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, request.FormID)
+	if contactInfo != nil {
+		FilledForms.Contact = boolPtr(true)
+	} else {
+		FilledForms.Contact = boolPtr(false)
+	}
 	cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
-	if cancer != nil {
+	if len(cancer) > 0 {
 		FilledForms.Cancer = boolPtr(true)
 	} else {
 		FilledForms.Cancer = boolPtr(false)
 	}
 	familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
-	if familyCancer != nil {
+	if len(familyCancer) > 0 {
 		FilledForms.FamilyCancer = boolPtr(true)
 	} else {
 		FilledForms.FamilyCancer = boolPtr(false)
+	}
+	lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+	if lungCancer != nil {
+		FilledForms.LungCancer = boolPtr(true)
+	} else {
+		FilledForms.LungCancer = boolPtr(false)
 	}
 	if form.FormType == enum.Navid {
 		navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, request.FormID)
@@ -2016,7 +2052,7 @@ func (formService *FormService) GetFamilyCancer(request formdto.GetPartialFormRe
 		if i == 0 || FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Relative != v.Relative ||
 			!((v.Name != nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name != nil && *v.Name == *FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name) || (v.Name == nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].Name == nil)) ||
 			!((v.RelativeRelation != nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation != nil && *v.RelativeRelation == *FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation) || (v.RelativeRelation == nil && FamilyCancersResponse.FamilyCancers[len(FamilyCancersResponse.FamilyCancers)-1].RelativeRelation == nil)) {
-			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, Name: v.Name, LifeStatus: v.LifeStatus}
+			familyInfo := formdto.FamilyCancerResponse{Relative: v.Relative, RelativeRelation: v.RelativeRelation, NumberRelative: v.NumberRelative, Name: v.Name, LifeStatus: v.LifeStatus}
 			FamilyCancersResponse.FamilyCancers = append(FamilyCancersResponse.FamilyCancers, familyInfo)
 		}
 		// Generate presigned URLs for family cancer pictures
@@ -2372,16 +2408,27 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(false)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
@@ -2555,19 +2602,55 @@ func (formService *FormService) DeleteForm(request formdto.DeleteFormRequest) er
 	return nil
 }
 
-func (formService *FormService) GetAllForms(offset, limit int, filters *postgres.FormFilters) ([]formdto.BasicFormResponse, int64, error) {
-	forms, err := formService.formRepository.FindAllForms(formService.db, offset, limit, filters)
+var formAllowedSortColumns = []string{"id", "created_at", "updated_at", "status"}
+
+func (formService *FormService) GetAllForms(offset, limit int, filters *postgres.FormFilters, sortBy, sortOrder, search *string) ([]formdto.BasicFormResponse, int64, error) {
+	options := postgres.NewQueryOptions().
+		WithPagination(limit, offset)
+
+	sortCol := "id"
+	if sortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*sortBy, formAllowedSortColumns, "id")
+	}
+	asc := true
+	if sortOrder != nil && *sortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if search != nil && *search != "" {
+		options.WithSearch(*search, []string{"users.phone"})
+	}
+
+	forms, err := formService.formRepository.FindAllForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllForms(formService.db, filters)
+	count, err := formService.formRepository.CountAllForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	formResponses := make([]formdto.BasicFormResponse, len(forms))
 	for i, form := range forms {
+		var decryptedSSN string
+		var Name *string
+		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if basicInfo != nil {
+			decryptedSSN, err = formService.fieldEncryptor.Decrypt(basicInfo.SocialSecurityNumber)
+			if err != nil {
+				return nil, 0, err
+			}
+		}
+		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
+		if err != nil {
+			return nil, 0, err
+		} else if contactInfo != nil {
+			Name = &contactInfo.Name
+		}
 		FilledForms := formdto.FilledFormsResponse{}
 		FilledForms.Basic = boolPtr(true)
 		generalHealth, _ := formService.formRepository.FindGeneralHealthByFormID(formService.db, form.ID)
@@ -2583,16 +2666,27 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(false)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
@@ -2609,6 +2703,8 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			UserID:                    form.UserID,
 			OperatorID:                form.OperatorID,
 			FilledByOperatorID:        form.FilledByOperatorID,
+			SocialSecurityNumber:      decryptedSSN,
+			Name:                      Name,
 			CreatedAt:                 form.CreatedAt,
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
@@ -2619,7 +2715,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	return formResponses, count, nil
 }
 
-func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters) ([]formdto.BasicFormResponse, int64, error) {
+func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *postgres.OperatorFormFilters, sortBy, sortOrder, search *string) ([]formdto.BasicFormResponse, int64, error) {
 	operator, err := formService.userService.GetUserByID(filters.OperatorID)
 	if err != nil {
 		return nil, 0, err
@@ -2644,12 +2740,29 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 		return nil, 0, forbiddenError
 	}
 
-	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, offset, limit, filters)
+	options := postgres.NewQueryOptions().
+		WithPagination(limit, offset)
+
+	sortCol := "id"
+	if sortBy != nil {
+		sortCol = postgres.ValidateSortColumn(*sortBy, formAllowedSortColumns, "id")
+	}
+	asc := true
+	if sortOrder != nil && *sortOrder == "desc" {
+		asc = false
+	}
+	options.WithSorting(sortCol, asc)
+
+	if search != nil && *search != "" {
+		options.WithSearch(*search, []string{"users.phone"})
+	}
+
+	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllOperatorForms(formService.db, filters)
+	count, err := formService.formRepository.CountAllOperatorForms(formService.db, options, filters)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -2671,16 +2784,28 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if cancer != nil {
+		if len(cancer) > 0 {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
 		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if familyCancer != nil {
+		if len(familyCancer) > 0 {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
+		}
+		contactInfo, _ := formService.formRepository.FindContactByFormID(formService.db, form.ID)
+		if contactInfo != nil {
+			FilledForms.Contact = boolPtr(true)
+		} else {
+			FilledForms.Contact = boolPtr(false)
+		}
+		lungCancer, _ := formService.formRepository.FindLungCancerByFormID(formService.db, form.ID)
+		if lungCancer != nil {
+			FilledForms.LungCancer = boolPtr(true)
+		} else {
+			FilledForms.LungCancer = boolPtr(false)
 		}
 		if form.FormType == enum.Navid {
 			navidInfo, _ := formService.formRepository.FindNavidInfoByFormID(formService.db, form.ID)
@@ -3051,7 +3176,7 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 		info.GhaedeAge = *request.GhaedeAge
 	}
 	if request.HasChildren != nil {
-		info.HasChildren = *request.HasChildren
+		info.HasChildren = request.HasChildren
 	}
 	info.NumberOfChildren = request.NumberOfChildren
 	info.SonCount = request.SonCount

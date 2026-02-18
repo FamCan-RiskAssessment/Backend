@@ -141,3 +141,25 @@ func (u *UserServiceMock) ValidateUserForFormCreation(operatorID, userID uint) e
 	args := u.Called(operatorID, userID)
 	return args.Error(0)
 }
+
+func (u *UserServiceMock) GetUserProfile(operatorID uint) (userdto.UserProfileResponse, error) {
+	args := u.Called(operatorID)
+
+	var resp userdto.UserProfileResponse
+	if args.Get(0) != nil {
+		resp = args.Get(0).(userdto.UserProfileResponse)
+	}
+
+	return resp, args.Error(1)
+}
+
+func (u *UserServiceMock) SubmitUserProfile(request userdto.SubmitUserProfileRequest) (userdto.UserProfileResponse, error) {
+	args := u.Called(request)
+
+	var resp userdto.UserProfileResponse
+	if args.Get(0) != nil {
+		resp = args.Get(0).(userdto.UserProfileResponse)
+	}
+
+	return resp, args.Error(1)
+}

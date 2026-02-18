@@ -6,6 +6,7 @@ const (
 	AnswerYes Answer = iota + 1
 	AnswerNo
 	AnswerDontKnow
+	AnswerOccasionally
 	AnswerUncertain
 	AnswerNoInfo
 	AnswerPossible
@@ -21,6 +22,8 @@ func (g Answer) String() string {
 		return "خیر"
 	case AnswerDontKnow:
 		return "نمی دانم"
+	case AnswerOccasionally:
+		return "گاهی"
 	case AnswerUncertain:
 		return "نامعین"
 	case AnswerNoInfo:
@@ -40,6 +43,7 @@ func GetAllAnswers() []Answer {
 		AnswerYes,
 		AnswerNo,
 		AnswerDontKnow,
+		AnswerOccasionally,
 		AnswerUncertain,
 		AnswerNoInfo,
 		AnswerPossible,

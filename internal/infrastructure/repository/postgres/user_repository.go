@@ -167,6 +167,20 @@ func (repo *UserRepository) FindUsersByRoleID(db database.Database, roleID uint)
 	return users, nil
 }
 
+func (repo *UserRepository) FindProfilesByRoleID(db database.Database, roleID uint) ([]*entity.User, error) {
+	var users []*entity.User
+	result := db.GetDB().
+		Joins("JOIN user_roles ON user_roles.user_id = users.id").
+		Where("user_roles.role_id = ?", roleID).
+		Preload("UserProfile").
+		Find(&users)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return users, nil
+}
+
 func (repo *UserRepository) FindUsersByPermission(db database.Database, permissionTypes []enum.PermissionType) ([]*entity.User, error) {
 	var users []*entity.User
 
@@ -217,13 +231,58 @@ func (repo *UserRepository) FindRolesByPermission(db database.Database, permissi
 	return roles, nil
 }
 
-func (repo *UserRepository) FindUsers(db database.Database, options *postgres.QueryOptions) ([]*entity.User, int64, error) {
-	var users []*entity.User
-	query := db.GetDB()
-	query = applyQueryOptions(query, options)
-	result := query.Find(&users)
-	if result.Error != nil {
-		return nil, 0, result.Error
+func ApplyUserFilters(query *gorm.DB, filters *postgres.UserFilters) *gorm.DB {
+	if filters == nil {
+		return query
 	}
-	return users, result.RowsAffected, nil
+	if filters.RoleID != nil {
+		query = query.Joins("JOIN user_roles ON user_roles.user_id = users.id").
+			Where("user_roles.role_id = ?", *filters.RoleID)
+	}
+	return query
+}
+
+func (repo *UserRepository) FindUsers(db database.Database, options *postgres.QueryOptions, filters *postgres.UserFilters) ([]*entity.User, int64, error) {
+	var users []*entity.User
+	var count int64
+
+	countQuery := db.GetDB().Model(&entity.User{})
+	countQuery = ApplyUserFilters(countQuery, filters)
+	countQuery = applySearchOnly(countQuery, options)
+	if err := countQuery.Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	query := db.GetDB()
+	query = ApplyUserFilters(query, filters)
+	query = applyQueryOptions(query, options)
+	if err := query.Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+	return users, count, nil
+}
+
+func (repo *UserRepository) FindProfileByUserID(db database.Database, userID uint) (*entity.User, error) {
+	var user entity.User
+
+	err := db.GetDB().
+		Preload("UserProfile").
+		First(&user, userID).
+		Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (repo *UserRepository) CreateProfile(db database.Database, profile *entity.UserProfile) error {
+	return db.GetDB().Create(profile).Error
+}
+func (repo *UserRepository) UpdateProfile(db database.Database, profile *entity.UserProfile) error {
+	return db.GetDB().Save(profile).Error
 }

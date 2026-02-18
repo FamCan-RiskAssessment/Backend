@@ -30,6 +30,7 @@ type BucketPath struct {
 
 type Field struct {
 	User             string
+	Profile          string
 	Form             string
 	OTP              string
 	Role             string
@@ -65,6 +66,7 @@ func NewConstants() *Constants {
 		},
 		Field: Field{
 			User:             "user",
+			Profile:          "profile",
 			Form:             "form",
 			OTP:              "otp",
 			Role:             "role",

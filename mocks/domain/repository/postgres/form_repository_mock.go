@@ -69,29 +69,29 @@ func (f *FormRepositoryMock) DeleteForm(db database.Database, id uint) error {
 	return args.Error(0)
 }
 
-func (f *FormRepositoryMock) FindAllForms(db database.Database, offset, limit int, filters *postgres.FormFilters) ([]*entity.Form, error) {
-	args := f.Called(db, offset, limit, filters)
+func (f *FormRepositoryMock) FindAllForms(db database.Database, options *postgres.QueryOptions, filters *postgres.FormFilters) ([]*entity.Form, error) {
+	args := f.Called(db, options, filters)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*entity.Form), args.Error(1)
 }
 
-func (f *FormRepositoryMock) CountAllForms(db database.Database, filters *postgres.FormFilters) (int64, error) {
-	args := f.Called(db, filters)
+func (f *FormRepositoryMock) CountAllForms(db database.Database, options *postgres.QueryOptions, filters *postgres.FormFilters) (int64, error) {
+	args := f.Called(db, options, filters)
 	return args.Get(0).(int64), args.Error(1)
 }
 
-func (f *FormRepositoryMock) FindAllOperatorForms(db database.Database, offset, limit int, filters *postgres.OperatorFormFilters) ([]*entity.Form, error) {
-	args := f.Called(db, offset, limit, filters)
+func (f *FormRepositoryMock) FindAllOperatorForms(db database.Database, options *postgres.QueryOptions, filters *postgres.OperatorFormFilters) ([]*entity.Form, error) {
+	args := f.Called(db, options, filters)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]*entity.Form), args.Error(1)
 }
 
-func (f *FormRepositoryMock) CountAllOperatorForms(db database.Database, filters *postgres.OperatorFormFilters) (int64, error) {
-	args := f.Called(db, filters)
+func (f *FormRepositoryMock) CountAllOperatorForms(db database.Database, options *postgres.QueryOptions, filters *postgres.OperatorFormFilters) (int64, error) {
+	args := f.Called(db, options, filters)
 	return args.Get(0).(int64), args.Error(1)
 }
 

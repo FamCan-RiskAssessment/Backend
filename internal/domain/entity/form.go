@@ -102,6 +102,15 @@ type CancerInfo struct {
 	PicturePaths []string `gorm:"type:jsonb;serializer:json"`
 }
 
+type Cancer struct {
+	database.Model
+	FormID uint `gorm:"not null;index"`
+	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
+
+	Cancer       bool `gorm:"not null;default:false"`
+	FamilyCancer bool `gorm:"not null;default:false"`
+}
+
 type FamilyCancerInfo struct {
 	database.Model
 	FormID uint `gorm:"not null;index"`

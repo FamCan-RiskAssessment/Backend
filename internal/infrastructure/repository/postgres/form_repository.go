@@ -297,6 +297,26 @@ func (r *FormRepository) CreateCancer(db database.Database, info *entity.CancerI
 	return db.GetDB().Create(info).Error
 }
 
+func (r *FormRepository) CreateCancerVisit(db database.Database, info *entity.Cancer) error {
+	return db.GetDB().Create(info).Error
+}
+
+func (r *FormRepository) UpdateCancerVisit(db database.Database, info *entity.Cancer) error {
+	return db.GetDB().Save(info).Error
+}
+
+func (r *FormRepository) FindCancerVisit(db database.Database, formID uint) (*entity.Cancer, error) {
+	var info entity.Cancer
+	err := db.GetDB().Where("form_id = ?", formID).First(&info).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &info, nil
+}
+
 func (r *FormRepository) UpdateCancer(db database.Database, info *entity.CancerInfo) error {
 	return db.GetDB().
 		Session(&gorm.Session{FullSaveAssociations: true}).

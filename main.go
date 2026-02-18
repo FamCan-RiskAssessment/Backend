@@ -29,6 +29,7 @@ func main() {
 		&entity.BasicInfo{},
 		&entity.GeneralHealthInfo{},
 		&entity.MamoGraphyInfo{},
+		&entity.Cancer{},
 		&entity.CancerInfo{},
 		&entity.FamilyCancerInfo{},
 		&entity.ContactInfo{},

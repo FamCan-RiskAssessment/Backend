@@ -719,6 +719,122 @@ func (formService *FormService) UpsertMamography(request formdto.UpsertMamograph
 	return nil
 }
 
+func (formService *FormService) VisitCancer(userID uint, formID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return err
+	}
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(userID)
+		if err != nil {
+			return err
+		}
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, userID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != userID {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	info, err := formService.formRepository.FindCancerVisit(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		info = &entity.Cancer{FormID: formID}
+	}
+	info.Cancer = true
+
+	if info.ID == 0 {
+		if err := formService.formRepository.CreateCancerVisit(formService.db, info); err != nil {
+			return err
+		}
+	} else {
+		if err := formService.formRepository.UpdateCancerVisit(formService.db, info); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (formService *FormService) VisitFamilyCancer(userID uint, formID uint) error {
+	form, err := formService.formRepository.FindFormByID(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if form == nil {
+		notFoundError := exception.NotFoundError{Item: formService.constants.Field.Form}
+		return notFoundError
+	}
+
+	// Allow SuperAdmin to update any form
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return err
+	}
+	var isOp bool
+	if !isSuperAdminUser {
+		isOp, err = formService.isOperator(userID)
+		if err != nil {
+			return err
+		}
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, userID)
+			if err != nil {
+				return err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return forbiddenError
+			}
+		} else if form.UserID != userID {
+			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+			return forbiddenError
+		}
+	}
+
+	info, err := formService.formRepository.FindCancerVisit(formService.db, formID)
+	if err != nil {
+		return err
+	}
+	if info == nil {
+		info = &entity.Cancer{FormID: formID}
+	}
+	info.Cancer = true
+
+	if info.ID == 0 {
+		if err := formService.formRepository.CreateCancerVisit(formService.db, info); err != nil {
+			return err
+		}
+	} else {
+		if err := formService.formRepository.UpdateCancerVisit(formService.db, info); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (formService *FormService) CreateCancer(request formdto.CreateCancerRequest) error {
 	form, err := formService.formRepository.FindFormByID(formService.db, request.FormID)
 	if err != nil {
@@ -1766,14 +1882,13 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 	} else {
 		FilledForms.Contact = boolPtr(false)
 	}
-	cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, request.FormID)
-	if len(cancer) > 0 {
+	cancer, _ := formService.formRepository.FindCancerVisit(formService.db, request.FormID)
+	if cancer != nil && cancer.Cancer {
 		FilledForms.Cancer = boolPtr(true)
 	} else {
 		FilledForms.Cancer = boolPtr(false)
 	}
-	familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, request.FormID)
-	if len(familyCancer) > 0 {
+	if cancer != nil && cancer.FamilyCancer {
 		FilledForms.FamilyCancer = boolPtr(true)
 	} else {
 		FilledForms.FamilyCancer = boolPtr(false)
@@ -2408,14 +2523,13 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 		} else {
 			FilledForms.Mamography = boolPtr(false)
 		}
-		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if len(cancer) > 0 {
+		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if len(familyCancer) > 0 {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2662,14 +2776,13 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 		} else {
 			FilledForms.Mamography = boolPtr(false)
 		}
-		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if len(cancer) > 0 {
+		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if len(familyCancer) > 0 {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2780,14 +2893,13 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 		} else {
 			FilledForms.Mamography = boolPtr(false)
 		}
-		cancer, _ := formService.formRepository.FindCancersByFormID(formService.db, form.ID)
-		if len(cancer) > 0 {
+		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		familyCancer, _ := formService.formRepository.FindFamilyCancersByFormID(formService.db, form.ID)
-		if len(familyCancer) > 0 {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)

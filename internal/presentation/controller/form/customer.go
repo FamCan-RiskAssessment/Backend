@@ -771,6 +771,25 @@ func (formController *CustomerFormController) GetAllCancers(ctx *gin.Context) {
 	controller.Response(ctx, 200, "", response)
 }
 
+func (formController *CustomerFormController) VisitCancer(ctx *gin.Context) {
+	type VisitCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[VisitCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.VisitCancer(userID.(uint), params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.createForm")
+	controller.Response(ctx, 201, message, nil)
+}
+
 func (formController *CustomerFormController) CreateCancer(ctx *gin.Context) {
 	type CreateCancerParams struct {
 		FormID     uint                    `uri:"formID" validate:"required"`
@@ -857,6 +876,25 @@ func (formController *CustomerFormController) DeleteCancer(ctx *gin.Context) {
 	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
 	message, _ := trans.Translate("successMessage.deleteForm")
 	controller.Response(ctx, 200, message, nil)
+}
+
+func (formController *CustomerFormController) VisitFamilyCancer(ctx *gin.Context) {
+	type VisitFamilyCancerParams struct {
+		FormID uint `uri:"formID" validate:"required"`
+	}
+
+	params := controller.Validate[VisitFamilyCancerParams](ctx)
+
+	userID, _ := ctx.Get(formController.constants.Context.ID)
+
+	err := formController.formService.VisitFamilyCancer(userID.(uint), params.FormID)
+	if err != nil {
+		panic(err)
+	}
+
+	trans := controller.GetTranslator(ctx, formController.constants.Context.Translator)
+	message, _ := trans.Translate("successMessage.createForm")
+	controller.Response(ctx, 201, message, nil)
 }
 
 func (formController *CustomerFormController) CreateFamilyCancer(ctx *gin.Context) {

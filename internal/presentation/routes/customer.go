@@ -42,11 +42,13 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 			formGroup.DELETE("/cancer/:cancerID", app.Controllers.Customer.FormController.DeleteCancer)
 			formGroup.POST("/cancer", app.Controllers.Customer.FormController.CreateCancer)
 			formGroup.GET("/cancer", app.Controllers.Customer.FormController.GetAllCancers)
+			formGroup.POST("/cancerVisit", app.Controllers.Customer.FormController.VisitCancer)
 
 			// Single family cancer operations (more specific routes first)
 			formGroup.POST("/familycancer", app.Controllers.Customer.FormController.CreateFamilyCancer)
 			formGroup.PUT("/familycancer/:familyCancerID", app.Controllers.Customer.FormController.UpdateFamilyCancer)
 			formGroup.DELETE("/familycancer/:familyCancerID", app.Controllers.Customer.FormController.DeleteFamilyCancer)
+			formGroup.POST("/familycancerVisit", app.Controllers.Customer.FormController.VisitFamilyCancer)
 
 			formGroup.DELETE("", app.Controllers.Customer.FormController.DeleteForm)
 		}

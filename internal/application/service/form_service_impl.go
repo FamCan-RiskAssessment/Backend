@@ -2526,14 +2526,10 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 
 		isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, *request.SocialSecurityNumber)
 		if err != nil {
-			return fmt.Errorf("failed to verify phone and social security number: %w", err)
+			return exception.NewVerificationFailedForbiddenError()
 		}
 		if !isMatch {
-			verificationError := exception.VerificationError{
-				Field:   "socialSecurityNumber",
-				Message: "Phone number and social security number do not match",
-			}
-			return verificationError
+			return exception.NewVerificationFailedForbiddenError()
 		}
 
 		info.SocialSecurityNumber = *request.SocialSecurityNumber

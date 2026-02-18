@@ -820,7 +820,7 @@ func (formService *FormService) VisitFamilyCancer(userID uint, formID uint) erro
 	if info == nil {
 		info = &entity.Cancer{FormID: formID}
 	}
-	info.Cancer = true
+	info.FamilyCancer = true
 
 	if info.ID == 0 {
 		if err := formService.formRepository.CreateCancerVisit(formService.db, info); err != nil {

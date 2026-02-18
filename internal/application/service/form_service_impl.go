@@ -1867,12 +1867,12 @@ func (formService *FormService) ChangeFormStatus(request formdto.ChangeFormStatu
 		FilledForms.Contact = boolPtr(false)
 	}
 	cancer, _ := formService.formRepository.FindCancerVisit(formService.db, request.FormID)
-	if cancer.Cancer {
+	if cancer != nil && cancer.Cancer {
 		FilledForms.Cancer = boolPtr(true)
 	} else {
 		FilledForms.Cancer = boolPtr(false)
 	}
-	if cancer.FamilyCancer {
+	if cancer != nil && cancer.FamilyCancer {
 		FilledForms.FamilyCancer = boolPtr(true)
 	} else {
 		FilledForms.FamilyCancer = boolPtr(false)
@@ -2507,12 +2507,12 @@ func (formService *FormService) GetUserForms(request formdto.GetUserFormsRequest
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
-		if cancer.Cancer {
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		if cancer.FamilyCancer {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2739,12 +2739,12 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
-		if cancer.Cancer {
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		if cancer.FamilyCancer {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)
@@ -2856,12 +2856,12 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 			FilledForms.Mamography = boolPtr(false)
 		}
 		cancer, _ := formService.formRepository.FindCancerVisit(formService.db, form.ID)
-		if cancer.Cancer {
+		if cancer != nil && cancer.Cancer {
 			FilledForms.Cancer = boolPtr(true)
 		} else {
 			FilledForms.Cancer = boolPtr(false)
 		}
-		if cancer.FamilyCancer {
+		if cancer != nil && cancer.FamilyCancer {
 			FilledForms.FamilyCancer = boolPtr(true)
 		} else {
 			FilledForms.FamilyCancer = boolPtr(false)

@@ -5,6 +5,7 @@ type ForbiddenType string
 const (
 	ForbiddenTypeBannedUser            ForbiddenType = "banned_user"
 	ForbiddenTypeUnapprovedCorporation ForbiddenType = "unapproved_corporation"
+	ForbiddenTypeVerificationFailed    ForbiddenType = "verification_failed"
 )
 
 type ForbiddenError struct {
@@ -31,5 +32,12 @@ func NewUnapprovedCorporationForbiddenError() ForbiddenError {
 	return ForbiddenError{
 		Type:    ForbiddenTypeUnapprovedCorporation,
 		Message: "Vendor approval is required to access this resource.",
+	}
+}
+
+func NewVerificationFailedForbiddenError() ForbiddenError {
+	return ForbiddenError{
+		Type:    ForbiddenTypeVerificationFailed,
+		Message: "Phone and social security number verification failed.",
 	}
 }

@@ -371,7 +371,7 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 
 	isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, request.SocialSecurityNumber)
 	if err != nil {
-		return formdto.BasicFormResponse{}, fmt.Errorf("failed to verify phone and social security number: %w", err)
+		return formdto.BasicFormResponse{}, exception.NewVerificationFailedForbiddenError()
 	}
 	if !isMatch {
 		verificationError := exception.VerificationError{
@@ -2105,15 +2105,16 @@ func (formService *FormService) GetFamilyCancerList(request formdto.GetPartialFo
 	}
 
 	for _, v := range info {
-		if v.Relative == enum.PaternalAunt || v.Relative == enum.PaternalUncle {
+		switch v.Relative {
+		case enum.PaternalAunt, enum.PaternalUncle:
 			FamilyCancersResponse.AmeAmoCancer = true
-		} else if v.Relative == enum.MaternalAunt || v.Relative == enum.MaternalUncle {
+		case enum.MaternalAunt, enum.MaternalUncle:
 			FamilyCancersResponse.KhaleDaeiCancer = true
-		} else if v.Relative == enum.Mother {
+		case enum.Mother:
 			FamilyCancersResponse.MotherCancer = true
-		} else if v.Relative == enum.Father {
+		case enum.Father:
 			FamilyCancersResponse.FatherCancer = true
-		} else if v.Relative == enum.Sister || v.Relative == enum.Brother {
+		case enum.Sister, enum.Brother:
 			FamilyCancersResponse.SiblingCancer = true
 		}
 	}

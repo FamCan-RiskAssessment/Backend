@@ -155,8 +155,14 @@ func handleNotFoundError(ctx *gin.Context, notFoundError exception.NotFoundError
 
 func handleForbiddenError(ctx *gin.Context, forbiddenError exception.ForbiddenError, transKey string) {
 	trans := controller.GetTranslator(ctx, transKey)
-	ResourceName, _ := trans.Translate(forbiddenError.Resource)
-	message, _ := trans.Translate("errors.forbiddenError", ResourceName)
+	var message string
+	switch forbiddenError.Type {
+	case exception.ForbiddenTypeVerificationFailed:
+		message, _ = trans.Translate("errors.verificationFailed")
+	default:
+		ResourceName, _ := trans.Translate(forbiddenError.Resource)
+		message, _ = trans.Translate("errors.forbiddenError", ResourceName)
+	}
 	controller.Response(ctx, 403, message, nil)
 }
 

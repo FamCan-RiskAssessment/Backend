@@ -8,16 +8,17 @@ import (
 )
 
 type Env struct {
-	Server     Server
-	Database   Database
-	Cache      Redis
-	SMSGateway SMSGateway
-	Pagination Pagination
-	OTP        OTP
-	SuperAdmin SuperAdmin
-	S3         S3
-	CalcURL    CalcURL
-	Security   Security
+	Server          Server
+	Database        Database
+	Cache           Redis
+	SMSGateway      SMSGateway
+	Pagination      Pagination
+	OTP             OTP
+	SuperAdmin      SuperAdmin
+	S3              S3
+	CalcURL         CalcURL
+	VerificationAPI VerificationAPI
+	Security        Security
 }
 
 type Server struct {
@@ -86,6 +87,11 @@ type CalcURL struct {
 	PLCO   string
 }
 
+type VerificationAPI struct {
+	BaseURL string
+	APIKey  string
+}
+
 type Security struct {
 	EncryptionKey      string
 	RateLimitPerMinute int
@@ -150,6 +156,10 @@ func NewEnv() *Env {
 			BCRA:   os.Getenv("BCRA_API_URL"),
 			Gail:   os.Getenv("GAIL_API_URL"),
 			PLCO:   os.Getenv("PLCO_API_URL"),
+		},
+		VerificationAPI: VerificationAPI{
+			BaseURL: os.Getenv("VERIFICATION_API_URL"),
+			APIKey:  os.Getenv("VERIFICATION_API_KEY"),
 		},
 		Security: Security{
 			EncryptionKey:      os.Getenv("ENCRYPTION_KEY"),

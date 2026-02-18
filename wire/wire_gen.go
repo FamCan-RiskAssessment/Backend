@@ -11,12 +11,14 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
+	external2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/external"
 	postgres2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	redis2 "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
@@ -78,11 +80,13 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	formRepository := postgres.NewFormRepository()
 	s3 := ProvideStorageConfig(config)
 	s3Storage := storage.NewS3Storage(constants, s3)
+	verificationAPI := ProvideVerificationAPIConfig(config)
+	verificationClientImpl := external.NewVerificationClient(verificationAPI)
 	fieldEncryptor, err := crypto.NewFieldEncryptor(security)
 	if err != nil {
 		return nil, err
 	}
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, fieldEncryptor)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl, fieldEncryptor)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -137,11 +141,13 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)))
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
+
+var RateLimitProviderSet = wire.NewSet(middleware.NewRateLimitMiddleware, ProvideRateLimiter)
 
 var CryptoProviderSet = wire.NewSet(crypto.NewPasswordHasher, crypto.NewFieldEncryptor, wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)))
 
-var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, middleware.NewRateLimitMiddleware, ProvideRateLimiter, wire.Struct(new(Middlewares), "*"))
+var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, RateLimitProviderSet, wire.Struct(new(Middlewares), "*"))
 
 var SeedProviderSet = wire.NewSet(seed.NewRoleSeeder, seed.NewDummySeeder, wire.Struct(new(Seeds), "*"))
 
@@ -189,6 +195,10 @@ func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
 	return &container.Env.CalcURL
 }
 
+func ProvideVerificationAPIConfig(container *bootstrap.Config) *bootstrap.VerificationAPI {
+	return &container.Env.VerificationAPI
+}
+
 func ProvideSecurityConfig(container *bootstrap.Config) *bootstrap.Security {
 	return &container.Env.Security
 }
@@ -222,6 +232,7 @@ var ProviderSet = wire.NewSet(
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
 	ProvideCalcURL,
+	ProvideVerificationAPIConfig,
 	ProvideSecurityConfig,
 	SeedProviderSet,
 )

@@ -58,6 +58,7 @@ type FormService interface {
 	GetAllHyperplasiaInBiopsyStatuses() ([]generaldto.EnumResponse, error)
 	GetAllLifeStatuses() ([]generaldto.EnumResponse, error)
 	GetAllRelativeTypes() ([]generaldto.EnumResponse, error)
+	GetAddressByPostalCode(postalCode string) (*formdto.PostalCodeInfoResponse, error)
 	GetAllFormTypes() ([]generaldto.EnumResponse, error)
 	GetAllAnswers() ([]generaldto.EnumResponse, error)
 }

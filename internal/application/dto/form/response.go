@@ -283,6 +283,20 @@ type GetLungCancerResponse struct {
 	LungDiseaseHistory           *string          `json:"lungDiseaseHistory,omitempty"`
 }
 
+type PostalCodeInfoResponse struct {
+	Province     *string `json:"province,omitempty"`
+	City         *string `json:"city,omitempty"`
+	Town         *string `json:"town,omitempty"`
+	District     *string `json:"district,omitempty"`
+	Street       *string `json:"street,omitempty"`
+	Street2      *string `json:"street2,omitempty"`
+	Number       *string `json:"number,omitempty"`
+	Floor        *string `json:"floor,omitempty"`
+	SideFloor    *string `json:"sideFloor,omitempty"`
+	BuildingName *string `json:"buildingName,omitempty"`
+	Description  *string `json:"description,omitempty"`
+}
+
 type GetNavidFormResponse struct {
 	ID                           uint             `json:"id"`
 	SupplementaryInsuranceStatus *enum.Answer     `json:"takmilBime"`

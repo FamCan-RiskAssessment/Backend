@@ -523,6 +523,11 @@ type UpdateLungCancerRequest struct {
 	// Attention question answer
 	AttentionCorrect *bool
 }
+
+type PostalCodeInfoRequest struct {
+	PostalCode string
+}
+
 type UpdateNavidFormRequest struct {
 	UserID uint
 	FormID uint

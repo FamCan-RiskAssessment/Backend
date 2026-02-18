@@ -10,12 +10,14 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/service"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/communication"
+	domainExternal "github.com/FamCan-RiskAssessment/Backend/internal/domain/external"
 	domainPostgre "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	domainRedis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	domainS3 "github.com/FamCan-RiskAssessment/Backend/internal/domain/storage/s3"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/communication/sms"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	infraExternal "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
 	infraJWT "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	infraLocalization "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
@@ -93,8 +95,15 @@ var AdapterProviderSet = wire.NewSet(
 	infraLocalization.NewTranslationService,
 	infraStorage.NewS3Storage,
 	sms.NewAsanakSMSService,
+	infraExternal.NewVerificationClient,
 	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.S3Storage)),
 	wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)),
+	wire.Bind(new(domainExternal.VerificationClient), new(*infraExternal.VerificationClientImpl)),
+)
+
+var RateLimitProviderSet = wire.NewSet(
+	middleware.NewRateLimitMiddleware,
+	ProvideRateLimiter,
 )
 
 var CryptoProviderSet = wire.NewSet(
@@ -108,8 +117,7 @@ var MiddlewareProviderSet = wire.NewSet(
 	middleware.NewRecoveryMiddleware,
 	middleware.NewLocalizationMiddleware,
 	middleware.NewAuthMiddleware,
-	middleware.NewRateLimitMiddleware,
-	ProvideRateLimiter,
+	RateLimitProviderSet,
 	wire.Struct(new(Middlewares), "*"),
 )
 
@@ -163,6 +171,10 @@ func ProvideCalcURL(container *bootstrap.Config) *bootstrap.CalcURL {
 	return &container.Env.CalcURL
 }
 
+func ProvideVerificationAPIConfig(container *bootstrap.Config) *bootstrap.VerificationAPI {
+	return &container.Env.VerificationAPI
+}
+
 func ProvideSecurityConfig(container *bootstrap.Config) *bootstrap.Security {
 	return &container.Env.Security
 }
@@ -197,6 +209,7 @@ var ProviderSet = wire.NewSet(
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
 	ProvideCalcURL,
+	ProvideVerificationAPIConfig,
 	ProvideSecurityConfig,
 	SeedProviderSet,
 )

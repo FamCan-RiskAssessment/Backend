@@ -10,6 +10,7 @@ func SetupCustomerRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	form.Use(app.Middlewares.Auth.AuthRequired)
 	{
 		form.POST("/basic", app.Controllers.Customer.FormController.CreateForm)
+		form.POST("/postalcode", app.Controllers.Customer.FormController.GetAddressByPostalCode)
 		formGroup := form.Group("/:formID")
 		{
 			formGroup.PUT("/basic", app.Controllers.Customer.FormController.UpdateBasicInfo)

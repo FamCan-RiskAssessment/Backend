@@ -16,6 +16,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
+	externalMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/external"
 	formRepositoryMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
 	s3Mocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/storage/s3"
 	databaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/infrastructure/database"
@@ -26,13 +27,14 @@ import (
 
 type FormServiceTestSuite struct {
 	suite.Suite
-	constants        *bootstrap.Constants
-	formRepository   *formRepositoryMocks.FormRepositoryMock
-	userService      *usecaseMocks.UserServiceMock
-	actionLogService *usecaseMocks.ActionLogServiceMock
-	s3Storage        *s3Mocks.S3StorageMock
-	db               *databaseMocks.DatabaseMock
-	formService      *FormService
+	constants          *bootstrap.Constants
+	formRepository     *formRepositoryMocks.FormRepositoryMock
+	userService        *usecaseMocks.UserServiceMock
+	actionLogService   *usecaseMocks.ActionLogServiceMock
+	s3Storage          *s3Mocks.S3StorageMock
+	db                 *databaseMocks.DatabaseMock
+	verificationClient *externalMocks.VerificationClientMock
+	formService        *FormService
 }
 
 func (suite *FormServiceTestSuite) SetupTest() {
@@ -42,6 +44,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 	suite.actionLogService = usecaseMocks.NewActionLogServiceMock()
 	suite.s3Storage = s3Mocks.NewS3StorageMock()
 	suite.db = databaseMocks.NewDatabaseMock()
+	suite.verificationClient = externalMocks.NewVerificationClientMock()
 
 	// Create field encryptor with test key
 	security := &bootstrap.Security{
@@ -56,6 +59,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		suite.actionLogService,
 		suite.s3Storage,
 		suite.db,
+		suite.verificationClient,
 		fieldEncryptor,
 	)
 }
@@ -78,6 +82,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 
 	form := &entity.Form{}
 	form.ID = 1
@@ -89,6 +94,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_Success() {
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, request.SocialSecurityNumber).Return(true, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
 		return f.UserID == userID && f.Status == enum.FormStatusDraft
 	})).Run(func(args mock.Arguments) {
@@ -174,6 +180,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 	operator := &entity.User{}
 	operator.ID = operatorID
 
@@ -187,6 +194,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, mock.Anything).Return(true, nil)
 	suite.userService.On("ValidateUserForFormCreation", operatorID, userID).Return(nil)
 	suite.userService.On("GetUserByID", operatorID).Return(operator, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.MatchedBy(func(f *entity.Form) bool {
@@ -200,6 +208,7 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_WithOperator_LogsActi
 	suite.formRepository.On("CreateBasicInfo", suite.db, mock.MatchedBy(func(b *entity.BasicInfo) bool {
 		return b.FormID == form.ID
 	})).Return(nil)
+	suite.formRepository.On("FindAttentionQuestionsByFormID", suite.db, mock.Anything).Return(nil, nil)
 	suite.actionLogService.On("LogAction", mock.MatchedBy(func(log actionlogdto.LogAction) bool {
 		return log.ActorID == operatorID && log.TargetID != nil && *log.TargetID == userID
 	})).Return(nil)
@@ -222,10 +231,12 @@ func (suite *FormServiceTestSuite) TestCreateBasicInfoForm_FormCreationFails() {
 	}
 	user := &entity.User{}
 	user.ID = userID
+	user.Phone = "09123456789"
 	repoError := errors.New("database error")
 
 	// Setup expectations
 	suite.userService.On("GetUserByID", userID).Return(user, nil)
+	suite.verificationClient.On("VerifyPhoneAndSSN", user.Phone, mock.Anything).Return(true, nil)
 	suite.formRepository.On("CreateForm", suite.db, mock.Anything).Return(repoError)
 
 	// Act

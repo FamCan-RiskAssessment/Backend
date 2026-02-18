@@ -22,9 +22,11 @@ type FormService interface {
 	UpdateBasicInfo(request formdto.UpdateBasicFormRequest) error
 	UpsertGeneralHealth(request formdto.UpsertGeneralHealthRequest) error
 	UpsertMamography(request formdto.UpsertMamographyRequest) error
+	VisitCancer(userID uint, formID uint) error
 	CreateCancer(request formdto.CreateCancerRequest) error
 	UpdateCancer(request formdto.UpdateCancerRequest) (formdto.UpdateCancerResponse, error)
 	DeleteCancer(request formdto.DeleteCancerRequest) error
+	VisitFamilyCancer(userID uint, formID uint) error
 	CreateFamilyCancer(request formdto.CreateFamilyCancerRequest) (formdto.CreateFamilyCancerResponse, error)
 	UpdateFamilyCancer(request formdto.UpdateFamilyCancerRequest) (formdto.UpdateFamilyCancerResponse, error)
 	DeleteFamilyCancer(request formdto.DeleteFamilyCancerRequest) error

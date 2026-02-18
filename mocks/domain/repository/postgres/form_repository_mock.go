@@ -131,6 +131,24 @@ func (f *FormRepositoryMock) UpdateMamography(db database.Database, info *entity
 	return args.Error(0)
 }
 
+func (f *FormRepositoryMock) CreateCancerVisit(db database.Database, info *entity.Cancer) error {
+	args := f.Called(db, info)
+	return args.Error(0)
+}
+
+func (f *FormRepositoryMock) UpdateCancerVisit(db database.Database, info *entity.Cancer) error {
+	args := f.Called(db, info)
+	return args.Error(0)
+}
+
+func (f *FormRepositoryMock) FindCancerVisit(db database.Database, formID uint) (*entity.Cancer, error) {
+	args := f.Called(db, formID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entity.Cancer), args.Error(1)
+}
+
 func (f *FormRepositoryMock) FindCancersByFormID(db database.Database, formID uint) ([]*entity.CancerInfo, error) {
 	args := f.Called(db, formID)
 	if args.Get(0) == nil {

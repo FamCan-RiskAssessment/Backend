@@ -317,6 +317,12 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 		Education             string                  `form:"education" validate:"required"`
 		Phone2                *string                 `form:"phone2"`
 		Phone3                *string                 `form:"phone3"`
+		BrotherNumber         *uint                   `form:"brotherNumber,omitempty"`
+		SisterNumber          *uint                   `form:"sisterNumber,omitempty"`
+		PaternalAuntNumber    *uint                   `form:"paternalAuntNumber,omitempty"`
+		PaternalUncleNumber   *uint                   `form:"paternalUncleNumber,omitempty"`
+		MaternalAuntNumber    *uint                   `form:"maternalAuntNumber,omitempty"`
+		MaternalUncleNumber   *uint                   `form:"maternalUncleNumber,omitempty"`
 	}
 
 	params := controller.Validate[UpsertContactParams](ctx)
@@ -342,6 +348,12 @@ func (formController *CustomerFormController) UpsertContact(ctx *gin.Context) {
 		Education:             params.Education,
 		Phone2:                params.Phone2,
 		Phone3:                params.Phone3,
+		BrotherNumber:         params.BrotherNumber,
+		SisterNumber:          params.SisterNumber,
+		PaternalAuntNumber:    params.PaternalAuntNumber,
+		PaternalUncleNumber:   params.PaternalUncleNumber,
+		MaternalAuntNumber:    params.MaternalAuntNumber,
+		MaternalUncleNumber:   params.MaternalUncleNumber,
 	}
 
 	if err := formController.formService.UpsertContact(req); err != nil {

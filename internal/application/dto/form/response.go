@@ -232,6 +232,12 @@ type GetContactResponse struct {
 	Education             string       `json:"education"`
 	Phone2                *string      `json:"phone2,omitempty"`
 	Phone3                *string      `json:"phone3,omitempty"`
+	BrotherNumber         *uint        `json:"brotherNumber"`
+	SisterNumber          *uint        `json:"sisterNumber"`
+	PaternalAuntNumber    *uint        `json:"paternalAuntNumber"`
+	PaternalUncleNumber   *uint        `json:"paternalUncleNumber"`
+	MaternalAuntNumber    *uint        `json:"maternalAuntNumber"`
+	MaternalUncleNumber   *uint        `json:"maternalUncleNumber"`
 }
 
 type GetLungCancerResponse struct {

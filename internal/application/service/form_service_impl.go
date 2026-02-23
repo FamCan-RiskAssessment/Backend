@@ -1466,6 +1466,12 @@ func (formService *FormService) UpsertContact(request formdto.UpsertContactReque
 	}
 	info.Phone2 = request.Phone2
 	info.Phone3 = request.Phone3
+	info.BrotherNumber = request.BrotherNumber
+	info.SisterNumber = request.SisterNumber
+	info.PaternalAuntNumber = request.PaternalAuntNumber
+	info.PaternalUncleNumber = request.PaternalUncleNumber
+	info.MaternalAuntNumber = request.MaternalAuntNumber
+	info.MaternalUncleNumber = request.MaternalUncleNumber
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string
@@ -3476,6 +3482,24 @@ func (formService *FormService) UpdateContact(request formdto.UpdateContactReque
 	}
 	info.Phone2 = request.Phone2
 	info.Phone3 = request.Phone3
+	if request.BrotherNumber != nil {
+		info.BrotherNumber = request.BrotherNumber
+	}
+	if request.SisterNumber != nil {
+		info.SisterNumber = request.SisterNumber
+	}
+	if request.PaternalAuntNumber != nil {
+		info.PaternalAuntNumber = request.PaternalAuntNumber
+	}
+	if request.PaternalUncleNumber != nil {
+		info.PaternalUncleNumber = request.PaternalUncleNumber
+	}
+	if request.MaternalAuntNumber != nil {
+		info.MaternalAuntNumber = request.MaternalAuntNumber
+	}
+	if request.MaternalUncleNumber != nil {
+		info.MaternalUncleNumber = request.MaternalUncleNumber
+	}
 
 	// Handle TestGen pictures upload
 	var newTestGenPaths []string

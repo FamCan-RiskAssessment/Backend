@@ -232,6 +232,12 @@ type UpsertContactRequest struct {
 	Education             string
 	Phone2                *string
 	Phone3                *string
+	BrotherNumber         *uint
+	SisterNumber          *uint
+	PaternalAuntNumber    *uint
+	PaternalUncleNumber   *uint
+	MaternalAuntNumber    *uint
+	MaternalUncleNumber   *uint
 }
 
 type UpsertNavidFormRequest struct {
@@ -463,6 +469,12 @@ type UpdateContactRequest struct {
 	Education             *string
 	Phone2                *string
 	Phone3                *string
+	BrotherNumber         *uint
+	SisterNumber          *uint
+	PaternalAuntNumber    *uint
+	PaternalUncleNumber   *uint
+	MaternalAuntNumber    *uint
+	MaternalUncleNumber   *uint
 }
 type UpdateLungCancerRequest struct {
 	UserID uint

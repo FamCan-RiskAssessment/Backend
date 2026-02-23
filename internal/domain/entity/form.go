@@ -147,6 +147,12 @@ type ContactInfo struct {
 	Education                 string       `gorm:"type:varchar(127)"`
 	Phone2                    *string      `gorm:"type:varchar(11)"`
 	Phone3                    *string      `gorm:"type:varchar(11)"`
+	BrotherNumber             *uint        `gorm:"type:int"`
+	SisterNumber              *uint        `gorm:"type:int"`
+	PaternalAuntNumber        *uint        `gorm:"type:int"`
+	PaternalUncleNumber       *uint        `gorm:"type:int"`
+	MaternalAuntNumber        *uint        `gorm:"type:int"`
+	MaternalUncleNumber       *uint        `gorm:"type:int"`
 }
 
 type LungCancerInfo struct {

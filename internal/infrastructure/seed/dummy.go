@@ -114,7 +114,7 @@ func (d *DummySeeder) seedForms() {
 	lungDiseaseTypes := []string{"آسم", "برونشیت مزمن", "فیبروز ریوی", "COPD", "سایر"}
 	smokingTypes := []string{"سیگار", "سیگار برگ", "پیپ", "قلیان", "چپق", "سیگار الکترونیکی"}
 	cancerTypes := enum.GetAllCancerTypes()
-	pastSmokingStatuses := []string{"ترک کرده", "هرگز", "نامشخص"}
+	pastSmokingStatuses := []enum.Answer{enum.AnswerAgo, enum.AnswerNo, enum.AnswerLongAgo}
 	secondhandSmokeLocations := []string{"خانه", "محل کار", "مکان عمومی", "هیچکدام"}
 	names := []string{
 		"علی احمدی", "فاطمه محمدی", "حسن رضایی", "زهرا کریمی", "محمد حسینی",
@@ -376,7 +376,7 @@ func (d *DummySeeder) createDummyContact(formID uint, formIndex int, names []str
 	}
 	return contactInfo
 }
-func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []string, secondhandSmokeLocations []string, cancerTypes []enum.CancerType, relations []string, lungDiseases []string) *entity.LungCancerInfo {
+func (d *DummySeeder) createDummyLungCancer(formID uint, formIndex int, insuranceStatuses []string, occupationalExposures []string, lungDiseaseTypes []string, smokingTypes []string, pastSmokingStatuses []enum.Answer, secondhandSmokeLocations []string, cancerTypes []enum.CancerType, relations []string, lungDiseases []string) *entity.LungCancerInfo {
 	var drinksAlcohol = enum.AnswerNo
 	if formIndex%4 == 0 {
 		drinksAlcohol = enum.AnswerYes

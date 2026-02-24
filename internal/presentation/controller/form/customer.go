@@ -399,7 +399,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		SmokedOpiumPerDayCurrent     *uint        `json:"smokedOpiumPerDayCurrent"`
 		ChewedOpiumPerDayCurrent     *uint        `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint        `json:"hookahPerWeekCurrent"`
-		PastSmoking                  *string      `json:"pastSmoking,omitempty"`
+		PastSmoking                  *enum.Answer `json:"pastSmoking,omitempty"`
 		SmokePastAvg                 *uint        `json:"smokePastAvg"`
 		SmokeCurrentAvg              *uint        `json:"smokeCurrentAvg"`
 		Bronchitis                   *enum.Answer `json:"bronshit"`
@@ -527,7 +527,7 @@ func (formController *CustomerFormController) UpsertNavidForm(ctx *gin.Context) 
 		SmokedOpiumPerDayCurrent     *uint        `json:"smokedOpiumPerDayCurrent"`
 		ChewedOpiumPerDayCurrent     *uint        `json:"chewedOpiumPerDayCurrent"`
 		HookahPerWeekCurrent         *uint        `json:"hookahPerWeekCurrent"`
-		PastSmoking                  *string      `json:"pastSmoking,omitempty"`
+		PastSmoking                  *enum.Answer `json:"pastSmoking,omitempty"`
 		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
 		LeaveSmoke                   *uint        `json:"leaveSmoke"`
 		SmokingTypesPast             *string      `json:"smokingTypesPast,omitempty"`

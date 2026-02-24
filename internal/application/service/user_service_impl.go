@@ -625,10 +625,10 @@ func (userService *UserService) RequestUserValidationOTP(operatorID uint, reques
 	}
 
 	// Send OTP via SMS (uncomment when ready)
-	// err = userService.smsService.SendOTP(request.Phone, otp)
-	// if err != nil {
-	// 	return err
-	// }
+	err = userService.smsService.SendOTP(request.Phone, otp)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

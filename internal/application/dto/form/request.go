@@ -275,7 +275,7 @@ type UpsertNavidFormRequest struct {
 	SmokedOpiumPerDayCurrent     *uint
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
-	PastSmoking                  *string
+	PastSmoking                  *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string
@@ -344,7 +344,7 @@ type UpsertLungCancerRequest struct {
 	SmokedOpiumPerDayCurrent     *uint
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
-	PastSmoking                  *string
+	PastSmoking                  *enum.Answer
 	SmokePastAvg                 *uint
 	SmokeCurrentAvg              *uint
 	Bronchitis                   *enum.Answer
@@ -511,7 +511,7 @@ type UpdateLungCancerRequest struct {
 	SmokedOpiumPerDayCurrent     *uint
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
-	PastSmoking                  *string
+	PastSmoking                  *enum.Answer
 	SmokePastAvg                 *uint
 	SmokeCurrentAvg              *uint
 	Bronchitis                   *enum.Answer
@@ -575,7 +575,7 @@ type UpdateNavidFormRequest struct {
 	SmokedOpiumPerDayCurrent     *uint
 	ChewedOpiumPerDayCurrent     *uint
 	HookahPerWeekCurrent         *uint
-	PastSmoking                  *string
+	PastSmoking                  *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
 	SmokingTypesPast             *string

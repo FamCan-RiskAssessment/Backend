@@ -267,7 +267,7 @@ type GetLungCancerResponse struct {
 	SmokedOpiumPerDayCurrent     *uint            `json:"smokedOpiumPerDayCurrent,omitempty"`
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
-	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	PastSmoking                  *enum.Answer     `json:"pastSmoking,omitempty"`
 	SmokePastAvg                 *uint            `json:"smokePastAvg"`
 	SmokeCurrentAvg              *uint            `json:"smokeCurrentAvg"`
 	Bronchitis                   *enum.Answer     `json:"bronshit"`
@@ -336,7 +336,7 @@ type GetNavidFormResponse struct {
 	SmokedOpiumPerDayCurrent     *uint            `json:"smokedOpiumPerDayCurrent,omitempty"`
 	ChewedOpiumPerDayCurrent     *uint            `json:"chewedOpiumPerDayCurrent,omitempty"`
 	HookahPerWeekCurrent         *uint            `json:"hookahPerWeekCurrent,omitempty"`
-	PastSmoking                  *string          `json:"pastSmoking,omitempty"`
+	PastSmoking                  *enum.Answer     `json:"pastSmoking,omitempty"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`

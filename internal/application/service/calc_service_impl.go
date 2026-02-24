@@ -1047,7 +1047,7 @@ func (calcService *CalcService) sendFormToPLCO(form *entity.Form, userID uint) (
 				smokingDuration = 0
 			}
 		}
-	} else if lungCancerInfo.PastSmoking != nil && *lungCancerInfo.PastSmoking != "" {
+	} else if answerinList(lungCancerInfo.PastSmoking, []enum.Answer{enum.AnswerYes, enum.AnswerAgo, enum.AnswerLongAgo}) {
 		// Former smoker
 		if lungCancerInfo.CigarettesPerDayPast != nil {
 			cigarettesPerDay = float64(*lungCancerInfo.CigarettesPerDayPast)
@@ -1683,6 +1683,18 @@ func mapPersonalLsOther(cancerInfo []*entity.CancerInfo) int {
 func answeredYes(answer *enum.Answer) bool {
 	if answer != nil && *answer == enum.AnswerYes {
 		return true
+	}
+	return false
+}
+
+func answerinList(answer *enum.Answer, validAnswers []enum.Answer) bool {
+	if answer == nil {
+		return false
+	}
+	for _, valid := range validAnswers {
+		if *answer == valid {
+			return true
+		}
 	}
 	return false
 }

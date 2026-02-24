@@ -185,7 +185,7 @@ type LungCancerInfo struct {
 	SmokedOpiumPerDayCurrent     *uint        `gorm:"type:int"`
 	ChewedOpiumPerDayCurrent     *uint        `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint        `gorm:"type:int"`
-	PastSmoking                  *string      `gorm:"type:varchar(127)"`
+	PastSmoking                  *enum.Answer `gorm:"type:int"`
 	SmokePastAvg                 *uint        `gorm:"type:int"`
 	SmokeCurrentAvg              *uint        `gorm:"type:int"`
 	Bronchitis                   *enum.Answer `gorm:"type:int"`
@@ -243,7 +243,7 @@ type NavidInfo struct {
 	SmokedOpiumPerDayCurrent     *uint        `gorm:"type:int"`
 	ChewedOpiumPerDayCurrent     *uint        `gorm:"type:int"`
 	HookahPerWeekCurrent         *uint        `gorm:"type:int"`
-	PastSmoking                  *string      `gorm:"type:varchar(127)"`
+	PastSmoking                  *enum.Answer `gorm:"type:int"`
 	LeaveSmoke                   *uint        `gorm:"type:int"`
 	SmokingStartAgePast          *uint        `gorm:"type:int"`
 	SmokingTypesPast             *string      `gorm:"type:varchar(50)"`

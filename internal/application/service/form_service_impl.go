@@ -2306,6 +2306,12 @@ func (formService *FormService) GetContact(request formdto.GetPartialFormRequest
 		Education:             info.Education,
 		Phone2:                info.Phone2,
 		Phone3:                info.Phone3,
+		BrotherNumber:         info.BrotherNumber,
+		SisterNumber:          info.SisterNumber,
+		PaternalAuntNumber:    info.PaternalAuntNumber,
+		PaternalUncleNumber:   info.PaternalUncleNumber,
+		MaternalAuntNumber:    info.MaternalAuntNumber,
+		MaternalUncleNumber:   info.MaternalUncleNumber,
 	}, nil
 }
 

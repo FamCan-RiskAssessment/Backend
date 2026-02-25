@@ -30,6 +30,7 @@ var rolePermissions = map[RoleName][]PermissionType{
 		PermissionSetPassword,
 		PermissionHandleOperators,
 		PermissionCreateFormForUser,
+		PermissionFillProfile,
 	},
 	Operator: {
 		PermissionViewPatients,
@@ -46,6 +47,7 @@ var rolePermissions = map[RoleName][]PermissionType{
 		PermissionDeleteOwnData,
 		PermissionSetPassword,
 		PermissionCreateFormForUser,
+		PermissionFillProfile,
 	},
 	Patient: {
 		PermissionEnterData,

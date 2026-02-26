@@ -31,6 +31,7 @@ var rolePermissions = map[RoleName][]PermissionType{
 		PermissionHandleOperators,
 		PermissionCreateFormForUser,
 		PermissionFillProfile,
+		PermissionViewLogs,
 	},
 	Operator: {
 		PermissionViewPatients,

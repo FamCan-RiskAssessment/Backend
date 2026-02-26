@@ -16,7 +16,7 @@ type UserResponse struct {
 	HealthCenter         *string         `json:"healthCenter"`
 	SocialSecurityNumber *string         `json:"socialSecurityNumber"`
 	CreatedAt            *string         `json:"createdAt"`
-	Roles                *[]RoleResponse `json:"roles"`
+	Roles                *[]RoleOnlyResponse `json:"roles"`
 }
 
 type OTPData struct {
@@ -40,6 +40,11 @@ type RoleResponse struct {
 	ID          uint                 `json:"id"`
 	Name        string               `json:"name"`
 	Permissions []PermissionResponse `json:"permissions"`
+}
+
+type RoleOnlyResponse struct {
+	ID          uint                 `json:"id"`
+	Name        string               `json:"name"`
 }
 
 type UserProfileResponse struct {

@@ -541,16 +541,11 @@ func (userService *UserService) GetUsers(request userdto.GetUsersListRequest) ([
 		if err := userService.userRepository.FindUserRoles(userService.db, user); err != nil {
 			return nil, 0, err
 		}
-		roles := make([]userdto.RoleResponse, len(user.Roles))
+		roles := make([]userdto.RoleOnlyResponse, len(user.Roles))
 		for k, role := range user.Roles {
-			permissions, err := userService.getRolePermissions(&role)
-			if err != nil {
-				return nil, 0, err
-			}
-			roles[k] = userdto.RoleResponse{
-				ID:          role.ID,
-				Name:        role.Name,
-				Permissions: permissions,
+			roles[k] = userdto.RoleOnlyResponse{
+				ID:   role.ID,
+				Name: role.Name,
 			}
 		}
 		// createAt := user.CreatedAt.Format("2006-01-02")

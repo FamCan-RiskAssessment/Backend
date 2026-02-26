@@ -1961,13 +1961,13 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 
 	y, m, d, _ := jalaali.ToJalaali(basic.BirthDate.Year(), basic.BirthDate.Month(), basic.BirthDate.Day())
 
-	birthDate := time.Date(y, time.Month(int(m)), d, 0, 0, 0, 0, time.UTC)
+	birthDate := fmt.Sprintf("%0d-%0d-%0d", y, m, d)
 
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
 		FormType:             enum.FormType(basic.Form.FormType),
 		Gender:               basic.Gender,
-		BirthDate:            formdto.BirthDate(jalaali.From(birthDate)),
+		BirthDate:            birthDate,
 		IsAtba:               basic.IsAtba,
 		SocialSecurityNumber: decryptedSSN,
 		Height:               basic.Height,

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	generaldto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/general"
@@ -8,6 +10,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
+	"github.com/jalaali/go-jalaali"
 )
 
 type ActionLogService struct {
@@ -107,12 +110,15 @@ func (als *ActionLogService) GetAllActionLogs(request actionlogdto.GetAllActionL
 
 	response := make([]actionlogdto.LogResponse, len(actionLogs))
 	for i, actionLog := range actionLogs {
+		y, m, d, _ := jalaali.ToJalaali(actionLog.CreatedAt.Year(), actionLog.CreatedAt.Month(), actionLog.CreatedAt.Day())
+
+		createAt := fmt.Sprintf("%0d-%0d-%0d", y, m, d)
 		response[i] = actionlogdto.LogResponse{
 			ID:        actionLog.ID,
 			Action:    actionLog.Action.String(),
 			Resource:  actionLog.Resource,
 			Details:   actionLog.Details,
-			CreatedAt: actionLog.CreatedAt,
+			CreatedAt: createAt,
 		}
 	}
 

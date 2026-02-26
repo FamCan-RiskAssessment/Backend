@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
@@ -16,6 +17,7 @@ import (
 	redis "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/redis"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"github.com/google/uuid"
+	"github.com/jalaali/go-jalaali"
 )
 
 type UserService struct {
@@ -536,9 +538,31 @@ func (userService *UserService) GetUsers(request userdto.GetUsersListRequest) ([
 
 	userResponses := make([]userdto.UserResponse, len(users))
 	for i, user := range users {
+		if err := userService.userRepository.FindUserRoles(userService.db, user); err != nil {
+			return nil, 0, err
+		}
+		roles := make([]userdto.RoleResponse, len(user.Roles))
+		for k, role := range user.Roles {
+			permissions, err := userService.getRolePermissions(&role)
+			if err != nil {
+				return nil, 0, err
+			}
+			roles[k] = userdto.RoleResponse{
+				ID:          role.ID,
+				Name:        role.Name,
+				Permissions: permissions,
+			}
+		}
+		// createAt := user.CreatedAt.Format("2006-01-02")
+		y, m, d, _ := jalaali.ToJalaali(user.CreatedAt.Year(), user.CreatedAt.Month(), user.CreatedAt.Day())
+
+		createAt := fmt.Sprintf("%0d-%0d-%0d", y, m, d)
+
 		userResponses[i] = userdto.UserResponse{
-			ID:    user.ID,
-			Phone: user.Phone,
+			ID:        user.ID,
+			Phone:     user.Phone,
+			CreatedAt: &createAt,
+			Roles:     &roles,
 		}
 	}
 	return userResponses, count, nil

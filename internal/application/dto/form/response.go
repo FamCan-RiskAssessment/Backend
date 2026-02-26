@@ -115,7 +115,7 @@ type GetBasicFormResponse struct {
 	ID                   uint          `json:"id"`
 	FormType             enum.FormType `json:"formType"`
 	Gender               enum.Gender   `json:"gender"`
-	BirthDate            BirthDate     `json:"birthDate"`
+	BirthDate            string        `json:"birthDate"`
 	IsAtba               bool          `json:"isAtba"`
 	SocialSecurityNumber string        `json:"socialSecurityNumber"`
 	Height               float64       `json:"height"`

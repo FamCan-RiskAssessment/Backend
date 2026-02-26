@@ -1,8 +1,6 @@
 package actionlogdto
 
 import (
-	"time"
-
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 )
 
@@ -14,6 +12,6 @@ type LogResponse struct {
 	Resource   *string               `json:"resource,omitempty"`
 	ResourceID *uint                 `json:"resourceId,omitempty"`
 	Details    string                `json:"details"`
-	CreatedAt  time.Time             `json:"createdAt"`
-	UpdatedAt  time.Time             `json:"updatedAt"`
+	CreatedAt  string                `json:"createdAt"`
+	UpdatedAt  string                `json:"updatedAt"`
 }

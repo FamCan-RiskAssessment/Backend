@@ -117,13 +117,13 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_Success() {
 	now := time.Now()
 	actionLogs := []*entity.ActionLog{
 		{
-			Model: database.Model{ID: 1, CreatedAt: now},
+			Model:   database.Model{ID: 1, CreatedAt: now},
 			ActorID: 1,
 			Action:  enum.ActionTypeOperatorCreatedForm,
 			Details: "Created form",
 		},
 		{
-			Model: database.Model{ID: 2, CreatedAt: now},
+			Model:   database.Model{ID: 2, CreatedAt: now},
 			ActorID: 2,
 			Action:  enum.ActionTypeOperatorUpdatedForm,
 			Details: "Updated form",
@@ -177,7 +177,7 @@ func (suite *ActionLogServiceTestSuite) TestGetAllActionLogs_CountError() {
 	now := time.Now()
 	actionLogs := []*entity.ActionLog{
 		{
-			Model: database.Model{ID: 1, CreatedAt: now},
+			Model:   database.Model{ID: 1, CreatedAt: now},
 			ActorID: 1,
 			Action:  enum.ActionTypeOperatorCreatedForm,
 		},

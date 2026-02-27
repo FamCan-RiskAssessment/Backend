@@ -369,22 +369,34 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 		return formdto.BasicFormResponse{}, notFoundError
 	}
 
-	isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, request.SocialSecurityNumber)
-	if err != nil {
-		return formdto.BasicFormResponse{}, exception.NewVerificationFailedForbiddenError()
+	// Determine the requester (operator if present, otherwise the user themselves)
+	// and check if they are a superadmin to skip verification steps.
+	requesterID := request.UserID
+	if request.FilledByOperatorID != nil {
+		requesterID = *request.FilledByOperatorID
 	}
-	if !isMatch {
-		verificationError := exception.VerificationError{
-			Field:   "socialSecurityNumber",
-			Message: "Phone number and social security number do not match",
+	isSuperAdmin := formService.isUserSuperAdmin(requesterID)
+
+	if !isSuperAdmin {
+		isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, request.SocialSecurityNumber)
+		if err != nil {
+			return formdto.BasicFormResponse{}, exception.NewVerificationFailedForbiddenError()
 		}
-		return formdto.BasicFormResponse{}, verificationError
+		if !isMatch {
+			verificationError := exception.VerificationError{
+				Field:   "socialSecurityNumber",
+				Message: "Phone number and social security number do not match",
+			}
+			return formdto.BasicFormResponse{}, verificationError
+		}
 	}
 
 	if request.FilledByOperatorID != nil {
-		err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
-		if err != nil {
-			return formdto.BasicFormResponse{}, err
+		if !isSuperAdmin {
+			err = formService.userService.ValidateUserForFormCreation(*request.FilledByOperatorID, request.UserID)
+			if err != nil {
+				return formdto.BasicFormResponse{}, err
+			}
 		}
 		operator, err := formService.userService.GetUserByID(*request.FilledByOperatorID)
 		if err != nil {
@@ -4145,6 +4157,19 @@ func (formService *FormService) GetAllAnswers() ([]generaldto.EnumResponse, erro
 // Helper functions for pointers
 func strPtr(s string) *string {
 	return &s
+}
+
+func (formService *FormService) isUserSuperAdmin(userID uint) bool {
+	roles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false
+	}
+	for _, role := range roles {
+		if role.Name == enum.SuperAdmin.String() {
+			return true
+		}
+	}
+	return false
 }
 
 func boolPtr(b bool) *bool {

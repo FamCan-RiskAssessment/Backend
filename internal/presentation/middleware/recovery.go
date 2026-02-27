@@ -58,6 +58,8 @@ func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err er
 		handleNotFoundError(ctx, notFoundError, recovery.constants.Context.Translator)
 	} else if forbiddenError, ok := err.(exception.ForbiddenError); ok {
 		handleForbiddenError(ctx, forbiddenError, recovery.constants.Context.Translator)
+	} else if verificationError, ok := err.(exception.VerificationError); ok {
+		handleVerificationError(ctx, verificationError)
 	} else if fieldError, ok := err.(exception.FieldError); ok {
 		handleFieldError(ctx, fieldError, recovery.constants.Context.Translator)
 	} else {
@@ -220,6 +222,15 @@ func handleServiceUnavailableError(ctx *gin.Context, serviceUnavailableError exc
 	}
 
 	controller.Response(ctx, 503, errorMessage, nil)
+}
+
+func handleVerificationError(ctx *gin.Context, verificationError exception.VerificationError) {
+	errorMessages := map[string]map[string]string{
+		verificationError.Field: {
+			"mismatch": verificationError.Message,
+		},
+	}
+	controller.Response(ctx, 422, errorMessages, nil)
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {

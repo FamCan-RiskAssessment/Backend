@@ -6,6 +6,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	actionlogdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/actionLog"
 	generaldto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/general"
+	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
@@ -111,18 +112,43 @@ func (als *ActionLogService) GetAllActionLogs(request actionlogdto.GetAllActionL
 	response := make([]actionlogdto.LogResponse, len(actionLogs))
 	for i, actionLog := range actionLogs {
 		y, m, d, _ := jalaali.ToJalaali(actionLog.CreatedAt.Year(), actionLog.CreatedAt.Month(), actionLog.CreatedAt.Day())
+		createdAt := fmt.Sprintf("%0d-%0d-%0d", y, m, d)
 
-		createAt := fmt.Sprintf("%0d-%0d-%0d", y, m, d)
+		actor := mapUserToResponse(actionLog.Actor)
+
+		var target *userdto.UserResponse
+		if actionLog.Target != nil {
+			t := mapUserToResponse(*actionLog.Target)
+			target = &t
+		}
+
 		response[i] = actionlogdto.LogResponse{
-			ID:        actionLog.ID,
-			Action:    actionLog.Action.String(),
-			Resource:  actionLog.Resource,
-			Details:   actionLog.Details,
-			CreatedAt: createAt,
+			ID:         actionLog.ID,
+			Actor:      actor,
+			Target:     target,
+			Action:     actionLog.Action.String(),
+			Resource:   actionLog.Resource,
+			ResourceID: actionLog.ResourceID,
+			Details:    actionLog.Details,
+			CreatedAt:  createdAt,
 		}
 	}
 
 	return response, count, nil
+}
+
+func mapUserToResponse(user entity.User) userdto.UserResponse {
+	r := userdto.UserResponse{
+		ID:    user.ID,
+		Phone: user.Phone,
+	}
+	if user.UserProfile != nil {
+		r.Name = &user.UserProfile.Name
+		r.LastName = &user.UserProfile.LastName
+		r.HealthCenter = &user.UserProfile.HealthCenter
+		r.SocialSecurityNumber = &user.UserProfile.SocialSecurityNumber
+	}
+	return r
 }
 
 func (als *ActionLogService) GetAllActionTypes() ([]generaldto.EnumResponse, error) {

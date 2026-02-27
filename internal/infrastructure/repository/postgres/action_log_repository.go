@@ -44,7 +44,7 @@ func (r *ActionLogRepository) FindAllActionLogs(db database.Database, options *p
 	query = ApplyActionLogFilters(query, filters)
 	query = applyQueryOptions(query, options)
 
-	err := query.Find(&logs).Error
+	err := query.Preload("Actor").Preload("Actor.UserProfile").Preload("Target").Preload("Target.UserProfile").Find(&logs).Error
 	return logs, err
 }
 

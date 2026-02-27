@@ -6,6 +6,8 @@ services:
     image: ghcr.io/famcan-riskassessment/backend:latest
     container_name: backend-RA
     restart: unless-stopped
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
     deploy:
       resources:
         limits:
@@ -25,8 +27,15 @@ services:
     image: postgres:17
     container_name: db-RA
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
+    ports:
+      - ${DB_PORT}:5432
     volumes:
       - db-data:/var/lib/postgresql/data
     deploy:
@@ -44,8 +53,15 @@ services:
     image: redis:8
     container_name: rdb-RA
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
+    ports:
+      - ${RDB_PORT}:6379
     volumes:
       - rdb-data:/data
     deploy:
@@ -66,5 +82,3 @@ volumes:
 networks:
   famcan-network:
     external: true
-    depends_on:
-      - db

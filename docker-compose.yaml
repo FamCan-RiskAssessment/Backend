@@ -16,8 +16,6 @@ services:
           memory: 128M
     env_file:
       - ./.env
-    ports:
-      - ${SERVER_PORT}:${SERVER_PORT}
     depends_on:
       - db
     networks:
@@ -29,10 +27,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - ${DB_PORT}:5432
     volumes:
-      - db-data:/var/lib/postgresql
+      - db-data:/var/lib/postgresql/data
     deploy:
       resources:
         limits:
@@ -50,10 +46,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - ${RDB_PORT}:6379
     volumes:
-      - rdb-data:/var/lib/redis/data
+      - rdb-data:/data
     deploy:
       resources:
         limits:
@@ -72,3 +66,5 @@ volumes:
 networks:
   famcan-network:
     external: true
+    depends_on:
+      - db

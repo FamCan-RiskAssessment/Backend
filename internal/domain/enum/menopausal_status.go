@@ -16,7 +16,7 @@ func (ms MenopausalStatus) String() string {
 	case MenopausalStatusPostMenopausal:
 		return "بله (Postmenopausal)"
 	case MenopausalStatusMedicationInduced:
-		return "در اثر مصرف موقتا متوقف شده است"
+		return "در اثر مصرف دارو موقتا متوقف شده است"
 	case MenopausalStatusUnknown:
 		return "اطلاع ندارم"
 	}

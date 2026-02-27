@@ -78,5 +78,3 @@ volumes:
 networks:
   famcan-network:
     external: true
-    depends_on:
-      - db

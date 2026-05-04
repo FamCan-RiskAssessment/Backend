@@ -2,6 +2,7 @@ package seed
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	repository "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
@@ -12,17 +13,20 @@ type RoleSeeder struct {
 	superAdmin     *bootstrap.SuperAdmin
 	userRepository repository.UserRepository
 	db             database.Database
+	passwordHasher usecase.PasswordHasher
 }
 
 func NewRoleSeeder(
 	superAdmin *bootstrap.SuperAdmin,
 	userRepository repository.UserRepository,
 	db database.Database,
+	passwordHasher usecase.PasswordHasher,
 ) *RoleSeeder {
 	return &RoleSeeder{
 		superAdmin:     superAdmin,
 		userRepository: userRepository,
 		db:             db,
+		passwordHasher: passwordHasher,
 	}
 }
 
@@ -128,9 +132,13 @@ func (roleSeeder *RoleSeeder) getOrCreateAdmin(adminCred *bootstrap.SuperAdmin) 
 		panic(err)
 	}
 	if admin == nil {
+		hashedPassword, err := roleSeeder.passwordHasher.HashPassword(adminCred.Password)
+		if err != nil {
+			panic(err)
+		}
 		admin = &entity.User{
 			Phone:    adminCred.Phone,
-			Password: adminCred.Password,
+			Password: hashedPassword,
 		}
 		err = roleSeeder.userRepository.CreateUser(roleSeeder.db, admin)
 		if err != nil {

@@ -1,0 +1,52 @@
+# Local development: PostgreSQL + Redis only (images already present on this machine).
+# Usage: docker compose -f docker-compose.dev.yaml up -d
+# Point the app at localhost using DB_PORT / RDB_PORT from .env.
+
+services:
+  db:
+    image: docker.arvancloud.ir/postgres:latest
+    container_name: bahar-db-dev
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-bahar}
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bahar-dev
+
+  rdb:
+    image: redis:7-alpine
+    container_name: bahar-rdb-dev
+    restart: unless-stopped
+    ports:
+      - "${RDB_PORT:-6379}:6379"
+    env_file:
+      - .env
+    volumes:
+      - rdb-data-dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bahar-dev
+
+volumes:
+  postgres-data-dev:
+  rdb-data-dev:
+
+networks:
+  bahar-dev:
+    driver: bridge

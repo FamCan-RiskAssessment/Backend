@@ -115,8 +115,8 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 		Customer: customerControllers,
 	}
 	superAdmin := ProvideSuperAdminCredentials(config)
-	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase)
-	dummySeeder := seed.NewDummySeeder(postgresDatabase, userRepository, formRepository)
+	roleSeeder := seed.NewRoleSeeder(superAdmin, userRepository, postgresDatabase, passwordHasher)
+	dummySeeder := seed.NewDummySeeder(postgresDatabase, userRepository, formRepository, passwordHasher)
 	seeds := &Seeds{
 		RoleSeeder:  roleSeeder,
 		DummySeeder: dummySeeder,

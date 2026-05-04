@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	repository "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
@@ -14,17 +15,20 @@ type DummySeeder struct {
 	db             database.Database
 	userRepository repository.UserRepository
 	formRepository repository.FormRepository
+	passwordHasher usecase.PasswordHasher
 }
 
 func NewDummySeeder(
 	db database.Database,
 	userRepository repository.UserRepository,
 	formRepository repository.FormRepository,
+	passwordHasher usecase.PasswordHasher,
 ) *DummySeeder {
 	return &DummySeeder{
 		db:             db,
 		userRepository: userRepository,
 		formRepository: formRepository,
+		passwordHasher: passwordHasher,
 	}
 }
 
@@ -42,6 +46,11 @@ func (d *DummySeeder) seedUsers() {
 	roleMap := make(map[string]*entity.Role)
 	for _, role := range roles {
 		roleMap[role.Name] = role
+	}
+
+	hashedDummyPassword, err := d.passwordHasher.HashPassword("123456")
+	if err != nil {
+		panic(err)
 	}
 
 	users := []struct {
@@ -84,7 +93,7 @@ func (d *DummySeeder) seedUsers() {
 
 		user := &entity.User{
 			Phone:    userData.phone,
-			Password: "123456",
+			Password: hashedDummyPassword,
 		}
 
 		if err := d.userRepository.CreateUser(d.db, user); err != nil {

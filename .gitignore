@@ -7,3 +7,4 @@ tmp/
 *.pem
 famcan
 famcan.pub
+.idea/

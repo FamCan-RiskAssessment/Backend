@@ -3,7 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/famcan-riskassessment/backend:latest
+    image: backend-ra:latest
+    pull_policy: never
     container_name: backend-RA
     restart: unless-stopped
     ports:

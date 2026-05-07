@@ -1,10 +1,11 @@
-FROM golang:1.23.4-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 RUN apk add --no-cache gcc musl-dev
 
 WORKDIR /app
 
-RUN go env -w GOPROXY=https://goproxy.io,direct
+RUN go env -w GOPROXY=https://package-mirror.liara.ir/repository/go/
+RUN go env -w GOSUMDB=off
 
 COPY go.mod go.sum ./
 

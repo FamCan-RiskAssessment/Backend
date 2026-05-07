@@ -202,10 +202,16 @@ func (userService *UserService) LoginWithPassword(loginInfo userdto.LoginRequest
 		return userdto.LoginResponse{}, err
 	}
 
+	roles, err := userService.GetUserRoles(user.ID)
+	if err != nil {
+		return userdto.LoginResponse{}, err
+	}
+
 	return userdto.LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		Permissions:  permissions,
+		Roles:        roles,
 	}, nil
 }
 

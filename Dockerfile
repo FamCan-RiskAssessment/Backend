@@ -4,7 +4,7 @@ RUN apk add --no-cache gcc musl-dev
 
 WORKDIR /app
 
-RUN go env -w GOPROXY=https://package-mirror.liara.ir/repository/go/
+RUN go env -w GOPROXY=https://mirror.abrha.net/repository/go/,direct
 RUN go env -w GOSUMDB=off
 
 COPY go.mod go.sum ./

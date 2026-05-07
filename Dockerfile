@@ -1,6 +1,6 @@
 FROM golang:1.23.4-alpine AS builder
 
-RUN apk add --no-cache gcc musl-dev
+RUN apk add --no-cache gcc musl-dev git
 
 WORKDIR /app
 

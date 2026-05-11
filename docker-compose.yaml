@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: ghcr.io/famcan-riskassessment/backend:latest
     pull_policy: always
-    container_name: backend-RA
+    container_name: backend
     restart: unless-stopped
     ports:
       - ${SERVER_PORT}:${SERVER_PORT}

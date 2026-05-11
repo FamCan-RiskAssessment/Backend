@@ -248,6 +248,8 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 
 	userID, _ := ctx.Get(formController.constants.Context.ID)
 
+	operatorID, _ := ctx.Get(formController.constants.Context.ID)
+
 	request := formdto.UpdateBasicFormRequest{
 		FormID:               params.FormID,
 		BirthDate:            params.BirthDate,
@@ -257,6 +259,7 @@ func (formController *AdminFormController) UpdateBasicInfo(ctx *gin.Context) {
 		Height:               params.Height,
 		Weight:               params.Weight,
 		UserID:               userID.(uint),
+		FilledByOperatorID:   &[]uint{operatorID.(uint)}[0],
 	}
 
 	err := formController.formService.UpdateBasicInfo(request)

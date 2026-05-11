@@ -49,7 +49,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 	}
 
 	supervisorFormManagement := routerGroup.Group("/form")
-	supervisorFormManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionType(enum.PermissionHandleOperators)}))
+	supervisorFormManagement.Use(app.Middlewares.Auth.RequiredWithPermission([]enum.PermissionType{enum.PermissionHandleOperators}))
 	{
 
 	}

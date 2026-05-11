@@ -1977,7 +1977,7 @@ func (formService *FormService) GetBasicForm(request formdto.GetPartialFormReque
 
 	return formdto.GetBasicFormResponse{
 		ID:                   basic.ID,
-		FormType:             enum.FormType(basic.Form.FormType),
+		FormType:             basic.Form.FormType,
 		Gender:               basic.Gender,
 		BirthDate:            birthDate,
 		IsAtba:               basic.IsAtba,
@@ -2662,12 +2662,23 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 			return notFoundError
 		}
 
-		isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, *request.SocialSecurityNumber)
-		if err != nil {
-			return exception.NewVerificationFailedForbiddenError()
+		requesterID := request.UserID
+		if request.FilledByOperatorID != nil {
+			requesterID = *request.FilledByOperatorID
 		}
-		if !isMatch {
-			return exception.NewVerificationFailedForbiddenError()
+		isSuperAdmin := formService.isUserSuperAdmin(requesterID)
+		if !isSuperAdmin {
+			isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, *request.SocialSecurityNumber)
+			if err != nil {
+				return exception.NewVerificationFailedForbiddenError()
+			}
+			if !isMatch {
+				verificationError := exception.VerificationError{
+					Field:   "socialSecurityNumber",
+					Message: "Phone number and social security number do not match",
+				}
+				return verificationError
+			}
 		}
 
 		info.SocialSecurityNumber = *request.SocialSecurityNumber

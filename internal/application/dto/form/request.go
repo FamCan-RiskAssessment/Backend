@@ -41,8 +41,9 @@ type CreateBasicFormRequest struct {
 }
 
 type UpdateBasicFormRequest struct {
-	UserID uint
-	FormID uint
+	UserID             uint
+	FilledByOperatorID *uint
+	FormID             uint
 
 	// page 1
 	BirthDate            *BirthDate

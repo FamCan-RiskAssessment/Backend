@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
@@ -19,11 +18,9 @@ type VerificationClientImpl struct {
 
 func NewVerificationClient(config *bootstrap.VerificationAPI) *VerificationClientImpl {
 	return &VerificationClientImpl{
-		baseURL: config.BaseURL,
-		apiKey:  config.APIKey,
-		httpClient: &http.Client{
-			Timeout: 10 * time.Second,
-		},
+		baseURL:    config.BaseURL,
+		apiKey:     config.APIKey,
+		httpClient: &http.Client{},
 	}
 }
 

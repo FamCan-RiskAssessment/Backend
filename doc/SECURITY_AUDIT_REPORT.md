@@ -212,10 +212,10 @@ WORKDIR /app
 
 COPY --from=builder /app/main .
 RUN mkdir -p /app/internal/infrastructure/jwt
-COPY ./internal/infrastructure/jwt/privateKey.pem ./internal/infrastructure/jwt/
-COPY ./internal/infrastructure/jwt/publicKey.pem ./internal/infrastructure/jwt/
+COPY ../internal/infrastructure/jwt/privateKey.pem ./internal/infrastructure/jwt/
+COPY ../internal/infrastructure/jwt/publicKey.pem ./internal/infrastructure/jwt/
 
-COPY .env .  # <-- VULNERABILITY: Secrets copied into image
+COPY ../.env .  # <-- VULNERABILITY: Secrets copied into image
 
 EXPOSE 8080
 

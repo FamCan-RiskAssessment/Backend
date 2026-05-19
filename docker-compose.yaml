@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/famcan-riskassessment/backend:latest
+    image: 127.0.0.1:5000/backend:latest
     pull_policy: always
     container_name: backend
     restart: unless-stopped

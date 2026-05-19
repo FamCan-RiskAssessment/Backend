@@ -1,0 +1,27 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  REGISTRY: 127.0.0.1:5000
+  IMAGE: $REGISTRY/backend
+
+build:
+  stage: build
+  tags:
+    - deploy
+
+  script:
+    - docker build -t $IMAGE:$CI_COMMIT_SHA .
+    - docker tag $IMAGE:$CI_COMMIT_SHA $IMAGE:latest
+    - docker push $IMAGE:$CI_COMMIT_SHA
+    - docker push $IMAGE:latest
+
+deploy:
+  stage: deploy
+  tags:
+    - deploy
+
+  script:
+    - docker compose pull
+    - docker compose up -d

@@ -1,0 +1,8 @@
+.env
+.git
+.gitignore
+db-data/
+rdb-data/
+tmp/
+*.md
+doc/

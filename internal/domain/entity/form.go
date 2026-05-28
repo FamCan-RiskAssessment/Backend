@@ -22,12 +22,13 @@ type BasicInfo struct {
 	FormID uint `gorm:"not null;index"`
 	Form   Form `gorm:"foreignKey:FormID;constraint:OnDelete:CASCADE"`
 	// page 1
-	Gender               enum.Gender `gorm:"not null"`
-	BirthDate            time.Time   `gorm:"not null;type:date"`
-	IsAtba               bool        `gorm:"not null;default:false"`
-	SocialSecurityNumber string      `gorm:"type:varchar(500);not null"` // Encrypted, larger size needed
-	Height               float64     `gorm:"type:decimal(5,2);not null"`
-	Weight               float64     `gorm:"type:decimal(5,2);not null"`
+	Gender                   enum.Gender `gorm:"not null"`
+	BirthDate                time.Time   `gorm:"not null;type:date"`
+	IsAtba                   bool        `gorm:"not null;default:false"`
+	SocialSecurityNumber     string      `gorm:"type:varchar(500);not null"` // Encrypted, larger size needed
+	SocialSecurityNumberHash string      `gorm:"type:char(64);index"`
+	Height                   float64     `gorm:"type:decimal(5,2);not null"`
+	Weight                   float64     `gorm:"type:decimal(5,2);not null"`
 }
 
 type GeneralHealthInfo struct {
@@ -193,6 +194,7 @@ type LungCancerInfo struct {
 	Fibrosis                     *enum.Answer `gorm:"type:int"`
 	LeaveSmoke                   *uint        `gorm:"type:int"`
 	SmokingStartAgePast          *uint        `gorm:"type:int"`
+	SmokeTypePast                *string      `gorm:"type:varchar(50)"`
 	SmokingTypesPast             *string      `gorm:"type:varchar(50)"`
 	CigarettesPerDayPast         *uint        `gorm:"type:int"`
 	CigarPerDayPast              *uint        `gorm:"type:int"`

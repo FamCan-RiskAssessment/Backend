@@ -275,6 +275,7 @@ type GetLungCancerResponse struct {
 	Fibrosis                     *enum.Answer     `json:"lungill"`
 	LeaveSmoke                   *uint            `json:"leaveSmoke,omitempty"`
 	SmokingStartAgePast          *uint            `json:"smokingStartAgePast,omitempty"`
+	SmokeTypePast                *string          `json:"smokeTypePast,omitempty"`
 	SmokingTypesPast             *string          `json:"smokingTypesPast,omitempty"`
 	CigarettesPerDayPast         *uint            `json:"cigarettesPerDayPast,omitempty"`
 	CigarPerDayPast              *uint            `json:"cigarPerDayPast,omitempty"`

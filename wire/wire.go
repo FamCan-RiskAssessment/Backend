@@ -18,9 +18,9 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/crypto"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	infraExternal "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/external"
-	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
 	infraJWT "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/jwt"
 	infraLocalization "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/localization"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/ratelimit"
 	infraPostgre "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/postgres"
 	infraRedis "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/repository/redis"
 	seed "github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/seed"
@@ -109,6 +109,7 @@ var RateLimitProviderSet = wire.NewSet(
 var CryptoProviderSet = wire.NewSet(
 	crypto.NewPasswordHasher,
 	crypto.NewFieldEncryptor,
+	crypto.NewSensitiveFieldHasher,
 	wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)),
 )
 

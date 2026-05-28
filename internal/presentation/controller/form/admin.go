@@ -49,10 +49,15 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 		SortBy             *string        `form:"sortBy"`
 		SortOrder          *string        `form:"sortOrder"`
 		Search             *string        `form:"search"`
+		SSN                *string        `form:"ssn"`
 	}
 
 	params := controller.Validate[GetAllFormsParams](ctx)
-	offset, limit := controller.GetOffsetLimit(params.Page, params.PageSize, formController.pagination.DefaultPage, formController.pagination.DefaultPageSize)
+	offset, limit := controller.GetOffsetLimit(
+		params.Page, params.PageSize,
+		formController.pagination.DefaultPage,
+		formController.pagination.DefaultPageSize,
+	)
 
 	filters := &postgres.FormFilters{
 		Status:             params.Status,
@@ -63,6 +68,7 @@ func (formController *AdminFormController) GetAllForms(ctx *gin.Context) {
 		SmokingNow:         params.SmokingNow,
 		Cancer:             params.Cancer,
 		FilledByOperatorID: params.FilledByOperatorID,
+		SSN:                params.SSN,
 	}
 
 	forms, count, err := formController.formService.GetAllForms(offset, limit, filters, params.SortBy, params.SortOrder, params.Search)
@@ -527,6 +533,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		Fibrosis                     *enum.Answer `json:"fibroz"`
 		LeaveSmoke                   *uint        `json:"leaveSmoke"`
 		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
+		SmokeTypePast                *string      `json:"smokeTypePast"`
 		SmokingTypesPast             *string      `json:"smokingTypesPast"`
 		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
 		CigarPerDayPast              *uint        `json:"cigarPerDayPast"`
@@ -588,6 +595,7 @@ func (formController *AdminFormController) UpdateLungCancer(ctx *gin.Context) {
 		Fibrosis:                     params.Fibrosis,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
+		SmokeTypePast:                params.SmokeTypePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
 		CigarettesPerDayPast:         params.CigarettesPerDayPast,
 		CigarPerDayPast:              params.CigarPerDayPast,

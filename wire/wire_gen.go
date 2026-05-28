@@ -86,7 +86,8 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl, fieldEncryptor)
+	sensitiveFieldHasher := crypto.NewSensitiveFieldHasher(security)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl, fieldEncryptor, sensitiveFieldHasher)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -145,7 +146,7 @@ var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTrans
 
 var RateLimitProviderSet = wire.NewSet(middleware.NewRateLimitMiddleware, ProvideRateLimiter)
 
-var CryptoProviderSet = wire.NewSet(crypto.NewPasswordHasher, crypto.NewFieldEncryptor, wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)))
+var CryptoProviderSet = wire.NewSet(crypto.NewPasswordHasher, crypto.NewFieldEncryptor, crypto.NewSensitiveFieldHasher, wire.Bind(new(usecase.PasswordHasher), new(*crypto.PasswordHasher)))
 
 var MiddlewareProviderSet = wire.NewSet(middleware.NewCorsMiddleware, middleware.NewRecoveryMiddleware, middleware.NewLocalizationMiddleware, middleware.NewAuthMiddleware, RateLimitProviderSet, wire.Struct(new(Middlewares), "*"))
 

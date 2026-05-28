@@ -51,6 +51,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		EncryptionKey: "12345678901234567890123456789012", // 32 characters
 	}
 	fieldEncryptor, _ := crypto.NewFieldEncryptor(security)
+	ssnHasher := crypto.NewSensitiveFieldHasher(security)
 
 	suite.formService = NewFormService(
 		suite.constants,
@@ -61,6 +62,7 @@ func (suite *FormServiceTestSuite) SetupTest() {
 		suite.db,
 		suite.verificationClient,
 		fieldEncryptor,
+		ssnHasher,
 	)
 }
 

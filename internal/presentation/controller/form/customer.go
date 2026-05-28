@@ -407,6 +407,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		Fibrosis                     *enum.Answer `json:"fibroz"`
 		SmokingStartAgePast          *uint        `json:"smokingStartAgePast"`
 		LeaveSmoke                   *uint        `json:"leaveSmoke"`
+		SmokeTypePast                *string      `json:"smokeTypePast,omitempty"`
 		SmokingTypesPast             *string      `json:"smokingTypesPast,omitempty"`
 		CigarettesPerDayPast         *uint        `json:"cigarettesPerDayPast"`
 		CigarPerDayPast              *uint        `json:"cigarPerDayPast"`
@@ -468,6 +469,7 @@ func (formController *CustomerFormController) UpsertLungCancer(ctx *gin.Context)
 		Fibrosis:                     params.Fibrosis,
 		LeaveSmoke:                   params.LeaveSmoke,
 		SmokingStartAgePast:          params.SmokingStartAgePast,
+		SmokeTypePast:                params.SmokeTypePast,
 		SmokingTypesPast:             params.SmokingTypesPast,
 		CigarettesPerDayPast:         params.CigarettesPerDayPast,
 		CigarPerDayPast:              params.CigarPerDayPast,

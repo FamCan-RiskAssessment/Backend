@@ -31,6 +31,7 @@ type FormService struct {
 	db                 database.Database
 	verificationClient external.VerificationClient
 	fieldEncryptor     *crypto.FieldEncryptor
+	ssnHasher          *crypto.SensitiveFieldHasher
 }
 
 func NewFormService(
@@ -42,6 +43,7 @@ func NewFormService(
 	db database.Database,
 	verificationClient external.VerificationClient,
 	fieldEncryptor *crypto.FieldEncryptor,
+	ssnHasher *crypto.SensitiveFieldHasher,
 ) *FormService {
 	return &FormService{
 		constants:          constants,
@@ -52,6 +54,7 @@ func NewFormService(
 		db:                 db,
 		verificationClient: verificationClient,
 		fieldEncryptor:     fieldEncryptor,
+		ssnHasher:          ssnHasher,
 	}
 }
 
@@ -105,6 +108,21 @@ func (formService *FormService) isSuperAdmin(userID uint) (bool, error) {
 
 	for _, role := range userRoles {
 		if role.Name == enum.SuperAdmin.String() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (formService *FormService) isPatient(userID uint) (bool, error) {
+	userRoles, err := formService.userService.GetUserRoles(userID)
+	if err != nil {
+		return false, err
+	}
+
+	for _, role := range userRoles {
+		if role.Name == enum.Patient.String() {
 			return true, nil
 		}
 	}
@@ -435,13 +453,14 @@ func (formService *FormService) CreateBasicInfoForm(request formdto.CreateBasicF
 	birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 
 	basic := &entity.BasicInfo{
-		FormID:               form.ID,
-		Gender:               enum.Gender(uint(request.Gender)),
-		BirthDate:            birthDate,
-		IsAtba:               request.IsAtba,
-		SocialSecurityNumber: encryptedSSN,
-		Height:               request.Height,
-		Weight:               request.Weight,
+		FormID:                   form.ID,
+		Gender:                   enum.Gender(uint(request.Gender)),
+		BirthDate:                birthDate,
+		IsAtba:                   request.IsAtba,
+		SocialSecurityNumber:     encryptedSSN,
+		SocialSecurityNumberHash: formService.ssnHasher.HashSSN(request.SocialSecurityNumber),
+		Height:                   request.Height,
+		Weight:                   request.Weight,
 	}
 
 	if err = formService.formRepository.CreateBasicInfo(formService.db, basic); err != nil {
@@ -1658,6 +1677,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.LungIll = request.LungIll
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
+	info.SmokeTypePast = request.SmokeTypePast
 	info.SmokingTypesPast = request.SmokingTypesPast
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast
 	info.CigarPerDayPast = request.CigarPerDayPast
@@ -2385,6 +2405,7 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		LungIll:                      info.LungIll,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
+		SmokeTypePast:                info.SmokeTypePast,
 		SmokingTypesPast:             info.SmokingTypesPast,
 		CigarettesPerDayPast:         info.CigarettesPerDayPast,
 		CigarPerDayPast:              info.CigarPerDayPast,
@@ -2653,6 +2674,7 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 	}
 
 	if request.SocialSecurityNumber != nil {
+		normalizedSSNHash := formService.ssnHasher.HashSSN(*request.SocialSecurityNumber)
 		user, err := formService.userService.GetUserByID(form.UserID)
 		if err != nil {
 			return err
@@ -2666,8 +2688,11 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 		if request.FilledByOperatorID != nil {
 			requesterID = *request.FilledByOperatorID
 		}
-		isSuperAdmin := formService.isUserSuperAdmin(requesterID)
-		if !isSuperAdmin {
+		isPatient, err := formService.isPatient(requesterID)
+		if err != nil {
+			return err
+		}
+		if isPatient {
 			isMatch, err := formService.verificationClient.VerifyPhoneAndSSN(user.Phone, *request.SocialSecurityNumber)
 			if err != nil {
 				return exception.NewVerificationFailedForbiddenError()
@@ -2681,7 +2706,13 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 			}
 		}
 
-		info.SocialSecurityNumber = *request.SocialSecurityNumber
+		// Encrypt Social Security Number before updating
+		encryptedSSN, err := formService.fieldEncryptor.Encrypt(*request.SocialSecurityNumber)
+		if err != nil {
+			return err
+		}
+		info.SocialSecurityNumber = encryptedSSN
+		info.SocialSecurityNumberHash = normalizedSSNHash
 	}
 
 	if request.BirthDate != nil {
@@ -2690,14 +2721,6 @@ func (formService *FormService) UpdateBasicInfo(request formdto.UpdateBasicFormR
 
 		birthDate := time.Date(y, m, d, 0, 0, 0, 0, time.UTC)
 		info.BirthDate = birthDate
-	}
-	if request.SocialSecurityNumber != nil {
-		// Encrypt Social Security Number before updating
-		encryptedSSN, err := formService.fieldEncryptor.Encrypt(*request.SocialSecurityNumber)
-		if err != nil {
-			return err
-		}
-		info.SocialSecurityNumber = encryptedSSN
 	}
 	if request.Gender != nil {
 		info.Gender = enum.Gender(uint(*request.Gender))
@@ -2768,21 +2791,30 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 		options.WithSearch(*search, []string{"users.phone"})
 	}
 
-	forms, err := formService.formRepository.FindAllForms(formService.db, options, filters)
+	queryFilters := filters
+	if filters != nil && filters.SSN != nil {
+		filtersCopy := *filters
+		ssnHash := formService.ssnHasher.HashSSN(*filters.SSN)
+		filtersCopy.SSN = nil
+		filtersCopy.SSNHash = &ssnHash
+		queryFilters = &filtersCopy
+	}
+
+	forms, err := formService.formRepository.FindAllForms(formService.db, options, queryFilters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllForms(formService.db, options, filters)
+	count, err := formService.formRepository.CountAllForms(formService.db, options, queryFilters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	formResponses := make([]formdto.BasicFormResponse, len(forms))
-	for i, form := range forms {
+	formResponses := make([]formdto.BasicFormResponse, 0, len(forms))
+	for _, form := range forms {
 		var decryptedSSN string
 		var Name *string
-		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, forms[i].ID)
+		basicInfo, err := formService.formRepository.FindBasicInfoByFormID(formService.db, form.ID)
 		if err != nil {
 			return nil, 0, err
 		} else if basicInfo != nil {
@@ -2791,7 +2823,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 				return nil, 0, err
 			}
 		}
-		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, forms[i].ID)
+		contactInfo, err := formService.formRepository.FindContactByFormID(formService.db, form.ID)
 		if err != nil {
 			return nil, 0, err
 		} else if contactInfo != nil {
@@ -2841,7 +2873,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 				FilledForms.NavidForm = boolPtr(false)
 			}
 		}
-		formResponses[i] = formdto.BasicFormResponse{
+		formResponses = append(formResponses, formdto.BasicFormResponse{
 			FormID:                    form.ID,
 			FormType:                  form.FormType,
 			Status:                    form.Status.String(),
@@ -2854,7 +2886,7 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 			UpdatedAt:                 form.UpdatedAt,
 			AttentionQuestionsCorrect: formService.countAttentionQuestionsCorrect(form.ID),
 			FilledForms:               &FilledForms,
-		}
+		})
 	}
 
 	return formResponses, count, nil
@@ -3720,6 +3752,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
+	info.SmokeTypePast = request.SmokeTypePast
 	info.SmokingTypesPast = request.SmokingTypesPast
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast
 	info.CigarPerDayPast = request.CigarPerDayPast

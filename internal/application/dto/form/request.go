@@ -353,6 +353,7 @@ type UpsertLungCancerRequest struct {
 	Fibrosis                     *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
+	SmokeTypePast                *string
 	SmokingTypesPast             *string
 	CigarettesPerDayPast         *uint
 	CigarPerDayPast              *uint
@@ -520,6 +521,7 @@ type UpdateLungCancerRequest struct {
 	Fibrosis                     *enum.Answer
 	LeaveSmoke                   *uint
 	SmokingStartAgePast          *uint
+	SmokeTypePast                *string
 	SmokingTypesPast             *string
 	CigarettesPerDayPast         *uint
 	CigarPerDayPast              *uint

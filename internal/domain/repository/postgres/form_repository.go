@@ -15,6 +15,8 @@ type FormFilters struct {
 	SmokingNow         *bool
 	Cancer             *bool
 	FilledByOperatorID *uint
+	SSN                *string
+	SSNHash            *string
 }
 
 type OperatorFormFilters struct {

@@ -182,7 +182,14 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 		query = query.Where("gender = ?", *filters.Gender)
 	}
 	if filters.BirthYear != nil {
-		query = query.Where("birth_year = ?", *filters.BirthYear)
+		birthYear := int(*filters.BirthYear)
+		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
+		// Frontend may send Jalali year; map to overlapping Gregorian years.
+		if birthYear < 1700 {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int IN (?, ?)", birthYear+621, birthYear+622)
+		} else {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int = ?", birthYear)
+		}
 	}
 	if filters.DrinksAlcohol != nil {
 		query = query.Where("drinks_alcohol = ?", *filters.DrinksAlcohol)
@@ -195,6 +202,10 @@ func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 	}
 	if filters.FilledByOperatorID != nil {
 		query = query.Where("filled_by_operator_id = ?", *filters.FilledByOperatorID)
+	}
+	if filters.SSNHash != nil {
+		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
+		query = query.Where("basic_infos.social_security_number_hash = ?", *filters.SSNHash)
 	}
 
 	return query
@@ -215,7 +226,14 @@ func ApplyOperatorFormFilters(query *gorm.DB, filters *postgres.OperatorFormFilt
 		query = query.Where("gender = ?", *filters.Gender)
 	}
 	if filters.BirthYear != nil {
-		query = query.Where("birth_year = ?", *filters.BirthYear)
+		birthYear := int(*filters.BirthYear)
+		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
+		// Frontend may send Jalali year; map to overlapping Gregorian years.
+		if birthYear < 1700 {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int IN (?, ?)", birthYear+621, birthYear+622)
+		} else {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int = ?", birthYear)
+		}
 	}
 	if filters.DrinksAlcohol != nil {
 		query = query.Where("drinks_alcohol = ?", *filters.DrinksAlcohol)

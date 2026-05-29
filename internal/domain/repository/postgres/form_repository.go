@@ -28,6 +28,7 @@ type OperatorFormFilters struct {
 	DrinksAlcohol *bool
 	SmokingNow    *bool
 	Cancer        *bool
+	SSNHash       *string
 }
 
 type FormRepository interface {

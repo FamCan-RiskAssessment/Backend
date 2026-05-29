@@ -1677,8 +1677,7 @@ func (formService *FormService) UpsertLungCancer(request formdto.UpsertLungCance
 	info.LungIll = request.LungIll
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
-	info.SmokeTypePast = request.SmokeTypePast
-	info.SmokingTypesPast = request.SmokingTypesPast
+	info.SmokingTypesPast = coalesceSmokingTypesPast(request.SmokingTypesPast, request.SmokeTypePast)
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast
 	info.CigarPerDayPast = request.CigarPerDayPast
 	info.ECigPerDayPast = request.ECigPerDayPast
@@ -2405,7 +2404,7 @@ func (formService *FormService) GetLungCancer(request formdto.GetPartialFormRequ
 		LungIll:                      info.LungIll,
 		LeaveSmoke:                   info.LeaveSmoke,
 		SmokingStartAgePast:          info.SmokingStartAgePast,
-		SmokeTypePast:                info.SmokeTypePast,
+		SmokeTypePast:                info.SmokingTypesPast,
 		SmokingTypesPast:             info.SmokingTypesPast,
 		CigarettesPerDayPast:         info.CigarettesPerDayPast,
 		CigarPerDayPast:              info.CigarPerDayPast,
@@ -2787,12 +2786,17 @@ func (formService *FormService) GetAllForms(offset, limit int, filters *postgres
 	}
 	options.WithSorting(sortCol, asc)
 
-	if search != nil && *search != "" {
-		options.WithSearch(*search, []string{"users.phone"})
-	}
-
 	queryFilters := filters
-	if filters != nil && filters.SSN != nil {
+	if search != nil && *search != "" {
+		filtersCopy := postgres.FormFilters{}
+		if filters != nil {
+			filtersCopy = *filters
+		}
+		ssnHash := formService.ssnHasher.HashSSN(*search)
+		filtersCopy.SSN = nil
+		filtersCopy.SSNHash = &ssnHash
+		queryFilters = &filtersCopy
+	} else if filters != nil && filters.SSN != nil {
 		filtersCopy := *filters
 		ssnHash := formService.ssnHasher.HashSSN(*filters.SSN)
 		filtersCopy.SSN = nil
@@ -2930,16 +2934,20 @@ func (formService *FormService) GetAllOperatorForms(offset, limit int, filters *
 	}
 	options.WithSorting(sortCol, asc)
 
+	queryFilters := filters
 	if search != nil && *search != "" {
-		options.WithSearch(*search, []string{"users.phone"})
+		filtersCopy := *filters
+		ssnHash := formService.ssnHasher.HashSSN(*search)
+		filtersCopy.SSNHash = &ssnHash
+		queryFilters = &filtersCopy
 	}
 
-	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, options, filters)
+	forms, err := formService.formRepository.FindAllOperatorForms(formService.db, options, queryFilters)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := formService.formRepository.CountAllOperatorForms(formService.db, options, filters)
+	count, err := formService.formRepository.CountAllOperatorForms(formService.db, options, queryFilters)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -3752,8 +3760,7 @@ func (formService *FormService) UpdateLungCancer(request formdto.UpdateLungCance
 
 	info.LeaveSmoke = request.LeaveSmoke
 	info.SmokingStartAgePast = request.SmokingStartAgePast
-	info.SmokeTypePast = request.SmokeTypePast
-	info.SmokingTypesPast = request.SmokingTypesPast
+	info.SmokingTypesPast = coalesceSmokingTypesPast(request.SmokingTypesPast, request.SmokeTypePast)
 	info.CigarettesPerDayPast = request.CigarettesPerDayPast
 	info.CigarPerDayPast = request.CigarPerDayPast
 	info.ECigPerDayPast = request.ECigPerDayPast
@@ -4222,4 +4229,11 @@ func boolPtr(b bool) *bool {
 
 func answerPtr(a enum.Answer) *enum.Answer {
 	return &a
+}
+
+func coalesceSmokingTypesPast(primary, fallback *string) *string {
+	if primary != nil {
+		return primary
+	}
+	return fallback
 }

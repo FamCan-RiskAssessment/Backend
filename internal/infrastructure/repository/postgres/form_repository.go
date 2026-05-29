@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/database"
 	"gorm.io/gorm"
@@ -167,83 +168,139 @@ func (r *FormRepository) CountAllOperatorForms(db database.Database, options *po
 	return count, err
 }
 
+type formFilterJoins struct {
+	basicInfo     bool
+	generalHealth bool
+	cancerVisit   bool
+}
+
+func (j *formFilterJoins) joinBasicInfo(query *gorm.DB) *gorm.DB {
+	if !j.basicInfo {
+		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
+		j.basicInfo = true
+	}
+	return query
+}
+
+func (j *formFilterJoins) joinGeneralHealth(query *gorm.DB) *gorm.DB {
+	if !j.generalHealth {
+		query = query.Joins("JOIN general_health_infos ON general_health_infos.form_id = forms.id")
+		j.generalHealth = true
+	}
+	return query
+}
+
+func (j *formFilterJoins) joinCancerVisit(query *gorm.DB) *gorm.DB {
+	if !j.cancerVisit {
+		query = query.Joins("JOIN cancers ON cancers.form_id = forms.id")
+		j.cancerVisit = true
+	}
+	return query
+}
+
+func applyCrossTableFormFilters(
+	query *gorm.DB,
+	gender *string,
+	birthYear *uint,
+	drinksAlcohol, smokingNow, cancer *bool,
+	ssnHash *string,
+) *gorm.DB {
+	var joins formFilterJoins
+
+	if gender != nil {
+		if g, ok := enum.ParseGenderFilter(*gender); ok {
+			query = joins.joinBasicInfo(query)
+			query = query.Where("basic_infos.gender = ?", g)
+		}
+	}
+	if birthYear != nil {
+		year := int(*birthYear)
+		query = joins.joinBasicInfo(query)
+		// Frontend may send Jalali year; map to overlapping Gregorian years.
+		if year < 1700 {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int IN (?, ?)", year+621, year+622)
+		} else {
+			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int = ?", year)
+		}
+	}
+	if drinksAlcohol != nil {
+		query = joins.joinGeneralHealth(query)
+		answer := enum.AnswerNo
+		if *drinksAlcohol {
+			answer = enum.AnswerYes
+		}
+		query = query.Where("general_health_infos.drinks_alcohol = ?", answer)
+	}
+	if smokingNow != nil {
+		query = joins.joinGeneralHealth(query)
+		answer := enum.AnswerNo
+		if *smokingNow {
+			answer = enum.AnswerYes
+		}
+		query = query.Where("general_health_infos.smoking_now = ?", answer)
+	}
+	if cancer != nil {
+		query = joins.joinCancerVisit(query)
+		query = query.Where("cancers.cancer = ?", *cancer)
+	}
+	if ssnHash != nil {
+		query = joins.joinBasicInfo(query)
+		query = query.Where("basic_infos.social_security_number_hash = ?", *ssnHash)
+	}
+
+	return query
+}
+
 func ApplyFormFilters(query *gorm.DB, filters *postgres.FormFilters) *gorm.DB {
 	if filters == nil {
 		return query
 	}
 
 	if filters.FormType != nil {
-		query = query.Where("form_type = ?", *filters.FormType)
+		query = query.Where("forms.form_type = ?", *filters.FormType)
 	}
 	if filters.Status != nil {
-		query = query.Where("status = ?", *filters.Status)
-	}
-	if filters.Gender != nil {
-		query = query.Where("gender = ?", *filters.Gender)
-	}
-	if filters.BirthYear != nil {
-		birthYear := int(*filters.BirthYear)
-		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
-		// Frontend may send Jalali year; map to overlapping Gregorian years.
-		if birthYear < 1700 {
-			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int IN (?, ?)", birthYear+621, birthYear+622)
-		} else {
-			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int = ?", birthYear)
-		}
-	}
-	if filters.DrinksAlcohol != nil {
-		query = query.Where("drinks_alcohol = ?", *filters.DrinksAlcohol)
-	}
-	if filters.SmokingNow != nil {
-		query = query.Where("smoking_now = ?", *filters.SmokingNow)
-	}
-	if filters.Cancer != nil {
-		query = query.Where("cancer = ?", *filters.Cancer)
+		query = query.Where("forms.status = ?", *filters.Status)
 	}
 	if filters.FilledByOperatorID != nil {
-		query = query.Where("filled_by_operator_id = ?", *filters.FilledByOperatorID)
+		query = query.Where("forms.filled_by_operator_id = ?", *filters.FilledByOperatorID)
 	}
-	if filters.SSNHash != nil {
-		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
-		query = query.Where("basic_infos.social_security_number_hash = ?", *filters.SSNHash)
-	}
+
+	query = applyCrossTableFormFilters(
+		query,
+		filters.Gender,
+		filters.BirthYear,
+		filters.DrinksAlcohol,
+		filters.SmokingNow,
+		filters.Cancer,
+		filters.SSNHash,
+	)
 
 	return query
 }
+
 func ApplyOperatorFormFilters(query *gorm.DB, filters *postgres.OperatorFormFilters) *gorm.DB {
 	if filters == nil {
 		return query
 	}
 
-	query = query.Where("operator_id = ?", filters.OperatorID)
+	query = query.Where("forms.operator_id = ?", filters.OperatorID)
 	if filters.FormType != nil {
-		query = query.Where("form_type = ?", *filters.FormType)
+		query = query.Where("forms.form_type = ?", *filters.FormType)
 	}
 	if filters.Status != nil {
-		query = query.Where("status = ?", *filters.Status)
+		query = query.Where("forms.status = ?", *filters.Status)
 	}
-	if filters.Gender != nil {
-		query = query.Where("gender = ?", *filters.Gender)
-	}
-	if filters.BirthYear != nil {
-		birthYear := int(*filters.BirthYear)
-		query = query.Joins("JOIN basic_infos ON basic_infos.form_id = forms.id")
-		// Frontend may send Jalali year; map to overlapping Gregorian years.
-		if birthYear < 1700 {
-			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int IN (?, ?)", birthYear+621, birthYear+622)
-		} else {
-			query = query.Where("EXTRACT(YEAR FROM basic_infos.birth_date)::int = ?", birthYear)
-		}
-	}
-	if filters.DrinksAlcohol != nil {
-		query = query.Where("drinks_alcohol = ?", *filters.DrinksAlcohol)
-	}
-	if filters.SmokingNow != nil {
-		query = query.Where("smoking_now = ?", *filters.SmokingNow)
-	}
-	if filters.Cancer != nil {
-		query = query.Where("cancer = ?", *filters.Cancer)
-	}
+
+	query = applyCrossTableFormFilters(
+		query,
+		filters.Gender,
+		filters.BirthYear,
+		filters.DrinksAlcohol,
+		filters.SmokingNow,
+		filters.Cancer,
+		filters.SSNHash,
+	)
 
 	return query
 }

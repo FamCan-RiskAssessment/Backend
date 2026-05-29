@@ -194,7 +194,6 @@ type LungCancerInfo struct {
 	Fibrosis                     *enum.Answer `gorm:"type:int"`
 	LeaveSmoke                   *uint        `gorm:"type:int"`
 	SmokingStartAgePast          *uint        `gorm:"type:int"`
-	SmokeTypePast                *string      `gorm:"type:varchar(50)"`
 	SmokingTypesPast             *string      `gorm:"type:varchar(50)"`
 	CigarettesPerDayPast         *uint        `gorm:"type:int"`
 	CigarPerDayPast              *uint        `gorm:"type:int"`

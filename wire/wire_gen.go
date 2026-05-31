@@ -98,8 +98,8 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	adminFormController := form.NewAdminFormController(constants, formService, userService, pagination)
 	actionLogController := actionlog.NewActionLogController(actionLogService, formService, userService, pagination)
 	calcURL := ProvideCalcURL(config)
-	calcService := service.NewCalcService(constants, formRepository, actionLogService, postgresDatabase, calcURL)
-	adminCalcController := calc.NewAdminCalcController(constants, calcService)
+	calcService := service.NewCalcService(constants, formRepository, formService, actionLogService, postgresDatabase, calcURL)
+	adminCalcController := calc.NewAdminCalcController(constants, calcService, pagination)
 	adminControllers := &AdminControllers{
 		UserController:      adminUserController,
 		FormController:      adminFormController,

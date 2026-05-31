@@ -527,6 +527,15 @@ func (r *FormRepository) FindPremm5ResultByFormID(db database.Database, formID u
 	return &result, nil
 }
 
+func (r *FormRepository) FindPremm5ResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.Premm5Result, error) {
+	if len(formIDs) == 0 {
+		return []entity.Premm5Result{}, nil
+	}
+	var results []entity.Premm5Result
+	err := db.GetDB().Where("form_id IN ?", formIDs).Find(&results).Error
+	return results, err
+}
+
 func (r *FormRepository) CreatePremm5Result(db database.Database, result *entity.Premm5Result) error {
 	return db.GetDB().Create(result).Error
 }
@@ -545,6 +554,15 @@ func (r *FormRepository) FindBCRAResultByFormID(db database.Database, formID uin
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *FormRepository) FindBCRAResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.BCRAResult, error) {
+	if len(formIDs) == 0 {
+		return []entity.BCRAResult{}, nil
+	}
+	var results []entity.BCRAResult
+	err := db.GetDB().Where("form_id IN ?", formIDs).Find(&results).Error
+	return results, err
 }
 
 func (r *FormRepository) CreateBCRAResult(db database.Database, result *entity.BCRAResult) error {
@@ -567,6 +585,15 @@ func (r *FormRepository) FindGailResultByFormID(db database.Database, formID uin
 	return &result, nil
 }
 
+func (r *FormRepository) FindGailResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.GailResult, error) {
+	if len(formIDs) == 0 {
+		return []entity.GailResult{}, nil
+	}
+	var results []entity.GailResult
+	err := db.GetDB().Where("form_id IN ?", formIDs).Find(&results).Error
+	return results, err
+}
+
 func (r *FormRepository) CreateGailResult(db database.Database, result *entity.GailResult) error {
 	return db.GetDB().Create(result).Error
 }
@@ -585,6 +612,15 @@ func (r *FormRepository) FindPLCOResultByFormID(db database.Database, formID uin
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *FormRepository) FindPLCOResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.PLCOResult, error) {
+	if len(formIDs) == 0 {
+		return []entity.PLCOResult{}, nil
+	}
+	var results []entity.PLCOResult
+	err := db.GetDB().Where("form_id IN ?", formIDs).Find(&results).Error
+	return results, err
 }
 
 func (r *FormRepository) CreatePLCOResult(db database.Database, result *entity.PLCOResult) error {

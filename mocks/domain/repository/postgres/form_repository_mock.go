@@ -283,6 +283,14 @@ func (f *FormRepositoryMock) FindPremm5ResultByFormID(db database.Database, form
 	return args.Get(0).(*entity.Premm5Result), args.Error(1)
 }
 
+func (f *FormRepositoryMock) FindPremm5ResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.Premm5Result, error) {
+	args := f.Called(db, formIDs)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entity.Premm5Result), args.Error(1)
+}
+
 func (f *FormRepositoryMock) CreatePremm5Result(db database.Database, result *entity.Premm5Result) error {
 	args := f.Called(db, result)
 	return args.Error(0)
@@ -299,6 +307,14 @@ func (f *FormRepositoryMock) FindBCRAResultByFormID(db database.Database, formID
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*entity.BCRAResult), args.Error(1)
+}
+
+func (f *FormRepositoryMock) FindBCRAResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.BCRAResult, error) {
+	args := f.Called(db, formIDs)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entity.BCRAResult), args.Error(1)
 }
 
 func (f *FormRepositoryMock) CreateBCRAResult(db database.Database, result *entity.BCRAResult) error {
@@ -319,6 +335,14 @@ func (f *FormRepositoryMock) FindGailResultByFormID(db database.Database, formID
 	return args.Get(0).(*entity.GailResult), args.Error(1)
 }
 
+func (f *FormRepositoryMock) FindGailResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.GailResult, error) {
+	args := f.Called(db, formIDs)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entity.GailResult), args.Error(1)
+}
+
 func (f *FormRepositoryMock) CreateGailResult(db database.Database, result *entity.GailResult) error {
 	args := f.Called(db, result)
 	return args.Error(0)
@@ -335,6 +359,14 @@ func (f *FormRepositoryMock) FindPLCOResultByFormID(db database.Database, formID
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*entity.PLCOResult), args.Error(1)
+}
+
+func (f *FormRepositoryMock) FindPLCOResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.PLCOResult, error) {
+	args := f.Called(db, formIDs)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]entity.PLCOResult), args.Error(1)
 }
 
 func (f *FormRepositoryMock) CreatePLCOResult(db database.Database, result *entity.PLCOResult) error {

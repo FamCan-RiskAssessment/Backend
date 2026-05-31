@@ -85,18 +85,22 @@ type FormRepository interface {
 	UpdateNavidInfo(db database.Database, info *entity.NavidInfo) error
 
 	FindPremm5ResultByFormID(db database.Database, formID uint) (*entity.Premm5Result, error)
+	FindPremm5ResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.Premm5Result, error)
 	CreatePremm5Result(db database.Database, result *entity.Premm5Result) error
 	UpdatePremm5Result(db database.Database, result *entity.Premm5Result) error
 
 	FindBCRAResultByFormID(db database.Database, formID uint) (*entity.BCRAResult, error)
+	FindBCRAResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.BCRAResult, error)
 	CreateBCRAResult(db database.Database, result *entity.BCRAResult) error
 	UpdateBCRAResult(db database.Database, result *entity.BCRAResult) error
 
 	FindGailResultByFormID(db database.Database, formID uint) (*entity.GailResult, error)
+	FindGailResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.GailResult, error)
 	CreateGailResult(db database.Database, result *entity.GailResult) error
 	UpdateGailResult(db database.Database, result *entity.GailResult) error
 
 	FindPLCOResultByFormID(db database.Database, formID uint) (*entity.PLCOResult, error)
+	FindPLCOResultsByFormIDs(db database.Database, formIDs []uint) ([]entity.PLCOResult, error)
 	CreatePLCOResult(db database.Database, result *entity.PLCOResult) error
 	UpdatePLCOResult(db database.Database, result *entity.PLCOResult) error
 

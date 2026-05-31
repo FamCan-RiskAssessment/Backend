@@ -1,5 +1,16 @@
 package calcdto
 
+import postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
+
+type GetCalcBrowseRequest struct {
+	Offset    int
+	Limit     int
+	Filters   *postgres.FormFilters
+	SortBy    *string
+	SortOrder *string
+	Search    *string
+}
+
 type SendFormToCalcRequest struct {
 	UserID uint
 	FormID uint

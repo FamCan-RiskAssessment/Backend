@@ -6,6 +6,7 @@ import (
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
 	calcdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/calc"
 	"github.com/FamCan-RiskAssessment/Backend/internal/application/usecase"
+	postgres "github.com/FamCan-RiskAssessment/Backend/internal/domain/repository/postgres"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller"
 	"github.com/gin-gonic/gin"
 )
@@ -13,16 +14,60 @@ import (
 type AdminCalcController struct {
 	constants   *bootstrap.Constants
 	calcService usecase.CalcService
+	pagination  *bootstrap.Pagination
 }
 
 func NewAdminCalcController(
 	constants *bootstrap.Constants,
 	calcService usecase.CalcService,
+	pagination *bootstrap.Pagination,
 ) *AdminCalcController {
 	return &AdminCalcController{
 		constants:   constants,
 		calcService: calcService,
+		pagination:  pagination,
 	}
+}
+
+func (calcController *AdminCalcController) GetCalcBrowse(ctx *gin.Context) {
+	type GetCalcBrowseParams struct {
+		Page      int     `form:"page"`
+		PageSize  int     `form:"pageSize"`
+		Status    *uint   `form:"status"`
+		SortBy    *string `form:"sortBy"`
+		SortOrder *string `form:"sortOrder"`
+		Search    *string `form:"search"`
+	}
+
+	params := controller.Validate[GetCalcBrowseParams](ctx)
+	offset, limit := controller.GetOffsetLimit(
+		params.Page,
+		params.PageSize,
+		calcController.pagination.DefaultPage,
+		calcController.pagination.DefaultPageSize,
+	)
+
+	filters := &postgres.FormFilters{
+		Status: params.Status,
+	}
+
+	request := calcdto.GetCalcBrowseRequest{
+		Offset:    offset,
+		Limit:     limit,
+		Filters:   filters,
+		SortBy:    params.SortBy,
+		SortOrder: params.SortOrder,
+		Search:    params.Search,
+	}
+
+	items, count, err := calcController.calcService.GetCalcBrowse(request)
+	if err != nil {
+		log.Printf("[CALC ERROR] GetCalcBrowse failed - Error: %v\n", err)
+		panic(err)
+	}
+
+	data := controller.NewPaginatedResponse(items, count, offset, limit)
+	controller.Response(ctx, 200, "", data)
 }
 
 func (calcController *AdminCalcController) SendFormToCalc(ctx *gin.Context) {

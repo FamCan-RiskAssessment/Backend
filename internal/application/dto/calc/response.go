@@ -1,5 +1,7 @@
 package calcdto
 
+import formdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/form"
+
 type CalcEnumResponse struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
@@ -34,4 +36,16 @@ type PLCOResponse struct {
 	PLCOM20123YrRisk     float64            `json:"plcom2012_3yr_risk"`
 	PLCOM2012RiskPercent float64            `json:"plcom2012_risk_percent"`
 	PLCO2012Results      map[string]float64 `json:"plco2012results,omitempty"`
+}
+
+type CalcResultsBundle struct {
+	Premm5 *Premm5Response `json:"premm5,omitempty"`
+	BCRA   *BCRAResponse   `json:"bcra,omitempty"`
+	Gail   *GailResponse   `json:"gail,omitempty"`
+	PLCO   *PLCOResponse   `json:"plco,omitempty"`
+}
+
+type CalcBrowseItemResponse struct {
+	Form    formdto.BasicFormResponse `json:"form"`
+	Results CalcResultsBundle         `json:"results"`
 }

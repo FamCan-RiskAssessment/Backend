@@ -181,6 +181,7 @@ func SetupAdminRoutes(routerGroup *gin.RouterGroup, app *wire.Application) {
 
 	calc := routerGroup.Group("/calc")
 	{
+		calc.GET("", app.Controllers.Admin.CalcController.GetCalcBrowse)
 		calc.POST("/model", app.Controllers.Admin.CalcController.SendFormToCalc)
 		calc.GET("/premm5/:formID", app.Controllers.Admin.CalcController.GetPremm5Results)
 		calc.GET("/bcra/:formID", app.Controllers.Admin.CalcController.GetBCRAResults)

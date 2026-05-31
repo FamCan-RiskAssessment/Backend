@@ -24,6 +24,7 @@ import (
 type CalcService struct {
 	constants        *bootstrap.Constants
 	formRepository   postgres.FormRepository
+	formService      usecase.FormService
 	actionLogService usecase.ActionLogService
 	db               database.Database
 	calcURL          *bootstrap.CalcURL
@@ -32,6 +33,7 @@ type CalcService struct {
 func NewCalcService(
 	constants *bootstrap.Constants,
 	formRepository postgres.FormRepository,
+	formService usecase.FormService,
 	actionLogService usecase.ActionLogService,
 	db database.Database,
 	calcURL *bootstrap.CalcURL,
@@ -39,6 +41,7 @@ func NewCalcService(
 	return &CalcService{
 		constants:        constants,
 		formRepository:   formRepository,
+		formService:      formService,
 		actionLogService: actionLogService,
 		db:               db,
 		calcURL:          calcURL,
@@ -482,6 +485,61 @@ func (calcService *CalcService) sendFormToGail(form *entity.Form, userID uint) (
 	}, nil
 }
 
+func (calcService *CalcService) GetCalcBrowse(request calcdto.GetCalcBrowseRequest) ([]calcdto.CalcBrowseItemResponse, int64, error) {
+	forms, count, err := calcService.formService.GetAllForms(
+		request.Offset,
+		request.Limit,
+		request.Filters,
+		request.SortBy,
+		request.SortOrder,
+		request.Search,
+	)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if len(forms) == 0 {
+		return []calcdto.CalcBrowseItemResponse{}, count, nil
+	}
+
+	formIDs := make([]uint, len(forms))
+	for i, form := range forms {
+		formIDs[i] = form.FormID
+	}
+
+	premm5ByFormID, err := calcService.loadPremm5ResultsByFormID(formIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	bcraByFormID, err := calcService.loadBCRAResultsByFormID(formIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	gailByFormID, err := calcService.loadGailResultsByFormID(formIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	plcoByFormID, err := calcService.loadPLCOResultsByFormID(formIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	items := make([]calcdto.CalcBrowseItemResponse, len(forms))
+	for i, form := range forms {
+		items[i] = calcdto.CalcBrowseItemResponse{
+			Form: form,
+			Results: calcdto.CalcResultsBundle{
+				Premm5: mapPremm5Result(premm5ByFormID[form.FormID]),
+				BCRA:   mapBCRAResult(bcraByFormID[form.FormID]),
+				Gail:   mapGailResult(gailByFormID[form.FormID]),
+				PLCO:   mapPLCOResult(plcoByFormID[form.FormID]),
+			},
+		}
+	}
+
+	return items, count, nil
+}
+
 func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcRequest) (calcdto.Premm5Response, error) {
 	form, err := calcService.formRepository.FindFormByID(calcService.db, request.FormID)
 	if err != nil {
@@ -502,18 +560,13 @@ func (calcService *CalcService) GetPremm5Results(request calcdto.SendFormToCalcR
 		return calcdto.Premm5Response{}, notFoundError
 	}
 
-	response := calcdto.Premm5Response{
-		GeneProbs: map[string]float64{
-			"MLH1": result.MLH1Probability,
-			"MSH2": result.MSH2Probability,
-			"MSH6": result.MSH6Probability,
-			"PMS2": result.PMS2Probability,
-		},
-		PAny:  result.PAny,
-		PNone: result.PNone,
+	response := mapPremm5Result(result)
+	if response == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
+		return calcdto.Premm5Response{}, notFoundError
 	}
 
-	return response, nil
+	return *response, nil
 
 }
 
@@ -537,15 +590,13 @@ func (calcService *CalcService) GetBCRAResults(request calcdto.SendFormToCalcReq
 		return calcdto.BCRAResponse{}, notFoundError
 	}
 
-	response := calcdto.BCRAResponse{
-		AbsRisk:    result.AbsRisk,
-		AbsRiskAvg: result.AbsRiskAvg,
-		RRStar1:    result.RRStar1,
-		RRStar2:    result.RRStar2,
-		ProjIntvl:  result.ProjIntvl,
+	response := mapBCRAResult(result)
+	if response == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
+		return calcdto.BCRAResponse{}, notFoundError
 	}
 
-	return response, nil
+	return *response, nil
 }
 
 func (calcService *CalcService) GetGailResults(request calcdto.SendFormToCalcRequest) (calcdto.GailResponse, error) {
@@ -568,12 +619,13 @@ func (calcService *CalcService) GetGailResults(request calcdto.SendFormToCalcReq
 		return calcdto.GailResponse{}, notFoundError
 	}
 
-	response := calcdto.GailResponse{
-		AbsoluteRisk: result.AbsoluteRisk,
-		RelativeRisk: result.RelativeRisk,
+	response := mapGailResult(result)
+	if response == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
+		return calcdto.GailResponse{}, notFoundError
 	}
 
-	return response, nil
+	return *response, nil
 }
 
 func (calcService *CalcService) GetPLCOResults(request calcdto.SendFormToCalcRequest) (calcdto.PLCOResponse, error) {
@@ -596,20 +648,118 @@ func (calcService *CalcService) GetPLCOResults(request calcdto.SendFormToCalcReq
 		return calcdto.PLCOResponse{}, notFoundError
 	}
 
-	response := calcdto.PLCOResponse{
+	response := mapPLCOResult(result)
+	if response == nil {
+		notFoundError := exception.NotFoundError{Item: calcService.constants.Field.Record}
+		return calcdto.PLCOResponse{}, notFoundError
+	}
+
+	return *response, nil
+}
+
+func (calcService *CalcService) loadPremm5ResultsByFormID(formIDs []uint) (map[uint]*entity.Premm5Result, error) {
+	results, err := calcService.formRepository.FindPremm5ResultsByFormIDs(calcService.db, formIDs)
+	if err != nil {
+		return nil, err
+	}
+	byFormID := make(map[uint]*entity.Premm5Result, len(results))
+	for i := range results {
+		byFormID[results[i].FormID] = &results[i]
+	}
+	return byFormID, nil
+}
+
+func (calcService *CalcService) loadBCRAResultsByFormID(formIDs []uint) (map[uint]*entity.BCRAResult, error) {
+	results, err := calcService.formRepository.FindBCRAResultsByFormIDs(calcService.db, formIDs)
+	if err != nil {
+		return nil, err
+	}
+	byFormID := make(map[uint]*entity.BCRAResult, len(results))
+	for i := range results {
+		byFormID[results[i].FormID] = &results[i]
+	}
+	return byFormID, nil
+}
+
+func (calcService *CalcService) loadGailResultsByFormID(formIDs []uint) (map[uint]*entity.GailResult, error) {
+	results, err := calcService.formRepository.FindGailResultsByFormIDs(calcService.db, formIDs)
+	if err != nil {
+		return nil, err
+	}
+	byFormID := make(map[uint]*entity.GailResult, len(results))
+	for i := range results {
+		byFormID[results[i].FormID] = &results[i]
+	}
+	return byFormID, nil
+}
+
+func (calcService *CalcService) loadPLCOResultsByFormID(formIDs []uint) (map[uint]*entity.PLCOResult, error) {
+	results, err := calcService.formRepository.FindPLCOResultsByFormIDs(calcService.db, formIDs)
+	if err != nil {
+		return nil, err
+	}
+	byFormID := make(map[uint]*entity.PLCOResult, len(results))
+	for i := range results {
+		byFormID[results[i].FormID] = &results[i]
+	}
+	return byFormID, nil
+}
+
+func mapPremm5Result(result *entity.Premm5Result) *calcdto.Premm5Response {
+	if result == nil {
+		return nil
+	}
+	return &calcdto.Premm5Response{
+		GeneProbs: map[string]float64{
+			"MLH1": result.MLH1Probability,
+			"MSH2": result.MSH2Probability,
+			"MSH6": result.MSH6Probability,
+			"PMS2": result.PMS2Probability,
+		},
+		PAny:  result.PAny,
+		PNone: result.PNone,
+	}
+}
+
+func mapBCRAResult(result *entity.BCRAResult) *calcdto.BCRAResponse {
+	if result == nil {
+		return nil
+	}
+	return &calcdto.BCRAResponse{
+		AbsRisk:    result.AbsRisk,
+		AbsRiskAvg: result.AbsRiskAvg,
+		RRStar1:    result.RRStar1,
+		RRStar2:    result.RRStar2,
+		ProjIntvl:  result.ProjIntvl,
+	}
+}
+
+func mapGailResult(result *entity.GailResult) *calcdto.GailResponse {
+	if result == nil {
+		return nil
+	}
+	return &calcdto.GailResponse{
+		AbsoluteRisk: result.AbsoluteRisk,
+		RelativeRisk: result.RelativeRisk,
+	}
+}
+
+func mapPLCOResult(result *entity.PLCOResult) *calcdto.PLCOResponse {
+	if result == nil {
+		return nil
+	}
+	response := &calcdto.PLCOResponse{
 		PLCOM20126YrRisk:     result.PLCOM20126YrRisk,
 		PLCOM20123YrRisk:     result.PLCOM20123YrRisk,
 		PLCOM2012RiskPercent: result.PLCOM2012RiskPercent,
 	}
-
 	if result.PLCO2012Results3Yr != nil && result.PLCO2012Results6Yr != nil {
 		response.PLCO2012Results = map[string]float64{
 			"risk_3yr": *result.PLCO2012Results3Yr,
 			"risk_6yr": *result.PLCO2012Results6Yr,
 		}
 	}
-
-	return response, nil
+	return response
 }
 
 func (calcService *CalcService) callPremm5API(request calcdto.SendFormToPremm5Request) (calcdto.Premm5Response, error) {

@@ -156,8 +156,8 @@ func ProvideSMSTemplates(container *bootstrap.Config) *bootstrap.SMSTemplates {
 	return &container.Constants.SMSTemplates
 }
 
-func ProvideJWTKeysPath(container *bootstrap.Config) *bootstrap.JWTKeysPath {
-	return &container.Constants.JWTKeysPath
+func ProvideJWTConfig(container *bootstrap.Config) *bootstrap.JWT {
+	return &container.Env.JWT
 }
 
 func ProvideSuperAdminCredentials(container *bootstrap.Config) *bootstrap.SuperAdmin {
@@ -206,7 +206,7 @@ var ProviderSet = wire.NewSet(
 	ProvideStorageConfig,
 	ProvideSMSGatewayConfig,
 	ProvideSMSTemplates,
-	ProvideJWTKeysPath,
+	ProvideJWTConfig,
 	ProvideSuperAdminCredentials,
 	ProvidePagination,
 	ProvideCalcURL,

@@ -11,19 +11,19 @@ import (
 )
 
 type JWTService struct {
-	keysPath   *bootstrap.JWTKeysPath
+	jwtConfig  *bootstrap.JWT
 	keyManager domainJWT.KeyManager
 }
 
 func NewJWTService(
 	keyManager domainJWT.KeyManager,
-	keysPath *bootstrap.JWTKeysPath,
+	jwtConfig *bootstrap.JWT,
 ) *JWTService {
 	service := &JWTService{
 		keyManager: keyManager,
-		keysPath:   keysPath,
+		jwtConfig:  jwtConfig,
 	}
-	err := keyManager.LoadKeys(keysPath.PrivateKey, keysPath.PublicKey)
+	err := keyManager.LoadKeys(jwtConfig.PrivateKey, jwtConfig.PublicKey)
 	if err != nil {
 		panic(err)
 	}

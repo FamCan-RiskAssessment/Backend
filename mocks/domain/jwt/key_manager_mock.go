@@ -15,8 +15,8 @@ func NewKeyManagerMock() *KeyManagerMock {
 	return &KeyManagerMock{}
 }
 
-func (k *KeyManagerMock) LoadKeys(privateKeyPath, publicKeyPath string) error {
-	args := k.Called(privateKeyPath, publicKeyPath)
+func (k *KeyManagerMock) LoadKeys(privateKeyPEM, publicKeyPEM string) error {
+	args := k.Called(privateKeyPEM, publicKeyPEM)
 	return args.Error(0)
 }
 

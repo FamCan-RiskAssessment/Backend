@@ -14,7 +14,6 @@ type Constants struct {
 	Field        Field
 	Tag          Tag
 	SMSTemplates SMSTemplates
-	JWTKeysPath  JWTKeysPath
 }
 
 type Context struct {
@@ -53,11 +52,6 @@ type SMSTemplates struct {
 	OTP string
 }
 
-type JWTKeysPath struct {
-	PrivateKey string
-	PublicKey  string
-}
-
 func NewConstants() *Constants {
 	return &Constants{
 		Context: Context{
@@ -85,10 +79,6 @@ func NewConstants() *Constants {
 		},
 		SMSTemplates: SMSTemplates{
 			OTP: "otp",
-		},
-		JWTKeysPath: JWTKeysPath{
-			PrivateKey: "internal/infrastructure/jwt/privateKey.pem",
-			PublicKey:  "internal/infrastructure/jwt/publicKey.pem",
 		},
 	}
 }

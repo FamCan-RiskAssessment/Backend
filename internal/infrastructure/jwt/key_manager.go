@@ -3,7 +3,6 @@ package jwt
 import (
 	"crypto/rsa"
 	"fmt"
-	"os"
 	"sync"
 
 	domainJWT "github.com/FamCan-RiskAssessment/Backend/internal/domain/jwt"
@@ -21,26 +20,16 @@ func NewJWTKeyManager() domainJWT.KeyManager {
 	return &JWTKeyManager{}
 }
 
-func (k *JWTKeyManager) LoadKeys(privateKeyPath, publicKeyPath string) error {
+func (k *JWTKeyManager) LoadKeys(privateKeyPEM, publicKeyPEM string) error {
 	k.mutex.Lock()
 	defer k.mutex.Unlock()
 
-	privKeyBytes, err := os.ReadFile(privateKeyPath)
-	if err != nil {
-		return fmt.Errorf("failed to read private key: %w", err)
-	}
-
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privKeyBytes)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPEM))
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}
 
-	publicKeyBytes, err := os.ReadFile(publicKeyPath)
-	if err != nil {
-		return fmt.Errorf("failed to read public key: %w", err)
-	}
-
-	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyBytes)
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(publicKeyPEM))
 	if err != nil {
 		return fmt.Errorf("failed to parse public key: %w", err)
 	}

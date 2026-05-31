@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -19,6 +20,7 @@ type Env struct {
 	CalcURL         CalcURL
 	VerificationAPI VerificationAPI
 	Security        Security
+	JWT             JWT
 }
 
 type Server struct {
@@ -98,6 +100,11 @@ type Security struct {
 	RateLimitWindow    int
 }
 
+type JWT struct {
+	PrivateKey string
+	PublicKey  string
+}
+
 func NewEnv() *Env {
 	godotenv.Load(".env")
 	return &Env{
@@ -166,6 +173,10 @@ func NewEnv() *Env {
 			RateLimitPerMinute: getEnvInt("RATE_LIMIT_PER_MINUTE", 5),
 			RateLimitWindow:    getEnvInt("RATE_LIMIT_WINDOW_SECONDS", 1),
 		},
+		JWT: JWT{
+			PrivateKey: getEnvPEM("JWT_PRIVATE_KEY"),
+			PublicKey:  getEnvPEM("JWT_PUBLIC_KEY"),
+		},
 	}
 }
 
@@ -176,4 +187,8 @@ func getEnvInt(key string, defaultVal int) int {
 		}
 	}
 	return defaultVal
+}
+
+func getEnvPEM(key string) string {
+	return strings.ReplaceAll(os.Getenv(key), `\n`, "\n")
 }

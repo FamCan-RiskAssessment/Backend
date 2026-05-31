@@ -16,11 +16,11 @@ import (
 
 type JWTServiceTestSuite struct {
 	suite.Suite
-	keyManager   *jwtMocks.KeyManagerMock
-	keysPath     *bootstrap.JWTKeysPath
-	jwtService   *JWTService
-	privateKey   *rsa.PrivateKey
-	publicKey    *rsa.PublicKey
+	keyManager *jwtMocks.KeyManagerMock
+	jwtConfig  *bootstrap.JWT
+	jwtService *JWTService
+	privateKey *rsa.PrivateKey
+	publicKey  *rsa.PublicKey
 }
 
 func (suite *JWTServiceTestSuite) SetupTest() {
@@ -32,17 +32,17 @@ func (suite *JWTServiceTestSuite) SetupTest() {
 	suite.publicKey = publicKey
 
 	suite.keyManager = jwtMocks.NewKeyManagerMock()
-	suite.keysPath = &bootstrap.JWTKeysPath{
-		PrivateKey: "test_private.pem",
-		PublicKey:  "test_public.pem",
+	suite.jwtConfig = &bootstrap.JWT{
+		PrivateKey: "test-private-key-pem",
+		PublicKey:  "test-public-key-pem",
 	}
 
 	// Setup expectations for LoadKeys to not panic
-	suite.keyManager.On("LoadKeys", suite.keysPath.PrivateKey, suite.keysPath.PublicKey).Return(nil)
+	suite.keyManager.On("LoadKeys", suite.jwtConfig.PrivateKey, suite.jwtConfig.PublicKey).Return(nil)
 	suite.keyManager.On("GetPrivateKey").Return(privateKey)
 	suite.keyManager.On("GetPublicKey").Return(publicKey)
 
-	suite.jwtService = NewJWTService(suite.keyManager, suite.keysPath)
+	suite.jwtService = NewJWTService(suite.keyManager, suite.jwtConfig)
 }
 
 // Test: GenerateToken should return valid access and refresh tokens
@@ -186,17 +186,17 @@ func (suite *JWTServiceTestSuite) TestValidateToken_ExtractUserID() {
 func TestNewJWTService_LoadKeysFails(t *testing.T) {
 	// Arrange
 	keyManager := jwtMocks.NewKeyManagerMock()
-	keysPath := &bootstrap.JWTKeysPath{
-		PrivateKey: "invalid_private.pem",
-		PublicKey:  "invalid_public.pem",
+	jwtConfig := &bootstrap.JWT{
+		PrivateKey: "invalid-private-key-pem",
+		PublicKey:  "invalid-public-key-pem",
 	}
 
 	// Setup expectation for LoadKeys to return an error
-	keyManager.On("LoadKeys", keysPath.PrivateKey, keysPath.PublicKey).Return(errors.New("failed to load keys"))
+	keyManager.On("LoadKeys", jwtConfig.PrivateKey, jwtConfig.PublicKey).Return(errors.New("failed to load keys"))
 
 	// Act & Assert - should panic
 	assert.Panics(t, func() {
-		NewJWTService(keyManager, keysPath)
+		NewJWTService(keyManager, jwtConfig)
 	})
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 type KeyManager interface {
-	LoadKeys(privateKeyPath, publicKeyPath string) error
+	LoadKeys(privateKeyPEM, publicKeyPEM string) error
 	GetPrivateKey() *rsa.PrivateKey
 	GetPublicKey() *rsa.PublicKey
 }

@@ -364,8 +364,8 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		BreastDensity                *string                 `form:"breastDensity,omitempty"`
 		Falop                        *enum.Answer            `form:"falop,omitempty"`
 		Andometrioz                  *enum.Answer            `form:"andometrioz,omitempty"`
-		LeavePestan                  bool                    `form:"leavePestan"`
-		LeaveTokhmdan                bool                    `form:"leaveTokhmdan"`
+		LeavePestan                  *enum.Answer            `form:"leavePestan"`
+		LeaveTokhmdan                *enum.Answer            `form:"leaveTokhmdan"`
 		LaDeColon                    *enum.Answer            `form:"laDeColon,omitempty"`
 		LaDePol                      *enum.Answer            `form:"laDePol,omitempty"`
 		AspLaMo                      *enum.Answer            `form:"aspLaMo,omitempty"`
@@ -403,8 +403,8 @@ func (formController *AdminFormController) UpdateMamography(ctx *gin.Context) {
 		BreastDensity:                params.BreastDensity,
 		Falop:                        params.Falop,
 		Andometrioz:                  params.Andometrioz,
-		LeavePestan:                  &params.LeavePestan,
-		LeaveTokhmdan:                &params.LeaveTokhmdan,
+		LeavePestan:                  params.LeavePestan,
+		LeaveTokhmdan:                params.LeaveTokhmdan,
 		LaDeColon:                    params.LaDeColon,
 		LaDePol:                      params.LaDePol,
 		AspLaMo:                      params.AspLaMo,

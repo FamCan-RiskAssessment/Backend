@@ -286,6 +286,9 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 		hasChildren = enum.AnswerYes
 	}
 
+	leftPestan := enum.AnswerYes
+	leftTokhmdan := enum.AnswerYes
+
 	mamoGraphyInfo := &entity.MamoGraphyInfo{
 		FormID:                       formID,
 		GhaedeAge:                    uint(12 + (formIndex % 10)),
@@ -308,8 +311,8 @@ func (d *DummySeeder) createDummyMamography(formID uint, formIndex int, menopaus
 		MamoGraphy:                   &drinksAlcohol,
 		Falop:                        &drinksAlcohol,
 		Andometrioz:                  &drinksAlcohol,
-		LeavePestan:                  formIndex%4 == 0,
-		LeaveTokhmdan:                formIndex%5 == 0,
+		LeavePestan:                  &leftPestan,
+		LeaveTokhmdan:                &leftTokhmdan,
 		LaDeColon:                    &drinksAlcohol,
 		LaDePol:                      &drinksAlcohol,
 		AspLaMo:                      &drinksAlcohol,

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
-	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/routes"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
 	"github.com/gin-gonic/gin"
@@ -20,31 +19,31 @@ func main() {
 		panic(err)
 	}
 
-	app.Database.DB.GetDB().AutoMigrate(
-		&entity.User{},
-		&entity.UserProfile{},
-		&entity.Role{},
-		&entity.Permission{},
-		&entity.Form{},
-		&entity.BasicInfo{},
-		&entity.GeneralHealthInfo{},
-		&entity.MamoGraphyInfo{},
-		&entity.Cancer{},
-		&entity.CancerInfo{},
-		&entity.FamilyCancerInfo{},
-		&entity.ContactInfo{},
-		&entity.LungCancerInfo{},
-		&entity.NavidInfo{},
-		&entity.ActionLog{},
-		&entity.Premm5Result{},
-		&entity.BCRAResult{},
-		&entity.GailResult{},
-		&entity.PLCOResult{},
-		&entity.AttentionQuestions{},
-	)
+	//app.Database.DB.GetDB().AutoMigrate(
+	//	&entity.User{},
+	//	&entity.UserProfile{},
+	//	&entity.Role{},
+	//	&entity.Permission{},
+	//	&entity.Form{},
+	//	&entity.BasicInfo{},
+	//	&entity.GeneralHealthInfo{},
+	//	&entity.MamoGraphyInfo{},
+	//	&entity.Cancer{},
+	//	&entity.CancerInfo{},
+	//	&entity.FamilyCancerInfo{},
+	//	&entity.ContactInfo{},
+	//	&entity.LungCancerInfo{},
+	//	&entity.NavidInfo{},
+	//	&entity.ActionLog{},
+	//	&entity.Premm5Result{},
+	//	&entity.BCRAResult{},
+	//	&entity.GailResult{},
+	//	&entity.PLCOResult{},
+	//	&entity.AttentionQuestions{},
+	//)
 
-	app.Seeds.RoleSeeder.SeedRoles()
-	app.Seeds.DummySeeder.SeedDummy()
+	//app.Seeds.RoleSeeder.SeedRoles()
+	//app.Seeds.DummySeeder.SeedDummy()
 
 	routes.Run(ginEngine, app)
 

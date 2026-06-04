@@ -41,6 +41,7 @@ var Persian = map[string]interface{}{
 	"errors": map[string]interface{}{
 		"generic":                "خطایی رخ داده است، لطفا دوباره تلاش کنید.",
 		"numeric":                "`{0}` باید عدد باشد.",
+		"invalidType":            "نوع داده `{0}` نامعتبر است.",
 		"fileRequired":           "وارد کردن فایل اجباری است.",
 		"minimumLength":          "باید از 7 کاراکتر بیشتر باشد.",
 		"containsLowercase":      "باید حتما دارای حرف کوچک باشد.",

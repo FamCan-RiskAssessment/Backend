@@ -199,8 +199,8 @@ type GetMamographyResponse struct {
 	BreastDensity                string                `json:"breastDensity"`
 	Falop                        *enum.Answer          `json:"falop"`
 	Andometrioz                  *enum.Answer          `json:"andometrioz"`
-	LeavePestan                  bool                  `json:"leavePestan"`
-	LeaveTokhmdan                bool                  `json:"leaveTokhmdan"`
+	LeavePestan                  *enum.Answer          `json:"leavePestan"`
+	LeaveTokhmdan                *enum.Answer          `json:"leaveTokhmdan"`
 	LaDeColon                    *enum.Answer          `json:"laDeColon"`
 	LaDePol                      *enum.Answer          `json:"laDePol"`
 	AspLaMo                      *enum.Answer          `json:"aspLaMo"`

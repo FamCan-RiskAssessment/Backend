@@ -238,6 +238,23 @@ func (formService *FormService) canUserEditForm(
 	form *entity.Form,
 	userID uint,
 ) (bool, error) {
+
+	// Check if user is a supervisor
+	isSup, err := formService.isSupervisor(userID)
+	if err != nil {
+		return false, err
+	}
+	// Allow access if user is SuperAdmin
+	isSuperAdminUser, err := formService.isSuperAdmin(userID)
+	if err != nil {
+		return false, err
+	}
+
+	if isSup || isSuperAdminUser {
+		// Supervisors can edit in most statuses except Calculated
+		return validation.CanUserEditFormInStatus(form.Status, false), nil
+	}
+
 	// Check if user is the form owner
 	if form.UserID == userID {
 		// Patients can only edit in Draft and WaitingForDocuments
@@ -261,22 +278,6 @@ func (formService *FormService) canUserEditForm(
 			// Operators can edit in most statuses except Calculated
 			return validation.CanUserEditFormInStatus(form.Status, false), nil
 		}
-	}
-
-	// Check if user is a supervisor
-	isSup, err := formService.isSupervisor(userID)
-	if err != nil {
-		return false, err
-	}
-	// Allow access if user is SuperAdmin
-	isSuperAdminUser, err := formService.isSuperAdmin(userID)
-	if err != nil {
-		return false, err
-	}
-
-	if isSup || isSuperAdminUser {
-		// Supervisors can edit in most statuses except Calculated
-		return validation.CanUserEditFormInStatus(form.Status, false), nil
 	}
 
 	return false, nil
@@ -1156,18 +1157,26 @@ func (formService *FormService) CreateFamilyCancer(request formdto.CreateFamilyC
 	if err != nil {
 		return formdto.CreateFamilyCancerResponse{}, err
 	}
-	if isOp {
-		canEdit, err := formService.canOperatorEditForm(form, request.UserID)
-		if err != nil {
-			return formdto.CreateFamilyCancerResponse{}, err
-		}
-		if !canEdit {
+
+	isSuperAdmin, err := formService.isSuperAdmin(request.UserID)
+	if err != nil {
+		return formdto.CreateFamilyCancerResponse{}, err
+	}
+
+	if !isSuperAdmin {
+		if isOp {
+			canEdit, err := formService.canOperatorEditForm(form, request.UserID)
+			if err != nil {
+				return formdto.CreateFamilyCancerResponse{}, err
+			}
+			if !canEdit {
+				forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
+				return formdto.CreateFamilyCancerResponse{}, forbiddenError
+			}
+		} else if form.UserID != request.UserID {
 			forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
 			return formdto.CreateFamilyCancerResponse{}, forbiddenError
 		}
-	} else if form.UserID != request.UserID {
-		forbiddenError := exception.ForbiddenError{Resource: formService.constants.Field.Form}
-		return formdto.CreateFamilyCancerResponse{}, forbiddenError
 	}
 
 	info := &entity.FamilyCancerInfo{
@@ -3367,7 +3376,7 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	info.DaughterCount = request.DaughterCount
 	info.AgeOfFirstBirth = request.AgeOfFirstBirth
 	if request.MenopausalStatus != nil {
-		info.MenopausalStatus = enum.MenopausalStatus(uint(*request.MenopausalStatus))
+		info.MenopausalStatus = enum.MenopausalStatus(*request.MenopausalStatus)
 	}
 	info.MenopauseAge = request.MenopauseAge
 	if request.HRT != nil {
@@ -3404,10 +3413,10 @@ func (formService *FormService) UpdateMamography(request formdto.UpdateMamograph
 	}
 
 	if request.LeavePestan != nil {
-		info.LeavePestan = *request.LeavePestan
+		info.LeavePestan = request.LeavePestan
 	}
 	if request.LeaveTokhmdan != nil {
-		info.LeaveTokhmdan = *request.LeaveTokhmdan
+		info.LeaveTokhmdan = request.LeaveTokhmdan
 	}
 	if request.LaDeColon != nil {
 		info.LaDeColon = request.LaDeColon

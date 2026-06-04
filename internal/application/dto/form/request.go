@@ -122,8 +122,8 @@ type UpsertMamographyRequest struct {
 	BreastDensity                *string
 	Falop                        *enum.Answer
 	Andometrioz                  *enum.Answer
-	LeavePestan                  bool
-	LeaveTokhmdan                bool
+	LeavePestan                  *enum.Answer
+	LeaveTokhmdan                *enum.Answer
 	LaDeColon                    *enum.Answer
 	LaDePol                      *enum.Answer
 	AspLaMo                      *enum.Answer
@@ -438,8 +438,8 @@ type UpdateMamographyRequest struct {
 	BreastDensity                *string
 	Falop                        *enum.Answer
 	Andometrioz                  *enum.Answer
-	LeavePestan                  *bool
-	LeaveTokhmdan                *bool
+	LeavePestan                  *enum.Answer
+	LeaveTokhmdan                *enum.Answer
 	LaDeColon                    *enum.Answer
 	LaDePol                      *enum.Answer
 	AspLaMo                      *enum.Answer

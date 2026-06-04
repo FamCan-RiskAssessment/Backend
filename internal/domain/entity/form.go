@@ -82,8 +82,8 @@ type MamoGraphyInfo struct {
 	BreastDensity                *string                         `gorm:"type:varchar(50)"`
 	Falop                        *enum.Answer                    `gorm:"type:int"`
 	Andometrioz                  *enum.Answer                    `gorm:"type:int"`
-	LeavePestan                  bool                            `gorm:"not null;default:false"`
-	LeaveTokhmdan                bool                            `gorm:"not null;default:false"`
+	LeavePestan                  *enum.Answer                    `gorm:"type:int"`
+	LeaveTokhmdan                *enum.Answer                    `gorm:"type:int"`
 	LaDeColon                    *enum.Answer                    `gorm:"type:int"`
 	LaDePol                      *enum.Answer                    `gorm:"type:int"`
 	AspLaMo                      *enum.Answer                    `gorm:"type:int"`

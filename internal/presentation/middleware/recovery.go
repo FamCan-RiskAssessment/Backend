@@ -1,8 +1,11 @@
 package middleware
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
@@ -87,13 +90,34 @@ func handleBindingError(ctx *gin.Context, bindingError exception.BindingError, t
 	trans := controller.GetTranslator(ctx, transKey)
 	message, _ := trans.Translate(genericError)
 
-	if numError, ok := bindingError.Err.(*strconv.NumError); ok {
+	var numError *strconv.NumError
+	if errors.As(bindingError.Err, &numError) {
 		message, _ = trans.Translate("errors.numeric", numError.Num)
-	} else if bindingError == http.ErrMissingFile {
+	} else if errors.Is(bindingError.Err, http.ErrMissingFile) {
 		message, _ = trans.Translate("errors.fileRequired")
+	} else {
+		var typeError *json.UnmarshalTypeError
+		if errors.As(bindingError.Err, &typeError) {
+			errorKey := "errors.invalidType"
+			if isNumericKind(typeError.Type.Kind()) {
+				errorKey = "errors.numeric"
+			}
+			message, _ = trans.Translate(errorKey, typeError.Field)
+		}
 	}
 
 	controller.Response(ctx, 400, message, nil)
+}
+
+func isNumericKind(k reflect.Kind) bool {
+	switch k {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64:
+		return true
+	default:
+		return false
+	}
 }
 
 func handleFileValidationError(ctx *gin.Context, fileValidationError exception.FileValidationError) {

@@ -235,8 +235,8 @@ func (formController *CustomerFormController) UpsertMamography(ctx *gin.Context)
 		BreastDensity                *string                 `form:"breastDensity,omitempty"`
 		Falop                        *enum.Answer            `form:"falop,omitempty"`
 		Andometrioz                  *enum.Answer            `form:"andometrioz,omitempty"`
-		LeavePestan                  bool                    `form:"leavePestan"`
-		LeaveTokhmdan                bool                    `form:"leaveTokhmdan"`
+		LeavePestan                  *enum.Answer            `form:"leavePestan"`
+		LeaveTokhmdan                *enum.Answer            `form:"leaveTokhmdan"`
 		LaDeColon                    *enum.Answer            `form:"laDeColon,omitempty"`
 		LaDePol                      *enum.Answer            `form:"laDePol,omitempty"`
 		AspLaMo                      *enum.Answer            `form:"aspLaMo,omitempty"`

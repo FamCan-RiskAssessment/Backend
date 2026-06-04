@@ -38,12 +38,13 @@
 - `SMS_PASSWORD=` - SMS service password
 - `SMS_SOURCE=` - SMS source identifier
 
-## AWS S3 Configuration
+## MinIO Configuration
 
-- `S3_REGION=` - AWS S3 region
-- `S3_ACCESS_KEY=` - AWS access key
-- `S3_SECRET_KEY=` - AWS secret key
-- `S3_ENDPOINT=` - S3 endpoint URL
+- `MINIO_REGION=` - MinIO region (e.g. `us-east-1`)
+- `MINIO_ACCESS_KEY=` - MinIO access key
+- `MINIO_SECRET_KEY=` - MinIO secret key
+- `MINIO_ENDPOINT=` - MinIO server URL (e.g. `http://localhost:9000`)
+- `MINIO_BUCKET=` - Single bucket for all file storage
 
 ## Admin Configuration
 
@@ -57,7 +58,12 @@
 - `GAIL_API_URL=` - GAIL API endpoint
 - `PLCO_API_URL=` - PLCO API endpoint
 
-## S3 Bucket Names
+## MinIO Object Prefixes
 
-- `MAMOGRAPHY_BUCKETNAME=` - S3 bucket for mammography files
-- `CANCER_BUCKETNAME=` - S3 bucket for cancer-related files
+Former per-type buckets are directories (key prefixes) inside `MINIO_BUCKET`. Defaults apply when unset.
+
+- `MINIO_PREFIX_MAMOGRAPHY=` - Default: `mamography`
+- `MINIO_PREFIX_CANCER=` - Default: `cancer`
+- `MINIO_PREFIX_GENETIC_TEST=` - Default: `genetic-test`
+- `MINIO_PREFIX_FATHER_GENETIC_TEST=` - Default: `father-genetic-test`
+- `MINIO_PREFIX_MOTHER_GENETIC_TEST=` - Default: `mother-genetic-test`

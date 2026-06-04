@@ -233,7 +233,7 @@ Based on `bootstrap/env.go`, the following secrets are exposed:
 | Secret | Impact |
 |--------|--------|
 | `DB_PASSWORD` | Full database access |
-| `S3_SECRET_KEY` | Access to all S3 buckets with medical images |
+| `MINIO_SECRET_KEY` | Access to MinIO bucket with medical images |
 | `ENCRYPTION_KEY` | Ability to decrypt all encrypted PHI (SSN, addresses) |
 | `SUPER_ADMIN_PASSWORD` | Super admin account access |
 | `SMS_API_KEY` | Ability to send SMS as the application |
@@ -289,7 +289,7 @@ services:
     image: ghcr.io/famcan-riskassessment/backend:latest
     environment:
       - DB_PASSWORD=${DB_PASSWORD}
-      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
     # Or use Docker secrets
     secrets:

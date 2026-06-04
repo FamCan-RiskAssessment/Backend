@@ -93,10 +93,10 @@ var ControllerProviderSet = wire.NewSet(
 var AdapterProviderSet = wire.NewSet(
 	infraJWT.NewJWTKeyManager,
 	infraLocalization.NewTranslationService,
-	infraStorage.NewS3Storage,
+	infraStorage.NewMinIOStorage,
 	sms.NewAsanakSMSService,
 	infraExternal.NewVerificationClient,
-	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.S3Storage)),
+	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.MinIOStorage)),
 	wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)),
 	wire.Bind(new(domainExternal.VerificationClient), new(*infraExternal.VerificationClientImpl)),
 )
@@ -144,8 +144,8 @@ func ProvideOTPConfig(container *bootstrap.Config) *bootstrap.OTP {
 	return &container.Env.OTP
 }
 
-func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.S3 {
-	return &container.Env.S3
+func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.MinIO {
+	return &container.Env.MinIO
 }
 
 func ProvideSMSGatewayConfig(container *bootstrap.Config) *bootstrap.SMSGateway {

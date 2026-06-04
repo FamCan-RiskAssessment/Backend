@@ -79,7 +79,7 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	formRepository := postgres.NewFormRepository()
 	s3 := ProvideStorageConfig(config)
-	s3Storage := storage.NewS3Storage(constants, s3)
+	s3Storage := storage.NewMinIOStorage(constants, s3)
 	verificationAPI := ProvideVerificationAPIConfig(config)
 	verificationClientImpl := external.NewVerificationClient(verificationAPI)
 	fieldEncryptor, err := crypto.NewFieldEncryptor(security)
@@ -142,7 +142,7 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewS3Storage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.S3Storage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewMinIOStorage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.MinIOStorage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
 
 var RateLimitProviderSet = wire.NewSet(middleware.NewRateLimitMiddleware, ProvideRateLimiter)
 
@@ -168,8 +168,8 @@ func ProvideOTPConfig(container *bootstrap.Config) *bootstrap.OTP {
 	return &container.Env.OTP
 }
 
-func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.S3 {
-	return &container.Env.S3
+func ProvideStorageConfig(container *bootstrap.Config) *bootstrap.MinIO {
+	return &container.Env.MinIO
 }
 
 func ProvideSMSGatewayConfig(container *bootstrap.Config) *bootstrap.SMSGateway {

@@ -16,7 +16,7 @@ type Env struct {
 	Pagination      Pagination
 	OTP             OTP
 	SuperAdmin      SuperAdmin
-	S3              S3
+	MinIO           MinIO
 	CalcURL         CalcURL
 	VerificationAPI VerificationAPI
 	Security        Security
@@ -61,15 +61,16 @@ type OTP struct {
 	MaxAttempts  int
 }
 
-type S3 struct {
-	Buckets   BucketName
+type MinIO struct {
+	Bucket    string
+	Prefixes  BucketPrefix
 	Region    string
 	AccessKey string
 	SecretKey string
 	Endpoint  string
 }
 
-type BucketName struct {
+type BucketPrefix struct {
 	Mamography        string
 	Cancer            string
 	GeneticTest       string
@@ -145,17 +146,18 @@ func NewEnv() *Env {
 			Phone:    os.Getenv("SUPER_ADMIN_PHONE"),
 			Password: os.Getenv("SUPER_ADMIN_PASSWORD"),
 		},
-		S3: S3{
-			Region:    os.Getenv("S3_REGION"),
-			AccessKey: os.Getenv("S3_ACCESS_KEY"),
-			SecretKey: os.Getenv("S3_SECRET_KEY"),
-			Endpoint:  os.Getenv("S3_ENDPOINT"),
-			Buckets: BucketName{
-				Mamography:        os.Getenv("MAMOGRAPHY_BUCKETNAME"),
-				Cancer:            os.Getenv("CANCER_BUCKETNAME"),
-				GeneticTest:       os.Getenv("GENETIC_TEST_BUCKETNAME"),
-				FatherGeneticTest: os.Getenv("FATHER_GENETIC_TEST_BUCKETNAME"),
-				MotherGeneticTest: os.Getenv("MOTHER_GENETIC_TEST_BUCKETNAME"),
+		MinIO: MinIO{
+			Bucket:    os.Getenv("MINIO_BUCKET"),
+			Region:    os.Getenv("MINIO_REGION"),
+			AccessKey: os.Getenv("MINIO_ACCESS_KEY"),
+			SecretKey: os.Getenv("MINIO_SECRET_KEY"),
+			Endpoint:  os.Getenv("MINIO_ENDPOINT"),
+			Prefixes: BucketPrefix{
+				Mamography:        getEnvOrDefault("MINIO_PREFIX_MAMOGRAPHY", "mamography"),
+				Cancer:            getEnvOrDefault("MINIO_PREFIX_CANCER", "cancer"),
+				GeneticTest:       getEnvOrDefault("MINIO_PREFIX_GENETIC_TEST", "genetic-test"),
+				FatherGeneticTest: getEnvOrDefault("MINIO_PREFIX_FATHER_GENETIC_TEST", "father-genetic-test"),
+				MotherGeneticTest: getEnvOrDefault("MINIO_PREFIX_MOTHER_GENETIC_TEST", "mother-genetic-test"),
 			},
 		},
 		CalcURL: CalcURL{
@@ -178,6 +180,13 @@ func NewEnv() *Env {
 			PublicKey:  getEnvPEM("JWT_PUBLIC_KEY"),
 		},
 	}
+}
+
+func getEnvOrDefault(key, defaultVal string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return defaultVal
 }
 
 func getEnvInt(key string, defaultVal int) int {

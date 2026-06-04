@@ -212,7 +212,7 @@ Only the backend directories are described here.
 ### S3 Storage
 
 - Files (e.g., attachments or uploads, if used) are stored via S3-compatible storage.
-- The domain defines `S3Storage` interface; `internal/infrastructure/storage` implements it.
+- The domain defines `S3Storage` interface; `internal/infrastructure/storage` implements it with MinIO (`minio-go`).
 
 ### SMS Gateway
 

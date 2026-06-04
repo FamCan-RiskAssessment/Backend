@@ -1,4 +1,4 @@
-FROM golang:1.23.4-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 RUN ver="v$(cut -d. -f1,2 /etc/alpine-release)" && \
     printf '%s\n' \
@@ -29,7 +29,7 @@ RUN ver="v$(cut -d. -f1,2 /etc/alpine-release)" && \
       "https://mirror.arvancloud.ir/alpine/${ver}/community" \
       > /etc/apk/repositories
 
-RUN apk update && apk add --no-cache ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache ca-certificates wget && rm -rf /var/cache/apk/*
 
 WORKDIR /app
 

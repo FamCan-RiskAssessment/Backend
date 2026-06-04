@@ -1,11 +1,15 @@
 package routes
 
 import (
+	"github.com/FamCan-RiskAssessment/Backend/internal/presentation/controller/health"
 	"github.com/FamCan-RiskAssessment/Backend/wire"
 	"github.com/gin-gonic/gin"
 )
 
 func Run(ginEngine *gin.Engine, app *wire.Application) {
+	healthController := health.NewHealthController(app.Database.DB, app.Database.RDB)
+	ginEngine.GET("/ready", healthController.Readiness)
+
 	ginEngine.Use(gin.Logger())
 	ginEngine.Use(app.Middlewares.Recovery.Recovery)
 	ginEngine.Use(app.Middlewares.Localization.Localization)

@@ -94,10 +94,10 @@ var AdapterProviderSet = wire.NewSet(
 	infraJWT.NewJWTKeyManager,
 	infraLocalization.NewTranslationService,
 	infraStorage.NewMinIOStorage,
-	sms.NewAsanakSMSService,
+	sms.NewSMSService,
 	infraExternal.NewVerificationClient,
 	wire.Bind(new(domainS3.S3Storage), new(*infraStorage.MinIOStorage)),
-	wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)),
+	wire.Bind(new(communication.SmsService), new(*sms.SMSService)),
 	wire.Bind(new(domainExternal.VerificationClient), new(*infraExternal.VerificationClientImpl)),
 )
 

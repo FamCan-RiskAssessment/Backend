@@ -78,7 +78,7 @@ func NewConstants() *Constants {
 			AlreadyExist: "already exist",
 		},
 		SMSTemplates: SMSTemplates{
-			OTP: "otp",
+			OTP: "token",
 		},
 	}
 }

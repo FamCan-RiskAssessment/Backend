@@ -69,17 +69,17 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	userCacheRepository := redis.NewUserCacheRepository(redisDatabase)
 	smsGateway := ProvideSMSGatewayConfig(config)
 	smsTemplates := ProvideSMSTemplates(config)
-	asanakSMSService := sms.NewAsanakSMSService(smsGateway, smsTemplates)
+	smsService := sms.NewSMSService(smsGateway, smsTemplates)
 	otp := ProvideOTPConfig(config)
 	otpService := service.NewOTPService(constants, otp, userCacheRepository)
 	actionLogRepository := postgres.NewActionLogRepository()
 	actionLogService := service.NewActionLogService(constants, actionLogRepository, postgresDatabase)
 	passwordHasher := crypto.NewPasswordHasher()
-	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, asanakSMSService, otpService, actionLogService, postgresDatabase, passwordHasher)
+	userService := service.NewUserService(constants, userRepository, userCacheRepository, jwtService, smsService, otpService, actionLogService, postgresDatabase, passwordHasher)
 	generalUserController := user.NewGeneralUserController(constants, userService)
 	formRepository := postgres.NewFormRepository()
-	s3 := ProvideStorageConfig(config)
-	s3Storage := storage.NewMinIOStorage(constants, s3)
+	minIO := ProvideStorageConfig(config)
+	minIOStorage := storage.NewMinIOStorage(constants, minIO)
 	verificationAPI := ProvideVerificationAPIConfig(config)
 	verificationClientImpl := external.NewVerificationClient(verificationAPI)
 	fieldEncryptor, err := crypto.NewFieldEncryptor(security)
@@ -87,7 +87,7 @@ func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 		return nil, err
 	}
 	sensitiveFieldHasher := crypto.NewSensitiveFieldHasher(security)
-	formService := service.NewFormService(constants, formRepository, userService, actionLogService, s3Storage, postgresDatabase, verificationClientImpl, fieldEncryptor, sensitiveFieldHasher)
+	formService := service.NewFormService(constants, formRepository, userService, actionLogService, minIOStorage, postgresDatabase, verificationClientImpl, fieldEncryptor, sensitiveFieldHasher)
 	generalFormController := form.NewGeneralFormController(formService)
 	generalControllers := &GeneralControllers{
 		UserController: generalUserController,
@@ -142,7 +142,7 @@ var CustomerControllerProviderSet = wire.NewSet(form.NewCustomerFormController, 
 
 var ControllerProviderSet = wire.NewSet(wire.Struct(new(Controllers), "*"))
 
-var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewMinIOStorage, sms.NewAsanakSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.MinIOStorage)), wire.Bind(new(communication.SmsService), new(*sms.AsanakSMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
+var AdapterProviderSet = wire.NewSet(jwt.NewJWTKeyManager, localization.NewTranslationService, storage.NewMinIOStorage, sms.NewSMSService, external.NewVerificationClient, wire.Bind(new(s3.S3Storage), new(*storage.MinIOStorage)), wire.Bind(new(communication.SmsService), new(*sms.SMSService)), wire.Bind(new(external2.VerificationClient), new(*external.VerificationClientImpl)))
 
 var RateLimitProviderSet = wire.NewSet(middleware.NewRateLimitMiddleware, ProvideRateLimiter)
 

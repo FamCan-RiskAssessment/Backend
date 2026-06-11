@@ -475,10 +475,33 @@ func (userService *UserService) UpdateRole(newRoleRequest userdto.UpdateRoleRequ
 	return err
 }
 
+func (userService *UserService) userHasSuperAdminRole(user *entity.User) (bool, error) {
+	if err := userService.userRepository.FindUserRoles(userService.db, user); err != nil {
+		return false, err
+	}
+	for _, role := range user.Roles {
+		if role.Name == enum.SuperAdmin.String() {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateUserRolesRequest) error {
 	user, err := userService.GetUserByID(userRolesRequest.UserID)
 	if err != nil {
 		return err
+	}
+
+	isSuperAdmin, err := userService.userHasSuperAdminRole(user)
+	if err != nil {
+		return err
+	}
+	if isSuperAdmin {
+		return exception.ForbiddenError{
+			Resource: userService.constants.Field.Role,
+			Message:  "نقش سوپر ادمین قابل تغییر نیست",
+		}
 	}
 
 	existingRoles := make(map[uint]bool)
@@ -491,6 +514,13 @@ func (userService *UserService) UpdateUserRoles(userRolesRequest userdto.UpdateU
 		role, err := userService.getRole(roleID)
 		if err != nil {
 			return err
+		}
+
+		if role.Name == enum.SuperAdmin.String() {
+			return exception.ForbiddenError{
+				Resource: userService.constants.Field.Role,
+				Message:  "امکان اختصاص نقش سوپر ادمین وجود ندارد",
+			}
 		}
 
 		roles = append(roles, *role)

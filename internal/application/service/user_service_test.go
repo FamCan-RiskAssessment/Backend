@@ -10,6 +10,7 @@ import (
 	userdto "github.com/FamCan-RiskAssessment/Backend/internal/application/dto/user"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/entity"
 	"github.com/FamCan-RiskAssessment/Backend/internal/domain/enum"
+	"github.com/FamCan-RiskAssessment/Backend/internal/domain/exception"
 	usecaseMocks "github.com/FamCan-RiskAssessment/Backend/mocks/application/usecase"
 	communicationMocks "github.com/FamCan-RiskAssessment/Backend/mocks/domain/communication"
 	postgresRepository "github.com/FamCan-RiskAssessment/Backend/mocks/domain/repository/postgres"
@@ -479,12 +480,16 @@ func (suite *UserServiceTestSuite) TestUpdateUserRoles_Success() {
 	}
 	user.ID = userID
 
-	role1 := &entity.Role{}
+	role1 := &entity.Role{Name: enum.Supervisor.String()}
 	role1.ID = 1
-	role2 := &entity.Role{}
+	role2 := &entity.Role{Name: enum.Operator.String()}
 	role2.ID = 2
 
 	suite.userRepository.On("FindUserByID", suite.db, userID).Return(user, nil)
+	suite.userRepository.On("FindUserRoles", suite.db, user).Return(nil).Run(func(args mock.Arguments) {
+		u := args.Get(1).(*entity.User)
+		u.Roles = []entity.Role{*role1}
+	})
 	suite.userRepository.On("FindRoleByID", suite.db, uint(1)).Return(role1, nil)
 	suite.userRepository.On("FindRoleByID", suite.db, uint(2)).Return(role2, nil)
 	suite.userRepository.On("ReplaceUserRoles", suite.db, user, mock.Anything).Return(nil)
@@ -495,6 +500,58 @@ func (suite *UserServiceTestSuite) TestUpdateUserRoles_Success() {
 
 	// Assert
 	assert.NoError(suite.T(), err)
+}
+
+func (suite *UserServiceTestSuite) TestUpdateUserRoles_CannotAssignSuperAdmin() {
+	userID := uint(2)
+	request := userdto.UpdateUserRolesRequest{
+		ActorID: uint(1),
+		UserID:  userID,
+		RoleIDs: []uint{1},
+	}
+
+	user := &entity.User{Phone: "09123456789"}
+	user.ID = userID
+
+	superAdminRole := &entity.Role{Name: enum.SuperAdmin.String()}
+	superAdminRole.ID = 1
+
+	suite.userRepository.On("FindUserByID", suite.db, userID).Return(user, nil)
+	suite.userRepository.On("FindUserRoles", suite.db, user).Return(nil).Run(func(args mock.Arguments) {
+		u := args.Get(1).(*entity.User)
+		u.Roles = []entity.Role{{Name: enum.Operator.String()}}
+	})
+	suite.userRepository.On("FindRoleByID", suite.db, uint(1)).Return(superAdminRole, nil)
+
+	err := suite.userService.UpdateUserRoles(request)
+
+	assert.Error(suite.T(), err)
+	_, ok := err.(exception.ForbiddenError)
+	assert.True(suite.T(), ok)
+}
+
+func (suite *UserServiceTestSuite) TestUpdateUserRoles_CannotChangeSuperAdminRole() {
+	userID := uint(1)
+	request := userdto.UpdateUserRolesRequest{
+		ActorID: userID,
+		UserID:  userID,
+		RoleIDs: []uint{2},
+	}
+
+	user := &entity.User{Phone: "09123456789"}
+	user.ID = userID
+
+	suite.userRepository.On("FindUserByID", suite.db, userID).Return(user, nil)
+	suite.userRepository.On("FindUserRoles", suite.db, user).Return(nil).Run(func(args mock.Arguments) {
+		u := args.Get(1).(*entity.User)
+		u.Roles = []entity.Role{{Name: enum.SuperAdmin.String()}}
+	})
+
+	err := suite.userService.UpdateUserRoles(request)
+
+	assert.Error(suite.T(), err)
+	_, ok := err.(exception.ForbiddenError)
+	assert.True(suite.T(), ok)
 }
 
 // ==================== GetUsers Tests ====================

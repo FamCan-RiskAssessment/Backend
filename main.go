@@ -40,6 +40,8 @@ func main() {
 	//	&entity.GailResult{},
 	//	&entity.PLCOResult{},
 	//	&entity.AttentionQuestions{},
+	//	&entity.Province{},
+	//	&entity.City{},
 	//)
 
 	//app.Seeds.RoleSeeder.SeedRoles()

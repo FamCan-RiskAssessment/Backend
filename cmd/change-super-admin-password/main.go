@@ -27,7 +27,7 @@ func main() {
 		*password = config.Env.SuperAdmin.Password
 	}
 
-	db := database.NewPostgresDatabase(&config.Env.Database)
+	db := database.NewPostgresDatabase(&config.Env.Database, &config.Env.Server)
 	userRepository := postgresRepo.NewUserRepository()
 	passwordHasher := crypto.NewPasswordHasher()
 	changer := seed.NewSuperAdminPasswordChanger(db, userRepository, passwordHasher)

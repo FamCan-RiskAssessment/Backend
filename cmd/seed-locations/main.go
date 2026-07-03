@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	config := bootstrap.Run()
-	db := database.NewPostgresDatabase(&config.Env.Database)
+	db := database.NewPostgresDatabase(&config.Env.Database, &config.Env.Server)
 	locationSeeder := seed.NewLocationSeeder(db)
 
 	if err := locationSeeder.SeedLocations(*provincesPath, *citiesPath); err != nil {

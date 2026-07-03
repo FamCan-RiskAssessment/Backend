@@ -132,6 +132,10 @@ func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
 }
 
+func ProvideServerConfig(container *bootstrap.Config) *bootstrap.Server {
+	return &container.Env.Server
+}
+
 func ProvideConstants(container *bootstrap.Config) *bootstrap.Constants {
 	return container.Constants
 }
@@ -200,6 +204,7 @@ var ProviderSet = wire.NewSet(
 	AdapterProviderSet,
 	CryptoProviderSet,
 	ProvideDBConfig,
+	ProvideServerConfig,
 	ProvideConstants,
 	ProvideRDBConfig,
 	ProvideOTPConfig,

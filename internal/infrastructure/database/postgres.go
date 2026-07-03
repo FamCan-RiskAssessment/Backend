@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/FamCan-RiskAssessment/Backend/bootstrap"
+	"github.com/FamCan-RiskAssessment/Backend/internal/infrastructure/logging"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -23,7 +24,7 @@ var (
 	dbInstance *PostgresDatabase
 )
 
-func NewPostgresDatabase(dbConfig *bootstrap.Database) *PostgresDatabase {
+func NewPostgresDatabase(dbConfig *bootstrap.Database, server *bootstrap.Server) *PostgresDatabase {
 	dbOnce.Do(func() {
 		// TODO: Security Enhancement - Enable SSL/TLS for database connections
 		// Currently using sslmode=disable which is insecure for production
@@ -40,7 +41,9 @@ func NewPostgresDatabase(dbConfig *bootstrap.Database) *PostgresDatabase {
 			dbConfig.Name,
 		)
 
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logging.GormLogger(server.Mode),
+		})
 		if err != nil {
 			panic(fmt.Errorf("failed to connect to database"))
 		}

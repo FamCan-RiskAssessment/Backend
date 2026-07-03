@@ -39,7 +39,8 @@ import (
 
 func InitializeApplication(config *bootstrap.Config) (*Application, error) {
 	bootstrapDatabase := ProvideDBConfig(config)
-	postgresDatabase := database.NewPostgresDatabase(bootstrapDatabase)
+	server := ProvideServerConfig(config)
+	postgresDatabase := database.NewPostgresDatabase(bootstrapDatabase, server)
 	bootstrapRedis := ProvideRDBConfig(config)
 	redisDatabase := database.NewRedisDatabase(bootstrapRedis)
 	wireDatabase := &Database{
@@ -156,6 +157,10 @@ func ProvideDBConfig(container *bootstrap.Config) *bootstrap.Database {
 	return &container.Env.Database
 }
 
+func ProvideServerConfig(container *bootstrap.Config) *bootstrap.Server {
+	return &container.Env.Server
+}
+
 func ProvideConstants(container *bootstrap.Config) *bootstrap.Constants {
 	return container.Constants
 }
@@ -223,6 +228,7 @@ var ProviderSet = wire.NewSet(
 	AdapterProviderSet,
 	CryptoProviderSet,
 	ProvideDBConfig,
+	ProvideServerConfig,
 	ProvideConstants,
 	ProvideRDBConfig,
 	ProvideOTPConfig,

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strconv"
@@ -41,6 +42,12 @@ func (recovery RecoveryMiddleware) Recovery(ctx *gin.Context) {
 }
 
 func (recovery RecoveryMiddleware) handleRecoveredError(ctx *gin.Context, err error) {
+	slog.Warn("request failed",
+		"method", ctx.Request.Method,
+		"path", ctx.Request.URL.Path,
+		"error", err.Error(),
+	)
+
 	if validationErrors, ok := err.(exception.ValidationErrors); ok {
 		handleValidationError(ctx, validationErrors, recovery.constants.Context.Translator)
 	} else if bindingError, ok := err.(exception.BindingError); ok {
@@ -258,6 +265,11 @@ func handleVerificationError(ctx *gin.Context, verificationError exception.Verif
 }
 
 func unhandledErrors(ctx *gin.Context, transKey string) {
+	slog.Error("unhandled request error",
+		"method", ctx.Request.Method,
+		"path", ctx.Request.URL.Path,
+	)
+
 	trans := controller.GetTranslator(ctx, transKey)
 	errorMessage, _ := trans.Translate(genericError)
 
